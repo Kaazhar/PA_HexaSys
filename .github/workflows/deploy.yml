@@ -1,0 +1,23 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: 51.83.154.80
+        username: debian
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 2222
+        script: |
+          cd /opt/upcycleconnect
+          git pull origin main
+          docker compose up -d --build
+          echo "✅ Déploiement réussi à $(date)" >> /var/log/upcycle-deploy.log
