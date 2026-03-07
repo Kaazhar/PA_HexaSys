@@ -26,4 +26,5 @@ jobs:
           cd /opt/upcycleconnect
           git pull origin main
           docker compose up -d --build
+          docker compose restart nginx
           echo "✅ Déploiement réussi à $(date)" >> /home/debian/deploy.log
