@@ -3,7 +3,7 @@ import './Footer.css';
 function Footer() {
   return (
     <footer className="footer">
-      <p>© 2026 UpcycleConnect — Projet Annuel ESGI test123 2A5</p>
+      <p>© 2026 UpcycleConnect — Projet Annuel ESGI ESGI Cybersécurité 2A5</p>
       <p>Contact : <a href="mailto:contact@upcycleconnect.net">contact@upcycleconnect.net</a></p>
     </footer>
   );
