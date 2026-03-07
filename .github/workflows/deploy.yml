@@ -25,4 +25,4 @@ jobs:
           cd /opt/upcycleconnect
           git pull origin main
           docker compose up -d --build
-          echo "✅ Déploiement réussi à $(date)" >> /var/log/upcycle-deploy.log
+          echo "✅ Déploiement réussi à $(date)" >> /home/debian/deploy.log
