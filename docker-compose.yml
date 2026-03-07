@@ -45,16 +45,10 @@ services:
     build: ./frontend-react
     container_name: upcycle_react
     restart: always
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-    volumes:
-      - ./frontend-react:/app
-      - /app/node_modules
     networks:
       - frontend
     expose:
-      - 3000
+      - 80
 
   web:
     build: ./frontend
