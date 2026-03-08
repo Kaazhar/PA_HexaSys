@@ -38,3 +38,19 @@
 .navbar-links a.active {
   color: #74c69d;
 }
+
+.navbar-login-btn {
+  background-color: #74c69d;
+  color: #1b4332 !important;
+  padding: 0.4rem 1.1rem;
+  border-radius: 50px;
+  font-weight: 700 !important;
+  transition: background-color 0.2s, transform 0.1s !important;
+}
+
+.navbar-login-btn:hover,
+.navbar-login-btn.active {
+  background-color: #52b788 !important;
+  color: #1b4332 !important;
+  transform: translateY(-1px);
+}
