@@ -21,8 +21,8 @@ function Navbar() {
           </Link>
         </li>
         <li>
-          <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>
-            A propos
+          <Link to="/login" className={`navbar-login-btn${location.pathname === '/login' ? ' active' : ''}`}>
+            Connexion
           </Link>
         </li>
       </ul>
