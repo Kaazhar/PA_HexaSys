@@ -45,23 +45,6 @@ services:
     build: ./frontend-react
     container_name: upcycle_react
     restart: always
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-    volumes:
-      - ./frontend-react:/app
-      - /app/node_modules
-    networks:
-      - frontend
-    expose:
-      - 3000
-
-  web:
-    build: ./frontend
-    container_name: upcycle_web
-    restart: always
-    volumes:
-      - ./frontend/public:/usr/share/nginx/html:ro
     networks:
       - frontend
     expose:
@@ -79,7 +62,6 @@ services:
       - /etc/ssl/cloudflare:/etc/ssl/cloudflare:ro
     depends_on:
       - api
-      - web
       - react
     networks:
       - frontend
