@@ -9,7 +9,7 @@ import (
     "os"
     "time"
 
-    _ "github.com/lib/pq"
+    _ "github.com/go-sql-driver/mysql"
 )
 
 type StatusResponse struct {
@@ -30,11 +30,11 @@ func main() {
     dbPassword := os.Getenv("DB_PASSWORD")
     dbName := os.Getenv("DB_NAME")
 
-    connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-        dbHost, dbPort, dbUser, dbPassword, dbName)
+    connStr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+        dbUser, dbPassword, dbHost, dbPort, dbName)
 
     var err error
-    db, err = sql.Open("postgres", connStr)
+    db, err = sql.Open("mysql", connStr)
     if err != nil {
         log.Fatal("Erreur connexion DB:", err)
     }

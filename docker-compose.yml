@@ -1,20 +1,27 @@
 services:
   db:
-    image: postgres:15-alpine
+    image: mysql:8.0
     container_name: upcycle_db
     restart: always
     environment:
-      POSTGRES_DB: upcycleconnect
-      POSTGRES_USER: upcycle_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: upcycleconnect
+      MYSQL_USER: upcycle_user
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/mysql
     networks:
       - backend
     healthcheck:
       test:
-        - CMD-SHELL
-        - pg_isready -U upcycle_user -d upcycleconnect
+        - CMD
+        - mysqladmin
+        - ping
+        - -h
+        - localhost
+        - -u
+        - upcycle_user
+        - -p${DB_PASSWORD}
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,7 +32,7 @@ services:
     restart: always
     environment:
       DB_HOST: db
-      DB_PORT: 5432
+      DB_PORT: 3306
       DB_USER: upcycle_user
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: upcycleconnect
