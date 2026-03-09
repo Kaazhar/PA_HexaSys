@@ -26,7 +26,7 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
       <div className="h-48 bg-gradient-to-br from-primary-500 to-primary-600 relative overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-white/20 text-6xl font-bold">
-            {listing.title.charAt(0).toUpperCase()}
+            {listing.title?.charAt(0)?.toUpperCase() || '?'}
           </span>
         </div>
         <div className="absolute top-3 left-3">
