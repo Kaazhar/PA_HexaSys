@@ -27,7 +27,7 @@ const (
 
 type User struct {
 	Base
-	Email        string   `gorm:"uniqueIndex;not null" json:"email"`
+	Email        string   `gorm:"uniqueIndex;not null;size:255" json:"email"`
 	PasswordHash string   `gorm:"not null" json:"-"`
 	Firstname    string   `gorm:"not null" json:"firstname"`
 	Lastname     string   `gorm:"not null" json:"lastname"`
@@ -42,7 +42,7 @@ type User struct {
 type Category struct {
 	Base
 	Name        string `gorm:"not null" json:"name"`
-	Slug        string `gorm:"uniqueIndex;not null" json:"slug"`
+	Slug        string `gorm:"uniqueIndex;not null;size:255" json:"slug"`
 	Description string `json:"description,omitempty"`
 	Icon        string `json:"icon,omitempty"`
 	Color       string `json:"color,omitempty"`
@@ -151,7 +151,7 @@ type Subscription struct {
 
 type Invoice struct {
 	Base
-	Number string  `gorm:"uniqueIndex" json:"number"`
+	Number string  `gorm:"uniqueIndex;size:255" json:"number"`
 	UserID uint    `json:"user_id"`
 	User   User    `json:"user,omitempty"`
 	Type   string  `gorm:"type:varchar(20)" json:"type"`
