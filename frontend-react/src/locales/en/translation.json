@@ -1,0 +1,178 @@
+{
+  "nav": {
+    "home": "Home",
+    "listings": "Listings",
+    "workshops": "Workshops",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "profile": "My Profile"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "firstname": "First name",
+    "lastname": "Last name",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "No account yet?",
+    "hasAccount": "Already have an account?",
+    "loginHere": "Login here",
+    "registerHere": "Register here",
+    "loginSuccess": "Login successful",
+    "registerSuccess": "Registration successful",
+    "loginError": "Invalid credentials",
+    "role": {
+      "particulier": "Individual",
+      "professionnel": "Professional",
+      "salarie": "Employee",
+      "admin": "Admin"
+    }
+  },
+  "listings": {
+    "title": "Listings",
+    "create": "Create listing",
+    "search": "Search...",
+    "type": {
+      "don": "Gift",
+      "vente": "Sale"
+    },
+    "condition": {
+      "neuf": "New",
+      "bon_etat": "Good condition",
+      "use": "Used",
+      "pieces": "For parts"
+    },
+    "status": {
+      "pending": "Pending",
+      "active": "Active",
+      "rejected": "Rejected",
+      "sold": "Sold"
+    },
+    "validate": "Validate",
+    "reject": "Reject",
+    "rejectReason": "Rejection reason",
+    "free": "Free",
+    "noListings": "No listings found"
+  },
+  "workshops": {
+    "title": "Workshops & Training",
+    "book": "Book",
+    "spots": "spots available",
+    "full": "Full",
+    "type": {
+      "atelier": "Workshop",
+      "formation": "Training",
+      "conference": "Conference"
+    },
+    "status": {
+      "draft": "Draft",
+      "pending": "Pending",
+      "active": "Active",
+      "cancelled": "Cancelled"
+    }
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "listings": "Listings",
+    "workshops": "Workshops",
+    "containers": "Containers",
+    "finance": "Finance",
+    "config": "Settings",
+    "stats": {
+      "totalUsers": "Total users",
+      "activeListings": "Active listings",
+      "upcomingWorkshops": "Upcoming workshops",
+      "monthlyRevenue": "Monthly revenue",
+      "pendingValidations": "Pending validations"
+    }
+  },
+  "containers": {
+    "title": "Containers",
+    "request": "Deposit request",
+    "capacity": "Capacity",
+    "status": {
+      "operational": "Operational",
+      "full": "Full",
+      "maintenance": "Maintenance"
+    }
+  },
+  "score": {
+    "title": "My upcycling score",
+    "points": "points",
+    "level": "Level",
+    "wasteAvoided": "Waste avoided",
+    "co2Saved": "CO₂ saved",
+    "waterSaved": "Water saved",
+    "levels": {
+      "debutant": "Beginner",
+      "intermediaire": "Intermediate",
+      "avance": "Advanced",
+      "expert": "Expert"
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All",
+    "loading": "Loading...",
+    "noData": "No data",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "active": "Active",
+    "inactive": "Inactive",
+    "welcome": "Welcome",
+    "error": "An error occurred",
+    "success": "Success"
+  },
+  "home": {
+    "hero": {
+      "title": "Give your objects a second life",
+      "subtitle": "The upcycling platform connecting individuals, professionals and trainers to create a circular economy together.",
+      "cta": "Get started",
+      "learnMore": "Learn more"
+    },
+    "howItWorks": {
+      "title": "How it works?",
+      "step1": {
+        "title": "Post",
+        "description": "Publish your listing in minutes. Gift or sale, choose what suits you."
+      },
+      "step2": {
+        "title": "Collect",
+        "description": "Use our collection containers across the city to deposit your items."
+      },
+      "step3": {
+        "title": "Transform",
+        "description": "Join our workshops and training sessions to learn upcycling skills."
+      }
+    },
+    "stats": {
+      "users": "users",
+      "listings": "listings",
+      "workshops": "workshops",
+      "waste": "waste avoided"
+    },
+    "recentListings": "Recent listings"
+  }
+}

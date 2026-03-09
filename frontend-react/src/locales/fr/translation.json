@@ -1,0 +1,178 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "listings": "Annonces",
+    "workshops": "Formations",
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "dashboard": "Tableau de bord",
+    "logout": "Déconnexion",
+    "profile": "Mon profil"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "Inscription",
+    "email": "Email",
+    "password": "Mot de passe",
+    "firstname": "Prénom",
+    "lastname": "Nom",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié ?",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "loginHere": "Se connecter",
+    "registerHere": "S'inscrire",
+    "loginSuccess": "Connexion réussie",
+    "registerSuccess": "Inscription réussie",
+    "loginError": "Identifiants invalides",
+    "role": {
+      "particulier": "Particulier",
+      "professionnel": "Professionnel",
+      "salarie": "Salarié",
+      "admin": "Admin"
+    }
+  },
+  "listings": {
+    "title": "Annonces",
+    "create": "Créer une annonce",
+    "search": "Rechercher...",
+    "type": {
+      "don": "Don",
+      "vente": "Vente"
+    },
+    "condition": {
+      "neuf": "Neuf",
+      "bon_etat": "Bon état",
+      "use": "Usé",
+      "pieces": "Pour pièces"
+    },
+    "status": {
+      "pending": "En attente",
+      "active": "Active",
+      "rejected": "Rejetée",
+      "sold": "Vendue"
+    },
+    "validate": "Valider",
+    "reject": "Rejeter",
+    "rejectReason": "Motif de rejet",
+    "free": "Gratuit",
+    "noListings": "Aucune annonce trouvée"
+  },
+  "workshops": {
+    "title": "Formations & Ateliers",
+    "book": "Réserver",
+    "spots": "places disponibles",
+    "full": "Complet",
+    "type": {
+      "atelier": "Atelier",
+      "formation": "Formation",
+      "conference": "Conférence"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "pending": "En attente",
+      "active": "Actif",
+      "cancelled": "Annulé"
+    }
+  },
+  "admin": {
+    "dashboard": "Tableau de bord",
+    "users": "Utilisateurs",
+    "listings": "Annonces",
+    "workshops": "Formations",
+    "containers": "Conteneurs",
+    "finance": "Finance",
+    "config": "Configuration",
+    "stats": {
+      "totalUsers": "Utilisateurs totaux",
+      "activeListings": "Annonces actives",
+      "upcomingWorkshops": "Formations à venir",
+      "monthlyRevenue": "Revenu mensuel",
+      "pendingValidations": "En attente de validation"
+    }
+  },
+  "containers": {
+    "title": "Conteneurs",
+    "request": "Demande de dépôt",
+    "capacity": "Capacité",
+    "status": {
+      "operational": "Opérationnel",
+      "full": "Plein",
+      "maintenance": "Maintenance"
+    }
+  },
+  "score": {
+    "title": "Mon score upcycling",
+    "points": "points",
+    "level": "Niveau",
+    "wasteAvoided": "Déchets évités",
+    "co2Saved": "CO₂ économisé",
+    "waterSaved": "Eau économisée",
+    "levels": {
+      "debutant": "Débutant",
+      "intermediaire": "Intermédiaire",
+      "avance": "Avancé",
+      "expert": "Expert"
+    }
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "all": "Tous",
+    "loading": "Chargement...",
+    "noData": "Aucune donnée",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre",
+    "actions": "Actions",
+    "status": "Statut",
+    "date": "Date",
+    "name": "Nom",
+    "email": "Email",
+    "role": "Rôle",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "welcome": "Bienvenue",
+    "error": "Une erreur est survenue",
+    "success": "Succès"
+  },
+  "home": {
+    "hero": {
+      "title": "Donnez une seconde vie à vos objets",
+      "subtitle": "La plateforme d'upcycling qui connecte les particuliers, professionnels et formateurs pour créer ensemble une économie circulaire.",
+      "cta": "Commencer",
+      "learnMore": "En savoir plus"
+    },
+    "howItWorks": {
+      "title": "Comment ça marche ?",
+      "step1": {
+        "title": "Déposez",
+        "description": "Publiez votre annonce en quelques minutes. Don ou vente, choisissez ce qui vous convient."
+      },
+      "step2": {
+        "title": "Collectez",
+        "description": "Utilisez nos conteneurs de collecte répartis dans toute la ville pour déposer vos objets."
+      },
+      "step3": {
+        "title": "Transformez",
+        "description": "Participez à nos ateliers et formations pour apprendre à upcycler vos objets."
+      }
+    },
+    "stats": {
+      "users": "utilisateurs",
+      "listings": "annonces",
+      "workshops": "formations",
+      "waste": "déchets évités"
+    },
+    "recentListings": "Annonces récentes"
+  }
+}
