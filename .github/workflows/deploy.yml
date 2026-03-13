@@ -24,8 +24,8 @@ jobs:
         script: |
           git config --global --add safe.directory /opt/upcycleconnect
           cd /opt/upcycleconnect
-          git pull origin main
-          docker compose build --no-cache react
+          git fetch origin main
+          git reset --hard origin/main
+          docker compose pull
           docker compose up -d
-          docker compose restart nginx
           echo "✅ Déploiement réussi à $(date)" >> /home/debian/deploy.log
