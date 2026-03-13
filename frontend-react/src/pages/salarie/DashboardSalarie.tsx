@@ -12,9 +12,7 @@ import clsx from 'clsx';
 
 const sidebarItems = [
   { label: 'Dashboard', path: '/salarie', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Mes formations', path: '/salarie/formations', icon: <BookOpen className="w-4 h-4" /> },
-  { label: 'Mes articles', path: '/salarie/articles', icon: <FileText className="w-4 h-4" /> },
-  { label: 'Planning', path: '/salarie/planning', icon: <Calendar className="w-4 h-4" /> },
+  { label: 'Formations', path: '/annonces', icon: <BookOpen className="w-4 h-4" /> },
 ];
 
 const statusConfig: Record<string, string> = {
@@ -48,9 +46,9 @@ export default function DashboardSalarie() {
       ) : (
         <div className="space-y-6">
           {/* Welcome */}
-          <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 text-white">
-            <h2 className="text-2xl font-bold">Bonjour, {user?.firstname} ! 👋</h2>
-            <p className="text-amber-100 mt-1">Gérez vos formations et articles depuis votre espace salarié.</p>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Bonjour, {user?.firstname} !</h2>
+            <p className="text-gray-500 mt-1">Gérez vos formations et articles depuis votre espace salarié.</p>
           </div>
 
           {/* Stats */}

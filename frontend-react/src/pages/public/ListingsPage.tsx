@@ -5,10 +5,8 @@ import ListingCard from '../../components/common/ListingCard';
 import { useQuery } from '@tanstack/react-query';
 import { listingService, categoryService } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { useTranslation } from 'react-i18next';
 
 export default function ListingsPage() {
-  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -40,7 +38,7 @@ export default function ListingsPage() {
     <PublicLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">{t('listings.title')}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Annonces</h1>
           <p className="text-gray-500 mt-2">{total} annonce{total > 1 ? 's' : ''} disponible{total > 1 ? 's' : ''}</p>
         </div>
 
@@ -50,7 +48,7 @@ export default function ListingsPage() {
             <div className="card sticky top-24">
               <div className="flex items-center gap-2 mb-4">
                 <SlidersHorizontal className="w-5 h-5 text-primary-500" />
-                <h2 className="font-semibold text-gray-900">{t('common.filter')}</h2>
+                <h2 className="font-semibold text-gray-900">Filtres</h2>
               </div>
 
               {/* Type filter */}
@@ -58,9 +56,9 @@ export default function ListingsPage() {
                 <label className="label">Type</label>
                 <div className="space-y-2">
                   {[
-                    { value: '', label: t('common.all') },
-                    { value: 'don', label: t('listings.type.don') },
-                    { value: 'vente', label: t('listings.type.vente') },
+                    { value: '', label: 'Tous' },
+                    { value: 'don', label: 'Don' },
+                    { value: 'vente', label: 'Vente' },
                   ].map((option) => (
                     <label key={option.value} className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -90,7 +88,7 @@ export default function ListingsPage() {
                       onChange={() => { setSelectedCategory(''); setPage(1); }}
                       className="text-primary-500"
                     />
-                    <span className="text-sm text-gray-700">{t('common.all')}</span>
+                    <span className="text-sm text-gray-700">Tous</span>
                   </label>
                   {categories.map((cat) => (
                     <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
@@ -126,7 +124,7 @@ export default function ListingsPage() {
               <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder={t('listings.search')}
+                placeholder="Rechercher..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 className="input pl-12 py-3 text-base"
@@ -141,7 +139,7 @@ export default function ListingsPage() {
             ) : listings.length === 0 ? (
               <div className="text-center py-20 text-gray-400">
                 <Package className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium">{t('listings.noListings')}</p>
+                <p className="text-lg font-medium">Aucune annonce trouvée</p>
                 <p className="text-sm mt-2">Essayez de modifier vos filtres de recherche</p>
               </div>
             ) : (

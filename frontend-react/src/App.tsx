@@ -16,6 +16,7 @@ import AdminListings from './pages/admin/AdminListings';
 import AdminWorkshops from './pages/admin/AdminWorkshops';
 import AdminContainers from './pages/admin/AdminContainers';
 import AdminFinance from './pages/admin/AdminFinance';
+import AdminCategories from './pages/admin/AdminCategories';
 
 // Particulier pages
 import DashboardParticulier from './pages/particulier/DashboardParticulier';
@@ -65,6 +66,7 @@ function App() {
       <Route path="/admin/formations" element={<ProtectedRoute roles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
       <Route path="/admin/conteneurs" element={<ProtectedRoute roles={['admin']}><AdminContainers /></ProtectedRoute>} />
       <Route path="/admin/finance" element={<ProtectedRoute roles={['admin']}><AdminFinance /></ProtectedRoute>} />
+      <Route path="/admin/categories" element={<ProtectedRoute roles={['admin']}><AdminCategories /></ProtectedRoute>} />
 
       {/* Particulier routes */}
       <Route path="/dashboard" element={<ProtectedRoute roles={['particulier']}><DashboardParticulier /></ProtectedRoute>} />

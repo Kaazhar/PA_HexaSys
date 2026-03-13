@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign, Settings, Search, Plus, Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign, FolderOpen, Search, Plus, Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,9 +17,9 @@ const sidebarItems = [
   { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: <Users className="w-4 h-4" /> },
   { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
   { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
+  { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
   { label: 'Conteneurs', path: '/admin/conteneurs', icon: <Package className="w-4 h-4" /> },
   { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
-  { label: 'Configuration', path: '/admin/config', icon: <Settings className="w-4 h-4" /> },
 ];
 
 const roleColors: Record<UserRole, string> = {

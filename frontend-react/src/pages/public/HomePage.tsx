@@ -1,14 +1,11 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Package, Truck, Wrench, Users, Tag, BookOpen, Leaf } from 'lucide-react';
+import { ArrowRight, Package, Truck, Wrench } from 'lucide-react';
 import PublicLayout from '../../components/layout/PublicLayout';
 import { useQuery } from '@tanstack/react-query';
 import { listingService } from '../../services/api';
 import ListingCard from '../../components/common/ListingCard';
-import { useTranslation } from 'react-i18next';
 
 export default function HomePage() {
-  const { t } = useTranslation();
-
   const { data: listingsData } = useQuery({
     queryKey: ['listings', 'recent'],
     queryFn: () => listingService.getAll({ limit: 4, status: 'active' }),
@@ -19,60 +16,23 @@ export default function HomePage() {
   return (
     <PublicLayout>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 text-white overflow-hidden relative">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-white blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-white blur-3xl" />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-white/20 text-white rounded-full px-4 py-2 text-sm font-medium mb-6">
-              <Leaf className="w-4 h-4" />
-              <span>Économie circulaire & Upcycling</span>
-            </div>
-            <h1 className="text-4xl lg:text-6xl font-bold leading-tight mb-6">
-              {t('home.hero.title')}
+      <section className="bg-primary-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="max-w-2xl">
+            <h1 className="text-4xl font-bold leading-tight mb-4">
+              Donnez une seconde vie à vos objets
             </h1>
-            <p className="text-lg text-white/80 mb-8 leading-relaxed max-w-2xl">
-              {t('home.hero.subtitle')}
+            <p className="text-lg text-white/80 mb-8">
+              La plateforme d'upcycling qui connecte les particuliers, professionnels et formateurs.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-2 bg-coral-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-coral-600 transition-colors shadow-lg"
-              >
-                {t('home.hero.cta')}
-                <ArrowRight className="w-5 h-5" />
+              <Link to="/register" className="inline-flex items-center gap-2 bg-white text-primary-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                Commencer <ArrowRight className="w-5 h-5" />
               </Link>
-              <Link
-                to="/annonces"
-                className="inline-flex items-center gap-2 bg-white/20 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-colors border border-white/30"
-              >
-                {t('home.hero.learnMore')}
+              <Link to="/annonces" className="inline-flex items-center gap-2 border border-white/50 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors">
+                Voir les annonces
               </Link>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="bg-beige-100 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { value: '12,450', label: t('home.stats.users'), icon: <Users className="w-6 h-6" /> },
-              { value: '847', label: t('home.stats.listings'), icon: <Tag className="w-6 h-6" /> },
-              { value: '45', label: t('home.stats.workshops'), icon: <BookOpen className="w-6 h-6" /> },
-              { value: '42T', label: t('home.stats.waste'), icon: <Leaf className="w-6 h-6" /> },
-            ].map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-100 text-primary-500 rounded-xl mb-3">
-                  {stat.icon}
-                </div>
-                <div className="text-3xl font-bold text-primary-500">{stat.value}</div>
-                <div className="text-sm text-gray-600 mt-1">{stat.label}</div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -81,7 +41,7 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">{t('home.howItWorks.title')}</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Comment ça marche ?</h2>
             <p className="text-gray-500 mt-3 max-w-xl mx-auto">
               En quelques étapes simples, participez à l'économie circulaire et réduisez votre impact environnemental.
             </p>
@@ -90,22 +50,22 @@ export default function HomePage() {
             {[
               {
                 icon: <Package className="w-8 h-8" />,
-                title: t('home.howItWorks.step1.title'),
-                description: t('home.howItWorks.step1.description'),
+                title: 'Déposez vos objets',
+                description: 'Publiez une annonce pour donner ou vendre vos objets inutilisés.',
                 step: '01',
                 color: 'bg-blue-50 text-blue-500',
               },
               {
                 icon: <Truck className="w-8 h-8" />,
-                title: t('home.howItWorks.step2.title'),
-                description: t('home.howItWorks.step2.description'),
+                title: 'Connectez-vous',
+                description: 'Trouvez des particuliers ou professionnels intéressés par vos objets.',
                 step: '02',
                 color: 'bg-primary-50 text-primary-500',
               },
               {
                 icon: <Wrench className="w-8 h-8" />,
-                title: t('home.howItWorks.step3.title'),
-                description: t('home.howItWorks.step3.description'),
+                title: 'Upcyclez',
+                description: 'Participez à des ateliers et formations pour transformer vos objets.',
                 step: '03',
                 color: 'bg-coral-400/10 text-coral-500',
               },
@@ -130,7 +90,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">{t('home.recentListings')}</h2>
+              <h2 className="text-3xl font-bold text-gray-900">Annonces récentes</h2>
               <p className="text-gray-500 mt-2">Découvrez les dernières annonces de la communauté</p>
             </div>
             <Link

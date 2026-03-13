@@ -1,10 +1,9 @@
-import { LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign, Settings, TrendingUp, FileText } from 'lucide-react';
+import { LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign, FolderOpen, FileText } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
@@ -14,9 +13,9 @@ const sidebarItems = [
   { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: <Users className="w-4 h-4" /> },
   { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
   { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
+  { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
   { label: 'Conteneurs', path: '/admin/conteneurs', icon: <Package className="w-4 h-4" /> },
   { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
-  { label: 'Configuration', path: '/admin/config', icon: <Settings className="w-4 h-4" /> },
 ];
 
 export default function AdminFinance() {
@@ -32,8 +31,6 @@ export default function AdminFinance() {
 
   const stats = statsData?.data;
   const invoices = invoicesData?.data || [];
-
-  const revenueByPlan = stats?.revenue_by_plan || [];
 
   const statusConfig: Record<string, string> = {
     paid: 'badge-green',
@@ -60,12 +57,11 @@ export default function AdminFinance() {
               value={`${stats?.monthly_revenue?.toFixed(0) || 0}€`}
               icon={<DollarSign className="w-5 h-5" />}
               color="green"
-              trend={{ value: 5, positive: true }}
             />
             <StatCard
               title="Revenu annuel"
               value={`${stats?.annual_revenue?.toFixed(0) || 0}€`}
-              icon={<TrendingUp className="w-5 h-5" />}
+              icon={<DollarSign className="w-5 h-5" />}
               color="blue"
             />
             <StatCard
@@ -82,20 +78,6 @@ export default function AdminFinance() {
             />
           </div>
         )}
-
-        {/* Revenue by plan chart */}
-        <div className="card">
-          <h2 className="font-semibold text-gray-900 mb-5">Revenus par abonnement</h2>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={revenueByPlan}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="plan" tick={{ fontSize: 13 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip formatter={(v) => [`${v}€`, 'Revenus']} />
-              <Bar dataKey="amount" fill="#2D5016" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
 
         {/* Invoices */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">

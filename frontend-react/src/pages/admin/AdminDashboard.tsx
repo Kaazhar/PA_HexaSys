@@ -1,10 +1,9 @@
-import { LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign, Settings, AlertCircle, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign, FolderOpen, AlertCircle } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Link } from 'react-router-dom';
 
 const sidebarItems = [
@@ -12,12 +11,10 @@ const sidebarItems = [
   { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: <Users className="w-4 h-4" /> },
   { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
   { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
+  { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
   { label: 'Conteneurs', path: '/admin/conteneurs', icon: <Package className="w-4 h-4" /> },
   { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
-  { label: 'Configuration', path: '/admin/config', icon: <Settings className="w-4 h-4" /> },
 ];
-
-const PIE_COLORS = ['#2D5016', '#C97664', '#3B82F6', '#8B5CF6'];
 
 export default function AdminDashboard() {
   const { data, isLoading } = useQuery({
@@ -36,33 +33,10 @@ export default function AdminDashboard() {
         <div className="space-y-6">
           {/* KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <StatCard
-              title="Utilisateurs totaux"
-              value={stats?.total_users || 0}
-              icon={<Users className="w-5 h-5" />}
-              color="green"
-              trend={{ value: 12, positive: true }}
-            />
-            <StatCard
-              title="Annonces actives"
-              value={stats?.active_listings || 0}
-              icon={<Tag className="w-5 h-5" />}
-              color="blue"
-              trend={{ value: 8, positive: true }}
-            />
-            <StatCard
-              title="Formations à venir"
-              value={stats?.total_workshops || 0}
-              icon={<BookOpen className="w-5 h-5" />}
-              color="purple"
-            />
-            <StatCard
-              title="Revenu mensuel"
-              value={`${stats?.monthly_revenue_total?.toFixed(0) || 0}€`}
-              icon={<DollarSign className="w-5 h-5" />}
-              color="coral"
-              trend={{ value: 5, positive: true }}
-            />
+            <StatCard title="Utilisateurs totaux" value={stats?.total_users || 0} icon={<Users className="w-5 h-5" />} color="green" />
+            <StatCard title="Annonces actives" value={stats?.active_listings || 0} icon={<Tag className="w-5 h-5" />} color="blue" />
+            <StatCard title="Formations" value={stats?.total_workshops || 0} icon={<BookOpen className="w-5 h-5" />} color="purple" />
+            <StatCard title="Revenu mensuel" value={`${stats?.monthly_revenue_total?.toFixed(0) || 0}€`} icon={<DollarSign className="w-5 h-5" />} color="coral" />
           </div>
 
           {/* Alerts */}
@@ -104,51 +78,14 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Revenue chart */}
-            <div className="card lg:col-span-2">
-              <div className="flex items-center gap-2 mb-6">
-                <TrendingUp className="w-5 h-5 text-primary-500" />
-                <h2 className="font-semibold text-gray-900">Évolution des revenus</h2>
-              </div>
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={stats?.monthly_revenue || []}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(v) => [`${v}€`, 'Revenus']} />
-                  <Line type="monotone" dataKey="revenue" stroke="#2D5016" strokeWidth={2.5} dot={{ fill: '#2D5016', r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Distribution chart */}
-            <div className="card">
-              <h2 className="font-semibold text-gray-900 mb-6">Répartition des revenus</h2>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Abonnements Pro', value: 2850 },
-                      { name: 'Ateliers', value: 620 },
-                      { name: 'Enterprise', value: 380 },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {PIE_COLORS.map((color, index) => (
-                      <Cell key={index} fill={color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => [`${v}€`]} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+          {/* Summary */}
+          <div className="card">
+            <h2 className="font-semibold text-gray-900 mb-4">Résumé de l'activité</h2>
+            <div className="divide-y divide-gray-100">
+              <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Annonces en attente</span><span className="font-semibold text-amber-600">{stats?.pending_listings || 0}</span></div>
+              <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Formations en attente</span><span className="font-semibold text-amber-600">{stats?.pending_workshops || 0}</span></div>
+              <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Demandes conteneur en attente</span><span className="font-semibold text-amber-600">{stats?.pending_container_requests || 0}</span></div>
+              <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Revenu mensuel total</span><span className="font-bold text-primary-600">{stats?.monthly_revenue_total?.toFixed(0) || 0}€</span></div>
             </div>
           </div>
 
@@ -157,7 +94,7 @@ export default function AdminDashboard() {
             {[
               { label: 'Gérer les utilisateurs', path: '/admin/utilisateurs', icon: <Users className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },
               { label: 'Valider les annonces', path: '/admin/annonces', icon: <Tag className="w-5 h-5" />, color: 'text-amber-500 bg-amber-50' },
-              { label: 'Gérer les conteneurs', path: '/admin/conteneurs', icon: <Package className="w-5 h-5" />, color: 'text-primary-500 bg-primary-50' },
+              { label: 'Gérer les catégories', path: '/admin/categories', icon: <FolderOpen className="w-5 h-5" />, color: 'text-purple-500 bg-purple-50' },
               { label: 'Voir la finance', path: '/admin/finance', icon: <DollarSign className="w-5 h-5" />, color: 'text-coral-500 bg-coral-400/10' },
             ].map((item, i) => (
               <Link key={i} to={item.path} className="card hover:shadow-md transition-shadow flex flex-col items-center gap-3 py-5 text-center">

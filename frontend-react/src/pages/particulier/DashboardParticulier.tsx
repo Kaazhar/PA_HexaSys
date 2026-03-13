@@ -1,4 +1,4 @@
-import { LayoutDashboard, Tag, PlusCircle, Package, Star, Calendar, BookOpen, CheckCircle, Clock, ArrowRight, Leaf } from 'lucide-react';
+import { LayoutDashboard, Tag, PlusCircle, Package, Star, BookOpen, CheckCircle, Clock, ArrowRight } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
@@ -12,11 +12,9 @@ import clsx from 'clsx';
 
 const sidebarItems = [
   { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Mes annonces', path: '/annonces/mes-annonces', icon: <Tag className="w-4 h-4" /> },
   { label: 'Créer une annonce', path: '/annonces/creer', icon: <PlusCircle className="w-4 h-4" /> },
   { label: 'Demande conteneur', path: '/conteneurs/demande', icon: <Package className="w-4 h-4" /> },
   { label: 'Mon score', path: '/score', icon: <Star className="w-4 h-4" /> },
-  { label: 'Planning', path: '/planning', icon: <Calendar className="w-4 h-4" /> },
   { label: 'Formations', path: '/annonces', icon: <BookOpen className="w-4 h-4" /> },
 ];
 
@@ -44,22 +42,11 @@ export default function DashboardParticulier() {
       ) : (
         <div className="space-y-6">
           {/* Welcome */}
-          <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Bonjour, {user?.firstname} ! 👋</h2>
-                <p className="text-white/70 mt-1">Continuez à contribuer à l'économie circulaire.</p>
-              </div>
-              <div className="hidden sm:flex items-center gap-3">
-                <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
-                  <Leaf className="w-7 h-7 text-white" />
-                </div>
-              </div>
-            </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Bonjour, {user?.firstname} !</h2>
+            <p className="text-gray-500 mt-1">Bienvenue sur votre espace UpcycleConnect.</p>
             {user?.first_login && (
-              <div className="mt-4 p-3 bg-white/10 rounded-xl">
-                <p className="text-sm font-medium">🎉 Bienvenue ! Commencez par créer votre première annonce.</p>
-              </div>
+              <p className="text-sm text-primary-600 mt-2">Commencez par créer votre première annonce.</p>
             )}
           </div>
 

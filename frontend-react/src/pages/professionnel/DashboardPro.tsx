@@ -1,4 +1,4 @@
-import { LayoutDashboard, Tag, Briefcase, CreditCard, Package, Star, TrendingUp, ArrowRight } from 'lucide-react';
+import { LayoutDashboard, Tag, Briefcase, CreditCard, ArrowRight } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
@@ -13,9 +13,7 @@ import clsx from 'clsx';
 const sidebarItems = [
   { label: 'Dashboard', path: '/pro', icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: 'Annonces', path: '/annonces', icon: <Tag className="w-4 h-4" /> },
-  { label: 'Mes projets', path: '/pro/projets', icon: <Briefcase className="w-4 h-4" /> },
-  { label: 'Abonnement', path: '/abonnement', icon: <CreditCard className="w-4 h-4" /> },
-  { label: 'Conteneurs', path: '/conteneurs', icon: <Package className="w-4 h-4" /> },
+  { label: 'Créer une annonce', path: '/annonces/creer', icon: <Briefcase className="w-4 h-4" /> },
 ];
 
 const planColors: Record<string, string> = {
@@ -47,22 +45,9 @@ export default function DashboardPro() {
       ) : (
         <div className="space-y-6">
           {/* Welcome */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Bonjour, {user?.firstname} ! 👋</h2>
-                <p className="text-blue-100 mt-1">Bienvenue dans votre espace professionnel UpcycleConnect.</p>
-              </div>
-              <div className="hidden sm:flex items-center gap-2">
-                {dashboard?.subscription ? (
-                  <span className={clsx('badge text-sm px-3 py-1', planColors[dashboard.subscription.plan] || 'badge-gray')}>
-                    {planLabels[dashboard.subscription.plan] || dashboard.subscription.plan}
-                  </span>
-                ) : (
-                  <span className="badge badge-gray text-sm px-3 py-1">Plan Découverte</span>
-                )}
-              </div>
-            </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Bonjour, {user?.firstname} !</h2>
+            <p className="text-gray-500 mt-1">Bienvenue dans votre espace professionnel UpcycleConnect.</p>
           </div>
 
           {/* Stats */}
@@ -82,9 +67,8 @@ export default function DashboardPro() {
             <StatCard
               title="Vues cette semaine"
               value="234"
-              icon={<TrendingUp className="w-5 h-5" />}
+              icon={<Tag className="w-5 h-5" />}
               color="green"
-              trend={{ value: 15, positive: true }}
             />
           </div>
 
@@ -175,7 +159,7 @@ export default function DashboardPro() {
                   {(dashboard?.projects || []).map((project: { id: number; title: string; views: number; likes: number; is_featured: boolean }) => (
                     <li key={project.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                       <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Star className="w-4 h-4 text-purple-500" />
+                        <Briefcase className="w-4 h-4 text-purple-500" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{project.title}</p>

@@ -19,9 +19,9 @@ export default function StatCard({ title, value, icon, trend, color = 'green', s
   };
 
   return (
-    <div className="card hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between mb-4">
-        <div className={clsx('p-3 rounded-xl', colorClasses[color])}>
+    <div className="card">
+      <div className="flex items-center justify-between mb-3">
+        <div className={clsx('p-2.5 rounded-lg', colorClasses[color])}>
           {icon}
         </div>
         {trend && (
