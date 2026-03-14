@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign, FolderOpen, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, Users, Tag, BookOpen, DollarSign, FolderOpen, AlertCircle } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
@@ -12,7 +12,6 @@ const sidebarItems = [
   { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
   { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
   { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
-  { label: 'Conteneurs', path: '/admin/conteneurs', icon: <Package className="w-4 h-4" /> },
   { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
 ];
 
@@ -75,7 +74,6 @@ export default function AdminDashboard() {
             <div className="divide-y divide-gray-100">
               <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Annonces en attente</span><span className="font-semibold text-amber-600">{stats?.pending_listings || 0}</span></div>
               <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Formations en attente</span><span className="font-semibold text-amber-600">{stats?.pending_workshops || 0}</span></div>
-              <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Demandes conteneur en attente</span><span className="font-semibold text-amber-600">{stats?.pending_container_requests || 0}</span></div>
               <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Revenu mensuel total</span><span className="font-bold text-primary-600">{stats?.monthly_revenue_total?.toFixed(0) || 0}€</span></div>
             </div>
           </div>

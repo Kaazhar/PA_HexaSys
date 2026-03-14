@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign, FolderOpen, Plus, CheckCircle, Calendar, MapPin } from 'lucide-react';
+import { LayoutDashboard, Users, Tag, BookOpen, DollarSign, FolderOpen, Plus, CheckCircle, Calendar, MapPin } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -18,7 +18,6 @@ const sidebarItems = [
   { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
   { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
   { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
-  { label: 'Conteneurs', path: '/admin/conteneurs', icon: <Package className="w-4 h-4" /> },
   { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
 ];
 

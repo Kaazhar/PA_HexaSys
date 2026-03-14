@@ -1,4 +1,4 @@
-import { LayoutDashboard, Tag, PlusCircle, Package, Star, BookOpen, CheckCircle, Clock, ArrowRight } from 'lucide-react';
+import { LayoutDashboard, Tag, PlusCircle, Star, BookOpen, CheckCircle, Clock, ArrowRight } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
@@ -13,7 +13,6 @@ import clsx from 'clsx';
 const sidebarItems = [
   { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: 'Créer une annonce', path: '/annonces/creer', icon: <PlusCircle className="w-4 h-4" /> },
-  { label: 'Demande conteneur', path: '/conteneurs/demande', icon: <Package className="w-4 h-4" /> },
   { label: 'Mon score', path: '/score', icon: <Star className="w-4 h-4" /> },
   { label: 'Formations', path: '/annonces', icon: <BookOpen className="w-4 h-4" /> },
 ];
@@ -150,7 +149,6 @@ export default function DashboardParticulier() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: 'Créer une annonce', path: '/annonces/creer', icon: <PlusCircle className="w-5 h-5" />, color: 'text-primary-500 bg-primary-50' },
-              { label: 'Demande de dépôt', path: '/conteneurs/demande', icon: <Package className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },
               { label: 'Mon score', path: '/score', icon: <Star className="w-5 h-5" />, color: 'text-amber-500 bg-amber-50' },
               { label: 'Formations', path: '/annonces', icon: <BookOpen className="w-5 h-5" />, color: 'text-purple-500 bg-purple-50' },
             ].map((action, i) => (

@@ -1,4 +1,4 @@
-import { LayoutDashboard, PlusCircle, Package, Star, BookOpen, Leaf, Droplets, Wind } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Star, BookOpen, Leaf, Droplets, Wind } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { scoreService } from '../../services/api';
@@ -10,7 +10,6 @@ import clsx from 'clsx';
 const sidebarItems = [
   { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: 'Créer une annonce', path: '/annonces/creer', icon: <PlusCircle className="w-4 h-4" /> },
-  { label: 'Demande conteneur', path: '/conteneurs/demande', icon: <Package className="w-4 h-4" /> },
   { label: 'Mon score', path: '/score', icon: <Star className="w-4 h-4" /> },
   { label: 'Formations', path: '/annonces', icon: <BookOpen className="w-4 h-4" /> },
 ];
