@@ -84,15 +84,6 @@ export interface UpcyclingScore {
   water_saved_liters: number;
 }
 
-export interface ScoreEntry {
-  id: number;
-  user_id: number;
-  points: number;
-  reason: string;
-  action: string;
-  created_at: string;
-}
-
 export interface Notification {
   id: number;
   user_id: number;
@@ -124,13 +115,6 @@ export interface AdminStats {
   pending_workshops: number;
   monthly_revenue: Array<{ month: string; revenue: number }>;
   monthly_revenue_total: number;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
 }
 
 export interface AuthResponse {

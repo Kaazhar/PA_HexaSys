@@ -76,9 +76,6 @@ export default function DashboardPro() {
           <div className="card">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-gray-900">Mon abonnement</h2>
-              <Link to="/abonnement" className="text-sm text-primary-500 hover:text-primary-600 flex items-center gap-1">
-                Gérer <ArrowRight className="w-3 h-3" />
-              </Link>
             </div>
             {dashboard?.subscription ? (
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
@@ -99,9 +96,6 @@ export default function DashboardPro() {
               <div className="text-center py-6 text-gray-400">
                 <CreditCard className="w-10 h-10 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">Aucun abonnement actif</p>
-                <Link to="/abonnement" className="btn-primary text-sm mt-3 inline-block">
-                  Choisir un abonnement
-                </Link>
               </div>
             )}
           </div>
@@ -144,9 +138,6 @@ export default function DashboardPro() {
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">Mes projets upcycling</h2>
-                <Link to="/pro/projets" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Voir tout <ArrowRight className="w-3 h-3" />
-                </Link>
               </div>
               {(dashboard?.projects || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">

@@ -44,16 +44,6 @@ func GetUsers(c *gin.Context) {
 	})
 }
 
-func GetUser(c *gin.Context) {
-	id := c.Param("id")
-	var user models.User
-	if err := config.DB.First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-	c.JSON(http.StatusOK, user)
-}
-
 type UpdateUserRequest struct {
 	Firstname string          `json:"firstname"`
 	Lastname  string          `json:"lastname"`

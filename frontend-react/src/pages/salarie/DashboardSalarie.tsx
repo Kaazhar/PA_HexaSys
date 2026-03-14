@@ -1,11 +1,10 @@
-import { LayoutDashboard, BookOpen, FileText, Calendar, MapPin, Users, Clock, ArrowRight } from 'lucide-react';
+import { LayoutDashboard, BookOpen, FileText, Calendar, MapPin, Users, Clock } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { dashboardService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
@@ -78,9 +77,6 @@ export default function DashboardSalarie() {
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">Mes formations</h2>
-                <Link to="/salarie/formations" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Voir tout <ArrowRight className="w-3 h-3" />
-                </Link>
               </div>
               {(dashboard?.my_workshops || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
@@ -166,9 +162,6 @@ export default function DashboardSalarie() {
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">Mes articles récents</h2>
-                <Link to="/salarie/articles" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Voir tout <ArrowRight className="w-3 h-3" />
-                </Link>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {(dashboard?.my_articles || []).map((article: { id: number; title: string; status: string; views: number; created_at: string }) => (
@@ -190,20 +183,6 @@ export default function DashboardSalarie() {
             </div>
           )}
 
-          {/* Quick actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              { label: 'Créer une formation', path: '/salarie/formations', icon: <BookOpen className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },
-              { label: 'Écrire un article', path: '/salarie/articles', icon: <FileText className="w-5 h-5" />, color: 'text-purple-500 bg-purple-50' },
-              { label: 'Mon planning', path: '/salarie/planning', icon: <Calendar className="w-5 h-5" />, color: 'text-amber-500 bg-amber-50' },
-            ].map((action, i) => (
-              <Link key={i} to={action.path} className="card hover:shadow-md transition-shadow flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${action.color}`}>{action.icon}</div>
-                <span className="text-sm font-medium text-gray-700">{action.label}</span>
-                <ArrowRight className="w-4 h-4 text-gray-400 ml-auto" />
-              </Link>
-            ))}
-          </div>
         </div>
       )}
     </DashboardLayout>
