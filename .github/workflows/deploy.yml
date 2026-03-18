@@ -71,7 +71,7 @@ jobs:
       with:
         host: 51.83.154.80
         username: debian
-        key_path: /tmp/deploy_key
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 2222
         script: |
           cd /opt/upcycleconnect
