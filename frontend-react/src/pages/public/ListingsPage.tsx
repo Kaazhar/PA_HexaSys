@@ -5,11 +5,13 @@ import ListingCard from '../../components/common/ListingCard';
 import { useQuery } from '@tanstack/react-query';
 import { listingService, categoryService } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import Pagination from '../../components/common/Pagination';
+import EmptyState from '../../components/common/EmptyState';
 
 export default function ListingsPage() {
-  const navigate = useNavigate();
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const [selectedType, setSelectedType] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [page, setPage] = useState(1);
@@ -139,41 +141,16 @@ export default function ListingsPage() {
                 <LoadingSpinner size="lg" />
               </div>
             ) : listings.length === 0 ? (
-              <div className="text-center py-20 text-gray-400">
-                <Package className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium">Aucune annonce trouvée</p>
-                <p className="text-sm mt-2">Essayez de modifier vos filtres de recherche</p>
-              </div>
+              <EmptyState icon={<Package className="w-10 h-10" />} message="Aucune annonce trouvée" />
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {listings.map((listing) => (
-                    <ListingCard key={listing.id} listing={listing} onClick={() => navigate(`/annonces/${listing.id}`)} />
+                    <ListingCard key={listing.id} listing={listing} />
                   ))}
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center gap-2 mt-8">
-                    <button
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                      className="btn-secondary py-2 px-4 disabled:opacity-50"
-                    >
-                      Précédent
-                    </button>
-                    <span className="flex items-center px-4 text-sm text-gray-600">
-                      Page {page} / {totalPages}
-                    </span>
-                    <button
-                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
-                      className="btn-secondary py-2 px-4 disabled:opacity-50"
-                    >
-                      Suivant
-                    </button>
-                  </div>
-                )}
+                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-8" />
               </>
             )}
           </div>

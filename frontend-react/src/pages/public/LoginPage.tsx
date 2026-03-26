@@ -68,6 +68,12 @@ export default function LoginPage() {
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
           </div>
 
+          <div className="text-right">
+            <Link to="/mot-de-passe-oublie" className="text-sm text-primary-500 hover:underline">
+              Mot de passe oublié ?
+            </Link>
+          </div>
+
           <button
             type="submit"
             disabled={isSubmitting}

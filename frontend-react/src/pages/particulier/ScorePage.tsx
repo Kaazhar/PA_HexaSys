@@ -1,4 +1,4 @@
-import { LayoutDashboard, PlusCircle, Star, BookOpen, Leaf, Droplets, Wind } from 'lucide-react';
+import { Leaf, Droplets, Wind } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { scoreService } from '../../services/api';
@@ -6,13 +6,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
-
-const sidebarItems = [
-  { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Créer une annonce', path: '/annonces/creer', icon: <PlusCircle className="w-4 h-4" /> },
-  { label: 'Mon score', path: '/score', icon: <Star className="w-4 h-4" /> },
-  { label: 'Formations', path: '/annonces', icon: <BookOpen className="w-4 h-4" /> },
-];
+import { particulierSidebar } from '../../config/sidebars';
 
 const levels = [
   { name: 'Débutant', min: 0, max: 99, emoji: '🌱' },
@@ -35,7 +29,7 @@ export default function ScorePage() {
   const progress = nextLevel ? Math.round(((score?.total_points || 0) - currentLevel.min) / (nextLevel.min - currentLevel.min) * 100) : 100;
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} title="Mon score upcycling">
+    <DashboardLayout sidebarItems={particulierSidebar} title="Mon score upcycling">
       {isLoading ? (
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (

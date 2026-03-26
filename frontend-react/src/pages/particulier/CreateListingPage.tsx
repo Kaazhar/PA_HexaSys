@@ -1,19 +1,14 @@
 import { useState } from 'react';
-import { LayoutDashboard, PlusCircle, Star, BookOpen, CheckCircle } from 'lucide-react';
+import { CheckCircle, Upload, X } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { categoryService, listingService } from '../../services/api';
+import { categoryService, listingService, uploadService } from '../../services/api';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
-
-const sidebarItems = [
-  { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Créer une annonce', path: '/annonces/creer', icon: <PlusCircle className="w-4 h-4" /> },
-  { label: 'Mon score', path: '/score', icon: <Star className="w-4 h-4" /> },
-  { label: 'Formations', path: '/annonces', icon: <BookOpen className="w-4 h-4" /> },
-];
+import { particulierSidebar } from '../../config/sidebars';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 interface ListingForm {
   title: string;
@@ -29,7 +24,26 @@ const steps = ['Type & Catégorie', 'Détails', 'Récapitulatif'];
 
 export default function CreateListingPage() {
   const [step, setStep] = useState(0);
+  const [images, setImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      for (const file of files) {
+        const res = await uploadService.upload(file);
+        setImages(prev => [...prev, res.data.url]);
+      }
+    } catch {
+      toast.error('Erreur lors du chargement de l\'image');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
@@ -63,13 +77,13 @@ export default function CreateListingPage() {
   };
 
   const onSubmit = (data: ListingForm) => {
-    createMutation.mutate({ ...data, category_id: Number(data.category_id) });
+    createMutation.mutate({ ...data, category_id: Number(data.category_id), images: images.join(',') } as any);
   };
 
   const selectedCategory = categories.find(c => c.id === Number(formValues.category_id));
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} title="Créer une annonce">
+    <DashboardLayout sidebarItems={particulierSidebar} title="Créer une annonce">
       <div className="max-w-2xl mx-auto">
         {/* Stepper */}
         <div className="flex items-center gap-4 mb-8">
@@ -187,6 +201,37 @@ export default function CreateListingPage() {
                   />
                   {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location.message}</p>}
                 </div>
+
+                {/* Photos */}
+                <div>
+                  <label className="label">Photos <span className="text-gray-400 font-normal">(optionnel)</span></label>
+                  <div className="space-y-3">
+                    {images.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {images.map((url) => (
+                          <div key={url} className="relative group">
+                            <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-gray-200" />
+                            <button
+                              type="button"
+                              onClick={() => setImages(prev => prev.filter(u => u !== url))}
+                              className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <label className={clsx(
+                      'flex items-center gap-2 px-4 py-3 border-2 border-dashed rounded-xl cursor-pointer transition-colors text-sm',
+                      uploading ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed' : 'border-gray-300 hover:border-primary-400 hover:bg-primary-50 text-gray-500'
+                    )}>
+                      {uploading ? <LoadingSpinner size="sm" /> : <Upload className="w-4 h-4" />}
+                      {uploading ? 'Chargement...' : 'Ajouter des photos'}
+                      <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="sr-only" disabled={uploading} />
+                    </label>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -211,6 +256,16 @@ export default function CreateListingPage() {
                     )}
                   </div>
                 </div>
+                {images.length > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">{images.length} photo{images.length > 1 ? 's' : ''} ajoutée{images.length > 1 ? 's' : ''}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {images.map((url) => (
+                        <img key={url} src={url} alt="" className="w-16 h-16 object-cover rounded-lg border border-gray-200" />
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="p-4 bg-amber-50 rounded-xl border border-amber-100">
                   <p className="text-sm text-amber-700">
                     ⏳ Votre annonce sera vérifiée par notre équipe avant publication (généralement sous 24h).

@@ -1,19 +1,11 @@
-import { LayoutDashboard, Users, Tag, BookOpen, DollarSign, FolderOpen, AlertCircle } from 'lucide-react';
+import { Users, Tag, BookOpen, Package, DollarSign, FolderOpen, AlertCircle } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { Link } from 'react-router-dom';
-
-const sidebarItems = [
-  { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: <Users className="w-4 h-4" /> },
-  { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
-  { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
-  { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
-  { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
-];
+import { adminSidebar } from '../../config/sidebars';
 
 export default function AdminDashboard() {
   const { data, isLoading } = useQuery({
@@ -25,7 +17,7 @@ export default function AdminDashboard() {
   const stats = data?.data;
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} title="Tableau de bord Admin">
+    <DashboardLayout sidebarItems={adminSidebar} title="Tableau de bord Admin">
       {isLoading ? (
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (
@@ -39,7 +31,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Alerts */}
-          {((stats?.pending_listings || 0) > 0 || (stats?.pending_workshops || 0) > 0) && (
+          {((stats?.pending_listings || 0) > 0 || (stats?.pending_workshops || 0) > 0 || (stats?.pending_container_requests || 0) > 0) && (
             <div className="card border-l-4 border-amber-400">
               <div className="flex items-center gap-2 mb-3">
                 <AlertCircle className="w-5 h-5 text-amber-500" />
@@ -64,6 +56,15 @@ export default function AdminDashboard() {
                     </div>
                   </Link>
                 )}
+                {(stats?.pending_container_requests || 0) > 0 && (
+                  <Link to="/admin/conteneurs" className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors">
+                    <Package className="w-5 h-5 text-amber-500" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">{stats?.pending_container_requests} demande{(stats?.pending_container_requests || 0) > 1 ? 's' : ''} de dépôt</p>
+                      <p className="text-xs text-gray-500">En attente de traitement</p>
+                    </div>
+                  </Link>
+                )}
               </div>
             </div>
           )}
@@ -74,6 +75,7 @@ export default function AdminDashboard() {
             <div className="divide-y divide-gray-100">
               <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Annonces en attente</span><span className="font-semibold text-amber-600">{stats?.pending_listings || 0}</span></div>
               <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Formations en attente</span><span className="font-semibold text-amber-600">{stats?.pending_workshops || 0}</span></div>
+              <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Demandes conteneur en attente</span><span className="font-semibold text-amber-600">{stats?.pending_container_requests || 0}</span></div>
               <div className="flex justify-between py-3 text-sm"><span className="text-gray-500">Revenu mensuel total</span><span className="font-bold text-primary-600">{stats?.monthly_revenue_total?.toFixed(0) || 0}€</span></div>
             </div>
           </div>

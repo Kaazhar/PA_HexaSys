@@ -1,6 +1,7 @@
 import { MapPin, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import type { Listing } from '../../types';
 import clsx from 'clsx';
 
@@ -10,6 +11,7 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({ listing, onClick }: ListingCardProps) {
+  const navigate = useNavigate();
   const conditionLabels: Record<string, string> = {
     neuf: 'Neuf',
     bon_etat: 'Bon état',
@@ -20,15 +22,23 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
   return (
     <div
       className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group"
-      onClick={onClick}
+      onClick={onClick ?? (() => navigate(`/annonces/${listing.id}`))}
     >
-      {/* Image placeholder */}
+      {/* Image */}
       <div className="h-48 bg-gradient-to-br from-primary-500 to-primary-600 relative overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-white/20 text-6xl font-bold">
-            {listing.title?.charAt(0)?.toUpperCase() || '?'}
-          </span>
-        </div>
+        {listing.images ? (
+          <img
+            src={listing.images.split(',')[0]}
+            alt={listing.title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-white/20 text-6xl font-bold">
+              {listing.title?.charAt(0)?.toUpperCase() || '?'}
+            </span>
+          </div>
+        )}
         <div className="absolute top-3 left-3">
           <span className={clsx(
             'badge text-xs font-semibold',

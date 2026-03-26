@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
+import { LogOut, UserCircle } from 'lucide-react';
 import logo from '../../assets/logo.png';
 import { useAuth } from '../../context/AuthContext';
 import clsx from 'clsx';
@@ -64,8 +64,19 @@ export default function Sidebar({ items, collapsed = false }: SidebarProps) {
         </ul>
       </nav>
 
-      {/* Logout */}
-      <div className="p-2 border-t border-gray-700">
+      {/* Bottom links */}
+      <div className="p-2 border-t border-gray-700 space-y-0.5">
+        <Link
+          to="/profil"
+          className={clsx(
+            'flex items-center gap-2.5 px-2.5 py-2 rounded text-gray-400 hover:text-white hover:bg-gray-800 w-full text-sm',
+            location.pathname === '/profil' && 'bg-gray-800 text-white'
+          )}
+          title={collapsed ? 'Mon profil' : undefined}
+        >
+          <UserCircle className="w-4 h-4 flex-shrink-0" />
+          {!collapsed && <span>Mon profil</span>}
+        </Link>
         <button
           onClick={handleLogout}
           className="flex items-center gap-2.5 px-2.5 py-2 rounded text-gray-400 hover:text-white hover:bg-gray-800 w-full text-sm"

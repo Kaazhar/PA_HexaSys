@@ -1,10 +1,6 @@
--- UpcycleConnect Database Schema
--- Generated for MySQL 8.0
-
 CREATE DATABASE IF NOT EXISTS upcycleconnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE upcycleconnect;
 
--- Users
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -24,7 +20,6 @@ CREATE TABLE IF NOT EXISTS users (
     KEY idx_users_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Categories
 CREATE TABLE IF NOT EXISTS categories (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -40,7 +35,6 @@ CREATE TABLE IF NOT EXISTS categories (
     KEY idx_categories_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Listings
 CREATE TABLE IF NOT EXISTS listings (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -62,7 +56,6 @@ CREATE TABLE IF NOT EXISTS listings (
     KEY idx_listings_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Workshops
 CREATE TABLE IF NOT EXISTS workshops (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -84,7 +77,6 @@ CREATE TABLE IF NOT EXISTS workshops (
     KEY idx_workshops_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Workshop bookings
 CREATE TABLE IF NOT EXISTS workshop_bookings (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -97,7 +89,37 @@ CREATE TABLE IF NOT EXISTS workshop_bookings (
     KEY idx_workshop_bookings_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Upcycling scores
+CREATE TABLE IF NOT EXISTS containers (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    created_at DATETIME(3),
+    updated_at DATETIME(3),
+    deleted_at DATETIME(3),
+    name VARCHAR(191) NOT NULL,
+    address VARCHAR(191),
+    district VARCHAR(191),
+    capacity INT DEFAULT 25,
+    current_count INT DEFAULT 0,
+    status VARCHAR(20) DEFAULT 'operational',
+    KEY idx_containers_deleted_at (deleted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS container_requests (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    created_at DATETIME(3),
+    updated_at DATETIME(3),
+    deleted_at DATETIME(3),
+    user_id BIGINT UNSIGNED,
+    container_id BIGINT UNSIGNED,
+    object_title VARCHAR(191),
+    object_description TEXT,
+    desired_date DATETIME(3),
+    status VARCHAR(20) DEFAULT 'pending',
+    access_code VARCHAR(191),
+    barcode VARCHAR(191),
+    reject_reason VARCHAR(191),
+    KEY idx_container_requests_deleted_at (deleted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS upcycling_scores (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -113,7 +135,6 @@ CREATE TABLE IF NOT EXISTS upcycling_scores (
     KEY idx_upcycling_scores_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Score entries
 CREATE TABLE IF NOT EXISTS score_entries (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -126,7 +147,6 @@ CREATE TABLE IF NOT EXISTS score_entries (
     KEY idx_score_entries_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Subscriptions
 CREATE TABLE IF NOT EXISTS subscriptions (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -141,7 +161,6 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     KEY idx_subscriptions_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Invoices
 CREATE TABLE IF NOT EXISTS invoices (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -159,7 +178,6 @@ CREATE TABLE IF NOT EXISTS invoices (
     KEY idx_invoices_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Notifications
 CREATE TABLE IF NOT EXISTS notifications (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -173,7 +191,6 @@ CREATE TABLE IF NOT EXISTS notifications (
     KEY idx_notifications_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Articles
 CREATE TABLE IF NOT EXISTS articles (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),
@@ -188,7 +205,6 @@ CREATE TABLE IF NOT EXISTS articles (
     KEY idx_articles_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Projects
 CREATE TABLE IF NOT EXISTS projects (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME(3),

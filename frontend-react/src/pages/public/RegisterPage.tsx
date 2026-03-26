@@ -12,6 +12,7 @@ interface RegisterForm {
   password: string;
   confirmPassword: string;
   role: 'particulier' | 'professionnel';
+  newsletter?: boolean;
 }
 
 export default function RegisterPage() {
@@ -31,9 +32,10 @@ export default function RegisterPage() {
         firstname: data.firstname,
         lastname: data.lastname,
         role: data.role,
+        newsletter: data.newsletter,
       });
-      toast.success('Inscription réussie');
-      navigate('/dashboard');
+      toast.success('Compte créé ! Vérifiez votre email.');
+      navigate(`/confirmer-email?email=${encodeURIComponent(data.email)}`);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
       toast.error(error.response?.data?.error || 'Une erreur est survenue');
@@ -129,6 +131,18 @@ export default function RegisterPage() {
                 placeholder="••••••••"
               />
               {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
+            </div>
+
+            <div className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                id="newsletter"
+                {...register('newsletter')}
+                className="mt-0.5 rounded"
+              />
+              <label htmlFor="newsletter" className="text-sm text-gray-600">
+                Je souhaite recevoir la newsletter UpcycleConnect (actus, nouveaux ateliers, conseils upcycling)
+              </label>
             </div>
 
             <button type="submit" disabled={isSubmitting} className="btn-primary w-full">

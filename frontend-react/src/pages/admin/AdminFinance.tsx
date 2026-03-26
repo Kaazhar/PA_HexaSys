@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Tag, BookOpen, DollarSign, FolderOpen, FileText } from 'lucide-react';
+import { DollarSign, FileText } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
@@ -6,16 +6,10 @@ import { adminService } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import clsx from 'clsx';
-
-const sidebarItems = [
-  { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: <Users className="w-4 h-4" /> },
-  { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
-  { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
-  { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
-  { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
-];
+import { adminSidebar } from '../../config/sidebars';
+import EmptyState from '../../components/common/EmptyState';
+import StatusBadge from '../../components/common/StatusBadge';
+import { invoiceStatuses } from '../../config/statuses';
 
 export default function AdminFinance() {
   const { data: statsData, isLoading: statsLoading } = useQuery({
@@ -31,20 +25,8 @@ export default function AdminFinance() {
   const stats = statsData?.data;
   const invoices = invoicesData?.data || [];
 
-  const statusConfig: Record<string, string> = {
-    paid: 'badge-green',
-    pending: 'badge-orange',
-    overdue: 'badge-red',
-  };
-
-  const statusLabel: Record<string, string> = {
-    paid: 'Payée',
-    pending: 'En attente',
-    overdue: 'En retard',
-  };
-
   return (
-    <DashboardLayout sidebarItems={sidebarItems} title="Finance">
+    <DashboardLayout sidebarItems={adminSidebar} title="Finance">
       <div className="space-y-6">
         {/* Stats */}
         {statsLoading ? (
@@ -86,10 +68,7 @@ export default function AdminFinance() {
           {invoicesLoading ? (
             <div className="flex justify-center py-10"><LoadingSpinner /></div>
           ) : invoices.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
-              <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p>Aucune facture</p>
-            </div>
+            <EmptyState icon={<FileText className="w-10 h-10" />} message="Aucune facture" />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -115,9 +94,7 @@ export default function AdminFinance() {
                       <td className="table-cell text-gray-500">{inv.tax.toFixed(2)}€</td>
                       <td className="table-cell font-bold text-primary-500">{inv.total.toFixed(2)}€</td>
                       <td className="table-cell">
-                        <span className={clsx('badge', statusConfig[inv.status] || 'badge-gray')}>
-                          {statusLabel[inv.status] || inv.status}
-                        </span>
+                        <StatusBadge status={inv.status} config={invoiceStatuses} />
                       </td>
                       <td className="table-cell text-gray-500 text-xs">
                         {inv.created_at ? format(new Date(inv.created_at), 'dd MMM yyyy', { locale: fr }) : '-'}

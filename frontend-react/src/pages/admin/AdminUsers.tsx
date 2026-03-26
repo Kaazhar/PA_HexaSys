@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Users, Tag, BookOpen, DollarSign, FolderOpen, Search, Plus, Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Search, Plus, Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, ShieldOff, ShieldCheck } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,15 +11,15 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
+import { adminSidebar } from '../../config/sidebars';
+import Pagination from '../../components/common/Pagination';
+import EmptyState from '../../components/common/EmptyState';
 
-const sidebarItems = [
-  { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: <Users className="w-4 h-4" /> },
-  { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
-  { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
-  { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
-  { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
-];
+interface BanFormData {
+  reason: string;
+  duration: number;
+  is_permanent: boolean;
+}
 
 const roleColors: Record<UserRole, string> = {
   admin: 'bg-purple-100 text-purple-800',
@@ -112,6 +112,12 @@ export default function AdminUsers() {
   const [editUser, setEditUser] = useState<User | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
+  const [banUser, setBanUser] = useState<User | null>(null);
+  const [unbanUserId, setUnbanUserId] = useState<number | null>(null);
+  const { register: registerBan, handleSubmit: handleBanSubmit, watch: watchBan, reset: resetBan } = useForm<BanFormData>({
+    defaultValues: { duration: 7, is_permanent: false },
+  });
+  const isPermanentBan = watchBan('is_permanent');
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'users', { search, role: roleFilter, status: statusFilter, page }],
@@ -159,8 +165,29 @@ export default function AdminUsers() {
     },
   });
 
+  const banMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: BanFormData }) => userService.ban(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      setBanUser(null);
+      resetBan();
+      toast.success('Utilisateur banni');
+    },
+    onError: () => toast.error('Erreur lors du bannissement'),
+  });
+
+  const unbanMutation = useMutation({
+    mutationFn: (id: number) => userService.unban(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      setUnbanUserId(null);
+      toast.success('Utilisateur débanni');
+    },
+    onError: () => toast.error('Erreur lors du débannissement'),
+  });
+
   return (
-    <DashboardLayout sidebarItems={sidebarItems} title="Gestion des utilisateurs">
+    <DashboardLayout sidebarItems={adminSidebar} title="Gestion des utilisateurs">
       <div className="space-y-5">
         {/* Header */}
         <div className="flex flex-col sm:flex-row gap-3 justify-between">
@@ -220,7 +247,7 @@ export default function AdminUsers() {
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={user.id} className={clsx('hover:bg-gray-50 transition-colors', user.is_banned && 'bg-red-50/40')}>
                       <td className="table-cell">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
@@ -229,6 +256,11 @@ export default function AdminUsers() {
                           <div>
                             <p className="font-medium text-gray-900">{user.firstname} {user.lastname}</p>
                             {!user.is_verified && <p className="text-xs text-amber-500">Non vérifié</p>}
+                            {user.is_banned && (
+                              <p className="text-xs text-red-500 font-medium">
+                                Banni{user.ban_expires_at ? ` jusqu'au ${format(new Date(user.ban_expires_at), 'dd/MM/yyyy')}` : ' définitivement'}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -239,8 +271,8 @@ export default function AdminUsers() {
                         </span>
                       </td>
                       <td className="table-cell">
-                        <span className={clsx('badge', user.is_active ? 'badge-green' : 'badge-red')}>
-                          {user.is_active ? 'Actif' : 'Inactif'}
+                        <span className={clsx('badge', user.is_banned ? 'bg-red-100 text-red-700' : user.is_active ? 'badge-green' : 'badge-red')}>
+                          {user.is_banned ? 'Banni' : user.is_active ? 'Actif' : 'Inactif'}
                         </span>
                       </td>
                       <td className="table-cell text-gray-500">
@@ -262,6 +294,23 @@ export default function AdminUsers() {
                           >
                             {user.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                           </button>
+                          {user.is_banned ? (
+                            <button
+                              onClick={() => setUnbanUserId(user.id)}
+                              className="p-1.5 rounded-lg text-orange-400 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                              title="Débannir"
+                            >
+                              <ShieldCheck className="w-4 h-4" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setBanUser(user)}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                              title="Bannir"
+                            >
+                              <ShieldOff className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                             onClick={() => setDeleteUserId(user.id)}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
@@ -276,38 +325,12 @@ export default function AdminUsers() {
                 </tbody>
               </table>
               {users.length === 0 && (
-                <div className="text-center py-12 text-gray-400">
-                  <Users className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p>Aucun utilisateur trouvé</p>
-                </div>
+                <EmptyState icon={<Users className="w-10 h-10" />} message="Aucun utilisateur trouvé" />
               )}
             </div>
           )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-              <p className="text-sm text-gray-500">
-                Page {page} sur {totalPages}
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 hover:bg-gray-50"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 hover:bg-gray-50"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="px-4 py-3 border-t border-gray-100" />
         </div>
 
         {/* Edit Modal */}
@@ -340,6 +363,56 @@ export default function AdminUsers() {
               className="btn-danger flex-1"
             >
               {deleteMutation.isPending ? 'Suppression...' : 'Supprimer'}
+            </button>
+          </div>
+        </Modal>
+
+        {/* Ban Modal */}
+        <Modal isOpen={!!banUser} onClose={() => { setBanUser(null); resetBan(); }} title={`Bannir ${banUser?.firstname} ${banUser?.lastname}`} size="sm">
+          <form onSubmit={handleBanSubmit((data) => banUser && banMutation.mutate({ id: banUser.id, data }))} className="space-y-4">
+            <div>
+              <label className="label">Raison du bannissement</label>
+              <textarea
+                {...registerBan('reason', { required: true })}
+                className="input resize-none min-h-[80px]"
+                placeholder="Comportement inapproprié, spam, violation des CGU..."
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <input {...registerBan('is_permanent')} type="checkbox" id="is_permanent" className="w-4 h-4 rounded" />
+              <label htmlFor="is_permanent" className="text-sm text-gray-700 cursor-pointer">Bannissement permanent</label>
+            </div>
+            {!isPermanentBan && (
+              <div>
+                <label className="label">Durée (jours)</label>
+                <input
+                  {...registerBan('duration', { valueAsNumber: true, min: 1 })}
+                  type="number"
+                  className="input"
+                  placeholder="7"
+                />
+              </div>
+            )}
+            <div className="flex gap-3 pt-2">
+              <button type="button" onClick={() => { setBanUser(null); resetBan(); }} className="btn-secondary flex-1">Annuler</button>
+              <button type="submit" disabled={banMutation.isPending} className="btn-danger flex-1">
+                {banMutation.isPending ? 'Bannissement...' : 'Bannir'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+
+        {/* Unban Confirm Modal */}
+        <Modal isOpen={!!unbanUserId} onClose={() => setUnbanUserId(null)} title="Lever le bannissement" size="sm">
+          <p className="text-gray-600 mb-5">Êtes-vous sûr de vouloir débannir cet utilisateur ? Il pourra de nouveau accéder à son compte.</p>
+          <div className="flex gap-3">
+            <button onClick={() => setUnbanUserId(null)} className="btn-secondary flex-1">Annuler</button>
+            <button
+              onClick={() => unbanUserId && unbanMutation.mutate(unbanUserId)}
+              disabled={unbanMutation.isPending}
+              className="btn-primary flex-1"
+            >
+              {unbanMutation.isPending ? 'Débannissement...' : 'Débannir'}
             </button>
           </div>
         </Modal>

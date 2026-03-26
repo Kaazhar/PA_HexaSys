@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Users, Tag, BookOpen, DollarSign, FolderOpen, Plus, CheckCircle, Calendar, MapPin } from 'lucide-react';
+import { BookOpen, Plus, CheckCircle, Calendar, MapPin, XCircle, Trash2, RefreshCw } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,22 +11,10 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
-
-const sidebarItems = [
-  { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: <Users className="w-4 h-4" /> },
-  { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
-  { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
-  { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
-  { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
-];
-
-const statusConfig = {
-  draft: { label: 'Brouillon', class: 'badge-gray' },
-  pending: { label: 'En attente', class: 'badge-orange' },
-  active: { label: 'Actif', class: 'badge-green' },
-  cancelled: { label: 'Annulé', class: 'badge-red' },
-};
+import { adminSidebar } from '../../config/sidebars';
+import EmptyState from '../../components/common/EmptyState';
+import StatusBadge from '../../components/common/StatusBadge';
+import { workshopStatuses } from '../../config/statuses';
 
 const typeLabels: Record<string, string> = {
   atelier: 'Atelier',
@@ -51,6 +39,9 @@ export default function AdminWorkshops() {
   const [statusFilter, setStatusFilter] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [page, setPage] = useState(1);
+  const [cancelWorkshop, setCancelWorkshop] = useState<Workshop | null>(null);
+  const [deleteWorkshopId, setDeleteWorkshopId] = useState<number | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'workshops', { status: statusFilter, page }],
@@ -93,8 +84,38 @@ export default function AdminWorkshops() {
     onError: () => toast.error('Erreur lors de la création'),
   });
 
+  const cancelMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason: string }) => workshopService.cancel(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
+      setCancelWorkshop(null);
+      setCancelReason('');
+      toast.success('Événement annulé, participants notifiés');
+    },
+    onError: () => toast.error('Erreur lors de l\'annulation'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => workshopService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
+      setDeleteWorkshopId(null);
+      toast.success('Événement supprimé, participants notifiés');
+    },
+    onError: () => toast.error('Erreur lors de la suppression'),
+  });
+
+  const checkEnrollmentMutation = useMutation({
+    mutationFn: () => workshopService.checkEnrollment(),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
+      toast.success(res.data.message || 'Vérification terminée');
+    },
+    onError: () => toast.error('Erreur lors de la vérification'),
+  });
+
   return (
-    <DashboardLayout sidebarItems={sidebarItems} title="Gestion des formations">
+    <DashboardLayout sidebarItems={adminSidebar} title="Gestion des formations">
       <div className="space-y-5">
         {/* Header */}
         <div className="flex flex-col sm:flex-row gap-3 justify-between">
@@ -110,13 +131,24 @@ export default function AdminWorkshops() {
                     : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 )}
               >
-                {s === '' ? 'Toutes' : statusConfig[s as keyof typeof statusConfig]?.label || s}
+                {s === '' ? 'Toutes' : workshopStatuses[s]?.label || s}
               </button>
             ))}
           </div>
-          <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-2 whitespace-nowrap">
-            <Plus className="w-4 h-4" /> Nouvelle formation
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => checkEnrollmentMutation.mutate()}
+              disabled={checkEnrollmentMutation.isPending}
+              className="btn-secondary flex items-center gap-2 whitespace-nowrap"
+              title="Annule automatiquement les événements dans les 48h avec moins de participants que le minimum"
+            >
+              <RefreshCw className={clsx('w-4 h-4', checkEnrollmentMutation.isPending && 'animate-spin')} />
+              Vérifier inscriptions
+            </button>
+            <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-2 whitespace-nowrap">
+              <Plus className="w-4 h-4" /> Nouvelle formation
+            </button>
+          </div>
         </div>
 
         {/* Table */}
@@ -138,6 +170,7 @@ export default function AdminWorkshops() {
                     <th className="table-header">Lieu</th>
                     <th className="table-header">Places</th>
                     <th className="table-header">Prix</th>
+                    <th className="table-header">Inscriptions</th>
                     <th className="table-header">Statut</th>
                     <th className="table-header">Actions</th>
                   </tr>
@@ -173,31 +206,57 @@ export default function AdminWorkshops() {
                         {workshop.price === 0 ? 'Gratuit' : `${workshop.price}€`}
                       </td>
                       <td className="table-cell">
-                        <span className={clsx('badge', statusConfig[workshop.status as keyof typeof statusConfig]?.class || 'badge-gray')}>
-                          {statusConfig[workshop.status as keyof typeof statusConfig]?.label || workshop.status}
-                        </span>
+                        <div className="text-sm">
+                          <span className={clsx('font-medium', workshop.enrolled < (workshop.min_spots || 10) ? 'text-orange-500' : 'text-gray-700')}>
+                            {workshop.enrolled}/{workshop.max_spots}
+                          </span>
+                          <p className="text-xs text-gray-400">min. {workshop.min_spots || 10}</p>
+                        </div>
                       </td>
                       <td className="table-cell">
-                        {workshop.status === 'pending' && (
-                          <button
-                            onClick={() => validateMutation.mutate(workshop.id)}
-                            disabled={validateMutation.isPending}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
-                          >
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            Valider
-                          </button>
+                        <StatusBadge status={workshop.status} config={workshopStatuses} />
+                        {workshop.cancel_reason && (
+                          <p className="text-xs text-gray-400 mt-0.5 max-w-[140px] truncate" title={workshop.cancel_reason}>
+                            {workshop.cancel_reason}
+                          </p>
                         )}
+                      </td>
+                      <td className="table-cell">
+                        <div className="flex items-center gap-1.5">
+                          {workshop.status === 'pending' && (
+                            <button
+                              onClick={() => validateMutation.mutate(workshop.id)}
+                              disabled={validateMutation.isPending}
+                              className="flex items-center gap-1 px-2.5 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
+                            >
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              Valider
+                            </button>
+                          )}
+                          {workshop.status !== 'cancelled' && (
+                            <button
+                              onClick={() => setCancelWorkshop(workshop)}
+                              className="flex items-center gap-1 px-2.5 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-medium hover:bg-orange-100 transition-colors"
+                            >
+                              <XCircle className="w-3.5 h-3.5" />
+                              Annuler
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setDeleteWorkshopId(workshop.id)}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                            title="Supprimer définitivement"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
               {workshops.length === 0 && (
-                <div className="text-center py-12 text-gray-400">
-                  <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p>Aucune formation trouvée</p>
-                </div>
+                <EmptyState icon={<BookOpen className="w-10 h-10" />} message="Aucune formation trouvée" />
               )}
             </div>
           )}
@@ -264,6 +323,49 @@ export default function AdminWorkshops() {
               </button>
             </div>
           </form>
+        </Modal>
+
+        {/* Cancel Modal */}
+        <Modal isOpen={!!cancelWorkshop} onClose={() => { setCancelWorkshop(null); setCancelReason(''); }} title="Annuler l'événement" size="sm">
+          <p className="text-sm text-gray-600 mb-3">
+            Tous les participants inscrits à <strong>{cancelWorkshop?.title}</strong> seront notifiés.
+          </p>
+          <div className="mb-4">
+            <label className="label">Raison de l'annulation</label>
+            <textarea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              className="input resize-none min-h-[80px]"
+              placeholder="Manque de participants, problème logistique..."
+            />
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => { setCancelWorkshop(null); setCancelReason(''); }} className="btn-secondary flex-1">Fermer</button>
+            <button
+              onClick={() => cancelWorkshop && cancelReason.trim() && cancelMutation.mutate({ id: cancelWorkshop.id, reason: cancelReason })}
+              disabled={cancelMutation.isPending || !cancelReason.trim()}
+              className="btn-danger flex-1"
+            >
+              {cancelMutation.isPending ? 'Annulation...' : 'Confirmer'}
+            </button>
+          </div>
+        </Modal>
+
+        {/* Delete Modal */}
+        <Modal isOpen={!!deleteWorkshopId} onClose={() => setDeleteWorkshopId(null)} title="Supprimer l'événement" size="sm">
+          <p className="text-gray-600 mb-5">
+            Cet événement sera supprimé définitivement et tous les inscrits seront notifiés. Cette action est irréversible.
+          </p>
+          <div className="flex gap-3">
+            <button onClick={() => setDeleteWorkshopId(null)} className="btn-secondary flex-1">Annuler</button>
+            <button
+              onClick={() => deleteWorkshopId && deleteMutation.mutate(deleteWorkshopId)}
+              disabled={deleteMutation.isPending}
+              className="btn-danger flex-1"
+            >
+              {deleteMutation.isPending ? 'Suppression...' : 'Supprimer'}
+            </button>
+          </div>
         </Modal>
       </div>
     </DashboardLayout>

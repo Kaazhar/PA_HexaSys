@@ -1,19 +1,12 @@
 import { useState } from 'react';
-import { LayoutDashboard, Users, Tag, BookOpen, DollarSign, FolderOpen, Plus, Pencil, Trash2, Check, X } from 'lucide-react';
+import { FolderOpen, Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { categoryService } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { Category } from '../../types';
-
-const sidebarItems = [
-  { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: <Users className="w-4 h-4" /> },
-  { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
-  { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
-  { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
-  { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
-];
+import { adminSidebar } from '../../config/sidebars';
+import EmptyState from '../../components/common/EmptyState';
 
 const emptyForm = { name: '', slug: '', description: '', icon: '', color: '#2D5016', is_active: true };
 
@@ -84,7 +77,7 @@ export default function AdminCategories() {
   };
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} title="Gestion des catégories">
+    <DashboardLayout sidebarItems={adminSidebar} title="Gestion des catégories">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <p className="text-gray-500 text-sm">{categories.length} catégorie{categories.length > 1 ? 's' : ''}</p>
@@ -142,10 +135,7 @@ export default function AdminCategories() {
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : categories.length === 0 ? (
-          <div className="card text-center py-12 text-gray-400">
-            <FolderOpen className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p>Aucune catégorie</p>
-          </div>
+          <EmptyState icon={<FolderOpen className="w-10 h-10" />} message="Aucune catégorie" />
         ) : (
           <div className="card overflow-hidden p-0">
             <table className="w-full text-sm">

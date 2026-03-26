@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Users, Tag, BookOpen, DollarSign, FolderOpen, Search, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { Tag, Search, CheckCircle, XCircle, Eye } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,22 +11,11 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
-
-const sidebarItems = [
-  { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: <Users className="w-4 h-4" /> },
-  { label: 'Annonces', path: '/admin/annonces', icon: <Tag className="w-4 h-4" /> },
-  { label: 'Formations', path: '/admin/formations', icon: <BookOpen className="w-4 h-4" /> },
-  { label: 'Catégories', path: '/admin/categories', icon: <FolderOpen className="w-4 h-4" /> },
-  { label: 'Finance', path: '/admin/finance', icon: <DollarSign className="w-4 h-4" /> },
-];
-
-const statusConfig = {
-  pending: { label: 'En attente', class: 'badge-orange' },
-  active: { label: 'Active', class: 'badge-green' },
-  rejected: { label: 'Rejetée', class: 'badge-red' },
-  sold: { label: 'Vendue', class: 'badge-gray' },
-};
+import { adminSidebar } from '../../config/sidebars';
+import Pagination from '../../components/common/Pagination';
+import EmptyState from '../../components/common/EmptyState';
+import StatusBadge from '../../components/common/StatusBadge';
+import { listingStatuses } from '../../config/statuses';
 
 export default function AdminListings() {
   const queryClient = useQueryClient();
@@ -74,7 +63,7 @@ export default function AdminListings() {
   };
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} title="Gestion des annonces">
+    <DashboardLayout sidebarItems={adminSidebar} title="Gestion des annonces">
       <div className="space-y-5">
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
@@ -100,7 +89,7 @@ export default function AdminListings() {
                     : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 )}
               >
-                {s === '' ? 'Toutes' : statusConfig[s as keyof typeof statusConfig]?.label || s}
+                {s === '' ? 'Toutes' : listingStatuses[s]?.label || s}
               </button>
             ))}
           </div>
@@ -149,9 +138,7 @@ export default function AdminListings() {
                         {listing.price ? `${listing.price}€` : 'Gratuit'}
                       </td>
                       <td className="table-cell">
-                        <span className={clsx('badge', statusConfig[listing.status as keyof typeof statusConfig]?.class || 'badge-gray')}>
-                          {statusConfig[listing.status as keyof typeof statusConfig]?.label || listing.status}
-                        </span>
+                        <StatusBadge status={listing.status} config={listingStatuses} />
                       </td>
                       <td className="table-cell text-gray-500 text-xs">
                         {listing.created_at ? format(new Date(listing.created_at), 'dd MMM yyyy', { locale: fr }) : '-'}
@@ -191,28 +178,12 @@ export default function AdminListings() {
                 </tbody>
               </table>
               {listings.length === 0 && (
-                <div className="text-center py-12 text-gray-400">
-                  <Tag className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p>Aucune annonce trouvée</p>
-                </div>
+                <EmptyState icon={<Tag className="w-10 h-10" />} message="Aucune annonce trouvée" />
               )}
             </div>
           )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-              <p className="text-sm text-gray-500">Page {page} / {totalPages}</p>
-              <div className="flex gap-2">
-                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary py-1.5 px-3 disabled:opacity-50 text-sm">
-                  Préc.
-                </button>
-                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="btn-secondary py-1.5 px-3 disabled:opacity-50 text-sm">
-                  Suiv.
-                </button>
-              </div>
-            </div>
-          )}
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="px-4 py-3 border-t border-gray-100" />
         </div>
 
         {/* Reject Modal */}
