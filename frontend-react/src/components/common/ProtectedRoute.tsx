@@ -23,6 +23,10 @@ export default function ProtectedRoute({ children, roles }: ProtectedRouteProps)
     return <Navigate to="/login" replace />;
   }
 
+  if (user && !user.is_verified) {
+    return <Navigate to="/confirmer-email" replace />;
+  }
+
   if (roles && user && !roles.includes(user.role)) {
     // Redirect to correct dashboard
     const dashboardMap: Record<UserRole, string> = {

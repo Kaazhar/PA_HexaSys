@@ -10,8 +10,8 @@ import type { User } from '../../types';
 export default function ConfirmEmailPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setSession } = useAuth();
-  const email = searchParams.get('email') || '';
+  const { setSession, user } = useAuth();
+  const email = searchParams.get('email') || user?.email || '';
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -25,7 +25,8 @@ export default function ConfirmEmailPage() {
       const { token, user } = res.data as { token: string; user: User };
       setSession(token, user);
       setSuccess(true);
-      setTimeout(() => navigate('/dashboard'), 1500);
+      const dashboardMap: Record<string, string> = { admin: '/admin', professionnel: '/pro', salarie: '/salarie', particulier: '/dashboard' };
+      setTimeout(() => navigate(dashboardMap[user?.role || ''] || '/dashboard'), 1500);
     } catch {
       toast.error('Code incorrect ou expiré');
     } finally {
