@@ -56,6 +56,8 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusConflict, gin.H{"error": "Email already registered"})
 		return
 	}
+	// Hard-delete tout compte soft-deleted avec ce même email pour libérer l'index unique
+	config.DB.Unscoped().Where("email = ? AND deleted_at IS NOT NULL", req.Email).Delete(&models.User{})
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
