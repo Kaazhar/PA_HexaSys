@@ -52,7 +52,7 @@ func Register(c *gin.Context) {
 	}
 
 	var existing models.User
-	if err := config.DB.Unscoped().Where("email = ?", req.Email).First(&existing).Error; err == nil {
+	if err := config.DB.Where("email = ?", req.Email).First(&existing).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Email already registered"})
 		return
 	}
