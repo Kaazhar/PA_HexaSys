@@ -2,7 +2,6 @@ package config
 
 import (
 	"crypto/rand"
-	"crypto/tls"
 	"encoding/hex"
 	"fmt"
 	"net/smtp"
@@ -31,55 +30,20 @@ func SendEmail(to, subject, htmlBody string) error {
 	}
 
 	host := "smtp.gmail.com"
-	port := "465"
-	addr := host + ":" + port
+	addr := host + ":587"
 
-	msg := "From: UpcycleConnect <" + gmailUser + ">\r\n" +
+	msg := []byte("From: UpcycleConnect <" + gmailUser + ">\r\n" +
 		"To: " + to + "\r\n" +
 		"Subject: " + subject + "\r\n" +
 		"MIME-Version: 1.0\r\n" +
 		"Content-Type: text/html; charset=UTF-8\r\n" +
 		"\r\n" +
-		htmlBody
+		htmlBody)
 
 	auth := smtp.PlainAuth("", gmailUser, gmailPassword, host)
 
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: false,
-		ServerName:         host,
+	if err := smtp.SendMail(addr, auth, gmailUser, []string{to}, msg); err != nil {
+		return fmt.Errorf("smtp error: %w", err)
 	}
-
-	conn, err := tls.Dial("tcp", addr, tlsConfig)
-	if err != nil {
-		return fmt.Errorf("smtp dial error: %w", err)
-	}
-	defer conn.Close()
-
-	client, err := smtp.NewClient(conn, host)
-	if err != nil {
-		return fmt.Errorf("smtp client error: %w", err)
-	}
-	defer client.Close()
-
-	if err = client.Auth(auth); err != nil {
-		return fmt.Errorf("smtp auth error: %w", err)
-	}
-	if err = client.Mail(gmailUser); err != nil {
-		return fmt.Errorf("smtp mail error: %w", err)
-	}
-	if err = client.Rcpt(to); err != nil {
-		return fmt.Errorf("smtp rcpt error: %w", err)
-	}
-
-	w, err := client.Data()
-	if err != nil {
-		return fmt.Errorf("smtp data error: %w", err)
-	}
-	defer w.Close()
-
-	if _, err = fmt.Fprint(w, msg); err != nil {
-		return fmt.Errorf("smtp write error: %w", err)
-	}
-
 	return nil
 }
