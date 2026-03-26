@@ -136,6 +136,18 @@ func SendMessage(c *gin.Context) {
 	}
 	config.DB.Create(&notif)
 
+	// Envoi email de notification en arrière-plan
+	var recipient models.User
+	if err := config.DB.First(&recipient, recipientID).Error; err == nil {
+		senderName := sender.Firstname + " " + sender.Lastname
+		appURL := config.GetEnv("APP_URL", "https://upcycleconnect.net")
+		go config.SendEmail(
+			recipient.Email,
+			"Nouveau message de "+senderName,
+			emailNewMessageTemplate(recipient.Firstname, senderName, preview, appURL),
+		)
+	}
+
 	config.DB.Preload("Sender").First(&msg, msg.ID)
 	c.JSON(http.StatusCreated, msg)
 }

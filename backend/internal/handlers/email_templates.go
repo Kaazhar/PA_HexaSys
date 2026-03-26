@@ -49,6 +49,31 @@ func emailResetPasswordTemplate(firstname, link string) string {
 </html>`, firstname, link)
 }
 
+func emailNewMessageTemplate(recipientFirstname, senderName, preview, appURL string) string {
+	return fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:sans-serif;background:#f9f9f9;padding:40px 0">
+<div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+  <div style="background:#2D5016;padding:32px;text-align:center">
+    <h1 style="color:#fff;margin:0;font-size:24px">&#127807; UpcycleConnect</h1>
+  </div>
+  <div style="padding:32px">
+    <h2 style="color:#1a1a1a;margin-top:0">Nouveau message, %s !</h2>
+    <p style="color:#555;line-height:1.6"><strong>%s</strong> vous a envoyé un message :</p>
+    <div style="background:#f5f5f5;border-left:4px solid #2D5016;padding:16px 20px;border-radius:0 8px 8px 0;margin:24px 0">
+      <p style="color:#333;margin:0;font-style:italic">"%s"</p>
+    </div>
+    <div style="text-align:center;margin:32px 0">
+      <a href="%s/messages" style="background:#2D5016;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:16px">Répondre au message</a>
+    </div>
+    <p style="color:#999;font-size:13px;text-align:center">Connectez-vous à UpcycleConnect pour voir la conversation complète.</p>
+  </div>
+</div>
+</body>
+</html>`, recipientFirstname, senderName, preview, appURL)
+}
+
 func emailNewsletterTemplate(subject, content string) string {
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html>
