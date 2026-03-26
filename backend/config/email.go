@@ -1,12 +1,11 @@
 package config
 
 import (
-	"bytes"
 	"crypto/rand"
+	"crypto/tls"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"net/http"
+	"net/smtp"
 )
 
 func GenerateToken() string {
@@ -23,43 +22,64 @@ func GenerateCode() string {
 }
 
 func SendEmail(to, subject, htmlBody string) error {
-	apiKey := GetEnv("MAILTRAP_API_TOKEN", "")
+	gmailUser := GetEnv("GMAIL_USER", "")
+	gmailPassword := GetEnv("GMAIL_APP_PASSWORD", "")
 
-	if apiKey == "" {
+	if gmailUser == "" || gmailPassword == "" {
 		fmt.Printf("[EMAIL DEV] To: %s | Subject: %s\n", to, subject)
 		return nil
 	}
 
-	fromEmail := GetEnv("MAILTRAP_FROM_EMAIL", "hello@demomailtrap.co")
-	fromName := GetEnv("MAILTRAP_FROM_NAME", "UpcycleConnect")
+	host := "smtp.gmail.com"
+	port := "465"
+	addr := host + ":" + port
 
-	payload := map[string]interface{}{
-		"from":    map[string]string{"email": fromEmail, "name": fromName},
-		"to":      []map[string]string{{"email": to}},
-		"subject": subject,
-		"html":    htmlBody,
+	msg := "From: UpcycleConnect <" + gmailUser + ">\r\n" +
+		"To: " + to + "\r\n" +
+		"Subject: " + subject + "\r\n" +
+		"MIME-Version: 1.0\r\n" +
+		"Content-Type: text/html; charset=UTF-8\r\n" +
+		"\r\n" +
+		htmlBody
+
+	auth := smtp.PlainAuth("", gmailUser, gmailPassword, host)
+
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: false,
+		ServerName:         host,
 	}
 
-	body, err := json.Marshal(payload)
+	conn, err := tls.Dial("tcp", addr, tlsConfig)
 	if err != nil {
-		return err
+		return fmt.Errorf("smtp dial error: %w", err)
 	}
+	defer conn.Close()
 
-	req, err := http.NewRequest("POST", "https://send.api.mailtrap.io/api/send", bytes.NewBuffer(body))
+	client, err := smtp.NewClient(conn, host)
 	if err != nil {
-		return err
+		return fmt.Errorf("smtp client error: %w", err)
 	}
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-	req.Header.Set("Content-Type", "application/json")
+	defer client.Close()
 
-	resp, err := http.DefaultClient.Do(req)
+	if err = client.Auth(auth); err != nil {
+		return fmt.Errorf("smtp auth error: %w", err)
+	}
+	if err = client.Mail(gmailUser); err != nil {
+		return fmt.Errorf("smtp mail error: %w", err)
+	}
+	if err = client.Rcpt(to); err != nil {
+		return fmt.Errorf("smtp rcpt error: %w", err)
+	}
+
+	w, err := client.Data()
 	if err != nil {
-		return err
+		return fmt.Errorf("smtp data error: %w", err)
 	}
-	defer resp.Body.Close()
+	defer w.Close()
 
-	if resp.StatusCode >= 300 {
-		return fmt.Errorf("mailtrap API error: status %d", resp.StatusCode)
+	if _, err = fmt.Fprint(w, msg); err != nil {
+		return fmt.Errorf("smtp write error: %w", err)
 	}
+
 	return nil
 }
