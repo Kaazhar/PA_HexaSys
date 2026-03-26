@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Mail } from 'lucide-react';
-import PublicLayout from '../../components/layout/PublicLayout';
 import { authService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import type { User } from '../../types';
+import logo from '../../assets/logo.png';
 
 export default function ConfirmEmailPage() {
   const [searchParams] = useSearchParams();
@@ -22,11 +22,11 @@ export default function ConfirmEmailPage() {
     setLoading(true);
     try {
       const res = await authService.confirmEmail(email, code);
-      const { token, user } = res.data as { token: string; user: User };
-      setSession(token, user);
+      const { token, user: confirmedUser } = res.data as { token: string; user: User };
+      setSession(token, confirmedUser);
       setSuccess(true);
       const dashboardMap: Record<string, string> = { admin: '/admin', professionnel: '/pro', salarie: '/salarie', particulier: '/dashboard' };
-      setTimeout(() => navigate(dashboardMap[user?.role || ''] || '/dashboard'), 1500);
+      setTimeout(() => navigate(dashboardMap[confirmedUser?.role || ''] || '/dashboard'), 1500);
     } catch {
       toast.error('Code incorrect ou expiré');
     } finally {
@@ -36,52 +36,45 @@ export default function ConfirmEmailPage() {
 
   if (success) {
     return (
-      <PublicLayout>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-center">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Email confirmé !</h1>
-            <p className="text-gray-500">Redirection en cours...</p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-beige-50">
+        <div className="text-center">
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Email confirmé !</h1>
+          <p className="text-gray-500">Redirection en cours...</p>
         </div>
-      </PublicLayout>
+      </div>
     );
   }
 
   return (
-    <PublicLayout>
-      <div className="min-h-[60vh] flex items-center justify-center py-12">
-        <div className="w-full max-w-md mx-auto px-4">
-          <div className="card text-center">
-            <div className="w-14 h-14 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Mail className="w-7 h-7 text-primary-600" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Vérifiez votre email</h1>
-            <p className="text-gray-500 mb-1">Un code à 6 chiffres a été envoyé à</p>
-            <p className="font-semibold text-gray-800 mb-6">{email}</p>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                value={code}
-                onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
-                className="input text-center text-3xl font-bold tracking-[0.5em] py-4"
-                placeholder="000000"
-                autoFocus
-              />
-              <button type="submit" disabled={loading || code.length !== 6} className="btn-primary w-full">
-                {loading ? 'Vérification...' : 'Confirmer mon compte'}
-              </button>
-            </form>
-
-            <p className="text-xs text-gray-400 mt-4">
-              Pas reçu ? Vérifiez vos spams.
-            </p>
-          </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-beige-50 px-4">
+      <img src={logo} alt="UpcycleConnect" className="h-12 mb-8" />
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8 text-center">
+        <div className="w-14 h-14 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Mail className="w-7 h-7 text-primary-600" />
         </div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Vérifiez votre email</h1>
+        <p className="text-gray-500 mb-1">Un code à 6 chiffres a été envoyé à</p>
+        <p className="font-semibold text-gray-800 mb-6">{email}</p>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={code}
+            onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
+            className="input text-center text-3xl font-bold tracking-[0.5em] py-4 w-full"
+            placeholder="000000"
+            autoFocus
+          />
+          <button type="submit" disabled={loading || code.length !== 6} className="btn-primary w-full">
+            {loading ? 'Vérification...' : 'Confirmer mon compte'}
+          </button>
+        </form>
+
+        <p className="text-xs text-gray-400 mt-4">Pas reçu ? Vérifiez vos spams.</p>
       </div>
-    </PublicLayout>
+    </div>
   );
 }
