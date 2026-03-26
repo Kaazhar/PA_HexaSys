@@ -46,6 +46,8 @@ services:
     networks:
       - backend
       - frontend
+    volumes:
+      - uploads_data:/root/uploads
     expose:
       - 8080
 
@@ -79,3 +81,4 @@ networks:
 
 volumes:
   db_data:
+  uploads_data:
