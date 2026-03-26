@@ -30,9 +30,9 @@ func ConnectDB() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
-	// Force UTF-8 sur la connexion — XAMPP Windows utilise cp850 par défaut
-	// ce qui cause un double-encodage des caractères accentués
 	DB.Exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci")
+	DB.Exec("SET GLOBAL innodb_default_row_format = 'DYNAMIC'")
+	DB.Exec("SET SESSION innodb_strict_mode = OFF")
 
 	log.Println("Database connected successfully")
 }

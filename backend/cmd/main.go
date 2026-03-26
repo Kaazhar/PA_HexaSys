@@ -4,26 +4,30 @@ import (
 	"log"
 	"time"
 
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/handlers"
 	"upcycleconnect/backend/internal/middleware"
 	"upcycleconnect/backend/internal/models"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
 	config.LoadEnv()
 	config.ConnectDB()
 
-	// Auto migrate
-	if err := config.DB.AutoMigrate(
+	migDB := config.DB.Set("gorm:table_options", "ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")
+	if err := migDB.AutoMigrate(
 		&models.User{},
+		&models.BanRecord{},
 		&models.Category{},
 		&models.Listing{},
 		&models.Workshop{},
 		&models.WorkshopBooking{},
+		&models.Container{},
+		&models.ContainerRequest{},
 		&models.UpcyclingScore{},
 		&models.ScoreEntry{},
 		&models.Subscription{},
@@ -31,18 +35,22 @@ func main() {
 		&models.Notification{},
 		&models.Article{},
 		&models.Project{},
+		&models.Conversation{},
+		&models.Message{},
+		&models.Review{},
+		&models.Report{},
 	); err != nil {
 		log.Fatal("Migration failed:", err)
 	}
 
-	// Seed initial data
 	seedData()
 
 	r := gin.Default()
 
-	// CORS
+	r.Static("/uploads", "./uploads")
+
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:3000", "https://upcycleconnect.net", "https://www.upcycleconnect.net"},
+		AllowOrigins:     []string{"http://localhost", "http://localhost:80", "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176", "http://localhost:3000", "https://upcycleconnect.net", "https://www.upcycleconnect.net"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -52,41 +60,76 @@ func main() {
 
 	api := r.Group("/api")
 
-	// Auth routes
 	auth := api.Group("/auth")
 	{
 		auth.POST("/register", handlers.Register)
 		auth.POST("/login", handlers.Login)
 		auth.GET("/me", middleware.AuthRequired(), handlers.Me)
+		auth.PUT("/profile", middleware.AuthRequired(), handlers.UpdateProfile)
+		auth.PUT("/password", middleware.AuthRequired(), handlers.ChangePassword)
+		auth.POST("/confirm-email", handlers.ConfirmEmail)
+		auth.POST("/forgot-password", handlers.ForgotPassword)
+		auth.POST("/reset-password", handlers.ResetPassword)
 	}
 
-	// Categories
+	api.PUT("/newsletter", middleware.AuthRequired(), handlers.ToggleNewsletter)
+
 	api.GET("/categories", handlers.GetCategories)
 	api.POST("/categories", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.CreateCategory)
 	api.PUT("/categories/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.UpdateCategory)
 	api.DELETE("/categories/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.DeleteCategory)
 
-	// Listings (public)
+	api.GET("/companies/:siret", handlers.GetCompanyBySiret)
+	api.GET("/search", handlers.GlobalSearch)
+	api.GET("/users/:id", handlers.GetPublicProfile)
+	api.GET("/projects", handlers.GetProjects)
+
+	api.GET("/listings/mine", middleware.AuthRequired(), handlers.GetMyListings)
 	api.GET("/listings", handlers.GetListings)
 	api.GET("/listings/:id", handlers.GetListing)
+	api.GET("/listings/:id/reviews", handlers.GetListingReviews)
 	api.POST("/listings", middleware.AuthRequired(), middleware.RequireRole(models.RoleParticulier, models.RoleProfessionnel, models.RoleAdmin), handlers.CreateListing)
+	api.POST("/listings/:id/reviews", middleware.AuthRequired(), handlers.CreateReview)
 	api.PUT("/listings/:id/validate", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ValidateListing)
 	api.PUT("/listings/:id/reject", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.RejectListing)
+	api.PUT("/listings/:id/sold", middleware.AuthRequired(), handlers.MarkListingSold)
+	api.PUT("/listings/:id", middleware.AuthRequired(), handlers.UpdateListing)
+	api.DELETE("/listings/:id", middleware.AuthRequired(), handlers.DeleteListing)
+	api.DELETE("/reviews/:id", middleware.AuthRequired(), handlers.DeleteReview)
+	api.POST("/upload", middleware.AuthRequired(), handlers.UploadFile)
+	api.POST("/listings/:id/report", middleware.AuthRequired(), handlers.CreateReport)
+	api.GET("/users/:id/reviews", handlers.GetUserReviews)
 
-	// Workshops
 	api.GET("/workshops", handlers.GetWorkshops)
 	api.GET("/workshops/:id", handlers.GetWorkshop)
 	api.POST("/workshops", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.CreateWorkshop)
 	api.PUT("/workshops/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.UpdateWorkshop)
 	api.PUT("/workshops/:id/validate", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ValidateWorkshop)
+	api.PUT("/workshops/:id/cancel", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.CancelWorkshop)
+	api.DELETE("/workshops/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.DeleteWorkshop)
 	api.POST("/workshops/:id/book", middleware.AuthRequired(), handlers.BookWorkshop)
+	api.POST("/workshops/check-enrollment", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.CheckLowEnrollment)
 
-	// Score & notifications
+	api.GET("/containers", handlers.GetContainers)
+	api.POST("/containers", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.CreateContainer)
+	api.PUT("/containers/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.UpdateContainer)
+	api.GET("/containers/requests", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.GetContainerRequests)
+	api.POST("/containers/requests", middleware.AuthRequired(), handlers.CreateContainerRequestHandler)
+	api.PUT("/containers/requests/:id/validate", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ValidateContainerRequest)
+	api.PUT("/containers/requests/:id/reject", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.RejectContainerRequest)
+
+	api.GET("/subscription", middleware.AuthRequired(), handlers.GetMySubscription)
+	api.POST("/subscription/upgrade", middleware.AuthRequired(), handlers.UpgradeSubscription)
+
+	api.GET("/conversations", middleware.AuthRequired(), handlers.GetConversations)
+	api.POST("/conversations", middleware.AuthRequired(), handlers.GetOrCreateConversation)
+	api.GET("/conversations/:id/messages", middleware.AuthRequired(), handlers.GetMessages)
+	api.POST("/conversations/:id/messages", middleware.AuthRequired(), handlers.SendMessage)
+
 	api.GET("/score/me", middleware.AuthRequired(), handlers.GetMyScore)
 	api.GET("/notifications", middleware.AuthRequired(), handlers.GetNotifications)
 	api.PUT("/notifications/:id/read", middleware.AuthRequired(), handlers.MarkNotificationRead)
 
-	// Admin routes
 	adminGroup := api.Group("/admin")
 	adminGroup.Use(middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin))
 	{
@@ -94,14 +137,43 @@ func main() {
 		adminGroup.POST("/users", handlers.CreateUser)
 		adminGroup.PUT("/users/:id", handlers.UpdateUser)
 		adminGroup.DELETE("/users/:id", handlers.DeleteUser)
+		adminGroup.POST("/users/:id/ban", handlers.BanUser)
+		adminGroup.POST("/users/:id/unban", handlers.UnbanUser)
+		adminGroup.GET("/users/:id/bans", handlers.GetBanHistory)
 		adminGroup.GET("/stats", handlers.GetAdminStats)
 		adminGroup.GET("/finance", handlers.GetFinanceStats)
 		adminGroup.GET("/invoices", handlers.GetInvoices)
 		adminGroup.GET("/listings", handlers.GetAdminListings)
 		adminGroup.GET("/workshops", handlers.GetAdminWorkshops)
+		adminGroup.GET("/reports", handlers.GetReports)
+		adminGroup.PUT("/reports/:id/resolve", handlers.ResolveReport)
+		adminGroup.POST("/newsletter", handlers.SendNewsletter)
 	}
 
-	// Role dashboards
+	// Routes salarié
+	salarieGroup := api.Group("/salarie")
+	salarieGroup.Use(middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin))
+	{
+		salarieGroup.GET("/workshops", handlers.GetMyWorkshops)
+		salarieGroup.GET("/articles", handlers.GetMyArticles)
+		salarieGroup.POST("/articles", handlers.CreateArticle)
+		salarieGroup.PUT("/articles/:id", handlers.UpdateArticle)
+		salarieGroup.DELETE("/articles/:id", handlers.DeleteArticle)
+	}
+
+	// Routes professionnels — vérification SIRET
+	proGroup := api.Group("/pro")
+	proGroup.Use(middleware.AuthRequired(), middleware.RequireRole(models.RoleProfessionnel, models.RoleAdmin))
+	{
+		proGroup.POST("/verify-siret", handlers.VerifySiret)
+		proGroup.GET("/siret-status", handlers.GetSiretStatus)
+		proGroup.GET("/company-info", handlers.GetCompanyInfo)
+		proGroup.GET("/projects", handlers.GetMyProjects)
+		proGroup.POST("/projects", handlers.CreateProject)
+		proGroup.PUT("/projects/:id", handlers.UpdateProject)
+		proGroup.DELETE("/projects/:id", handlers.DeleteProject)
+	}
+
 	api.GET("/particulier/dashboard", middleware.AuthRequired(), middleware.RequireRole(models.RoleParticulier, models.RoleAdmin), handlers.GetParticularDashboard)
 	api.GET("/pro/dashboard", middleware.AuthRequired(), middleware.RequireRole(models.RoleProfessionnel, models.RoleAdmin), handlers.GetProDashboard)
 	api.GET("/salarie/dashboard", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.GetSalarieDashboard)
@@ -127,7 +199,6 @@ func seedData() {
 		return string(hash)
 	}
 
-	// Seed users
 	users := []models.User{
 		{Email: "hacksimpsons92@gmail.com", PasswordHash: hashPassword("Theo2026!"), Firstname: "Théo", Lastname: "", Role: models.RoleAdmin, IsActive: true, IsVerified: true, FirstLogin: false},
 		{Email: "romaintoso250@gmail.com", PasswordHash: hashPassword("Romain2026!"), Firstname: "Romain", Lastname: "", Role: models.RoleAdmin, IsActive: true, IsVerified: true, FirstLogin: false},
@@ -147,7 +218,6 @@ func seedData() {
 		config.DB.Create(&models.UpcyclingScore{UserID: users[i].ID, TotalPoints: (i + 1) * 50, Level: "Débutant"})
 	}
 
-	// Categories
 	categories := []models.Category{
 		{Name: "Mobilier", Slug: "mobilier", Description: "Meubles et décoration", Icon: "sofa", Color: "#8B5CF6", IsActive: true},
 		{Name: "Électronique", Slug: "electronique", Description: "Appareils électroniques", Icon: "cpu", Color: "#3B82F6", IsActive: true},
@@ -160,7 +230,18 @@ func seedData() {
 		config.DB.Create(&categories[i])
 	}
 
-	// Listings
+	containers := []models.Container{
+		{Name: "Conteneur République", Address: "Place de la République", District: "75011", Capacity: 30, CurrentCount: 12, Status: "operational", Latitude: 48.8674, Longitude: 2.3634},
+		{Name: "Conteneur Bastille", Address: "Place de la Bastille", District: "75012", Capacity: 25, CurrentCount: 20, Status: "operational", Latitude: 48.8533, Longitude: 2.3692},
+		{Name: "Conteneur Nation", Address: "Place de la Nation", District: "75011", Capacity: 20, CurrentCount: 5, Status: "operational", Latitude: 48.8484, Longitude: 2.3960},
+		{Name: "Conteneur Oberkampf", Address: "Rue Oberkampf", District: "75011", Capacity: 15, CurrentCount: 15, Status: "full", Latitude: 48.8643, Longitude: 2.3715},
+		{Name: "Conteneur Marais", Address: "Rue de Bretagne", District: "75003", Capacity: 25, CurrentCount: 8, Status: "operational", Latitude: 48.8625, Longitude: 2.3609},
+	}
+
+	for i := range containers {
+		config.DB.Create(&containers[i])
+	}
+
 	listings := []models.Listing{
 		{Title: "Table basse en bois massif", Description: "Belle table basse vintage en chêne massif, très bon état", Type: "don", CategoryID: categories[0].ID, Condition: "bon_etat", Location: "Paris 11e", Status: "active", UserID: users[1].ID},
 		{Title: "Vélo de ville femme", Description: "Vélo hollandais 3 vitesses, panier avant inclus", Type: "vente", CategoryID: categories[0].ID, Condition: "bon_etat", Price: 85, Location: "Paris 12e", Status: "active", UserID: users[1].ID},
@@ -178,7 +259,6 @@ func seedData() {
 		config.DB.Create(&listings[i])
 	}
 
-	// Workshops
 	now := time.Now()
 	workshops := []models.Workshop{
 		{Title: "Atelier upcycling textile", Description: "Apprenez à transformer vos vieux vêtements en nouvelles créations", Date: now.AddDate(0, 0, 7), Duration: 180, Location: "Atelier Paris 11e", Price: 25, MaxSpots: 12, CategoryID: categories[2].ID, Status: "active", InstructorID: users[3].ID, Type: "atelier"},
@@ -192,7 +272,6 @@ func seedData() {
 		config.DB.Create(&workshops[i])
 	}
 
-	// Notifications
 	notifs := []models.Notification{
 		{UserID: users[1].ID, Message: "Bienvenue sur UpcycleConnect ! Commencez par créer votre première annonce.", Type: "info"},
 		{UserID: users[1].ID, Message: "Votre annonce \"Table basse en bois massif\" a été validée !", Type: "success"},
@@ -203,7 +282,6 @@ func seedData() {
 		config.DB.Create(&notifs[i])
 	}
 
-	// Score entries
 	scoreEntries := []models.ScoreEntry{
 		{UserID: users[1].ID, Points: 10, Reason: "Première annonce créée", Action: "listing_created"},
 		{UserID: users[1].ID, Points: 15, Reason: "Profil complété", Action: "profile_completed"},

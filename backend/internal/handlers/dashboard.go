@@ -15,13 +15,17 @@ func GetAdminStats(c *gin.Context) {
 	var pendingListings int64
 	var totalWorkshops int64
 	var pendingWorkshops int64
+	var totalContainers int64
+	var pendingContainerRequests int64
+
 	config.DB.Model(&models.User{}).Count(&totalUsers)
 	config.DB.Model(&models.Listing{}).Where("status = ?", "active").Count(&activeListings)
 	config.DB.Model(&models.Listing{}).Where("status = ?", "pending").Count(&pendingListings)
 	config.DB.Model(&models.Workshop{}).Count(&totalWorkshops)
 	config.DB.Model(&models.Workshop{}).Where("status = ?", "pending").Count(&pendingWorkshops)
+	config.DB.Model(&models.Container{}).Count(&totalContainers)
+	config.DB.Model(&models.ContainerRequest{}).Where("status = ?", "pending").Count(&pendingContainerRequests)
 
-	// Revenue mock data (monthly)
 	now := time.Now()
 	monthlyRevenue := []map[string]interface{}{}
 	for i := 5; i >= 0; i-- {
@@ -38,6 +42,8 @@ func GetAdminStats(c *gin.Context) {
 		"pending_listings":          pendingListings,
 		"total_workshops":           totalWorkshops,
 		"pending_workshops":         pendingWorkshops,
+		"total_containers":          totalContainers,
+		"pending_container_requests": pendingContainerRequests,
 		"monthly_revenue":           monthlyRevenue,
 		"monthly_revenue_total":     3850.00,
 	})

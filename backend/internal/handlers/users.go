@@ -44,6 +44,43 @@ func GetUsers(c *gin.Context) {
 	})
 }
 
+func GetPublicProfile(c *gin.Context) {
+	id := c.Param("id")
+	var user models.User
+	if err := config.DB.Select("id, firstname, lastname, role, created_at, siret_verified").First(&user, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
+		return
+	}
+
+	var activeListings []models.Listing
+	config.DB.Preload("Category").Where("user_id = ? AND status = ?", id, "active").
+		Order("created_at DESC").Limit(12).Find(&activeListings)
+
+	var reviewCount int64
+	var avgRating float64
+	config.DB.Model(&models.Review{}).Where("target_user_id = ?", id).Count(&reviewCount)
+	if reviewCount > 0 {
+		config.DB.Model(&models.Review{}).Where("target_user_id = ?", id).Select("AVG(rating)").Scan(&avgRating)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"user":            user,
+		"active_listings": activeListings,
+		"review_count":    reviewCount,
+		"avg_rating":      avgRating,
+	})
+}
+
+func GetUser(c *gin.Context) {
+	id := c.Param("id")
+	var user models.User
+	if err := config.DB.First(&user, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
+
 type UpdateUserRequest struct {
 	Firstname string          `json:"firstname"`
 	Lastname  string          `json:"lastname"`

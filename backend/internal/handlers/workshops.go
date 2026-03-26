@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -9,6 +10,19 @@ import (
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
 )
+
+// notifyWorkshopParticipants envoie une notification à tous les inscrits d'un workshop.
+func notifyWorkshopParticipants(workshopID uint, message, notifType string) {
+	var bookings []models.WorkshopBooking
+	config.DB.Where("workshop_id = ? AND status = ?", workshopID, "confirmed").Find(&bookings)
+	for _, b := range bookings {
+		config.DB.Create(&models.Notification{
+			UserID:  b.UserID,
+			Message: message,
+			Type:    notifType,
+		})
+	}
+}
 
 func GetWorkshops(c *gin.Context) {
 	var workshops []models.Workshop
@@ -77,16 +91,17 @@ func GetWorkshop(c *gin.Context) {
 }
 
 type CreateWorkshopRequest struct {
-	Title        string  `json:"title" binding:"required"`
-	Description  string  `json:"description"`
-	Date         string  `json:"date" binding:"required"`
-	Duration     int     `json:"duration"`
-	Location     string  `json:"location"`
-	Price        float64 `json:"price"`
-	MaxSpots     int     `json:"max_spots"`
-	CategoryID   uint    `json:"category_id"`
-	Type         string  `json:"type"`
-	Image        string  `json:"image"`
+	Title       string  `json:"title" binding:"required"`
+	Description string  `json:"description"`
+	Date        string  `json:"date" binding:"required"`
+	Duration    int     `json:"duration"`
+	Location    string  `json:"location"`
+	Price       float64 `json:"price"`
+	MaxSpots    int     `json:"max_spots"`
+	MinSpots    int     `json:"min_spots"`
+	CategoryID  uint    `json:"category_id"`
+	Type        string  `json:"type"`
+	Image       string  `json:"image"`
 }
 
 func CreateWorkshop(c *gin.Context) {
@@ -111,6 +126,10 @@ func CreateWorkshop(c *gin.Context) {
 	if maxSpots == 0 {
 		maxSpots = 15
 	}
+	minSpots := req.MinSpots
+	if minSpots == 0 {
+		minSpots = 10
+	}
 
 	workshopType := req.Type
 	if workshopType == "" {
@@ -125,6 +144,7 @@ func CreateWorkshop(c *gin.Context) {
 		Location:     req.Location,
 		Price:        req.Price,
 		MaxSpots:     maxSpots,
+		MinSpots:     minSpots,
 		CategoryID:   req.CategoryID,
 		Type:         workshopType,
 		Image:        req.Image,
@@ -199,7 +219,6 @@ func BookWorkshop(c *gin.Context) {
 		return
 	}
 
-	// Check if already booked
 	var existing models.WorkshopBooking
 	if err := config.DB.Where("workshop_id = ? AND user_id = ?", id, userID).First(&existing).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Already booked"})
@@ -220,4 +239,112 @@ func BookWorkshop(c *gin.Context) {
 	config.DB.Model(&workshop).UpdateColumn("enrolled", workshop.Enrolled+1)
 
 	c.JSON(http.StatusCreated, booking)
+}
+
+type CancelWorkshopRequest struct {
+	Reason string `json:"reason" binding:"required"`
+}
+
+// CancelWorkshop annule un événement et notifie tous les inscrits.
+func CancelWorkshop(c *gin.Context) {
+	id := c.Param("id")
+	userID, _ := c.Get("userID")
+	userRole, _ := c.Get("userRole")
+
+	var workshop models.Workshop
+	if err := config.DB.First(&workshop, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Événement introuvable"})
+		return
+	}
+
+	role := userRole.(models.UserRole)
+	if role != models.RoleAdmin && workshop.InstructorID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
+		return
+	}
+
+	if workshop.Status == "cancelled" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cet événement est déjà annulé"})
+		return
+	}
+
+	var req CancelWorkshopRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	config.DB.Model(&workshop).Updates(map[string]interface{}{
+		"status":        "cancelled",
+		"cancel_reason": req.Reason,
+	})
+
+	msg := fmt.Sprintf("L'événement \"%s\" a été annulé. Raison : %s", workshop.Title, req.Reason)
+	notifyWorkshopParticipants(workshop.ID, msg, "warning")
+
+	if role == models.RoleAdmin && workshop.InstructorID != userID.(uint) {
+		config.DB.Create(&models.Notification{
+			UserID:  workshop.InstructorID,
+			Message: fmt.Sprintf("Votre événement \"%s\" a été annulé par un administrateur. Raison : %s", workshop.Title, req.Reason),
+			Type:    "warning",
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Événement annulé, participants notifiés"})
+}
+
+// DeleteWorkshop supprime définitivement un événement et notifie tous les inscrits.
+func DeleteWorkshop(c *gin.Context) {
+	id := c.Param("id")
+
+	var workshop models.Workshop
+	if err := config.DB.First(&workshop, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Événement introuvable"})
+		return
+	}
+
+	msg := fmt.Sprintf("L'événement \"%s\" prévu le %s a été supprimé.", workshop.Title, workshop.Date.Format("02/01/2006"))
+	notifyWorkshopParticipants(workshop.ID, msg, "error")
+
+	config.DB.Create(&models.Notification{
+		UserID:  workshop.InstructorID,
+		Message: fmt.Sprintf("Votre événement \"%s\" a été supprimé par un administrateur.", workshop.Title),
+		Type:    "error",
+	})
+
+	config.DB.Delete(&workshop)
+	c.JSON(http.StatusOK, gin.H{"message": "Événement supprimé, participants notifiés"})
+}
+
+// CheckLowEnrollment annule automatiquement les événements à moins de 48h dont les inscriptions
+// sont inférieures au minimum requis.
+func CheckLowEnrollment(c *gin.Context) {
+	deadline := time.Now().Add(48 * time.Hour)
+	var workshops []models.Workshop
+	config.DB.Where("status = 'active' AND date <= ? AND date > ? AND enrolled < min_spots", deadline, time.Now()).Find(&workshops)
+
+	cancelled := 0
+	for _, w := range workshops {
+		reason := fmt.Sprintf("Nombre minimum de participants non atteint (%d/%d inscrits)", w.Enrolled, w.MinSpots)
+		config.DB.Model(&w).Updates(map[string]interface{}{
+			"status":        "cancelled",
+			"cancel_reason": reason,
+		})
+
+		msg := fmt.Sprintf("L'événement \"%s\" du %s a été annulé : le nombre minimum de participants (%d) n'a pas été atteint.",
+			w.Title, w.Date.Format("02/01/2006"), w.MinSpots)
+		notifyWorkshopParticipants(w.ID, msg, "warning")
+
+		config.DB.Create(&models.Notification{
+			UserID:  w.InstructorID,
+			Message: msg,
+			Type:    "warning",
+		})
+		cancelled++
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":   fmt.Sprintf("%d événement(s) annulé(s) faute de participants", cancelled),
+		"cancelled": cancelled,
+	})
 }

@@ -4,17 +4,17 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func GetListings(c *gin.Context) {
 	var listings []models.Listing
 	query := config.DB.Preload("Category").Preload("User")
 
-	// Public view - only active listings unless admin
 	role, _ := c.Get("userRole")
 	userRole, _ := role.(models.UserRole)
 	if userRole != models.RoleAdmin {
@@ -104,7 +104,6 @@ func CreateListing(c *gin.Context) {
 		return
 	}
 
-	// Add score
 	scoreEntry := models.ScoreEntry{
 		UserID: userID.(uint),
 		Points: 10,
@@ -132,7 +131,6 @@ func ValidateListing(c *gin.Context) {
 		"reject_reason": "",
 	})
 
-	// Notify user
 	notif := models.Notification{
 		UserID:  listing.UserID,
 		Message: "Votre annonce \"" + listing.Title + "\" a été validée !",
@@ -176,6 +174,56 @@ func RejectListing(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Listing rejected"})
 }
 
+func GetMyListings(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	var listings []models.Listing
+	query := config.DB.Preload("Category").Where("user_id = ?", userID)
+	if status := c.Query("status"); status != "" {
+		query = query.Where("status = ?", status)
+	}
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	offset := (page - 1) * limit
+	var total int64
+	query.Model(&models.Listing{}).Count(&total)
+	query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&listings)
+	c.JSON(http.StatusOK, gin.H{"listings": listings, "total": total, "page": page, "limit": limit})
+}
+
+func MarkListingSold(c *gin.Context) {
+	id := c.Param("id")
+	userID, _ := c.Get("userID")
+	var listing models.Listing
+	if err := config.DB.First(&listing, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
+		return
+	}
+	if listing.UserID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
+		return
+	}
+	config.DB.Model(&listing).Update("status", "sold")
+	c.JSON(http.StatusOK, gin.H{"message": "Annonce marquée comme vendue"})
+}
+
+func DeleteListing(c *gin.Context) {
+	id := c.Param("id")
+	userID, _ := c.Get("userID")
+	userRole, _ := c.Get("userRole")
+	var listing models.Listing
+	if err := config.DB.First(&listing, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
+		return
+	}
+	role := userRole.(models.UserRole)
+	if role != models.RoleAdmin && listing.UserID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
+		return
+	}
+	config.DB.Delete(&listing)
+	c.JSON(http.StatusOK, gin.H{"message": "Annonce supprimée"})
+}
+
 func GetAdminListings(c *gin.Context) {
 	var listings []models.Listing
 	query := config.DB.Preload("Category").Preload("User")
@@ -202,4 +250,41 @@ func GetAdminListings(c *gin.Context) {
 		"page":     page,
 		"limit":    limit,
 	})
+}
+
+func UpdateListing(c *gin.Context) {
+	id := c.Param("id")
+	userID, _ := c.Get("userID")
+
+	var listing models.Listing
+	if err := config.DB.First(&listing, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
+		return
+	}
+
+	if listing.UserID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
+		return
+	}
+
+	var req CreateListingRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	config.DB.Model(&listing).Updates(map[string]interface{}{
+		"title":       req.Title,
+		"description": req.Description,
+		"type":        req.Type,
+		"category_id": req.CategoryID,
+		"condition":   req.Condition,
+		"price":       req.Price,
+		"location":    req.Location,
+		"images":      req.Images,
+		"status":      "pending",
+	})
+
+	config.DB.Preload("Category").Preload("User").First(&listing, listing.ID)
+	c.JSON(http.StatusOK, listing)
 }

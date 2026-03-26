@@ -4,9 +4,11 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
 )
 
@@ -44,6 +46,27 @@ func AuthRequired() gin.HandlerFunc {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			c.Abort()
 			return
+		}
+
+		// Check ban status from DB
+		var user models.User
+		if err := config.DB.Select("id, is_banned, ban_reason, ban_expires_at").First(&user, claims.UserID).Error; err == nil {
+			if user.IsBanned {
+				if user.BanExpiresAt == nil || user.BanExpiresAt.After(time.Now()) {
+					c.JSON(http.StatusForbidden, gin.H{
+						"error":      "Votre compte a été banni",
+						"ban_reason": user.BanReason,
+					})
+					c.Abort()
+					return
+				}
+				// Ban expired — auto-lift
+				config.DB.Model(&user).Updates(map[string]interface{}{
+					"is_banned":      false,
+					"ban_reason":     "",
+					"ban_expires_at": nil,
+				})
+			}
 		}
 
 		c.Set("userID", claims.UserID)

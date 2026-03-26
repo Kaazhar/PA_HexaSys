@@ -3,9 +3,10 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetMyScore(c *gin.Context) {
@@ -13,7 +14,6 @@ func GetMyScore(c *gin.Context) {
 
 	var score models.UpcyclingScore
 	if err := config.DB.Where("user_id = ?", userID).First(&score).Error; err != nil {
-		// Create if not exists
 		score = models.UpcyclingScore{UserID: userID.(uint)}
 		config.DB.Create(&score)
 	}
@@ -25,6 +25,16 @@ func GetMyScore(c *gin.Context) {
 		"score":   score,
 		"entries": entries,
 	})
+}
+
+func GetUserScore(c *gin.Context) {
+	id := c.Param("id")
+	var score models.UpcyclingScore
+	if err := config.DB.Where("user_id = ?", id).First(&score).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Score not found"})
+		return
+	}
+	c.JSON(http.StatusOK, score)
 }
 
 func GetNotifications(c *gin.Context) {
