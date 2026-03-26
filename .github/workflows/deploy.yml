@@ -51,6 +51,15 @@ jobs:
         tags: |
           esgipa2rte/upcycle-nginx:latest
           ${{ steps.version.outputs.tag != 'latest' && format('esgipa2rte/upcycle-nginx:{0}', steps.version.outputs.tag) || '' }}
+    - name: Copy docker-compose to server
+      uses: appleboy/scp-action@master
+      with:
+        host: 51.83.154.80
+        username: debian
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 2222
+        source: "docker-compose.yml"
+        target: "/opt/upcycleconnect"
     - name: Deploy via SSH
       uses: appleboy/ssh-action@master
       with:
