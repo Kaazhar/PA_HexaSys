@@ -60,8 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (data: { email: string; password: string; firstname: string; lastname: string; role: string }) => {
-    await authService.register(data);
-    // Ne pas auto-login : l'utilisateur doit confirmer son email
+    const res = await authService.register(data);
+    const { token, user: newUser } = res.data as { token: string; user: User };
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(newUser));
+    setUser(newUser);
+    setIsAuthenticated(true);
   };
 
   const setSession = (newToken: string, newUser: User) => {

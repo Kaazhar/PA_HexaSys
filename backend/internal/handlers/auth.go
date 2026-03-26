@@ -101,7 +101,12 @@ func Register(c *gin.Context) {
 		}
 	}()
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Compte créé. Vérifiez votre email pour le code de confirmation."})
+	token, err := generateToken(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"token": token, "user": user})
 }
 
 func Login(c *gin.Context) {
