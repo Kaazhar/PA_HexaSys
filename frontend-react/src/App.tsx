@@ -57,6 +57,16 @@ function App() {
     );
   }
 
+  // Bloquer tout accès si connecté mais email non vérifié
+  if (user && !user.is_verified) {
+    return (
+      <Routes>
+        <Route path="/confirmer-email" element={<ConfirmEmailPage />} />
+        <Route path="*" element={<Navigate to="/confirmer-email" replace />} />
+      </Routes>
+    );
+  }
+
   const getDashboardPath = () => {
     if (!user) return '/login';
     switch (user.role) {
