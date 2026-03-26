@@ -243,6 +243,8 @@ func ConfirmEmail(c *gin.Context) {
 		"is_verified":        true,
 		"email_verify_token": "",
 	})
+	user.IsVerified = true
+	user.EmailVerifyToken = ""
 	token, err := generateToken(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur serveur"})
