@@ -37,6 +37,9 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: upcycleconnect
       JWT_SECRET: ${JWT_SECRET}
+      GMAIL_USER: ${GMAIL_USER}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
+      APP_URL: https://upcycleconnect.net
     depends_on:
       db:
         condition: service_healthy
