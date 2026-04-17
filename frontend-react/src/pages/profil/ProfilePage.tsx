@@ -4,10 +4,13 @@ import PublicLayout from '../../components/layout/PublicLayout';
 import { useAuth } from '../../context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { authService, newsletterService } from '../../services/api';
+import PhoneVerification from '../../components/PhoneVerification';
+import TwoFAToggle from '../../components/TwoFAToggle';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
+import type { User as UserType } from '../../types';
 
 const roleLabels: Record<string, string> = {
   particulier: 'Particulier',
@@ -41,6 +44,11 @@ export default function ProfilePage() {
   });
 
   const [newsletter, setNewsletter] = useState((user as any)?.newsletter_subscribed || false);
+
+  const { updateUser } = useAuth();
+  const handleUserUpdated = (updatedUser: UserType) => {
+    updateUser(updatedUser);
+  };
 
   const profileMutation = useMutation({
     mutationFn: (data: typeof profileForm) => authService.updateProfile(data),
@@ -264,6 +272,18 @@ export default function ProfilePage() {
               </button>
             </div>
           </div>
+
+          <PhoneVerification
+            currentPhone={user.phone}
+            isVerified={user.phone_verified}
+            onSuccess={handleUserUpdated}
+          />
+
+          <TwoFAToggle
+            isEnabled={user.two_fa_enabled}
+            isPhoneVerified={user.phone_verified}
+            onSuccess={handleUserUpdated}
+          />
 
           {/* Compte */}
           <div className="card">

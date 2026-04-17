@@ -37,6 +37,9 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: upcycleconnect
       JWT_SECRET: ${JWT_SECRET}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER}
     volumes:
       - ./backend:/app
     depends_on:
@@ -55,6 +58,8 @@ services:
     volumes:
       - ./frontend-react:/app
       - /app/node_modules
+    depends_on:
+      - api
     networks:
       - frontend
     expose:

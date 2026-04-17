@@ -9,6 +9,7 @@ import (
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/middleware"
 	"upcycleconnect/backend/internal/models"
+	"upcycleconnect/backend/internal/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -141,6 +142,20 @@ func Login(c *gin.Context) {
 		user.FirstLogin = false
 	}
 
+	if user.TwoFAEnabled {
+		err := services.EnvoyerCodeVerification(user.ID, user.Phone, "two_fa")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible d'envoyer le code SMS"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"requires_2fa": true,
+			"user_id":      user.ID,
+		})
+		return
+	}
+
 	token, err := generateToken(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
@@ -151,6 +166,67 @@ func Login(c *gin.Context) {
 		"token": token,
 		"user":  user,
 	})
+}
+
+func Verify2FA(c *gin.Context) {
+	var req struct {
+		UserID uint   `json:"user_id" binding:"required"`
+		Code   string `json:"code" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id et code requis"})
+		return
+	}
+
+	if err := services.ValiderCode(req.UserID, req.Code, "two_fa"); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+	if err := config.DB.First(&user, req.UserID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
+		return
+	}
+
+	token, err := generateToken(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la génération du token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+		"user":  user,
+	})
+}
+
+func Resend2FACode(c *gin.Context) {
+	var req struct {
+		UserID uint `json:"user_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id requis"})
+		return
+	}
+
+	var user models.User
+	if err := config.DB.First(&user, req.UserID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
+		return
+	}
+
+	if !user.TwoFAEnabled || !user.PhoneVerified {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "La 2FA n'est pas activée pour ce compte"})
+		return
+	}
+
+	if err := services.EnvoyerCodeVerification(user.ID, user.Phone, "two_fa"); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Nouveau code envoyé par SMS"})
 }
 
 func Me(c *gin.Context) {

@@ -8,6 +8,7 @@ import (
 	"upcycleconnect/backend/internal/handlers"
 	"upcycleconnect/backend/internal/middleware"
 	"upcycleconnect/backend/internal/models"
+	"upcycleconnect/backend/internal/services"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,7 @@ import (
 func main() {
 	config.LoadEnv()
 	config.ConnectDB()
+	services.InitSMS()
 
 	migDB := config.DB.Set("gorm:table_options", "ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")
 	if err := migDB.AutoMigrate(
@@ -39,6 +41,7 @@ func main() {
 		&models.Message{},
 		&models.Review{},
 		&models.Report{},
+		&models.PhoneVerification{},
 	); err != nil {
 		log.Fatal("Migration failed:", err)
 	}
@@ -70,6 +73,16 @@ func main() {
 		auth.POST("/confirm-email", handlers.ConfirmEmail)
 		auth.POST("/forgot-password", handlers.ForgotPassword)
 		auth.POST("/reset-password", handlers.ResetPassword)
+		auth.POST("/verify-2fa", handlers.Verify2FA)
+		auth.POST("/resend-2fa", handlers.Resend2FACode)
+	}
+
+	phone := api.Group("/phone")
+	phone.Use(middleware.AuthRequired())
+	{
+		phone.POST("/send-code", handlers.SendPhoneCode)
+		phone.POST("/verify", handlers.VerifyPhone)
+		phone.POST("/toggle-2fa", handlers.Toggle2FA)
 	}
 
 	api.PUT("/newsletter", middleware.AuthRequired(), handlers.ToggleNewsletter)

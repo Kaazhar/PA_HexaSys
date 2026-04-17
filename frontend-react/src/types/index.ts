@@ -11,6 +11,12 @@ export interface User {
   is_active: boolean;
   is_verified: boolean;
   first_login: boolean;
+  is_banned?: boolean;
+  ban_reason?: string;
+  siret?: string;
+  siret_verified?: boolean;
+  phone_verified?: boolean;
+  two_fa_enabled?: boolean;
   created_at: string;
   updated_at: string;
 }

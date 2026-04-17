@@ -31,6 +31,8 @@ import DashboardPro from './pages/professionnel/DashboardPro';
 // Salarie pages
 import DashboardSalarie from './pages/salarie/DashboardSalarie';
 
+import ProfilePage from './pages/profil/ProfilePage';
+
 function App() {
   const { isLoading, user } = useAuth();
 
@@ -81,6 +83,8 @@ function App() {
 
       {/* Salarie routes */}
       <Route path="/salarie" element={<ProtectedRoute roles={['salarie']}><DashboardSalarie /></ProtectedRoute>} />
+
+      <Route path="/profil" element={<ProtectedRoute roles={['particulier', 'professionnel', 'salarie', 'admin']}><ProfilePage /></ProtectedRoute>} />
 
       {/* Catch all */}
       <Route path="*" element={<Navigate to="/" />} />

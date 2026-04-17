@@ -43,6 +43,19 @@ type User struct {
 	PasswordResetToken   string     `gorm:"size:64" json:"-"`
 	PasswordResetExpiry  *time.Time `json:"-"`
 	NewsletterSubscribed bool       `gorm:"default:false" json:"newsletter_subscribed"`
+	PhoneVerified        bool       `gorm:"default:false" json:"phone_verified"`
+	TwoFAEnabled         bool       `gorm:"default:false" json:"two_fa_enabled"`
+}
+
+type PhoneVerification struct {
+	Base
+	UserID    uint      `gorm:"not null;index" json:"user_id"`
+	Phone     string    `gorm:"not null;size:20" json:"phone"`
+	CodeHash  string    `gorm:"not null" json:"-"`
+	Purpose   string    `gorm:"type:varchar(20);not null" json:"purpose"`
+	Attempts  int       `gorm:"default:0" json:"attempts"`
+	Used      bool      `gorm:"default:false" json:"used"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 type BanRecord struct {

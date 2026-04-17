@@ -44,6 +44,19 @@ export const authService = {
   confirmEmail: (email: string, code: string) => api.post('/auth/confirm-email', { email, code }),
   forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
   resetPassword: (token: string, password: string) => api.post('/auth/reset-password', { token, password }),
+  verify2FA: (userId: number, code: string) =>
+    api.post<{ token: string; user: User }>('/auth/verify-2fa', { user_id: userId, code }),
+  resend2FA: (userId: number) =>
+    api.post('/auth/resend-2fa', { user_id: userId }),
+};
+
+export const phoneService = {
+  sendCode: (phone: string) =>
+    api.post('/phone/send-code', { phone }),
+  verify: (phone: string, code: string) =>
+    api.post<{ message: string; user: User }>('/phone/verify', { phone, code }),
+  toggle2FA: (enabled: boolean) =>
+    api.post<{ message: string; user: User }>('/phone/toggle-2fa', { enabled }),
 };
 
 export const newsletterService = {

@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import Login2FAScreen from '../../components/Login2FAScreen';
 import toast from 'react-hot-toast';
 import logo from '../../assets/logo.png';
+import type { User } from '../../types';
 
 interface LoginForm {
   email: string;
@@ -10,29 +13,68 @@ interface LoginForm {
   rememberMe: boolean;
 }
 
+interface LoginResponse {
+  token?: string;
+  user?: User;
+  requires_2fa?: boolean;
+  user_id?: number;
+}
+
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, setSession } = useAuth();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>();
 
+  const [userId2FA, setUserId2FA] = useState<number | null>(null);
+
+  const redirectApresLogin = (user: User) => {
+    const dashboardMap: Record<string, string> = {
+      admin: '/admin',
+      professionnel: '/pro',
+      salarie: '/salarie',
+      particulier: '/dashboard',
+    };
+    navigate(dashboardMap[user.role] || '/dashboard');
+  };
+
   const onSubmit = async (data: LoginForm) => {
     try {
-      await login(data.email, data.password);
-      toast.success('Connexion réussie');
-      // Redirect based on role is handled in App.tsx
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const dashboardMap: Record<string, string> = {
-        admin: '/admin',
-        professionnel: '/pro',
-        salarie: '/salarie',
-        particulier: '/dashboard',
-      };
-      navigate(dashboardMap[user.role] || '/dashboard');
+      const { authService } = await import('../../services/api');
+      const res = await authService.login(data.email, data.password);
+      const reponse = res.data as LoginResponse;
+
+      if (reponse.requires_2fa && reponse.user_id) {
+        setUserId2FA(reponse.user_id);
+        return;
+      }
+
+      if (reponse.token && reponse.user) {
+        setSession(reponse.token, reponse.user);
+        toast.success('Connexion réussie');
+        redirectApresLogin(reponse.user);
+      }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
       toast.error(error.response?.data?.error || 'Identifiants invalides');
     }
   };
+
+  const apresValidation2FA = (token: string, user: User) => {
+    setSession(token, user);
+    redirectApresLogin(user);
+  };
+
+  if (userId2FA !== null) {
+    return (
+      <Login2FAScreen
+        userId={userId2FA}
+        onSuccess={apresValidation2FA}
+        onCancel={() => setUserId2FA(null)}
+      />
+    );
+  }
+
+  void login;
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
