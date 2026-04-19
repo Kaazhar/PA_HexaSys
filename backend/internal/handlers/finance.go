@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"upcycleconnect/backend/config"
@@ -11,25 +12,56 @@ import (
 func GetFinanceStats(c *gin.Context) {
 	var totalInvoices int64
 	var pendingAmount float64
+	var monthlyRevenue float64
+	var annualRevenue float64
 
 	config.DB.Model(&models.Invoice{}).Count(&totalInvoices)
 
-	var invoices []models.Invoice
-	config.DB.Where("status = ?", "pending").Find(&invoices)
-	for _, inv := range invoices {
+	var pendingInvoices []models.Invoice
+	config.DB.Where("status = ?", "pending").Find(&pendingInvoices)
+	for _, inv := range pendingInvoices {
 		pendingAmount += inv.Total
+	}
+
+	now := time.Now()
+	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	firstOfYear := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+
+	config.DB.Model(&models.Invoice{}).
+		Where("status = ? AND created_at >= ?", "paid", firstOfMonth).
+		Select("COALESCE(SUM(total), 0)").Scan(&monthlyRevenue)
+
+	config.DB.Model(&models.Invoice{}).
+		Where("status = ? AND created_at >= ?", "paid", firstOfYear).
+		Select("COALESCE(SUM(total), 0)").Scan(&annualRevenue)
+
+	type PlanStat struct {
+		Plan  string
+		Count int64
+		Total float64
+	}
+	var planStats []PlanStat
+	config.DB.Model(&models.Subscription{}).
+		Where("status = ?", "active").
+		Select("plan, COUNT(*) as count, COALESCE(SUM(price), 0) as total").
+		Group("plan").
+		Scan(&planStats)
+
+	revenueByPlan := make([]map[string]interface{}, 0, len(planStats))
+	for _, ps := range planStats {
+		revenueByPlan = append(revenueByPlan, map[string]interface{}{
+			"plan":   ps.Plan,
+			"amount": ps.Total,
+			"count":  ps.Count,
+		})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"total_invoices":  totalInvoices,
 		"pending_amount":  pendingAmount,
-		"monthly_revenue": 3850.00,
-		"annual_revenue":  38500.00,
-		"revenue_by_plan": []map[string]interface{}{
-			{"plan": "Découverte", "amount": 0, "count": 45},
-			{"plan": "Pro", "amount": 2850, "count": 38},
-			{"plan": "Enterprise", "amount": 1000, "count": 5},
-		},
+		"monthly_revenue": monthlyRevenue,
+		"annual_revenue":  annualRevenue,
+		"revenue_by_plan": revenueByPlan,
 	})
 }
 

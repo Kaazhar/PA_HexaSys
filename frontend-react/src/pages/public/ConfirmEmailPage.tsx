@@ -14,6 +14,7 @@ export default function ConfirmEmailPage() {
   const email = searchParams.get('email') || user?.email || '';
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,6 +32,19 @@ export default function ConfirmEmailPage() {
       toast.error('Code incorrect ou expiré');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) { toast.error('Email introuvable'); return; }
+    setResending(true);
+    try {
+      await authService.resendConfirmEmail(email);
+      toast.success('Nouveau code envoyé !');
+    } catch {
+      toast.error('Erreur lors de l\'envoi');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -73,7 +87,13 @@ export default function ConfirmEmailPage() {
           </button>
         </form>
 
-        <p className="text-xs text-gray-400 mt-4">Pas reçu ? Vérifiez vos spams.</p>
+        <button
+          onClick={handleResend}
+          disabled={resending}
+          className="mt-4 text-sm text-primary-600 hover:underline disabled:opacity-50"
+        >
+          {resending ? 'Envoi en cours...' : 'Renvoyer le code'}
+        </button>
       </div>
     </div>
   );

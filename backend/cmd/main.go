@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -48,6 +49,29 @@ func main() {
 
 	seedData()
 
+	go func() {
+		for {
+			time.Sleep(1 * time.Hour)
+			deadline := time.Now().Add(48 * time.Hour)
+			var workshops []models.Workshop
+			config.DB.Where("status = 'active' AND date <= ? AND date > ? AND enrolled < min_spots", deadline, time.Now()).Find(&workshops)
+			for _, w := range workshops {
+				reason := fmt.Sprintf("Nombre minimum de participants non atteint (%d/%d inscrits)", w.Enrolled, w.MinSpots)
+				config.DB.Model(&w).Updates(map[string]interface{}{
+					"status":        "cancelled",
+					"cancel_reason": reason,
+				})
+				var bookings []models.WorkshopBooking
+				config.DB.Where("workshop_id = ? AND status = ?", w.ID, "confirmed").Find(&bookings)
+				msg := fmt.Sprintf("L'événement \"%s\" du %s a été annulé : le nombre minimum de participants (%d) n'a pas été atteint.", w.Title, w.Date.Format("02/01/2006"), w.MinSpots)
+				for _, b := range bookings {
+					config.DB.Create(&models.Notification{UserID: b.UserID, Message: msg, Type: "warning"})
+				}
+				config.DB.Create(&models.Notification{UserID: w.InstructorID, Message: msg, Type: "warning"})
+			}
+		}
+	}()
+
 	r := gin.Default()
 
 	r.Static("/uploads", "./uploads")
@@ -73,6 +97,7 @@ func main() {
 		auth.POST("/confirm-email", handlers.ConfirmEmail)
 		auth.POST("/forgot-password", handlers.ForgotPassword)
 		auth.POST("/reset-password", handlers.ResetPassword)
+		auth.POST("/resend-confirm", handlers.ResendConfirmEmail)
 		auth.POST("/verify-2fa", handlers.Verify2FA)
 		auth.POST("/resend-2fa", handlers.Resend2FACode)
 	}

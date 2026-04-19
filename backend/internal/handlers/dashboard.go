@@ -30,22 +30,34 @@ func GetAdminStats(c *gin.Context) {
 	monthlyRevenue := []map[string]interface{}{}
 	for i := 5; i >= 0; i-- {
 		month := now.AddDate(0, -i, 0)
+		start := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, now.Location())
+		end := start.AddDate(0, 1, 0)
+		var rev float64
+		config.DB.Model(&models.Invoice{}).
+			Where("status = ? AND created_at >= ? AND created_at < ?", "paid", start, end).
+			Select("COALESCE(SUM(total), 0)").Scan(&rev)
 		monthlyRevenue = append(monthlyRevenue, map[string]interface{}{
 			"month":   month.Format("Jan"),
-			"revenue": float64(1200 + (5-i)*340 + (int(month.Month())%3)*150),
+			"revenue": rev,
 		})
 	}
 
+	var monthlyRevenueTotal float64
+	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	config.DB.Model(&models.Invoice{}).
+		Where("status = ? AND created_at >= ?", "paid", firstOfMonth).
+		Select("COALESCE(SUM(total), 0)").Scan(&monthlyRevenueTotal)
+
 	c.JSON(http.StatusOK, gin.H{
-		"total_users":               totalUsers,
-		"active_listings":           activeListings,
-		"pending_listings":          pendingListings,
-		"total_workshops":           totalWorkshops,
-		"pending_workshops":         pendingWorkshops,
-		"total_containers":          totalContainers,
+		"total_users":                totalUsers,
+		"active_listings":            activeListings,
+		"pending_listings":           pendingListings,
+		"total_workshops":            totalWorkshops,
+		"pending_workshops":          pendingWorkshops,
+		"total_containers":           totalContainers,
 		"pending_container_requests": pendingContainerRequests,
-		"monthly_revenue":           monthlyRevenue,
-		"monthly_revenue_total":     3850.00,
+		"monthly_revenue":            monthlyRevenue,
+		"monthly_revenue_total":      monthlyRevenueTotal,
 	})
 }
 

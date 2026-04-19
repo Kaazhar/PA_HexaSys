@@ -42,6 +42,7 @@ export const authService = {
   changePassword: (data: { current_password: string; new_password: string }) =>
     api.put('/auth/password', data),
   confirmEmail: (email: string, code: string) => api.post('/auth/confirm-email', { email, code }),
+  resendConfirmEmail: (email: string) => api.post('/auth/resend-confirm', { email }),
   forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
   resetPassword: (token: string, password: string) => api.post('/auth/reset-password', { token, password }),
   verify2FA: (userId: number, code: string) =>

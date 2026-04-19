@@ -357,6 +357,29 @@ func ForgotPassword(c *gin.Context) {
 	go config.SendEmail(user.Email, "Réinitialisation de votre mot de passe - UpcycleConnect", emailResetPasswordTemplate(user.Firstname, link))
 }
 
+func ResendConfirmEmail(c *gin.Context) {
+	var req struct {
+		Email string `json:"email" binding:"required,email"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Si cet email est enregistré et non vérifié, un nouveau code vous a été envoyé."})
+
+	var user models.User
+	if err := config.DB.Where("email = ? AND is_verified = ?", req.Email, false).First(&user).Error; err != nil {
+		return
+	}
+	verifyCode := config.GenerateCode()
+	config.DB.Model(&user).Update("email_verify_token", verifyCode)
+	go func() {
+		if err := config.SendEmail(user.Email, "Nouveau code de confirmation - UpcycleConnect", emailConfirmTemplate(user.Firstname, verifyCode)); err != nil {
+			log.Printf("[EMAIL ERROR] %v", err)
+		}
+	}()
+}
+
 func ResetPassword(c *gin.Context) {
 	var req struct {
 		Token    string `json:"token" binding:"required"`
