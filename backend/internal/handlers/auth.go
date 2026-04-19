@@ -57,7 +57,6 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusConflict, gin.H{"error": "Email already registered"})
 		return
 	}
-	// Hard-delete tout compte soft-deleted avec ce même email pour libérer l'index unique
 	config.DB.Unscoped().Where("email = ? AND deleted_at IS NOT NULL", req.Email).Delete(&models.User{})
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -93,7 +92,6 @@ func Register(c *gin.Context) {
 	score := models.UpcyclingScore{UserID: user.ID}
 	config.DB.Create(&score)
 
-	// Send confirmation code
 	verifyCode := config.GenerateCode()
 	config.DB.Model(&user).Update("email_verify_token", verifyCode)
 	go func() {
@@ -342,7 +340,6 @@ func ForgotPassword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// Always return same message to not reveal if email exists
 	c.JSON(http.StatusOK, gin.H{"message": "Si cet email est enregistré, vous recevrez un lien de réinitialisation."})
 
 	var user models.User

@@ -9,5 +9,6 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /app/api .
+RUN mkdir -p /root/uploads
 EXPOSE 8080
 CMD ["./api"]

@@ -72,7 +72,10 @@ func UpdateProject(c *gin.Context) {
 	}
 
 	var req map[string]interface{}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	config.DB.Model(&project).Updates(req)
 	c.JSON(http.StatusOK, project)
 }

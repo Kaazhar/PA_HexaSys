@@ -163,7 +163,6 @@ func main() {
 		adminGroup.POST("/newsletter", handlers.SendNewsletter)
 	}
 
-	// Routes salarié
 	salarieGroup := api.Group("/salarie")
 	salarieGroup.Use(middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin))
 	{
@@ -174,7 +173,6 @@ func main() {
 		salarieGroup.DELETE("/articles/:id", handlers.DeleteArticle)
 	}
 
-	// Routes professionnels — vérification SIRET
 	proGroup := api.Group("/pro")
 	proGroup.Use(middleware.AuthRequired(), middleware.RequireRole(models.RoleProfessionnel, models.RoleAdmin))
 	{

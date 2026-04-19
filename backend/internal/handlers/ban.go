@@ -12,8 +12,8 @@ import (
 
 type BanRequest struct {
 	Reason      string `json:"reason" binding:"required"`
-	Duration    int    `json:"duration"`     // jours, 0 = permanent
-	IsPermanent bool   `json:"is_permanent"` // forcer permanent
+	Duration    int    `json:"duration"`
+	IsPermanent bool   `json:"is_permanent"`
 }
 
 func BanUser(c *gin.Context) {
@@ -33,7 +33,10 @@ func BanUser(c *gin.Context) {
 	}
 
 	var expiresAt *time.Time
-	isPermanent := req.IsPermanent || req.Duration == 0
+	isPermanent := req.IsPermanent
+	if req.Duration == 0 {
+		isPermanent = true
+	}
 	if !isPermanent && req.Duration > 0 {
 		t := time.Now().AddDate(0, 0, req.Duration)
 		expiresAt = &t

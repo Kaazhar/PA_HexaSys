@@ -91,7 +91,11 @@ func VerifySiret(c *gin.Context) {
 	}
 
 	url := fmt.Sprintf("https://recherche-entreprises.api.gouv.fr/search?q=%s&page=1&per_page=1", req.Siret)
-	httpReq, _ := http.NewRequest("GET", url, nil)
+	httpReq, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur interne"})
+		return
+	}
 	httpReq.Header.Set("User-Agent", "UpcycleConnect/1.0")
 
 	resp, err := (&http.Client{}).Do(httpReq)
@@ -120,7 +124,6 @@ func VerifySiret(c *gin.Context) {
 		return
 	}
 
-	// Trouver l'établissement correspondant au SIRET
 	var etabAdresse, etabVille, etabCP string
 	etabActif := false
 	for _, etab := range company.MatchingEtablissements {
@@ -150,19 +153,16 @@ func VerifySiret(c *gin.Context) {
 		companyName = company.NomRaisonSociale
 	}
 
-	// Effectifs lisible
 	effectifsLabel := trancheEffectifs[company.TrancheEffectifSalarie]
 	if effectifsLabel == "" && company.TrancheEffectifSalarie != "" {
 		effectifsLabel = "Tranche " + company.TrancheEffectifSalarie
 	}
 
-	// Catégorie lisible
 	catLabel := categorieEntreprise[company.CategorieEntreprise]
 	if catLabel == "" {
 		catLabel = company.CategorieEntreprise
 	}
 
-	// Dernier CA connu
 	var lastCA *int64
 	var lastCAYear string
 	for year, fin := range company.Finances {
@@ -172,7 +172,6 @@ func VerifySiret(c *gin.Context) {
 		}
 	}
 
-	// Enregistrer le SIRET vérifié
 	var user models.User
 	config.DB.First(&user, userID)
 	config.DB.Model(&user).Updates(map[string]interface{}{
@@ -208,7 +207,6 @@ func VerifySiret(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// GetCompanyBySiret retourne les infos d'une entreprise depuis l'API SIRENE (endpoint public).
 func GetCompanyBySiret(c *gin.Context) {
 	siret := c.Param("siret")
 	if !siretRegexp.MatchString(siret) {
@@ -217,7 +215,11 @@ func GetCompanyBySiret(c *gin.Context) {
 	}
 
 	url := fmt.Sprintf("https://recherche-entreprises.api.gouv.fr/search?q=%s&page=1&per_page=1", siret)
-	httpReq, _ := http.NewRequest("GET", url, nil)
+	httpReq, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur interne"})
+		return
+	}
 	httpReq.Header.Set("User-Agent", "UpcycleConnect/1.0")
 
 	resp, err := (&http.Client{}).Do(httpReq)
@@ -304,7 +306,6 @@ func GetSiretStatus(c *gin.Context) {
 	})
 }
 
-// GetCompanyInfo retourne les infos de l'entreprise depuis l'API SIRENE pour l'utilisateur connecté.
 func GetCompanyInfo(c *gin.Context) {
 	userID, _ := c.Get("userID")
 
@@ -319,7 +320,11 @@ func GetCompanyInfo(c *gin.Context) {
 	}
 
 	url := fmt.Sprintf("https://recherche-entreprises.api.gouv.fr/search?q=%s&page=1&per_page=1", user.Siret)
-	httpReq, _ := http.NewRequest("GET", url, nil)
+	httpReq, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur interne"})
+		return
+	}
 	httpReq.Header.Set("User-Agent", "UpcycleConnect/1.0")
 
 	resp, err := (&http.Client{}).Do(httpReq)

@@ -5,3 +5,4 @@ mockup.html
 dist/
 build/
 memory/
+*.exe

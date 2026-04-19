@@ -32,7 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
         localStorage.removeItem('user');
       }
-      // Verify token is still valid
       authService.me()
         .then((res) => {
           setUser(res.data);
@@ -61,11 +60,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (data: { email: string; password: string; firstname: string; lastname: string; role: string }) => {
     const res = await authService.register(data);
-    const { token, user: newUser } = res.data as { token: string; user: User };
-    localStorage.setItem('token', token);
+    const { token: newToken, user: newUser } = res.data as { token: string; user: User };
+    localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
+    setToken(newToken);
     setUser(newUser);
-    setIsAuthenticated(true);
   };
 
   const setSession = (newToken: string, newUser: User) => {

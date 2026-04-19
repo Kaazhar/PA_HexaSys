@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
 )
@@ -150,7 +151,7 @@ func ValidateContainerRequest(c *gin.Context) {
 	})
 
 	config.DB.Model(&models.Container{}).Where("id = ?", request.ContainerID).
-		UpdateColumn("current_count", request.Container.CurrentCount+1)
+		UpdateColumn("current_count", gorm.Expr("current_count + 1"))
 
 	notif := models.Notification{
 		UserID:  request.UserID,

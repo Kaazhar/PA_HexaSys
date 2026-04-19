@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
 )
 
-// notifyWorkshopParticipants envoie une notification à tous les inscrits d'un workshop.
 func notifyWorkshopParticipants(workshopID uint, message, notifType string) {
 	var bookings []models.WorkshopBooking
 	config.DB.Where("workshop_id = ? AND status = ?", workshopID, "confirmed").Find(&bookings)
@@ -236,7 +236,7 @@ func BookWorkshop(c *gin.Context) {
 		return
 	}
 
-	config.DB.Model(&workshop).UpdateColumn("enrolled", workshop.Enrolled+1)
+	config.DB.Model(&workshop).UpdateColumn("enrolled", gorm.Expr("enrolled + 1"))
 
 	c.JSON(http.StatusCreated, booking)
 }
@@ -245,7 +245,6 @@ type CancelWorkshopRequest struct {
 	Reason string `json:"reason" binding:"required"`
 }
 
-// CancelWorkshop annule un événement et notifie tous les inscrits.
 func CancelWorkshop(c *gin.Context) {
 	id := c.Param("id")
 	userID, _ := c.Get("userID")
@@ -293,7 +292,6 @@ func CancelWorkshop(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Événement annulé, participants notifiés"})
 }
 
-// DeleteWorkshop supprime définitivement un événement et notifie tous les inscrits.
 func DeleteWorkshop(c *gin.Context) {
 	id := c.Param("id")
 
@@ -316,8 +314,6 @@ func DeleteWorkshop(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Événement supprimé, participants notifiés"})
 }
 
-// CheckLowEnrollment annule automatiquement les événements à moins de 48h dont les inscriptions
-// sont inférieures au minimum requis.
 func CheckLowEnrollment(c *gin.Context) {
 	deadline := time.Now().Add(48 * time.Hour)
 	var workshops []models.Workshop
