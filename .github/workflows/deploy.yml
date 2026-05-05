@@ -51,26 +51,31 @@ jobs:
         tags: |
           esgipa2rte/upcycle-nginx:latest
           ${{ steps.version.outputs.tag != 'latest' && format('esgipa2rte/upcycle-nginx:{0}', steps.version.outputs.tag) || '' }}
-    - name: Copy docker-compose to server
-      uses: appleboy/scp-action@master
-      with:
-        host: 51.83.154.80
-        username: debian
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: 2222
-        source: "docker-compose.yml"
-        target: "/opt/upcycleconnect"
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        cat >> ~/.ssh/config << 'EOF'
+        Host proxmox
+          HostName 82.66.207.249
+          Port 2222
+          User root
+          StrictHostKeyChecking no
+          IdentityFile ~/.ssh/id_rsa
+        Host eveng
+          HostName 10.10.0.200
+          User root
+          StrictHostKeyChecking no
+          ProxyJump proxmox
+          IdentityFile ~/.ssh/id_rsa
+        Host serveur-web
+          HostName 192.168.80.10
+          User root
+          StrictHostKeyChecking no
+          ProxyJump eveng
+          IdentityFile ~/.ssh/id_rsa
+        EOF
     - name: Deploy via SSH
-      uses: appleboy/ssh-action@master
-      with:
-        host: 51.83.154.80
-        username: debian
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: 2222
-        script: |
-          cd /opt/upcycleconnect
-          sed -i 's|^GMAIL_USER=.*|GMAIL_USER=${{ secrets.GMAIL_USER }}|' .env
-          sed -i 's|^GMAIL_APP_PASSWORD=.*|GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}|' .env
-          docker compose pull
-          docker compose up -d
-          echo "✅ Déploiement réussi à $(date)" >> /home/debian/deploy.log
+      run: |
+        ssh serveur-web "cd /opt/upcycleconnect && sed -i 's|^GMAIL_USER=.*|GMAIL_USER=${{ secrets.GMAIL_USER }}|' .env && sed -i 's|^GMAIL_APP_PASSWORD=.*|GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}|' .env && docker compose pull && docker restart upcycle_api && sleep 5 && docker restart upcycle_react && sleep 5 && docker restart upcycle_nginx && echo '✅ Déploiement réussi' >> /root/deploy.log"
