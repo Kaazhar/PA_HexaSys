@@ -5,7 +5,7 @@ on:
     tags: [ 'v*' ]
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -51,31 +51,13 @@ jobs:
         tags: |
           esgipa2rte/upcycle-nginx:latest
           ${{ steps.version.outputs.tag != 'latest' && format('esgipa2rte/upcycle-nginx:{0}', steps.version.outputs.tag) || '' }}
-    - name: Setup SSH
+    - name: Deploy
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        cat >> ~/.ssh/config << 'EOF'
-        Host proxmox
-          HostName 82.66.207.249
-          Port 2222
-          User root
-          StrictHostKeyChecking no
-          IdentityFile ~/.ssh/id_rsa
-        Host eveng
-          HostName 10.10.0.200
-          User root
-          StrictHostKeyChecking no
-          ProxyJump proxmox
-          IdentityFile ~/.ssh/id_rsa
-        Host serveur-web
-          HostName 192.168.80.10
-          User root
-          StrictHostKeyChecking no
-          ProxyJump eveng
-          IdentityFile ~/.ssh/id_rsa
-        EOF
-    - name: Deploy via SSH
-      run: |
-        ssh serveur-web "cd /opt/upcycleconnect && sed -i 's|^GMAIL_USER=.*|GMAIL_USER=${{ secrets.GMAIL_USER }}|' .env && sed -i 's|^GMAIL_APP_PASSWORD=.*|GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}|' .env && docker compose pull && docker restart upcycle_api && sleep 5 && docker restart upcycle_react && sleep 5 && docker restart upcycle_nginx && echo '✅ Déploiement réussi' >> /root/deploy.log"
+        cd /opt/upcycleconnect
+        sed -i 's|^GMAIL_USER=.*|GMAIL_USER=${{ secrets.GMAIL_USER }}|' .env
+        sed -i 's|^GMAIL_APP_PASSWORD=.*|GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}|' .env
+        docker compose pull
+        docker restart upcycle_api && sleep 5
+        docker restart upcycle_react && sleep 5
+        docker restart upcycle_nginx
+        echo "✅ Déploiement réussi $(date)" >> /root/deploy.log
