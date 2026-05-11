@@ -57,7 +57,9 @@ jobs:
         sed -i 's|^GMAIL_USER=.*|GMAIL_USER=${{ secrets.GMAIL_USER }}|' .env
         sed -i 's|^GMAIL_APP_PASSWORD=.*|GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}|' .env
         docker compose pull
-        docker restart upcycle_api && sleep 5
-        docker restart upcycle_react && sleep 5
-        docker restart upcycle_nginx
+        docker compose up -d --force-recreate --no-deps api
+        sleep 5
+        docker compose up -d --force-recreate --no-deps react
+        sleep 5
+        docker compose up -d --force-recreate --no-deps nginx
         echo "✅ Déploiement réussi $(date)" >> /root/deploy.log
