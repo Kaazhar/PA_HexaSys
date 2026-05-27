@@ -53,6 +53,7 @@ jobs:
           ${{ steps.version.outputs.tag != 'latest' && format('esgipa2rte/upcycle-nginx:{0}', steps.version.outputs.tag) || '' }}
     - name: Deploy
       run: |
+        cp docker-compose.yml /opt/upcycleconnect/docker-compose.yml
         cd /opt/upcycleconnect
         set_env() { grep -q "^$1=" .env && sed -i "s|^$1=.*|$1=$2|" .env || echo "$1=$2" >> .env; }
         set_env GMAIL_USER "${{ secrets.GMAIL_USER }}"
