@@ -20,7 +20,7 @@ i18n
       useSuspense: true,
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage'],
       caches: ['localStorage'],
     },
   });
