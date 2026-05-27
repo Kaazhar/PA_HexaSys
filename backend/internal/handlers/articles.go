@@ -9,6 +9,38 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
+// GetPublicArticles - GET /api/articles (public, published only)
+func GetPublicArticles(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "12"))
+	offset := (page - 1) * limit
+	tag := c.Query("tag")
+
+	var articles []models.Article
+	var total int64
+
+	q := config.DB.Model(&models.Article{}).Where("status = ?", "published")
+	if tag != "" {
+		q = q.Where("tags LIKE ?", "%"+tag+"%")
+	}
+	q.Count(&total)
+	q.Preload("Author").Order("created_at DESC").Offset(offset).Limit(limit).Find(&articles)
+
+	c.JSON(http.StatusOK, gin.H{"articles": articles, "total": total, "page": page, "limit": limit})
+}
+
+// GetPublicArticle - GET /api/articles/:id (public, published only)
+func GetPublicArticle(c *gin.Context) {
+	id := c.Param("id")
+	var article models.Article
+	if err := config.DB.Preload("Author").Where("status = ?", "published").First(&article, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Article introuvable"})
+		return
+	}
+	config.DB.Model(&article).UpdateColumn("views", article.Views+1)
+	c.JSON(http.StatusOK, article)
+}
+
 func GetMyArticles(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	var articles []models.Article

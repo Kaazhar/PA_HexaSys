@@ -314,6 +314,16 @@ func DeleteWorkshop(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Événement supprimé, participants notifiés"})
 }
 
+// GetMyBookings - GET /api/user/bookings
+func GetMyBookings(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	var bookings []models.WorkshopBooking
+	config.DB.Preload("Workshop").Preload("Workshop.Category").
+		Where("user_id = ? AND status = ?", userID, "confirmed").
+		Order("created_at DESC").Find(&bookings)
+	c.JSON(http.StatusOK, bookings)
+}
+
 func CheckLowEnrollment(c *gin.Context) {
 	deadline := time.Now().Add(48 * time.Hour)
 	var workshops []models.Workshop
