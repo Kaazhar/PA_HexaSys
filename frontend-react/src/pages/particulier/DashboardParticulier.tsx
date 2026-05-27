@@ -44,7 +44,7 @@ export default function DashboardParticulier() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div id="tour-stats" className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <StatCard
               title="Annonces actives"
               value={dashboard?.active_listings || 0}

@@ -5,8 +5,9 @@ import { fr } from 'date-fns/locale';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PublicLayout from '../../components/layout/PublicLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { workshopService } from '../../services/api';
+import { workshopService, stripeService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { useState } from 'react';
 import clsx from 'clsx';
 
@@ -30,13 +31,34 @@ export default function WorkshopDetailPage() {
 
   const workshop = data?.data;
 
+  const [stripeLoading, setStripeLoading] = useState(false);
+
   const bookMutation = useMutation({
     mutationFn: () => workshopService.book(Number(id)),
     onSuccess: () => {
       setBooked(true);
       queryClient.invalidateQueries({ queryKey: ['workshop', id] });
     },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || 'Erreur lors de l\'inscription');
+    },
   });
+
+  const handleBook = async () => {
+    if (!workshop) return;
+    if (workshop.price > 0) {
+      setStripeLoading(true);
+      try {
+        const res = await stripeService.createWorkshopCheckout(workshop.id);
+        window.location.href = res.data.checkout_url;
+      } catch (err: any) {
+        toast.error(err?.response?.data?.error || 'Erreur lors du paiement');
+        setStripeLoading(false);
+      }
+    } else {
+      bookMutation.mutate();
+    }
+  };
 
   return (
     <PublicLayout>
@@ -130,18 +152,14 @@ export default function WorkshopDetailPage() {
                   </Link>
                 ) : (
                   <button
-                    onClick={() => bookMutation.mutate()}
-                    disabled={bookMutation.isPending}
-                    className="btn-primary w-full"
+                    onClick={handleBook}
+                    disabled={bookMutation.isPending || stripeLoading}
+                    className="btn-primary w-full flex items-center justify-center gap-2"
                   >
-                    {bookMutation.isPending ? 'Inscription...' : "S'inscrire"}
+                    {(bookMutation.isPending || stripeLoading) ? 'Chargement...' : (
+                      workshop.price > 0 ? `Payer ${workshop.price}€ et s'inscrire` : "S'inscrire gratuitement"
+                    )}
                   </button>
-                )}
-
-                {bookMutation.isError && (
-                  <p className="text-xs text-red-500 text-center mt-2">
-                    Une erreur est survenue. Vous êtes peut-être déjà inscrit.
-                  </p>
                 )}
 
                 <div className="mt-3 text-xs text-gray-400 text-center">

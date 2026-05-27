@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Pencil, Trash2, Eye, Heart, Image } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
+import { proSidebar } from '../../config/sidebars';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { projectService } from '../../services/api';
 import { format } from 'date-fns';
@@ -89,7 +90,7 @@ export default function ProjetsPro() {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <DashboardLayout>
+    <DashboardLayout sidebarItems={proSidebar} title="Projets upcycling">
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>

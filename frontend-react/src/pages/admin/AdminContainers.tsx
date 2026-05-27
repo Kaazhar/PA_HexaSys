@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Package, Plus, CheckCircle, XCircle, MapPin } from 'lucide-react';
+import { Package, Plus, CheckCircle, XCircle, MapPin, Grid3x3 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { containerService } from '../../services/api';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import type { ContainerRequest } from '../../types';
+import type { ContainerRequest, ContainerSlot, Container } from '../../types';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -23,9 +23,117 @@ interface CreateContainerForm {
   capacity: number;
 }
 
+const slotStatusStyle: Record<string, string> = {
+  free: 'border-gray-200 bg-white text-gray-600',
+  reserved: 'border-amber-300 bg-amber-50 text-amber-600',
+  occupied: 'border-red-300 bg-red-50 text-red-600',
+};
+
+function SlotsModal({ container, onClose }: { container: Container; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ['container-slots', container.id],
+    queryFn: () => containerService.getSlots(container.id),
+  });
+  const slots: ContainerSlot[] = data?.data || [];
+
+  const { register, handleSubmit, reset } = useForm({ defaultValues: { S: 0, M: 0, L: 0 } });
+
+  const seedMutation = useMutation({
+    mutationFn: (counts: { S: number; M: number; L: number }) =>
+      containerService.seedSlots(container.id, counts),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['container-slots', container.id] });
+      reset({ S: 0, M: 0, L: 0 });
+      toast.success('Cases ajoutées !');
+    },
+    onError: () => toast.error('Erreur lors de la création des cases'),
+  });
+
+  const bySize = (size: string) => slots.filter(s => s.size === size);
+  const freeOf = (size: string) => bySize(size).filter(s => s.status === 'free').length;
+
+  return (
+    <Modal isOpen onClose={onClose} title={`Cases — ${container.name}`} size="lg">
+      <div className="space-y-5">
+        {/* Summary */}
+        <div className="grid grid-cols-3 gap-3">
+          {['S', 'M', 'L'].map(size => (
+            <div key={size} className="p-3 bg-gray-50 rounded-xl text-center">
+              <p className="text-lg font-bold text-gray-800">{size}</p>
+              <p className="text-sm text-gray-500">{freeOf(size)}/{bySize(size).length} libres</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Slot grid */}
+        {isLoading ? (
+          <div className="flex justify-center py-4"><LoadingSpinner /></div>
+        ) : slots.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-4">Aucune case — ajoutez-en ci-dessous.</p>
+        ) : (
+          <div className="space-y-3">
+            {['S', 'M', 'L'].map(size => {
+              const sizeSlots = bySize(size);
+              if (sizeSlots.length === 0) return null;
+              return (
+                <div key={size}>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Taille {size}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {sizeSlots.map(slot => (
+                      <span
+                        key={slot.id}
+                        className={clsx('px-2.5 py-1.5 rounded-lg border-2 text-xs font-mono font-bold', slotStatusStyle[slot.status])}
+                        title={slot.status}
+                      >
+                        {slot.slot_code}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+            {/* Legend */}
+            <div className="flex items-center gap-4 text-xs text-gray-400 pt-2 border-t border-gray-100">
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded border border-gray-200 bg-white" /> Libre</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded border border-amber-300 bg-amber-50" /> Réservée</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded border border-red-300 bg-red-50" /> Occupée</span>
+            </div>
+          </div>
+        )}
+
+        {/* Add slots form */}
+        <div className="border-t border-gray-100 pt-4">
+          <p className="text-sm font-semibold text-gray-700 mb-3">Ajouter des cases</p>
+          <form onSubmit={handleSubmit((d) => seedMutation.mutate({ S: Number(d.S), M: Number(d.M), L: Number(d.L) }))} className="space-y-3">
+            <div className="grid grid-cols-3 gap-3">
+              {['S', 'M', 'L'].map(size => (
+                <div key={size}>
+                  <label className="label">Taille {size}</label>
+                  <input
+                    {...register(size as 'S' | 'M' | 'L', { valueAsNumber: true, min: 0 })}
+                    type="number"
+                    min="0"
+                    className="input text-center"
+                    placeholder="0"
+                  />
+                </div>
+              ))}
+            </div>
+            <button type="submit" disabled={seedMutation.isPending} className="btn-primary w-full">
+              {seedMutation.isPending ? 'Ajout...' : 'Ajouter les cases'}
+            </button>
+          </form>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 export default function AdminContainers() {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
+  const [slotsContainer, setSlotsContainer] = useState<Container | null>(null);
   const [rejectRequest, setRejectRequest] = useState<ContainerRequest | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
 
@@ -124,8 +232,14 @@ export default function AdminContainers() {
                       </div>
                     </div>
 
-                    <div className="text-xs text-gray-500 mt-2">
-                      <span className="font-medium">Arrondissement :</span> {container.district}
+                    <div className="flex items-center justify-between mt-3">
+                      <span className="text-xs text-gray-500">{container.district}</span>
+                      <button
+                        onClick={() => setSlotsContainer(container)}
+                        className="flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium"
+                      >
+                        <Grid3x3 className="w-3.5 h-3.5" /> Gérer les cases
+                      </button>
                     </div>
                   </div>
                 );
@@ -167,7 +281,8 @@ export default function AdminContainers() {
                       <th className="table-header">Demandeur</th>
                       <th className="table-header">Objet</th>
                       <th className="table-header">Conteneur</th>
-                      <th className="table-header">Date souhaitée</th>
+                      <th className="table-header">Case</th>
+                      <th className="table-header">Date</th>
                       <th className="table-header">Statut</th>
                       <th className="table-header">Actions</th>
                     </tr>
@@ -186,6 +301,18 @@ export default function AdminContainers() {
                           <p className="text-xs text-gray-500 line-clamp-1">{req.object_description}</p>
                         </td>
                         <td className="table-cell text-gray-500">{req.container?.name || `#${req.container_id}`}</td>
+                        <td className="table-cell">
+                          {req.slot_code ? (
+                            <span className="font-mono text-xs font-bold text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                              {req.slot_code}
+                            </span>
+                          ) : (
+                            <span className="text-gray-300 text-xs">—</span>
+                          )}
+                          {req.size_category && (
+                            <span className="ml-1 text-xs text-gray-400">{req.size_category}</span>
+                          )}
+                        </td>
                         <td className="table-cell text-gray-500 text-xs">
                           {req.desired_date ? format(new Date(req.desired_date), 'dd MMM yyyy', { locale: fr }) : '-'}
                         </td>
@@ -258,6 +385,11 @@ export default function AdminContainers() {
             </div>
           </form>
         </Modal>
+
+        {/* Slots Modal */}
+        {slotsContainer && (
+          <SlotsModal container={slotsContainer} onClose={() => setSlotsContainer(null)} />
+        )}
 
         {/* Reject Modal */}
         <Modal isOpen={!!rejectRequest} onClose={() => { setRejectRequest(null); resetReject(); }} title="Refuser la demande" size="sm">

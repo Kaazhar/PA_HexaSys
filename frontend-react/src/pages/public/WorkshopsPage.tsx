@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Users, Tag, ChevronRight } from 'lucide-react';
+import { Calendar, MapPin, Clock, Users, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import { usePaginatedQuery } from '../../hooks/usePaginatedQuery';
 import PublicLayout from '../../components/layout/PublicLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -10,12 +10,7 @@ import { workshopService } from '../../services/api';
 import clsx from 'clsx';
 import Pagination from '../../components/common/Pagination';
 import EmptyState from '../../components/common/EmptyState';
-
-const typeLabels: Record<string, string> = {
-  atelier: 'Atelier',
-  formation: 'Formation',
-  conference: 'Conférence',
-};
+import { useTranslation } from 'react-i18next';
 
 const typeColors: Record<string, string> = {
   atelier: 'bg-blue-100 text-blue-700',
@@ -25,6 +20,13 @@ const typeColors: Record<string, string> = {
 
 export default function WorkshopsPage() {
   const [type, setType] = useState('');
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('en') ? enUS : fr;
+  const typeLabels: Record<string, string> = {
+    atelier: t('workshops.type.atelier'),
+    formation: t('workshops.type.formation'),
+    conference: t('workshops.type.conference'),
+  };
 
   const { items: workshops, total, totalPages, isLoading, page, setPage } = usePaginatedQuery({
     queryKey: ['workshops', type],
@@ -37,24 +39,24 @@ export default function WorkshopsPage() {
     <PublicLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">Ateliers & Formations</h1>
-          <p className="text-gray-500 text-sm">Participez à des ateliers et formations autour de l'upcycling</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">{t('workshops.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('workshops.subtitle')}</p>
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {['', 'atelier', 'formation', 'conference'].map((t) => (
+          {['', 'atelier', 'formation', 'conference'].map((wtype) => (
             <button
-              key={t}
-              onClick={() => { setType(t); setPage(1); }}
+              key={wtype}
+              onClick={() => { setType(wtype); setPage(1); }}
               className={clsx(
                 'px-4 py-2 rounded-md text-sm font-medium transition-colors',
-                type === t
+                type === wtype
                   ? 'bg-primary-500 text-white'
                   : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
               )}
             >
-              {t === '' ? 'Tous' : typeLabels[t]}
+              {wtype === '' ? t('common.all') : typeLabels[wtype]}
             </button>
           ))}
         </div>
@@ -62,7 +64,7 @@ export default function WorkshopsPage() {
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : workshops.length === 0 ? (
-          <EmptyState icon={<Calendar className="w-10 h-10" />} message="Aucune formation disponible" />
+          <EmptyState icon={<Calendar className="w-10 h-10" />} message={t('workshops.no_workshops')} />
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -91,7 +93,7 @@ export default function WorkshopsPage() {
                     <div className="space-y-1.5 text-sm text-gray-500">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>{format(new Date(workshop.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}</span>
+                        <span>{format(new Date(workshop.date), 'dd MMMM yyyy à HH:mm', { locale: dateLocale })}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
@@ -107,11 +109,11 @@ export default function WorkshopsPage() {
                       <div className="flex items-center gap-1.5 text-sm">
                         <Users className="w-4 h-4 text-gray-400" />
                         <span className={clsx('font-medium', full ? 'text-red-500' : 'text-gray-600')}>
-                          {full ? 'Complet' : `${spotsLeft} place${spotsLeft > 1 ? 's' : ''} restante${spotsLeft > 1 ? 's' : ''}`}
+                          {full ? t('workshops.full') : `${spotsLeft} ${t('workshops.spots')}`}
                         </span>
                       </div>
                       <span className="font-semibold text-gray-900">
-                        {workshop.price === 0 ? 'Gratuit' : `${workshop.price}€`}
+                        {workshop.price === 0 ? t('workshops.free') : `${workshop.price}€`}
                       </span>
                     </div>
                   </Link>

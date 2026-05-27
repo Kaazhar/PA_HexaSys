@@ -6,6 +6,7 @@ import Login2FAScreen from '../../components/Login2FAScreen';
 import toast from 'react-hot-toast';
 import logo from '../../assets/logo.png';
 import type { User } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 interface LoginForm {
   email: string;
@@ -23,6 +24,7 @@ interface LoginResponse {
 export default function LoginPage() {
   const { login, setSession } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>();
 
   const [userId2FA, setUserId2FA] = useState<number | null>(null);
@@ -84,12 +86,12 @@ export default function LoginPage() {
         </Link>
 
         <div className="bg-white p-8">
-        <h1 className="text-xl font-bold text-gray-900 mb-1">Connexion</h1>
-        <p className="text-sm text-gray-500 mb-6">Connectez-vous à votre compte.</p>
+        <h1 className="text-xl font-bold text-gray-900 mb-1">{t('auth.login_title')}</h1>
+        <p className="text-sm text-gray-500 mb-6">{t('auth.login_subtitle')}</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="label">Email</label>
+            <label className="label">{t('auth.email')}</label>
             <input
               {...register('email', { required: 'Email requis', pattern: { value: /^\S+@\S+$/, message: 'Email invalide' } })}
               type="email"
@@ -100,7 +102,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="label">Mot de passe</label>
+            <label className="label">{t('auth.password')}</label>
             <input
               {...register('password', { required: 'Mot de passe requis' })}
               type="password"
@@ -112,7 +114,7 @@ export default function LoginPage() {
 
           <div className="text-right">
             <Link to="/mot-de-passe-oublie" className="text-sm text-primary-500 hover:underline">
-              Mot de passe oublié ?
+              {t('auth.forgot')}
             </Link>
           </div>
 
@@ -121,14 +123,14 @@ export default function LoginPage() {
             disabled={isSubmitting}
             className="btn-primary w-full"
           >
-            {isSubmitting ? 'Connexion...' : 'Connexion'}
+            {isSubmitting ? t('auth.logging_in') : t('auth.login_btn')}
           </button>
         </form>
 
         <p className="mt-5 text-center text-sm text-gray-500">
-          Pas encore de compte ?{' '}
+          {t('auth.no_account')}{' '}
           <Link to="/register" className="text-primary-500 font-medium hover:underline">
-            S'inscrire
+            {t('auth.register_link')}
           </Link>
         </p>
         </div>

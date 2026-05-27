@@ -1,4 +1,4 @@
-import { MapPin, Clock } from 'lucide-react';
+import { MapPin, Clock, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -39,13 +39,18 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
             </span>
           </div>
         )}
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3 left-3 flex flex-col gap-1">
           <span className={clsx(
             'badge text-xs font-semibold',
             listing.type === 'don' ? 'bg-green-500 text-white' : 'bg-coral-500 text-white'
           )}>
             {listing.type === 'don' ? 'Don' : 'Vente'}
           </span>
+          {listing.is_sponsored && (
+            <span className="flex items-center gap-1 badge bg-amber-400 text-white text-xs font-semibold">
+              <Star className="w-3 h-3" /> Sponsorisé
+            </span>
+          )}
         </div>
         {listing.status !== 'active' && (
           <div className="absolute top-3 right-3">

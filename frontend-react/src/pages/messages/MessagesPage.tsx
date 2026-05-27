@@ -1,24 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Send, MessageCircle, Home, Tag } from 'lucide-react';
+import { Send, MessageCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { messageService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { particulierSidebar, proSidebar, salarieSidebar, adminSidebar } from '../../config/sidebars';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
 import type { Conversation } from '../../types';
 
-const sidebarItems = [
-  { label: 'Accueil', path: '/', icon: <Home className="w-4 h-4" /> },
-  { label: 'Annonces', path: '/annonces', icon: <Tag className="w-4 h-4" /> },
-  { label: 'Messages', path: '/messages', icon: <MessageCircle className="w-4 h-4" /> },
-];
-
 export default function MessagesPage() {
   const { user } = useAuth();
+  const sidebar = user?.role === 'professionnel' ? proSidebar : user?.role === 'salarie' ? salarieSidebar : user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const queryClient = useQueryClient();
   const location = useLocation();
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
@@ -82,7 +78,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} title="Messages">
+    <DashboardLayout sidebarItems={sidebar} title="Messages">
       <div className="h-[calc(100vh-180px)] flex gap-4">
         {/* Conversations list */}
         <div className="w-72 flex-shrink-0 flex flex-col card p-0 overflow-hidden">

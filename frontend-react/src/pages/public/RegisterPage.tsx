@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { Briefcase, Home } from 'lucide-react';
 import logo from '../../assets/logo.png';
+import { useTranslation } from 'react-i18next';
 
 interface RegisterForm {
   firstname: string;
@@ -18,6 +19,7 @@ interface RegisterForm {
 export default function RegisterPage() {
   const { register: authRegister } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<RegisterForm>({
     defaultValues: { role: 'particulier' },
   });
@@ -52,25 +54,25 @@ export default function RegisterPage() {
         </Link>
 
         <div className="bg-white p-8">
-          <h1 className="text-xl font-bold text-gray-900 mb-1">Inscription</h1>
-          <p className="text-sm text-gray-500 mb-6">Créez votre compte.</p>
+          <h1 className="text-xl font-bold text-gray-900 mb-1">{t('auth.register')}</h1>
+          <p className="text-sm text-gray-500 mb-6">{t('auth.register_subtitle')}</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="label">Je suis...</label>
+              <label className="label">{t('auth.role')}</label>
               <div className="grid grid-cols-2 gap-2">
                 <label className={`flex items-center gap-2 p-3 border cursor-pointer rounded ${selectedRole === 'particulier' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'}`}>
                   <input {...register('role')} type="radio" value="particulier" className="sr-only" />
                   <Home className={`w-4 h-4 ${selectedRole === 'particulier' ? 'text-primary-500' : 'text-gray-400'}`} />
                   <span className={`text-sm font-medium ${selectedRole === 'particulier' ? 'text-primary-500' : 'text-gray-600'}`}>
-                    Particulier
+                    {t('auth.particulier')}
                   </span>
                 </label>
                 <label className={`flex items-center gap-2 p-3 border cursor-pointer rounded ${selectedRole === 'professionnel' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'}`}>
                   <input {...register('role')} type="radio" value="professionnel" className="sr-only" />
                   <Briefcase className={`w-4 h-4 ${selectedRole === 'professionnel' ? 'text-primary-500' : 'text-gray-400'}`} />
                   <span className={`text-sm font-medium ${selectedRole === 'professionnel' ? 'text-primary-500' : 'text-gray-600'}`}>
-                    Professionnel
+                    {t('auth.professionnel')}
                   </span>
                 </label>
               </div>
@@ -78,7 +80,7 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="label">Prénom</label>
+                <label className="label">{t('auth.firstname')}</label>
                 <input
                   {...register('firstname', { required: 'Requis' })}
                   className="input"
@@ -87,7 +89,7 @@ export default function RegisterPage() {
                 {errors.firstname && <p className="text-red-500 text-xs mt-1">{errors.firstname.message}</p>}
               </div>
               <div>
-                <label className="label">Nom</label>
+                <label className="label">{t('auth.lastname')}</label>
                 <input
                   {...register('lastname', { required: 'Requis' })}
                   className="input"
@@ -98,7 +100,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="label">Email</label>
+              <label className="label">{t('auth.email')}</label>
               <input
                 {...register('email', { required: 'Email requis', pattern: { value: /^\S+@\S+$/, message: 'Email invalide' } })}
                 type="email"
@@ -109,7 +111,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="label">Mot de passe</label>
+              <label className="label">{t('auth.password')}</label>
               <input
                 {...register('password', { required: 'Requis', minLength: { value: 6, message: 'Minimum 6 caractères' } })}
                 type="password"
@@ -120,7 +122,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="label">Confirmer le mot de passe</label>
+              <label className="label">{t('auth.confirm_password')}</label>
               <input
                 {...register('confirmPassword', {
                   required: 'Requis',
@@ -141,19 +143,19 @@ export default function RegisterPage() {
                 className="mt-0.5 rounded"
               />
               <label htmlFor="newsletter" className="text-sm text-gray-600">
-                Je souhaite recevoir la newsletter UpcycleConnect (actus, nouveaux ateliers, conseils upcycling)
+                {t('auth.newsletter_label')}
               </label>
             </div>
 
             <button type="submit" disabled={isSubmitting} className="btn-primary w-full">
-              {isSubmitting ? 'Inscription...' : "Créer mon compte"}
+              {isSubmitting ? t('auth.registering') : t('auth.register_btn')}
             </button>
           </form>
 
           <p className="mt-5 text-center text-sm text-gray-500">
-            Déjà un compte ?{' '}
+            {t('auth.have_account')}{' '}
             <Link to="/login" className="text-primary-500 font-medium hover:underline">
-              Se connecter
+              {t('auth.login_link')}
             </Link>
           </p>
         </div>

@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationService, searchService } from '../../services/api';
 import clsx from 'clsx';
 import type { Notification } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 function useDebounce<T>(value: T, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -20,6 +21,16 @@ function useDebounce<T>(value: T, delay: number) {
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const [languages, setLanguages] = useState<{ code: string; label: string; flag: string }[]>([]);
+  const currentLang = i18n.language?.split('-')[0] ?? 'fr';
+
+  useEffect(() => {
+    fetch('/locales/languages.json')
+      .then(r => r.json())
+      .then(setLanguages)
+      .catch(() => setLanguages([{ code: 'fr', label: 'FR', flag: '🇫🇷' }, { code: 'en', label: 'EN', flag: '🇬🇧' }]));
+  }, []);
   const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -104,19 +115,14 @@ export default function Navbar() {
 
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-5">
-            <Link to="/" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">
-              Accueil
-            </Link>
-            <Link to="/annonces" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">
-              Annonces
-            </Link>
-            <Link to="/formations" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">
-              Formations
-            </Link>
+            <Link to="/" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.home')}</Link>
+            <Link to="/annonces" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.listings')}</Link>
+            <Link to="/formations" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.workshops')}</Link>
             <Link to="/conteneurs" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors flex items-center gap-1">
-              <Map className="w-3.5 h-3.5" />
-              Conteneurs
+              <Map className="w-3.5 h-3.5" />{t('nav.containers')}
             </Link>
+            <Link to="/conseils" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.conseils')}</Link>
+            <Link to="/forum" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.forum')}</Link>
           </div>
 
           {/* Search bar */}
@@ -126,7 +132,7 @@ export default function Navbar() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   className="w-full pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-300 focus:border-primary-300 transition-colors"
-                  placeholder="Rechercher..."
+                  placeholder={t('nav.search_placeholder')}
                   value={searchQuery}
                   onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true); }}
                   onFocus={() => setSearchOpen(true)}
@@ -207,10 +213,10 @@ export default function Navbar() {
                   {notifOpen && (
                     <div className="absolute right-0 top-full mt-1 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 max-h-96 overflow-y-auto">
                       <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-semibold text-gray-900">Notifications</p>
+                        <p className="text-sm font-semibold text-gray-900">{t('nav.notifications')}</p>
                       </div>
                       {notifications.length === 0 ? (
-                        <p className="text-sm text-gray-400 px-4 py-4 text-center">Aucune notification</p>
+                        <p className="text-sm text-gray-400 px-4 py-4 text-center">{t('nav.no_notifications')}</p>
                       ) : (
                         notifications.slice(0, 10).map((n) => (
                           <div
@@ -252,28 +258,28 @@ export default function Navbar() {
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        Tableau de bord
+                        {t('nav.dashboard')}
                       </Link>
                       <Link
                         to="/profil"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        Mon profil
+                        {t('nav.profile')}
                       </Link>
                       <Link
                         to="/abonnement"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        Abonnement
+                        {t('nav.subscription')}
                       </Link>
                       <hr className="my-1 border-gray-100" />
                       <button
                         onClick={handleLogout}
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                       >
-                        Déconnexion
+                        {t('nav.logout')}
                       </button>
                     </div>
                   )}
@@ -281,14 +287,29 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link to="/login" className="btn-secondary text-sm py-2">
-                  Connexion
-                </Link>
-                <Link to="/register" className="btn-primary text-sm py-2">
-                  S'inscrire
-                </Link>
+                <Link to="/login" className="btn-secondary text-sm py-2">{t('nav.login')}</Link>
+                <Link to="/register" className="btn-primary text-sm py-2">{t('nav.register')}</Link>
               </>
             )}
+          </div>
+
+          {/* Language switcher */}
+          <div className="hidden md:flex items-center gap-1">
+            {languages.map(lang => (
+              <button
+                key={lang.code}
+                type="button"
+                onClick={() => i18n.changeLanguage(lang.code)}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                  currentLang === lang.code
+                    ? 'border-primary-400 bg-primary-50 text-primary-700'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+                title={lang.label}
+              >
+                {lang.flag} {lang.label}
+              </button>
+            ))}
           </div>
 
           {/* Mobile menu button */}
@@ -308,6 +329,8 @@ export default function Navbar() {
           <Link to="/annonces" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Annonces</Link>
           <Link to="/formations" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Formations</Link>
           <Link to="/conteneurs" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Conteneurs</Link>
+          <Link to="/conseils" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Conseils</Link>
+          <Link to="/forum" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Forum</Link>
           {isAuthenticated ? (
             <>
               <Link to={getDashboardPath()} className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Tableau de bord</Link>

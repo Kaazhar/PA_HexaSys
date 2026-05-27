@@ -43,9 +43,11 @@ export default function Sidebar({ items, collapsed = false }: SidebarProps) {
         <ul className="space-y-0.5 px-2">
           {items.map((item) => {
             const isActive = location.pathname === item.path;
+            const tourId = 'tour-nav-' + item.path.replace(/\//g, '-');
             return (
               <li key={item.path}>
                 <Link
+                  id={tourId}
                   to={item.path}
                   className={clsx(
                     'flex items-center gap-2.5 px-2.5 py-2 rounded text-sm',
