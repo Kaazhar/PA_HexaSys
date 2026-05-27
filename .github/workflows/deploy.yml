@@ -54,13 +54,14 @@ jobs:
     - name: Deploy
       run: |
         cd /opt/upcycleconnect
-        sed -i 's|^GMAIL_USER=.*|GMAIL_USER=${{ secrets.GMAIL_USER }}|' .env
-        sed -i 's|^GMAIL_APP_PASSWORD=.*|GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}|' .env
-        sed -i 's|^STRIPE_SECRET_KEY=.*|STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}|' .env
-        sed -i 's|^STRIPE_WEBHOOK_SECRET=.*|STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}|' .env
-        sed -i 's|^VAPID_PRIVATE_KEY=.*|VAPID_PRIVATE_KEY=${{ secrets.VAPID_PRIVATE_KEY }}|' .env
-        sed -i 's|^VAPID_PUBLIC_KEY=.*|VAPID_PUBLIC_KEY=${{ secrets.VAPID_PUBLIC_KEY }}|' .env
-        sed -i 's|^JWT_SECRET=.*|JWT_SECRET=${{ secrets.JWT_SECRET }}|' .env
+        set_env() { grep -q "^$1=" .env && sed -i "s|^$1=.*|$1=$2|" .env || echo "$1=$2" >> .env; }
+        set_env GMAIL_USER "${{ secrets.GMAIL_USER }}"
+        set_env GMAIL_APP_PASSWORD "${{ secrets.GMAIL_APP_PASSWORD }}"
+        set_env STRIPE_SECRET_KEY "${{ secrets.STRIPE_SECRET_KEY }}"
+        set_env STRIPE_WEBHOOK_SECRET "${{ secrets.STRIPE_WEBHOOK_SECRET }}"
+        set_env VAPID_PRIVATE_KEY "${{ secrets.VAPID_PRIVATE_KEY }}"
+        set_env VAPID_PUBLIC_KEY "${{ secrets.VAPID_PUBLIC_KEY }}"
+        set_env JWT_SECRET "${{ secrets.JWT_SECRET }}"
         docker compose pull
         docker compose up -d --force-recreate --no-deps api
         sleep 5
