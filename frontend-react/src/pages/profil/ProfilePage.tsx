@@ -300,9 +300,10 @@ export default function ProfilePage() {
                 onClick={() => {
                   const next = !newsletter;
                   setNewsletter(next);
-                  newsletterService.toggle(next).then(() =>
-                    toast.success(next ? 'Inscrit à la newsletter' : 'Désinscrit de la newsletter')
-                  );
+                  newsletterService.toggle(next).then(() => {
+                    toast.success(next ? 'Inscrit à la newsletter' : 'Désinscrit de la newsletter');
+                    updateUser({ ...(user as any), newsletter_subscribed: next });
+                  });
                 }}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${newsletter ? 'bg-primary-500' : 'bg-gray-200'}`}
               >
