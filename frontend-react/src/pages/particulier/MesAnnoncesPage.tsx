@@ -16,7 +16,7 @@ import EmptyState from '../../components/common/EmptyState';
 
 const statusConfig: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
   pending: { label: 'En attente', icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-amber-100 text-amber-700' },
-  active: { label: 'Active', icon: <CheckCircle className="w-3.5 h-3.5" />, cls: 'bg-green-100 text-green-700' },
+  active: { label: 'Active', icon: <CheckCircle className="w-3.5 h-3.5" />, cls: 'bg-green-100 text-green-700' }, // "Active" est féminin ici car "annonce"
   rejected: { label: 'Rejetée', icon: <XCircle className="w-3.5 h-3.5" />, cls: 'bg-red-100 text-red-700' },
   sold: { label: 'Vendue/Donnée', icon: <CheckCircle className="w-3.5 h-3.5" />, cls: 'bg-gray-100 text-gray-600' },
 };

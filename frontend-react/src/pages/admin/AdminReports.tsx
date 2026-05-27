@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { reportService } from '../../services/api';
+import { listingStatuses } from '../../config/statuses';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
@@ -116,7 +117,7 @@ export default function AdminReports() {
                             <ExternalLink className="w-3 h-3" />
                           </Link>
                           <span className={clsx('badge text-xs', report.listing.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500')}>
-                            {report.listing.status}
+                            {listingStatuses[report.listing.status]?.label || report.listing.status}
                           </span>
                         </div>
                       )}

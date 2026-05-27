@@ -13,7 +13,7 @@ import { particulierSidebar } from '../../config/sidebars';
 
 const statusConfig = {
   pending: { label: 'En attente', class: 'badge-orange', icon: <Clock className="w-3 h-3" /> },
-  active: { label: 'Active', class: 'badge-green', icon: <CheckCircle className="w-3 h-3" /> },
+  active: { label: 'Active', class: 'badge-green', icon: <CheckCircle className="w-3 h-3" /> }, // féminin = annonce
   rejected: { label: 'Rejetée', class: 'badge-red', icon: null },
   sold: { label: 'Vendue', class: 'badge-gray', icon: null },
 };

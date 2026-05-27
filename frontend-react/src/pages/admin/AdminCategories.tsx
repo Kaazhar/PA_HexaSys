@@ -163,7 +163,7 @@ export default function AdminCategories() {
                     <td className="px-4 py-3 text-gray-500 hidden lg:table-cell truncate max-w-xs">{cat.description || '-'}</td>
                     <td className="px-4 py-3 text-center">
                       <span className={`badge ${cat.is_active ? 'badge-green' : 'badge-gray'}`}>
-                        {cat.is_active ? 'Active' : 'Inactive'}
+                        {cat.is_active ? 'Actif' : 'Inactif'}
                       </span>
                     </td>
                     <td className="px-4 py-3">
