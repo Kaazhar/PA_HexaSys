@@ -6,6 +6,8 @@ import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { listingService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import { particulierSidebar, proSidebar, adminSidebar } from '../../config/sidebars';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -20,6 +22,8 @@ const statusConfig: Record<string, { label: string; icon: React.ReactNode; cls: 
 };
 
 export default function MesAnnoncesPage() {
+  const { user } = useAuth();
+  const sidebar = user?.role === 'professionnel' ? proSidebar : user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const [statusFilter, setStatusFilter] = useState('');
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const queryClient = useQueryClient();
@@ -45,7 +49,7 @@ export default function MesAnnoncesPage() {
   });
 
   return (
-    <DashboardLayout>
+    <DashboardLayout sidebarItems={sidebar} title="Mes annonces">
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>

@@ -269,7 +269,7 @@ export default function DashboardPro() {
                         <p className="text-xs text-gray-500">{listing.type === 'don' ? 'Don' : `${listing.price}€`}</p>
                       </div>
                       <span className={clsx('badge text-xs', listing.status === 'active' ? 'badge-green' : listing.status === 'pending' ? 'badge-orange' : 'badge-gray')}>
-                        {listing.status === 'active' ? 'Active' : listing.status === 'pending' ? 'En attente' : listing.status}
+                        {listing.status === 'active' ? 'Active' : listing.status === 'pending' ? 'En attente' : listing.status === 'sold' ? 'Vendue' : listing.status === 'rejected' ? 'Refusée' : listing.status}
                       </span>
                     </li>
                   ))}

@@ -14,6 +14,9 @@ func GetFinanceStats(c *gin.Context) {
 	var pendingAmount float64
 	var monthlyRevenue float64
 	var annualRevenue float64
+	var totalCommissions float64
+	var monthlyCommissions float64
+	var totalSoldListings int64
 
 	config.DB.Model(&models.Invoice{}).Count(&totalInvoices)
 
@@ -34,6 +37,18 @@ func GetFinanceStats(c *gin.Context) {
 	config.DB.Model(&models.Invoice{}).
 		Where("status = ? AND created_at >= ?", "paid", firstOfYear).
 		Select("COALESCE(SUM(total), 0)").Scan(&annualRevenue)
+
+	config.DB.Model(&models.Listing{}).
+		Where("status = ? AND type = ?", "sold", "vente").
+		Count(&totalSoldListings)
+
+	config.DB.Model(&models.Listing{}).
+		Where("status = ? AND type = ?", "sold", "vente").
+		Select("COALESCE(SUM(commission_amount), 0)").Scan(&totalCommissions)
+
+	config.DB.Model(&models.Listing{}).
+		Where("status = ? AND type = ? AND updated_at >= ?", "sold", "vente", firstOfMonth).
+		Select("COALESCE(SUM(commission_amount), 0)").Scan(&monthlyCommissions)
 
 	type PlanStat struct {
 		Plan  string
@@ -57,11 +72,14 @@ func GetFinanceStats(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"total_invoices":  totalInvoices,
-		"pending_amount":  pendingAmount,
-		"monthly_revenue": monthlyRevenue,
-		"annual_revenue":  annualRevenue,
-		"revenue_by_plan": revenueByPlan,
+		"total_invoices":       totalInvoices,
+		"pending_amount":       pendingAmount,
+		"monthly_revenue":      monthlyRevenue,
+		"annual_revenue":       annualRevenue,
+		"revenue_by_plan":      revenueByPlan,
+		"total_commissions":    totalCommissions,
+		"monthly_commissions":  monthlyCommissions,
+		"total_sold_listings":  totalSoldListings,
 	})
 }
 

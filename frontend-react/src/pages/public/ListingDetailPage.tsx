@@ -1,11 +1,11 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { MapPin, Clock, ArrowLeft, Tag, BadgeCheck, User as UserIcon, Briefcase, Building2, Users, Calendar, TrendingUp, Star, MessageCircle, Send, Flag } from 'lucide-react';
+import { MapPin, Clock, ArrowLeft, Tag, BadgeCheck, User as UserIcon, Briefcase, Building2, Users, Calendar, TrendingUp, Star, MessageCircle, Send, Flag, ShoppingCart } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PublicLayout from '../../components/layout/PublicLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { listingService, siretService, reviewService, messageService, reportService } from '../../services/api';
+import { listingService, siretService, reviewService, messageService, reportService, stripeService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import clsx from 'clsx';
 import { useState } from 'react';
@@ -97,6 +97,14 @@ export default function ListingDetailPage() {
       navigate('/messages', { state: { conversationId: res.data.id } });
     },
     onError: (err: any) => toast.error(err?.response?.data?.error || `Erreur ${err?.response?.status || ''}: Impossible de contacter le vendeur.`),
+  });
+
+  const buyMutation = useMutation({
+    mutationFn: () => stripeService.createListingCheckout(Number(id)),
+    onSuccess: (res) => {
+      window.location.href = res.data.checkout_url;
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.error || 'Impossible de lancer le paiement.'),
   });
 
   const reportMutation = useMutation({
@@ -218,10 +226,14 @@ export default function ListingDetailPage() {
                   <div className="space-y-4">
                     {/* Avatar + name */}
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-primary-600 font-bold text-lg">
-                          {seller.firstname?.charAt(0)?.toUpperCase() || '?'}
-                        </span>
+                      <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {(seller as any).avatar_url ? (
+                          <img src={(seller as any).avatar_url} alt={seller.firstname} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-primary-600 font-bold text-lg">
+                            {seller.firstname?.charAt(0)?.toUpperCase() || '?'}
+                          </span>
+                        )}
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">
@@ -336,14 +348,31 @@ export default function ListingDetailPage() {
                   )}
                 </div>
                 {isAuthenticated && seller && seller.id !== user?.id ? (
-                  <button
-                    onClick={() => contactMutation.mutate()}
-                    disabled={contactMutation.isPending}
-                    className="btn-primary w-full flex items-center justify-center gap-2"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Contacter le vendeur
-                  </button>
+                  <div className="space-y-2">
+                    {listing.type === 'vente' && listing.price && listing.status === 'active' && (
+                      <button
+                        onClick={() => buyMutation.mutate()}
+                        disabled={buyMutation.isPending}
+                        className="w-full flex items-center justify-center gap-2 bg-coral-500 hover:bg-coral-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        {buyMutation.isPending ? 'Redirection...' : 'Acheter maintenant'}
+                      </button>
+                    )}
+                    {listing.status === 'sold' && (
+                      <div className="w-full text-center text-sm text-gray-500 bg-gray-100 py-2.5 px-4 rounded-lg font-medium">
+                        Annonce vendue
+                      </div>
+                    )}
+                    <button
+                      onClick={() => contactMutation.mutate()}
+                      disabled={contactMutation.isPending}
+                      className="btn-primary w-full flex items-center justify-center gap-2"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Contacter le vendeur
+                    </button>
+                  </div>
                 ) : !isAuthenticated ? (
                   <Link to="/login" className="btn-primary w-full text-center block">
                     Se connecter pour contacter

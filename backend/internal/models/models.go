@@ -6,6 +6,18 @@ import (
 	"gorm.io/gorm"
 )
 
+// Hook GORM : envoie un push à chaque nouvelle notification créée en BDD
+func (n *Notification) AfterCreate(tx *gorm.DB) error {
+	go func() {
+		// Import circulaire évité via interface — le push_service est appelé via main
+		PushSender(n.UserID, "UpcycleConnect", n.Message)
+	}()
+	return nil
+}
+
+// PushSender est initialisé par main.go pour éviter l'import circulaire
+var PushSender func(userID uint, title, body string) = func(userID uint, title, body string) {}
+
 type Base struct {
 	ID        uint           `gorm:"primarykey" json:"id"`
 	CreatedAt time.Time      `json:"created_at"`
@@ -45,6 +57,7 @@ type User struct {
 	NewsletterSubscribed bool       `gorm:"default:false" json:"newsletter_subscribed"`
 	PhoneVerified        bool       `gorm:"default:false" json:"phone_verified"`
 	TwoFAEnabled         bool       `gorm:"default:false" json:"two_fa_enabled"`
+	AvatarURL            string     `gorm:"size:500" json:"avatar_url,omitempty"`
 }
 
 type PhoneVerification struct {
@@ -94,7 +107,13 @@ type Listing struct {
 	Status       string   `gorm:"type:varchar(20);default:'pending'" json:"status"`
 	UserID       uint     `json:"user_id"`
 	User         User     `json:"user,omitempty"`
-	RejectReason string   `json:"reject_reason,omitempty"`
+	RejectReason   string     `json:"reject_reason,omitempty"`
+	Weight         float64    `gorm:"default:0" json:"weight"`
+	SizeCategory   string     `gorm:"type:varchar(5);default:''" json:"size_category"`
+	IsSponsored      bool       `gorm:"default:false" json:"is_sponsored"`
+	SponsoredUntil   *time.Time `json:"sponsored_until,omitempty"`
+	CommissionRate   float64    `gorm:"default:7.5" json:"commission_rate"`
+	CommissionAmount float64    `gorm:"default:0" json:"commission_amount"`
 }
 
 type Workshop struct {
@@ -153,6 +172,18 @@ type ContainerRequest struct {
 	AccessCode        string    `json:"access_code,omitempty"`
 	Barcode           string    `json:"barcode,omitempty"`
 	RejectReason      string    `json:"reject_reason,omitempty"`
+	SizeCategory      string    `gorm:"type:varchar(5);default:''" json:"size_category"`
+	SlotID            *uint     `json:"slot_id,omitempty"`
+	SlotCode          string    `gorm:"size:10" json:"slot_code,omitempty"`
+}
+
+type ContainerSlot struct {
+	Base
+	ContainerID uint   `gorm:"not null;index" json:"container_id"`
+	SlotCode    string `gorm:"size:10;not null" json:"slot_code"`
+	Size        string `gorm:"type:varchar(5);not null" json:"size"`
+	Status      string `gorm:"type:varchar(20);default:'free'" json:"status"`
+	RequestID   *uint  `json:"request_id,omitempty"`
 }
 
 type UpcyclingScore struct {
@@ -205,6 +236,14 @@ type Notification struct {
 	Read    bool   `gorm:"default:false" json:"read"`
 }
 
+type PushSubscription struct {
+	Base
+	UserID   uint   `gorm:"index" json:"user_id"`
+	Endpoint string `gorm:"type:text;not null" json:"endpoint"`
+	P256dh   string `gorm:"type:text;not null" json:"p256dh"`
+	Auth     string `gorm:"size:255;not null" json:"auth"`
+}
+
 type Article struct {
 	Base
 	Title    string `gorm:"not null" json:"title"`
@@ -228,6 +267,26 @@ type Project struct {
 	Views        int    `gorm:"default:0" json:"views"`
 	Likes        int    `gorm:"default:0" json:"likes"`
 	IsFeatured   bool   `gorm:"default:false" json:"is_featured"`
+}
+
+type ForumTopic struct {
+	Base
+	Title        string `gorm:"not null" json:"title"`
+	Content      string `gorm:"type:text;not null" json:"content"`
+	AuthorID     uint   `json:"author_id"`
+	Author       User   `json:"author,omitempty"`
+	IsPinned     bool   `gorm:"default:false" json:"is_pinned"`
+	IsLocked     bool   `gorm:"default:false" json:"is_locked"`
+	Views        int    `gorm:"default:0" json:"views"`
+	RepliesCount int    `gorm:"default:0" json:"replies_count"`
+}
+
+type ForumPost struct {
+	Base
+	TopicID  uint   `gorm:"not null;index" json:"topic_id"`
+	AuthorID uint   `json:"author_id"`
+	Author   User   `json:"author,omitempty"`
+	Content  string `gorm:"type:text;not null" json:"content"`
 }
 
 type Conversation struct {

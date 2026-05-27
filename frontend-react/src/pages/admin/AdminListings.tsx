@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Tag, Search, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { Tag, Search, CheckCircle, XCircle, Eye, Star } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -43,6 +43,16 @@ export default function AdminListings() {
       toast.success('Annonce validée !');
     },
     onError: () => toast.error('Erreur lors de la validation'),
+  });
+
+  const sponsorMutation = useMutation({
+    mutationFn: ({ id, isSponsored }: { id: number; isSponsored: boolean }) =>
+      listingService.sponsor(id, isSponsored),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'listings'] });
+      toast.success('Mise en avant mise à jour !');
+    },
+    onError: () => toast.error('Erreur'),
   });
 
   const rejectMutation = useMutation({
@@ -152,6 +162,15 @@ export default function AdminListings() {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
+                          {listing.status === 'active' && (
+                            <button
+                              onClick={() => sponsorMutation.mutate({ id: listing.id, isSponsored: !listing.is_sponsored })}
+                              className={`p-1.5 rounded-lg transition-colors ${listing.is_sponsored ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50'}`}
+                              title={listing.is_sponsored ? 'Retirer la mise en avant' : 'Mettre en avant'}
+                            >
+                              <Star className="w-4 h-4" />
+                            </button>
+                          )}
                           {listing.status === 'pending' && (
                             <>
                               <button

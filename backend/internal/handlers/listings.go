@@ -46,7 +46,7 @@ func GetListings(c *gin.Context) {
 	var total int64
 	query.Model(&models.Listing{}).Count(&total)
 
-	query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&listings)
+	query.Offset(offset).Limit(limit).Order("is_sponsored DESC, created_at DESC").Find(&listings)
 
 	c.JSON(http.StatusOK, gin.H{
 		"listings": listings,
@@ -202,8 +202,12 @@ func MarkListingSold(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}
-	config.DB.Model(&listing).Update("status", "sold")
-	c.JSON(http.StatusOK, gin.H{"message": "Annonce marquée comme vendue"})
+	commission := listing.Price * (listing.CommissionRate / 100)
+	config.DB.Model(&listing).Updates(map[string]interface{}{
+		"status":            "sold",
+		"commission_amount": commission,
+	})
+	c.JSON(http.StatusOK, gin.H{"message": "Annonce marquée comme vendue", "commission": commission})
 }
 
 func DeleteListing(c *gin.Context) {
@@ -287,4 +291,24 @@ func UpdateListing(c *gin.Context) {
 
 	config.DB.Preload("Category").Preload("User").First(&listing, listing.ID)
 	c.JSON(http.StatusOK, listing)
+}
+
+func SponsorListing(c *gin.Context) {
+	id := c.Param("id")
+	var listing models.Listing
+	if err := config.DB.First(&listing, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
+		return
+	}
+
+	var req struct {
+		IsSponsored bool `json:"is_sponsored"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	config.DB.Model(&listing).Update("is_sponsored", req.IsSponsored)
+	c.JSON(http.StatusOK, gin.H{"is_sponsored": req.IsSponsored})
 }

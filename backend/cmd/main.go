@@ -20,6 +20,8 @@ func main() {
 	config.LoadEnv()
 	config.ConnectDB()
 	services.InitSMS()
+	services.InitPush()
+	models.PushSender = services.SendPushToUser
 
 	migDB := config.DB.Set("gorm:table_options", "ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")
 	if err := migDB.AutoMigrate(
@@ -43,11 +45,16 @@ func main() {
 		&models.Review{},
 		&models.Report{},
 		&models.PhoneVerification{},
+		&models.PushSubscription{},
+		&models.ContainerSlot{},
+		&models.ForumTopic{},
+		&models.ForumPost{},
 	); err != nil {
 		log.Fatal("Migration failed:", err)
 	}
 
 	seedData()
+	seedSlots()
 
 	go func() {
 		for {
@@ -93,6 +100,7 @@ func main() {
 		auth.POST("/login", handlers.Login)
 		auth.GET("/me", middleware.AuthRequired(), handlers.Me)
 		auth.PUT("/profile", middleware.AuthRequired(), handlers.UpdateProfile)
+		auth.PUT("/avatar", middleware.AuthRequired(), handlers.UpdateAvatar)
 		auth.PUT("/password", middleware.AuthRequired(), handlers.ChangePassword)
 		auth.POST("/confirm-email", handlers.ConfirmEmail)
 		auth.POST("/forgot-password", handlers.ForgotPassword)
@@ -112,6 +120,14 @@ func main() {
 
 	api.PUT("/newsletter", middleware.AuthRequired(), handlers.ToggleNewsletter)
 
+	api.GET("/push/vapid-public-key", handlers.GetVapidPublicKey)
+	push := api.Group("/push")
+	push.Use(middleware.AuthRequired())
+	{
+		push.POST("/subscribe", handlers.SubscribePush)
+		push.DELETE("/unsubscribe", handlers.UnsubscribePush)
+	}
+
 	api.GET("/categories", handlers.GetCategories)
 	api.POST("/categories", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.CreateCategory)
 	api.PUT("/categories/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.UpdateCategory)
@@ -130,6 +146,7 @@ func main() {
 	api.POST("/listings/:id/reviews", middleware.AuthRequired(), handlers.CreateReview)
 	api.PUT("/listings/:id/validate", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ValidateListing)
 	api.PUT("/listings/:id/reject", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.RejectListing)
+	api.PUT("/listings/:id/sponsor", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.SponsorListing)
 	api.PUT("/listings/:id/sold", middleware.AuthRequired(), handlers.MarkListingSold)
 	api.PUT("/listings/:id", middleware.AuthRequired(), handlers.UpdateListing)
 	api.DELETE("/listings/:id", middleware.AuthRequired(), handlers.DeleteListing)
@@ -151,6 +168,8 @@ func main() {
 	api.GET("/containers", handlers.GetContainers)
 	api.POST("/containers", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.CreateContainer)
 	api.PUT("/containers/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.UpdateContainer)
+	api.GET("/containers/slots", handlers.GetContainerSlots)
+	api.POST("/containers/:id/slots", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.SeedContainerSlots)
 	api.GET("/containers/requests", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.GetContainerRequests)
 	api.POST("/containers/requests", middleware.AuthRequired(), handlers.CreateContainerRequestHandler)
 	api.PUT("/containers/requests/:id/validate", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ValidateContainerRequest)
@@ -159,11 +178,34 @@ func main() {
 	api.GET("/subscription", middleware.AuthRequired(), handlers.GetMySubscription)
 	api.POST("/subscription/upgrade", middleware.AuthRequired(), handlers.UpgradeSubscription)
 
+	// Articles (public)
+	api.GET("/articles", handlers.GetPublicArticles)
+	api.GET("/articles/:id", handlers.GetPublicArticle)
+
+	// Forum
+	api.GET("/forum/topics", handlers.GetForumTopics)
+	api.GET("/forum/topics/:id", handlers.GetForumTopic)
+	api.POST("/forum/topics", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.CreateForumTopic)
+	api.PUT("/forum/topics/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.UpdateForumTopic)
+	api.DELETE("/forum/topics/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.DeleteForumTopic)
+	api.PUT("/forum/topics/:id/pin", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.PinForumTopic)
+	api.PUT("/forum/topics/:id/lock", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.LockForumTopic)
+	api.POST("/forum/topics/:id/posts", middleware.AuthRequired(), handlers.CreateForumPost)
+	api.DELETE("/forum/posts/:id", middleware.AuthRequired(), handlers.DeleteForumPost)
+
+	// Stripe
+	api.POST("/stripe/workshop-checkout", middleware.AuthRequired(), handlers.CreateWorkshopCheckout)
+	api.POST("/stripe/listing-checkout", middleware.AuthRequired(), handlers.CreateListingCheckout)
+	api.POST("/stripe/subscription-checkout", middleware.AuthRequired(), handlers.CreateSubscriptionCheckout)
+	api.GET("/stripe/confirm", middleware.AuthRequired(), handlers.ConfirmSession)
+	api.POST("/stripe/webhook", handlers.StripeWebhook)
+
 	api.GET("/conversations", middleware.AuthRequired(), handlers.GetConversations)
 	api.POST("/conversations", middleware.AuthRequired(), handlers.GetOrCreateConversation)
 	api.GET("/conversations/:id/messages", middleware.AuthRequired(), handlers.GetMessages)
 	api.POST("/conversations/:id/messages", middleware.AuthRequired(), handlers.SendMessage)
 
+	api.GET("/user/bookings", middleware.AuthRequired(), handlers.GetMyBookings)
 	api.GET("/score/me", middleware.AuthRequired(), handlers.GetMyScore)
 	api.GET("/notifications", middleware.AuthRequired(), handlers.GetNotifications)
 	api.PUT("/notifications/:id/read", middleware.AuthRequired(), handlers.MarkNotificationRead)
@@ -329,4 +371,42 @@ func seedData() {
 	}
 
 	log.Println("Seed data inserted successfully")
+}
+
+func seedSlots() {
+	var count int64
+	config.DB.Model(&models.ContainerSlot{}).Count(&count)
+	if count > 0 {
+		return
+	}
+
+	log.Println("Seeding container slots...")
+
+	var containers []models.Container
+	config.DB.Find(&containers)
+
+	sizes := []struct {
+		size  string
+		total int
+	}{
+		{"S", 6},
+		{"M", 4},
+		{"L", 2},
+	}
+
+	for _, container := range containers {
+		for _, s := range sizes {
+			for i := 1; i <= s.total; i++ {
+				slotCode := fmt.Sprintf("%s-%02d", s.size, i)
+				config.DB.Create(&models.ContainerSlot{
+					ContainerID: container.ID,
+					SlotCode:    slotCode,
+					Size:        s.size,
+					Status:      "free",
+				})
+			}
+		}
+	}
+
+	log.Println("Container slots seeded successfully")
 }

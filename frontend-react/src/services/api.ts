@@ -1,8 +1,9 @@
 import axios from 'axios';
 import type {
-  User, Listing, Workshop, Container, ContainerRequest,
+  User, Listing, Workshop, WorkshopBooking, Container, ContainerRequest, ContainerSlot,
   Category, Notification, Invoice, AdminStats, AuthResponse,
-  Subscription, Project, Conversation, Message, Review, SearchResults
+  Subscription, Project, Conversation, Message, Review, SearchResults,
+  ForumTopic, ForumPost, Article
 } from '../types';
 
 const api = axios.create({
@@ -41,6 +42,8 @@ export const authService = {
     api.put<User>('/auth/profile', data),
   changePassword: (data: { current_password: string; new_password: string }) =>
     api.put('/auth/password', data),
+  updateAvatar: (avatarUrl: string) =>
+    api.put<User>('/auth/avatar', { avatar_url: avatarUrl }),
   confirmEmail: (email: string, code: string) => api.post('/auth/confirm-email', { email, code }),
   resendConfirmEmail: (email: string) => api.post('/auth/resend-confirm', { email }),
   forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
@@ -94,6 +97,7 @@ export const listingService = {
   validate: (id: number) => api.put(`/listings/${id}/validate`),
   reject: (id: number, reason: string) => api.put(`/listings/${id}/reject`, { reason }),
   markSold: (id: number) => api.put(`/listings/${id}/sold`),
+  sponsor: (id: number, isSponsored: boolean) => api.put(`/listings/${id}/sponsor`, { is_sponsored: isSponsored }),
   delete: (id: number) => api.delete(`/listings/${id}`),
 };
 
@@ -135,10 +139,19 @@ export const containerService = {
   getOne: (id: number) => api.get<Container>(`/containers/${id}`),
   create: (data: Partial<Container>) => api.post<Container>('/containers', data),
   update: (id: number, data: Partial<Container>) => api.put<Container>(`/containers/${id}`, data),
+  getSlots: (id: number) => api.get<ContainerSlot[]>('/containers/slots', { params: { container_id: id } }),
+  seedSlots: (id: number, counts: { S: number; M: number; L: number }) =>
+    api.post<ContainerSlot[]>(`/containers/${id}/slots`, counts),
   getRequests: (params?: { status?: string }) =>
     api.get<ContainerRequest[]>('/containers/requests', { params }),
-  createRequest: (data: { container_id: number; object_title: string; object_description: string; desired_date: string }) =>
-    api.post<ContainerRequest>('/containers/requests', data),
+  createRequest: (data: {
+    container_id: number;
+    object_title: string;
+    object_description: string;
+    desired_date: string;
+    size_category: string;
+    slot_id: number;
+  }) => api.post<ContainerRequest>('/containers/requests', data),
   validateRequest: (id: number) => api.put(`/containers/requests/${id}/validate`),
   rejectRequest: (id: number, reason: string) => api.put(`/containers/requests/${id}/reject`, { reason }),
 };
@@ -222,6 +235,46 @@ export const reportService = {
     api.get<{ reports: any[]; total: number; page: number; limit: number }>('/admin/reports', { params }),
   resolve: (id: number, data: { status: string; admin_note?: string }) =>
     api.put(`/admin/reports/${id}/resolve`, data),
+};
+
+// Articles (public)
+export const articleService = {
+  getAll: (params?: { page?: number; limit?: number; tag?: string }) =>
+    api.get<{ articles: Article[]; total: number; page: number; limit: number }>('/articles', { params }),
+  getOne: (id: number) => api.get<Article>(`/articles/${id}`),
+};
+
+// Forum
+export const forumService = {
+  getTopics: (params?: { page?: number; limit?: number }) =>
+    api.get<{ topics: ForumTopic[]; total: number; page: number; limit: number }>('/forum/topics', { params }),
+  getTopic: (id: number) =>
+    api.get<{ topic: ForumTopic; posts: ForumPost[] }>(`/forum/topics/${id}`),
+  createTopic: (data: { title: string; content: string }) =>
+    api.post<ForumTopic>('/forum/topics', data),
+  updateTopic: (id: number, data: { title?: string; content?: string }) =>
+    api.put<ForumTopic>(`/forum/topics/${id}`, data),
+  deleteTopic: (id: number) => api.delete(`/forum/topics/${id}`),
+  pinTopic: (id: number) => api.put(`/forum/topics/${id}/pin`),
+  lockTopic: (id: number) => api.put(`/forum/topics/${id}/lock`),
+  createPost: (topicId: number, content: string) =>
+    api.post<ForumPost>(`/forum/topics/${topicId}/posts`, { content }),
+  deletePost: (id: number) => api.delete(`/forum/posts/${id}`),
+};
+
+// User bookings
+export const bookingService = {
+  getMyBookings: () => api.get<WorkshopBooking[]>('/user/bookings'),
+};
+
+// Stripe
+export const stripeService = {
+  createWorkshopCheckout: (workshopId: number) =>
+    api.post<{ checkout_url: string }>('/stripe/workshop-checkout', { workshop_id: workshopId }),
+  createListingCheckout: (listingId: number) =>
+    api.post<{ checkout_url: string }>('/stripe/listing-checkout', { listing_id: listingId }),
+  createSubscriptionCheckout: (plan: string) =>
+    api.post<{ checkout_url: string }>('/stripe/subscription-checkout', { plan }),
 };
 
 // Search

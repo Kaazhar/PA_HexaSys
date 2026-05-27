@@ -244,6 +244,22 @@ type UpdateProfileRequest struct {
 	Address   string `json:"address"`
 }
 
+func UpdateAvatar(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	var req struct {
+		AvatarURL string `json:"avatar_url"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var user models.User
+	config.DB.First(&user, userID)
+	config.DB.Model(&user).Update("avatar_url", req.AvatarURL)
+	config.DB.First(&user, userID)
+	c.JSON(http.StatusOK, user)
+}
+
 func UpdateProfile(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	var req UpdateProfileRequest

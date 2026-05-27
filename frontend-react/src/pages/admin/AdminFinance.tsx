@@ -1,4 +1,4 @@
-import { DollarSign, FileText } from 'lucide-react';
+import { DollarSign, FileText, Percent } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
@@ -56,6 +56,24 @@ export default function AdminFinance() {
               value={`${stats?.pending_amount?.toFixed(0) || 0}€`}
               icon={<DollarSign className="w-5 h-5" />}
               color="coral"
+            />
+            <StatCard
+              title="Commissions (ce mois)"
+              value={`${stats?.monthly_commissions?.toFixed(2) || '0.00'}€`}
+              icon={<Percent className="w-5 h-5" />}
+              color="green"
+            />
+            <StatCard
+              title="Commissions totales"
+              value={`${stats?.total_commissions?.toFixed(2) || '0.00'}€`}
+              icon={<Percent className="w-5 h-5" />}
+              color="blue"
+            />
+            <StatCard
+              title="Ventes conclues"
+              value={stats?.total_sold_listings || 0}
+              icon={<FileText className="w-5 h-5" />}
+              color="purple"
             />
           </div>
         )}

@@ -17,6 +17,7 @@ export interface User {
   siret_verified?: boolean;
   phone_verified?: boolean;
   two_fa_enabled?: boolean;
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -46,6 +47,12 @@ export interface Listing {
   user_id: number;
   user?: User;
   reject_reason?: string;
+  weight?: number;
+  size_category?: string;
+  is_sponsored?: boolean;
+  sponsored_until?: string;
+  commission_rate?: number;
+  commission_amount?: number;
   created_at: string;
   updated_at: string;
 }
@@ -93,6 +100,15 @@ export interface Container {
   longitude: number;
 }
 
+export interface ContainerSlot {
+  id: number;
+  container_id: number;
+  slot_code: string;
+  size: 'S' | 'M' | 'L';
+  status: 'free' | 'reserved' | 'occupied';
+  request_id?: number;
+}
+
 export interface ContainerRequest {
   id: number;
   user_id: number;
@@ -106,6 +122,9 @@ export interface ContainerRequest {
   access_code?: string;
   barcode?: string;
   reject_reason?: string;
+  size_category?: string;
+  slot_id?: number;
+  slot_code?: string;
   created_at: string;
 }
 
@@ -161,6 +180,43 @@ export interface AdminStats {
   pending_container_requests: number;
   monthly_revenue: Array<{ month: string; revenue: number }>;
   monthly_revenue_total: number;
+}
+
+export interface Article {
+  id: number;
+  title: string;
+  content: string;
+  author_id: number;
+  author?: User;
+  status: 'draft' | 'published';
+  views: number;
+  tags?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ForumTopic {
+  id: number;
+  title: string;
+  content: string;
+  author_id: number;
+  author?: User;
+  is_pinned: boolean;
+  is_locked: boolean;
+  views: number;
+  replies_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ForumPost {
+  id: number;
+  topic_id: number;
+  author_id: number;
+  author?: User;
+  content: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface PaginatedResponse<T> {

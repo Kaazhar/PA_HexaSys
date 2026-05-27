@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { User, Mail, Phone, MapPin, Lock, BadgeCheck, Calendar, Loader2, ShieldAlert } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { User, Mail, Phone, MapPin, Lock, BadgeCheck, Calendar, Loader2, ShieldAlert, Camera } from 'lucide-react';
 import PublicLayout from '../../components/layout/PublicLayout';
 import { useAuth } from '../../context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authService, newsletterService } from '../../services/api';
+import { authService, newsletterService, uploadService } from '../../services/api';
 import PhoneVerification from '../../components/PhoneVerification';
 import TwoFAToggle from '../../components/TwoFAToggle';
 import { format } from 'date-fns';
@@ -27,8 +27,27 @@ const roleColors: Record<string, string> = {
 };
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const queryClient = useQueryClient();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [avatarLoading, setAvatarLoading] = useState(false);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarLoading(true);
+    try {
+      const uploadRes = await uploadService.upload(file);
+      const saveRes = await authService.updateAvatar(uploadRes.data.url);
+      updateUser(saveRes.data);
+      toast.success('Photo de profil mise à jour');
+    } catch {
+      toast.error('Erreur lors du téléchargement');
+    } finally {
+      setAvatarLoading(false);
+      e.target.value = '';
+    }
+  };
 
   const [profileForm, setProfileForm] = useState({
     firstname: user?.firstname || '',
@@ -45,7 +64,6 @@ export default function ProfilePage() {
 
   const [newsletter, setNewsletter] = useState((user as any)?.newsletter_subscribed || false);
 
-  const { updateUser } = useAuth();
   const handleUserUpdated = (updatedUser: UserType) => {
     updateUser(updatedUser);
   };
@@ -98,8 +116,28 @@ export default function ProfilePage() {
 
         {/* Header */}
         <div className="flex items-center gap-5 mb-8 pb-8 border-b border-gray-200">
-          <div className="w-16 h-16 rounded-full bg-primary-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-            {initials}
+          <div className="relative flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className="w-16 h-16 rounded-full overflow-hidden bg-primary-500 flex items-center justify-center text-white text-xl font-bold hover:ring-2 hover:ring-primary-400 transition-all group"
+            >
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span>{initials}</span>
+              )}
+              <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                {avatarLoading ? <Loader2 className="w-5 h-5 text-white animate-spin" /> : <Camera className="w-5 h-5 text-white" />}
+              </div>
+            </button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">

@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationService } from '../../services/api';
 import { Bell, MessageCircle } from 'lucide-react';
 import type { Notification } from '../../types';
+import PushNotificationButton from '../PushNotificationButton';
 
 interface NavItem {
   label: string;
@@ -58,13 +59,16 @@ export default function DashboardLayout({ children, sidebarItems = [], title }: 
             {title && <h1 className="text-base font-semibold text-gray-800">{title}</h1>}
           </div>
           <div className="flex items-center gap-2">
+            {/* Push notifications */}
+            <PushNotificationButton />
+
             {/* Messages */}
-            <Link to="/messages" className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+            <Link id="tour-messages" to="/messages" className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
               <MessageCircle className="w-5 h-5" />
             </Link>
 
             {/* Notifications */}
-            <div ref={notifRef} className="relative">
+            <div id="tour-notifications" ref={notifRef} className="relative">
               <button onClick={() => setNotifOpen(!notifOpen)} className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
@@ -98,8 +102,12 @@ export default function DashboardLayout({ children, sidebarItems = [], title }: 
           </div>
 
           <Link to="/profil" className="flex items-center gap-2.5 hover:bg-gray-50 px-2 py-1.5 rounded-md transition-colors">
-            <div className="w-7 h-7 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-semibold">
-              {user?.firstname.charAt(0)}{user?.lastname.charAt(0)}
+            <div className="w-7 h-7 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-semibold overflow-hidden">
+              {(user as any)?.avatar_url ? (
+                <img src={(user as any).avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <>{user?.firstname.charAt(0)}{user?.lastname.charAt(0)}</>
+              )}
             </div>
             <div className="hidden md:block text-left">
               <p className="text-sm font-medium text-gray-700 leading-tight">{user?.firstname} {user?.lastname}</p>
