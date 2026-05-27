@@ -19,6 +19,16 @@ func ConnectDB() {
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")
 
+	// Connexion sans DB pour créer la base si elle n'existe pas
+	dsnNoDB := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8mb4&parseTime=True&loc=Local",
+		user, password, host, port)
+	if tmpDB, err2 := gorm.Open(mysql.Open(dsnNoDB), &gorm.Config{}); err2 == nil {
+		tmpDB.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;", dbname))
+		if sqlDB, err3 := tmpDB.DB(); err3 == nil {
+			sqlDB.Close()
+		}
+	}
+
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&collation=utf8mb4_unicode_ci&parseTime=True&loc=Local",
 		user, password, host, port, dbname)
 
