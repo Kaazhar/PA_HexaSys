@@ -1,8 +1,10 @@
 import { CheckCircle, Zap, Star, Building2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
+import { proSidebar } from '../../config/sidebars';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { subscriptionService } from '../../services/api';
+import { subscriptionService, stripeService } from '../../services/api';
+import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import { useState } from 'react';
 
@@ -65,6 +67,8 @@ export default function AbonnementPage() {
 
   const sub = data?.data;
 
+  const [stripeLoading, setStripeLoading] = useState(false);
+
   const upgradeMutation = useMutation({
     mutationFn: (plan: string) => subscriptionService.upgrade(plan),
     onSuccess: () => {
@@ -74,8 +78,27 @@ export default function AbonnementPage() {
     },
   });
 
+  const handleConfirmPlan = async (plan: string) => {
+    const planData = plans.find(p => p.id === plan);
+    if (!planData) return;
+    if (planData.price === 0) {
+      // Plan gratuit : pas de Stripe
+      upgradeMutation.mutate(plan);
+    } else {
+      // Plan payant : redirection Stripe Checkout
+      setStripeLoading(true);
+      try {
+        const res = await stripeService.createSubscriptionCheckout(plan);
+        window.location.href = res.data.checkout_url;
+      } catch (err: any) {
+        toast.error(err?.response?.data?.error || 'Erreur lors du paiement');
+        setStripeLoading(false);
+      }
+    }
+  };
+
   return (
-    <DashboardLayout>
+    <DashboardLayout sidebarItems={proSidebar} title="Abonnement">
       <div className="space-y-6">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Mon abonnement</h1>
@@ -181,13 +204,19 @@ export default function AbonnementPage() {
                 : `Vous serez facturé ${plans.find(p => p.id === selectedPlan)?.price}€/mois.`}
             </p>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setSelectedPlan(null)} className="btn-secondary">Annuler</button>
+              <button onClick={() => setSelectedPlan(null)} className="btn-secondary" disabled={stripeLoading || upgradeMutation.isPending}>
+                Annuler
+              </button>
               <button
-                onClick={() => upgradeMutation.mutate(selectedPlan)}
-                disabled={upgradeMutation.isPending}
+                onClick={() => handleConfirmPlan(selectedPlan)}
+                disabled={upgradeMutation.isPending || stripeLoading}
                 className="btn-primary"
               >
-                {upgradeMutation.isPending ? 'Changement...' : 'Confirmer'}
+                {(upgradeMutation.isPending || stripeLoading)
+                  ? 'Chargement...'
+                  : plans.find(p => p.id === selectedPlan)?.price === 0
+                    ? 'Confirmer'
+                    : `Payer ${plans.find(p => p.id === selectedPlan)?.price}€/mois`}
               </button>
             </div>
           </div>
