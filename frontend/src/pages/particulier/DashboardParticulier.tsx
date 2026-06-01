@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { LayoutDashboard, Tag, PlusCircle, Package, Star, Calendar, BookOpen, CheckCircle, Clock, ArrowRight, Leaf, AlertCircle } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
@@ -30,6 +31,7 @@ const statusConfig = {
 };
 
 export default function DashboardParticulier() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -65,8 +67,8 @@ export default function DashboardParticulier() {
           <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Bonjour, {user?.firstname} ! 👋</h2>
-                <p className="text-white/70 mt-1">Continuez à contribuer à l'économie circulaire.</p>
+                <h2 className="text-2xl font-bold">{t('dashboard.hello')}, {user?.firstname} ! 👋</h2>
+                <p className="text-white/70 mt-1">{t('dashboard.circularEconomy')}</p>
               </div>
               <div className="hidden sm:flex items-center gap-3">
                 <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
@@ -76,7 +78,7 @@ export default function DashboardParticulier() {
             </div>
             {user?.first_login && (
               <div className="mt-4 p-3 bg-white/10 rounded-xl">
-                <p className="text-sm font-medium">🎉 Bienvenue ! Commencez par créer votre première annonce.</p>
+                <p className="text-sm font-medium">🎉 {t('dashboard.welcome')}</p>
               </div>
             )}
           </div>
@@ -84,19 +86,19 @@ export default function DashboardParticulier() {
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <StatCard
-              title="Annonces actives"
+              title={t('dashboard.activeListings')}
               value={dashboard?.active_listings || 0}
               icon={<Tag className="w-5 h-5" />}
               color="green"
             />
             <StatCard
-              title="Ateliers suivis"
+              title={t('dashboard.workshopsFollowed')}
               value={dashboard?.bookings?.length || 0}
               icon={<BookOpen className="w-5 h-5" />}
               color="blue"
             />
             <StatCard
-              title="Score upcycling"
+              title={t('dashboard.upcyclingScore')}
               value={`${dashboard?.score?.total_points || 0} pts`}
               icon={<Star className="w-5 h-5" />}
               color="coral"
@@ -108,15 +110,15 @@ export default function DashboardParticulier() {
             {/* My listings */}
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Mes dernières annonces</h2>
+                <h2 className="font-semibold text-gray-900">{t('dashboard.myListings')}</h2>
                 <Link to="/annonces/creer" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Créer <ArrowRight className="w-3 h-3" />
+                  {t('common.create_verb')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
               {(dashboard?.my_listings || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <Tag className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Aucune annonce pour le moment</p>
+                  <p className="text-sm">{t('dashboard.noListings')}</p>
                   <Link to="/annonces/creer" className="btn-primary text-sm mt-3 inline-block">
                     Créer une annonce
                   </Link>
@@ -144,15 +146,15 @@ export default function DashboardParticulier() {
             {/* Upcoming workshops */}
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Prochaines formations</h2>
+                <h2 className="font-semibold text-gray-900">{t('dashboard.upcomingWorkshops')}</h2>
                 <Link to="/annonces" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Voir tout <ArrowRight className="w-3 h-3" />
+                  {t('common.seeAll')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
               {(dashboard?.upcoming_workshops || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Aucune formation à venir</p>
+                  <p className="text-sm">{t('dashboard.noWorkshops')}</p>
                 </div>
               ) : (
                 <ul className="space-y-3">
@@ -181,9 +183,9 @@ export default function DashboardParticulier() {
           {myRequests.length > 0 && (
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Mes dépôts conteneur</h2>
+                <h2 className="font-semibold text-gray-900">{t('dashboard.myDeposits')}</h2>
                 <Link to="/conteneurs/demande" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Nouvelle demande <ArrowRight className="w-3 h-3" />
+                  {t('dashboard.newDeposit')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
               <ul className="space-y-3">
@@ -216,7 +218,7 @@ export default function DashboardParticulier() {
                           onClick={() => confirmDepositMutation.mutate(req.id)}
                           className="btn-primary text-xs py-1.5 px-3 flex-shrink-0"
                         >
-                          Confirmer le dépôt
+                          {t('dashboard.confirmDeposit')}
                         </button>
                       ) : (
                         <span className={clsx('badge flex items-center gap-1', s.class)}>

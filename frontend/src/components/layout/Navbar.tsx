@@ -1,9 +1,15 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Leaf, Menu, X, Bell, ChevronDown, Globe } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import clsx from 'clsx';
+
+interface Language {
+  code: string;
+  label: string;
+  flag: string;
+}
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
@@ -11,6 +17,15 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [languages, setLanguages] = useState<Language[]>([]);
+
+  useEffect(() => {
+    fetch('/locales/languages.json')
+      .then(r => r.json())
+      .then(setLanguages)
+      .catch(() => setLanguages([{ code: 'fr', label: 'Français', flag: '🇫🇷' }, { code: 'en', label: 'English', flag: '🇬🇧' }]));
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -27,9 +42,7 @@ export default function Navbar() {
     }
   };
 
-  const toggleLanguage = () => {
-    i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr');
-  };
+  const currentLang = languages.find(l => l.code === i18n.language) || languages[0];
 
   return (
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
@@ -55,13 +68,32 @@ export default function Navbar() {
 
           {/* Right side */}
           <div className="hidden md:flex items-center gap-3">
-            <button
-              onClick={toggleLanguage}
-              className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 transition-colors p-2 rounded-lg hover:bg-gray-50"
-            >
-              <Globe className="w-4 h-4" />
-              <span className="uppercase text-xs font-medium">{i18n.language === 'fr' ? 'EN' : 'FR'}</span>
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setLangMenuOpen(!langMenuOpen)}
+                className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 transition-colors p-2 rounded-lg hover:bg-gray-50"
+              >
+                <Globe className="w-4 h-4" />
+                <span className="text-xs font-medium">{currentLang?.flag} {currentLang?.code.toUpperCase()}</span>
+              </button>
+              {langMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                  {languages.map(lang => (
+                    <button
+                      key={lang.code}
+                      onClick={() => { i18n.changeLanguage(lang.code); setLangMenuOpen(false); }}
+                      className={clsx(
+                        'w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2',
+                        i18n.language === lang.code ? 'font-semibold text-primary-500' : 'text-gray-700'
+                      )}
+                    >
+                      <span>{lang.flag}</span>
+                      <span>{lang.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {isAuthenticated && user ? (
               <>
