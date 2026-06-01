@@ -42,11 +42,16 @@ export default function DashboardLayout({ children, sidebarItems, title }: Dashb
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-coral-500 rounded-full"></span>
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full overflow-hidden bg-primary-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                {user?.avatar_url
-                  ? <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                  : <>{user?.firstname.charAt(0)}{user?.lastname.charAt(0)}</>
-                }
+              <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden relative">
+                <span className="absolute">{user?.firstname.charAt(0)}{user?.lastname.charAt(0)}</span>
+                {user?.avatar_url && (
+                  <img
+                    src={user.avatar_url}
+                    alt="avatar"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                )}
               </div>
               <div className="hidden md:block">
                 <p className="text-sm font-medium text-gray-700">{user?.firstname} {user?.lastname}</p>
