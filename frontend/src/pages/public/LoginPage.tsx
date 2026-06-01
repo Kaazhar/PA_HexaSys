@@ -32,16 +32,16 @@ export default function LoginPage() {
       navigate(dashboardMap[user.role] || '/dashboard');
     } catch (err: unknown) {
       const error = err as { response?: { status?: number; data?: { error?: string; ban_reason?: string; ban_expires_at?: string } } };
-      if (error.response?.status === 403 && error.response?.data?.error === 'banned') {
+      if (error.response?.status === 403) {
         const params = new URLSearchParams();
-        params.set('reason', error.response.data.ban_reason || 'Violation des conditions d\'utilisation');
-        if (error.response.data.ban_expires_at) {
+        params.set('reason', error.response.data?.ban_reason || 'Violation des conditions d\'utilisation');
+        if (error.response.data?.ban_expires_at) {
           params.set('expires_at', error.response.data.ban_expires_at);
         }
         navigate(`/compte-bloque?${params.toString()}`);
         return;
       }
-      toast.error(error.response?.data?.error || t('auth.loginError'));
+      toast.error(t('auth.loginError'));
     }
   };
 
