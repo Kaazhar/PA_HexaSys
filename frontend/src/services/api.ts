@@ -1,7 +1,8 @@
 import axios from 'axios';
 import type {
   User, Listing, Workshop, Container, ContainerRequest,
-  Category, Notification, Invoice, AdminStats, AuthResponse
+  Category, Notification, Invoice, AdminStats, AuthResponse,
+  Conversation, Message
 } from '../types';
 
 const api = axios.create({
@@ -96,6 +97,16 @@ export const containerService = {
   clearSlots: (id: number) => api.delete(`/containers/${id}/slots`),
   getMyRequests: () => api.get<ContainerRequest[]>('/containers/requests/mine'),
   confirmDeposit: (id: number) => api.put(`/containers/requests/${id}/confirm-deposit`),
+};
+
+// Messages
+export const messageService = {
+  getConversations: () => api.get<Conversation[]>('/conversations'),
+  getOrCreateConversation: (otherUserId: number, listingId?: number) =>
+    api.post<Conversation>('/conversations', { other_user_id: otherUserId, listing_id: listingId }),
+  getMessages: (convId: number) => api.get<Message[]>(`/conversations/${convId}/messages`),
+  sendMessage: (convId: number, content: string) =>
+    api.post<Message>(`/conversations/${convId}/messages`, { content }),
 };
 
 // Score

@@ -132,6 +132,29 @@ export interface Notification {
   created_at: string;
 }
 
+export interface Conversation {
+  id: number;
+  participant_one_id: number;
+  participant_one?: User;
+  participant_two_id: number;
+  participant_two?: User;
+  listing_id?: number;
+  listing?: Listing;
+  last_message_at: string;
+  last_message?: string;
+  created_at: string;
+}
+
+export interface Message {
+  id: number;
+  conversation_id: number;
+  sender_id: number;
+  sender?: User;
+  content: string;
+  read: boolean;
+  created_at: string;
+}
+
 export interface Invoice {
   id: number;
   number: string;

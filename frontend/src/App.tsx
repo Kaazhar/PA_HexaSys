@@ -30,6 +30,9 @@ import DashboardPro from './pages/professionnel/DashboardPro';
 // Salarie pages
 import DashboardSalarie from './pages/salarie/DashboardSalarie';
 
+// Shared pages
+import MessagesPage from './pages/shared/MessagesPage';
+
 function App() {
   const { isLoading, user } = useAuth();
 
@@ -79,6 +82,9 @@ function App() {
 
       {/* Salarie routes */}
       <Route path="/salarie" element={<ProtectedRoute roles={['salarie']}><DashboardSalarie /></ProtectedRoute>} />
+
+      {/* Shared routes */}
+      <Route path="/messages" element={<ProtectedRoute roles={['particulier', 'professionnel', 'salarie', 'admin']}><MessagesPage /></ProtectedRoute>} />
 
       {/* Catch all */}
       <Route path="*" element={<Navigate to="/" />} />
