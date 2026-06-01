@@ -109,6 +109,7 @@ export default function Navbar() {
                       <span className="absolute">{user.firstname.charAt(0)}{user.lastname.charAt(0)}</span>
                       {user.avatar_url && (
                         <img
+                          key={user.avatar_url}
                           src={user.avatar_url}
                           alt="avatar"
                           className="absolute inset-0 w-full h-full object-cover"
