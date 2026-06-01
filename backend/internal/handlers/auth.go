@@ -130,6 +130,15 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	if user.IsBanned {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error":          "banned",
+			"ban_reason":     user.BanReason,
+			"ban_expires_at": user.BanExpiresAt,
+		})
+		return
+	}
+
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return

@@ -174,6 +174,9 @@ func main() {
 	api.POST("/containers/requests", middleware.AuthRequired(), handlers.CreateContainerRequestHandler)
 	api.PUT("/containers/requests/:id/validate", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ValidateContainerRequest)
 	api.PUT("/containers/requests/:id/reject", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.RejectContainerRequest)
+	api.PUT("/containers/requests/:id/confirm-deposit", middleware.AuthRequired(), handlers.ConfirmDeposit)
+	api.GET("/containers/requests/mine", middleware.AuthRequired(), handlers.GetMyContainerRequests)
+	api.DELETE("/containers/:id/slots", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ClearContainerSlots)
 
 	api.GET("/subscription", middleware.AuthRequired(), handlers.GetMySubscription)
 	api.POST("/subscription/upgrade", middleware.AuthRequired(), handlers.UpgradeSubscription)

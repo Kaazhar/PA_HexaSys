@@ -235,11 +235,7 @@ func ValidateContainerRequest(c *gin.Context) {
 		"barcode":     barcode,
 	})
 
-	// Mark slot as occupied
-	if request.SlotID != nil {
-		config.DB.Model(&models.ContainerSlot{}).Where("id = ?", *request.SlotID).
-			Update("status", "occupied")
-	}
+	// Slot reste "reserved" jusqu'à confirmation de dépôt par l'utilisateur
 
 	config.DB.Model(&models.Container{}).Where("id = ?", request.ContainerID).
 		UpdateColumn("current_count", gorm.Expr("current_count + 1"))
@@ -252,6 +248,76 @@ func ValidateContainerRequest(c *gin.Context) {
 	config.DB.Create(&notif)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Request approved", "access_code": accessCode, "barcode": barcode})
+}
+
+// ConfirmDeposit - PUT /containers/requests/:id/confirm-deposit (user auth)
+// L'utilisateur confirme qu'il a déposé l'objet → slot passe de "reserved" à "occupied"
+func ConfirmDeposit(c *gin.Context) {
+	id := c.Param("id")
+	userID, _ := c.Get("userID")
+
+	var request models.ContainerRequest
+	if err := config.DB.First(&request, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Demande introuvable"})
+		return
+	}
+
+	if request.UserID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Accès interdit"})
+		return
+	}
+
+	if request.Status != "approved" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "La demande doit être approuvée avant de confirmer le dépôt"})
+		return
+	}
+
+	config.DB.Model(&request).Update("status", "deposited")
+
+	if request.SlotID != nil {
+		config.DB.Model(&models.ContainerSlot{}).Where("id = ?", *request.SlotID).
+			Update("status", "occupied")
+	}
+
+	config.DB.Model(&models.Container{}).Where("id = ?", request.ContainerID).
+		UpdateColumn("current_count", gorm.Expr("current_count + 1"))
+
+	config.DB.Create(&models.Notification{
+		UserID:  request.UserID,
+		Message: fmt.Sprintf("Dépôt confirmé pour \"%s\" — case %s.", request.ObjectTitle, request.SlotCode),
+		Type:    "success",
+	})
+
+	c.JSON(http.StatusOK, gin.H{"message": "Dépôt confirmé"})
+}
+
+// GetMyContainerRequests - GET /containers/requests/mine (user auth)
+func GetMyContainerRequests(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	var requests []models.ContainerRequest
+	config.DB.Preload("Container").Where("user_id = ?", userID).
+		Order("created_at DESC").Find(&requests)
+	c.JSON(http.StatusOK, requests)
+}
+
+// ClearContainerSlots - DELETE /containers/:id/slots (admin)
+// Remet tous les slots à "free" et remet current_count à 0
+func ClearContainerSlots(c *gin.Context) {
+	id := c.Param("id")
+	containerID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid container ID"})
+		return
+	}
+
+	config.DB.Model(&models.ContainerSlot{}).
+		Where("container_id = ?", containerID).
+		Updates(map[string]interface{}{"status": "free", "request_id": nil})
+
+	config.DB.Model(&models.Container{}).Where("id = ?", containerID).
+		Update("current_count", 0)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Stock vidé"})
 }
 
 func RejectContainerRequest(c *gin.Context) {
