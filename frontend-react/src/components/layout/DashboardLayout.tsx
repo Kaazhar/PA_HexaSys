@@ -102,11 +102,10 @@ export default function DashboardLayout({ children, sidebarItems = [], title }: 
           </div>
 
           <Link to="/profil" className="flex items-center gap-2.5 hover:bg-gray-50 px-2 py-1.5 rounded-md transition-colors">
-            <div className="w-7 h-7 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-semibold overflow-hidden">
-              {(user as any)?.avatar_url ? (
-                <img src={(user as any).avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <>{user?.firstname.charAt(0)}{user?.lastname.charAt(0)}</>
+            <div className="w-7 h-7 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-semibold overflow-hidden relative">
+              <span className="absolute">{user?.firstname.charAt(0)}{user?.lastname.charAt(0)}</span>
+              {(user as any)?.avatar_url && (
+                <img key={(user as any).avatar_url} src={(user as any).avatar_url} alt="Avatar" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
               )}
             </div>
             <div className="hidden md:block text-left">

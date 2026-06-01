@@ -244,8 +244,11 @@ export default function Navbar() {
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-medium">
-                      {user.firstname.charAt(0)}{user.lastname.charAt(0)}
+                    <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-medium overflow-hidden relative">
+                      <span className="absolute">{user.firstname.charAt(0)}{user.lastname.charAt(0)}</span>
+                      {user.avatar_url && (
+                        <img key={user.avatar_url} src={user.avatar_url} alt="avatar" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                      )}
                     </div>
                     <span className="text-sm font-medium text-gray-700">{user.firstname}</span>
                     <ChevronDown className="w-4 h-4 text-gray-400" />

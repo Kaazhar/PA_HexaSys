@@ -36,7 +36,7 @@ jobs:
     - name: Build & push React
       uses: docker/build-push-action@v6
       with:
-        context: ./frontend
+        context: ./frontend-react
         platforms: linux/amd64
         push: true
         tags: |
