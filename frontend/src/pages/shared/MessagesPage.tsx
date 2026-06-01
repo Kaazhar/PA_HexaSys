@@ -130,11 +130,11 @@ export default function MessagesPage() {
                         isSelected && 'bg-primary-50 border-r-2 border-primary-500'
                       )}
                     >
-                      <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden">
-                        {other?.avatar_url
-                          ? <img src={other.avatar_url} alt="" className="w-full h-full object-cover" />
-                          : <>{other?.firstname?.charAt(0)}{other?.lastname?.charAt(0)}</>
-                        }
+                      <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden relative">
+                        <span className="absolute">{other?.firstname?.charAt(0)}{other?.lastname?.charAt(0)}</span>
+                        {other?.avatar_url && (
+                          <img src={other.avatar_url} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
@@ -180,11 +180,11 @@ export default function MessagesPage() {
                   const other = getOtherParticipant(selectedConv);
                   return (
                     <>
-                      <div className="w-9 h-9 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-bold overflow-hidden">
-                        {other?.avatar_url
-                          ? <img src={other.avatar_url} alt="" className="w-full h-full object-cover" />
-                          : <>{other?.firstname?.charAt(0)}{other?.lastname?.charAt(0)}</>
-                        }
+                      <div className="w-9 h-9 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-bold overflow-hidden relative">
+                        <span className="absolute">{other?.firstname?.charAt(0)}{other?.lastname?.charAt(0)}</span>
+                        {other?.avatar_url && (
+                          <img src={other.avatar_url} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                        )}
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{other?.firstname} {other?.lastname}</p>
@@ -209,11 +209,11 @@ export default function MessagesPage() {
                     return (
                       <div key={msg.id} className={clsx('flex', isMine ? 'justify-end' : 'justify-start')}>
                         {!isMine && (
-                          <div className="w-7 h-7 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-bold mr-2 flex-shrink-0 self-end overflow-hidden">
-                            {msg.sender?.avatar_url
-                              ? <img src={msg.sender.avatar_url} alt="" className="w-full h-full object-cover" />
-                              : <>{msg.sender?.firstname?.charAt(0)}</>
-                            }
+                          <div className="w-7 h-7 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-bold mr-2 flex-shrink-0 self-end overflow-hidden relative">
+                            <span className="absolute">{msg.sender?.firstname?.charAt(0)}</span>
+                            {msg.sender?.avatar_url && (
+                              <img src={msg.sender.avatar_url} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                            )}
                           </div>
                         )}
                         <div className={clsx(
