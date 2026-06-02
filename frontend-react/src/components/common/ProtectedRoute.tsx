@@ -23,6 +23,10 @@ export default function ProtectedRoute({ children, roles }: ProtectedRouteProps)
     return <Navigate to="/login" replace />;
   }
 
+  if (user && user.is_banned) {
+    return <Navigate to="/compte-bloque" replace />;
+  }
+
   if (user && !user.is_verified) {
     return <Navigate to="/confirmer-email" replace />;
   }

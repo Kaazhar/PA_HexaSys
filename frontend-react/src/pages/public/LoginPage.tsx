@@ -56,7 +56,11 @@ export default function LoginPage() {
         redirectApresLogin(reponse.user);
       }
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const error = err as { response?: { status?: number; data?: { error?: string } } };
+      if (error.response?.status === 403) {
+        navigate('/compte-bloque');
+        return;
+      }
       toast.error(error.response?.data?.error || 'Identifiants invalides');
     }
   };

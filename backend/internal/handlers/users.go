@@ -154,11 +154,12 @@ func DeleteUser(c *gin.Context) {
 }
 
 type CreateUserRequest struct {
-	Email     string          `json:"email" binding:"required,email"`
-	Password  string          `json:"password" binding:"required,min=6"`
-	Firstname string          `json:"firstname" binding:"required"`
-	Lastname  string          `json:"lastname" binding:"required"`
-	Role      models.UserRole `json:"role"`
+	Email      string          `json:"email" binding:"required,email"`
+	Password   string          `json:"password" binding:"required,min=6"`
+	Firstname  string          `json:"firstname" binding:"required"`
+	Lastname   string          `json:"lastname" binding:"required"`
+	Role       models.UserRole `json:"role"`
+	IsVerified bool            `json:"is_verified"`
 }
 
 func CreateUser(c *gin.Context) {
@@ -192,6 +193,7 @@ func CreateUser(c *gin.Context) {
 		Lastname:     req.Lastname,
 		Role:         role,
 		IsActive:     true,
+		IsVerified:   req.IsVerified,
 	}
 
 	if err := config.DB.Create(&user).Error; err != nil {

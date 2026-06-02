@@ -18,6 +18,7 @@ import ForgotPasswordPage from './pages/public/ForgotPasswordPage';
 import ResetPasswordPage from './pages/public/ResetPasswordPage';
 import ConfirmEmailPage from './pages/public/ConfirmEmailPage';
 import NotFoundPage from './pages/public/NotFoundPage';
+import BannedPage from './pages/public/BannedPage';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
@@ -149,6 +150,7 @@ function App() {
       <Route path="/payment/success" element={<PaymentSuccessPage />} />
       <Route path="/payment/cancel" element={<PaymentCancelPage />} />
 
+      <Route path="/compte-bloque" element={<BannedPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
     </>

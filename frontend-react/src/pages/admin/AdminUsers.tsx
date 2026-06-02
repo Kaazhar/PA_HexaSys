@@ -41,6 +41,7 @@ interface UserFormData {
   email: string;
   role: UserRole;
   is_active: boolean;
+  is_verified?: boolean;
   password?: string;
 }
 
@@ -94,6 +95,12 @@ function UserForm({ user, onSubmit, isLoading }: { user?: User; onSubmit: (data:
         <input {...register('is_active')} type="checkbox" id="is_active" className="w-4 h-4 rounded text-primary-500" />
         <label htmlFor="is_active" className="text-sm text-gray-700 cursor-pointer">Compte actif</label>
       </div>
+      {!user && (
+        <div className="flex items-center gap-3">
+          <input {...register('is_verified')} type="checkbox" id="is_verified" className="w-4 h-4 rounded text-primary-500" />
+          <label htmlFor="is_verified" className="text-sm text-gray-700 cursor-pointer">Email vérifié <span className="text-gray-400">(compte de test)</span></label>
+        </div>
+      )}
       <div className="flex gap-3 pt-2">
         <button type="submit" disabled={isLoading} className="btn-primary flex-1">
           {isLoading ? 'Enregistrement...' : 'Enregistrer'}
