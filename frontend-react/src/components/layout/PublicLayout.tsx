@@ -38,7 +38,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="border-t border-white/20 mt-8 pt-8 text-center text-sm text-white/50">
-            © 2026 UpcycleConnect. Tous droits réservés. gougougaga
+            © 2026 UpcycleConnect. Tous droits réservés.
           </div>
         </div>
       </footer>

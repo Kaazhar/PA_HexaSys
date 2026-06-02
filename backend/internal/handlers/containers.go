@@ -16,6 +16,30 @@ import (
 func GetContainers(c *gin.Context) {
 	var containers []models.Container
 	config.DB.Order("name ASC").Find(&containers)
+
+	// Auto-sync status from actual slot occupancy
+	for i := range containers {
+		var occupiedCount int64
+		config.DB.Model(&models.ContainerSlot{}).
+			Where("container_id = ? AND status IN ('reserved','occupied')", containers[i].ID).
+			Count(&occupiedCount)
+		containers[i].CurrentCount = int(occupiedCount)
+
+		var totalSlots int64
+		config.DB.Model(&models.ContainerSlot{}).
+			Where("container_id = ?", containers[i].ID).
+			Count(&totalSlots)
+
+		newStatus := "operational"
+		if totalSlots > 0 && occupiedCount >= totalSlots {
+			newStatus = "full"
+		}
+		if containers[i].Status != newStatus {
+			config.DB.Model(&containers[i]).Update("status", newStatus)
+			containers[i].Status = newStatus
+		}
+	}
+
 	c.JSON(http.StatusOK, containers)
 }
 
@@ -315,7 +339,7 @@ func ClearContainerSlots(c *gin.Context) {
 		Updates(map[string]interface{}{"status": "free", "request_id": nil})
 
 	config.DB.Model(&models.Container{}).Where("id = ?", containerID).
-		Update("current_count", 0)
+		Updates(map[string]interface{}{"current_count": 0, "status": "operational"})
 
 	c.JSON(http.StatusOK, gin.H{"message": "Stock vidé"})
 }
