@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import TutorialOverlay from './components/TutorialOverlay';
+import { authService } from './services/api';
 
 import HomePage from './pages/public/HomePage';
 import LoginPage from './pages/public/LoginPage';
@@ -58,8 +59,15 @@ import PaymentSuccessPage from './pages/payment/PaymentSuccessPage';
 import PaymentCancelPage from './pages/payment/PaymentCancelPage';
 
 function App() {
-  const { isLoading, user } = useAuth();
+  const { isLoading, user, updateUser, token } = useAuth();
   const [showTutorial, setShowTutorial] = useState(false);
+  const location = useLocation();
+
+  // Refetch user à chaque changement de page pour détecter ban/désactivation
+  useEffect(() => {
+    if (!token) return;
+    authService.me().then(res => updateUser(res.data)).catch(() => {});
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!user) return;
