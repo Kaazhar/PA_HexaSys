@@ -52,6 +52,11 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	if interdit, mot := services.ContientMotInterdit(req.Firstname, req.Lastname); interdit {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Votre profil contient un terme interdit : '" + mot + "'. Merci de le retirer."})
+		return
+	}
+
 	var existing models.User
 	if err := config.DB.Where("email = ?", req.Email).First(&existing).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Email already registered"})
@@ -274,6 +279,11 @@ func UpdateProfile(c *gin.Context) {
 	var req UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if interdit, mot := services.ContientMotInterdit(req.Firstname, req.Lastname, req.Address); interdit {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Votre profil contient un terme interdit : '" + mot + "'. Merci de le retirer."})
 		return
 	}
 

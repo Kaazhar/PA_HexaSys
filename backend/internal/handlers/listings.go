@@ -6,6 +6,7 @@ import (
 
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
+	"upcycleconnect/backend/internal/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -81,6 +82,11 @@ func CreateListing(c *gin.Context) {
 	var req CreateListingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if interdit, mot := services.ContientMotInterdit(req.Title, req.Description); interdit {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Votre annonce contient un terme interdit : '" + mot + "'. Merci de le retirer."})
 		return
 	}
 
@@ -274,6 +280,11 @@ func UpdateListing(c *gin.Context) {
 	var req CreateListingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if interdit, mot := services.ContientMotInterdit(req.Title, req.Description); interdit {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Votre annonce contient un terme interdit : '" + mot + "'. Merci de le retirer."})
 		return
 	}
 
