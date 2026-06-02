@@ -15,6 +15,19 @@ var planPrices = map[string]float64{
 	"enterprise": 99,
 }
 
+func planLabel(plan string) string {
+	switch plan {
+	case "pro":
+		return "Pro"
+	case "enterprise":
+		return "Entreprise"
+	case "decouverte":
+		return "Découverte"
+	default:
+		return plan
+	}
+}
+
 func GetMySubscription(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	var sub models.Subscription

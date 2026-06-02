@@ -162,6 +162,7 @@ export interface Invoice {
   user_id: number;
   user?: User;
   type: string;
+  description?: string;
   amount: number;
   tax: number;
   total: number;

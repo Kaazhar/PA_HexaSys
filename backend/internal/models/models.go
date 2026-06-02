@@ -220,12 +220,13 @@ type Invoice struct {
 	Number string  `gorm:"uniqueIndex;size:255" json:"number"`
 	UserID uint    `json:"user_id"`
 	User   User    `json:"user,omitempty"`
-	Type   string  `gorm:"type:varchar(20)" json:"type"`
-	Amount float64 `json:"amount"`
-	Tax    float64 `json:"tax"`
-	Total  float64 `json:"total"`
-	Status string  `gorm:"type:varchar(20);default:'pending'" json:"status"`
-	PDFURL string  `json:"pdf_url,omitempty"`
+	Type        string  `gorm:"type:varchar(20)" json:"type"`
+	Description string  `json:"description,omitempty"`
+	Amount      float64 `json:"amount"`
+	Tax         float64 `json:"tax"`
+	Total       float64 `json:"total"`
+	Status      string  `gorm:"type:varchar(20);default:'pending'" json:"status"`
+	PDFURL      string  `json:"pdf_url,omitempty"`
 }
 
 type Notification struct {

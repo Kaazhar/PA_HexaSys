@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { CheckCircle, ArrowRight, Loader2, Download } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../services/api';
+import api, { invoiceService } from '../../services/api';
 
 type ConfirmResult = {
   status: string;
   type?: string;
   title?: string;
   plan?: string;
+  invoice_id?: number;
 };
 
 export default function PaymentSuccessPage() {
@@ -17,6 +18,19 @@ export default function PaymentSuccessPage() {
   const { user } = useAuth();
   const [result, setResult] = useState<ConfirmResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadInvoice = async () => {
+    if (!result?.invoice_id) return;
+    setDownloading(true);
+    try {
+      await invoiceService.downloadPdf(result.invoice_id);
+    } catch {
+      alert('Impossible de télécharger la facture pour le moment.');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   useEffect(() => {
     if (!sessionId) { setLoading(false); return; }
@@ -63,9 +77,19 @@ export default function PaymentSuccessPage() {
             <p className="text-gray-600 mb-6">{getMessage()}</p>
 
             <div className="space-y-3">
+              {result?.invoice_id && (
+                <button
+                  onClick={handleDownloadInvoice}
+                  disabled={downloading}
+                  className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-[#2D5016] text-white rounded-xl font-medium hover:bg-[#3a6a1e] transition-colors disabled:opacity-60"
+                >
+                  {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                  Télécharger ma facture (PDF)
+                </button>
+              )}
               <Link
                 to={getDashboardPath()}
-                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-[#2D5016] text-white rounded-xl font-medium hover:bg-[#3a6a1e] transition-colors"
+                className={`flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-medium transition-colors ${result?.invoice_id ? 'border-2 border-gray-200 text-gray-700 hover:bg-gray-50' : 'bg-[#2D5016] text-white hover:bg-[#3a6a1e]'}`}
               >
                 Aller au tableau de bord
                 <ArrowRight className="w-4 h-4" />

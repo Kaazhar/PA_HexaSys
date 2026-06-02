@@ -181,6 +181,9 @@ func main() {
 	api.GET("/subscription", middleware.AuthRequired(), handlers.GetMySubscription)
 	api.POST("/subscription/upgrade", middleware.AuthRequired(), handlers.UpgradeSubscription)
 
+	api.GET("/invoices/mine", middleware.AuthRequired(), handlers.GetMyInvoices)
+	api.GET("/invoices/:id/pdf", middleware.AuthRequired(), handlers.DownloadInvoicePDF)
+
 	// Articles (public)
 	api.GET("/articles", handlers.GetPublicArticles)
 	api.GET("/articles/:id", handlers.GetPublicArticle)

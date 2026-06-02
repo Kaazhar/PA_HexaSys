@@ -273,9 +273,12 @@ func ConfirmSession(c *gin.Context) {
 			return
 		}
 
+		wsInvoiceNumber := fmt.Sprintf("INV-WS-%d-%d", workshopID, userID)
+
 		var existing models.WorkshopBooking
 		if config.DB.Where("workshop_id = ? AND user_id = ?", workshopID, userID).First(&existing).Error == nil {
-			c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "workshop", "title": workshop.Title})
+			inv := ensureInvoice(wsInvoiceNumber, userID, "workshop", workshop.Title, workshop.Price)
+			c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "workshop", "title": workshop.Title, "invoice_id": inv.ID})
 			return
 		}
 
@@ -287,12 +290,13 @@ func ConfirmSession(c *gin.Context) {
 		}
 		config.DB.Create(&booking)
 		config.DB.Model(&workshop).UpdateColumn("enrolled", gorm.Expr("enrolled + 1"))
+		inv := ensureInvoice(wsInvoiceNumber, userID, "workshop", workshop.Title, workshop.Price)
 		config.DB.Create(&models.Notification{
 			UserID:  userID,
 			Message: fmt.Sprintf("✅ Paiement confirmé ! Votre inscription à \"%s\" est validée.", workshop.Title),
 			Type:    "success",
 		})
-		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "workshop", "title": workshop.Title})
+		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "workshop", "title": workshop.Title, "invoice_id": inv.ID})
 
 	case "listing":
 		listingIDStr := s.Metadata["listing_id"]
@@ -305,9 +309,11 @@ func ConfirmSession(c *gin.Context) {
 			return
 		}
 
-		// Idempotence : si déjà vendu, retourner OK
+		invoiceNumber := fmt.Sprintf("INV-LST-%d-%d", listingID, userID)
+
 		if listing.Status == "sold" {
-			c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "listing", "title": listing.Title})
+			inv := ensureInvoice(invoiceNumber, userID, "listing", listing.Title, listing.Price)
+			c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "listing", "title": listing.Title, "invoice_id": inv.ID})
 			return
 		}
 
@@ -317,33 +323,20 @@ func ConfirmSession(c *gin.Context) {
 			"commission_amount": commission,
 		})
 
-		// Facture pour l'acheteur
-		tax := listing.Price * 0.20
-		invoiceNumber := fmt.Sprintf("INV-LST-%d-%d", listingID, userID)
-		config.DB.Create(&models.Invoice{
-			Number: invoiceNumber,
-			UserID: userID,
-			Type:   "listing",
-			Amount: listing.Price,
-			Tax:    tax,
-			Total:  listing.Price + tax,
-			Status: "paid",
-		})
+		inv := ensureInvoice(invoiceNumber, userID, "listing", listing.Title, listing.Price)
 
-		// Notification acheteur
 		config.DB.Create(&models.Notification{
 			UserID:  userID,
 			Message: fmt.Sprintf("✅ Achat confirmé ! Vous avez acheté \"%s\". Contactez le vendeur pour la remise.", listing.Title),
 			Type:    "success",
 		})
-		// Notification vendeur
 		config.DB.Create(&models.Notification{
 			UserID:  listing.UserID,
 			Message: fmt.Sprintf("🎉 Votre annonce \"%s\" a été vendue !", listing.Title),
 			Type:    "success",
 		})
 
-		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "listing", "title": listing.Title})
+		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "listing", "title": listing.Title, "invoice_id": inv.ID})
 
 	case "subscription":
 		plan := s.Metadata["plan"]
@@ -368,12 +361,14 @@ func ConfirmSession(c *gin.Context) {
 				"renewal_date": time.Now().AddDate(0, 1, 0),
 			})
 		}
+		subInvoiceNumber := fmt.Sprintf("INV-SUB-%d-%s", userID, time.Now().Format("200601"))
+		inv := ensureInvoice(subInvoiceNumber, userID, "subscription", "Abonnement "+planLabel(plan), price)
 		config.DB.Create(&models.Notification{
 			UserID:  userID,
 			Message: fmt.Sprintf("🎉 Abonnement %s activé ! Merci pour votre confiance.", plan),
 			Type:    "success",
 		})
-		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "subscription", "plan": plan})
+		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "subscription", "plan": plan, "invoice_id": inv.ID})
 
 	default:
 		c.JSON(http.StatusOK, gin.H{"status": "confirmed"})
@@ -443,6 +438,7 @@ func StripeWebhook(c *gin.Context) {
 			}
 			config.DB.Create(&booking)
 			config.DB.Model(&workshop).UpdateColumn("enrolled", gorm.Expr("enrolled + 1"))
+			ensureInvoice(fmt.Sprintf("INV-WS-%d-%d", workshopID, userID), userID, "workshop", workshop.Title, workshop.Price)
 
 			config.DB.Create(&models.Notification{
 				UserID:  userID,
@@ -467,17 +463,7 @@ func StripeWebhook(c *gin.Context) {
 				"status":            "sold",
 				"commission_amount": commission,
 			})
-			tax := listing.Price * 0.20
-			invoiceNumber := fmt.Sprintf("INV-LST-%d-%d", listingID, userID)
-			config.DB.Create(&models.Invoice{
-				Number: invoiceNumber,
-				UserID: userID,
-				Type:   "listing",
-				Amount: listing.Price,
-				Tax:    tax,
-				Total:  listing.Price + tax,
-				Status: "paid",
-			})
+			ensureInvoice(fmt.Sprintf("INV-LST-%d-%d", listingID, userID), userID, "listing", listing.Title, listing.Price)
 			config.DB.Create(&models.Notification{
 				UserID:  userID,
 				Message: fmt.Sprintf("✅ Achat confirmé ! Vous avez acheté \"%s\".", listing.Title),
@@ -512,6 +498,7 @@ func StripeWebhook(c *gin.Context) {
 					"renewal_date": time.Now().AddDate(0, 1, 0),
 				})
 			}
+			ensureInvoice(fmt.Sprintf("INV-SUB-%d-%s", userID, time.Now().Format("200601")), userID, "subscription", "Abonnement "+planLabel(plan), price)
 
 			config.DB.Create(&models.Notification{
 				UserID:  userID,

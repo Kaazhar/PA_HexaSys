@@ -280,6 +280,22 @@ export const stripeService = {
     api.post<{ checkout_url: string }>('/stripe/subscription-checkout', { plan }),
 };
 
+// Factures
+export const invoiceService = {
+  getMine: () => api.get<Invoice[]>('/invoices/mine'),
+  downloadPdf: async (id: number, number?: string) => {
+    const res = await api.get(`/invoices/${id}/pdf`, { responseType: 'blob' });
+    const url = window.URL.createObjectURL(res.data as Blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `facture-${number || id}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
+};
+
 // Search
 export const searchService = {
   global: (q: string) => api.get<SearchResults>('/search', { params: { q } }),
