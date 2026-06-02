@@ -11,13 +11,7 @@ import { fr } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { User as UserType } from '../../types';
-
-const roleLabels: Record<string, string> = {
-  particulier: 'Particulier',
-  professionnel: 'Professionnel',
-  salarie: 'Salarié',
-  admin: 'Administrateur',
-};
+import { useTranslation } from 'react-i18next';
 
 const roleColors: Record<string, string> = {
   particulier: 'bg-blue-50 text-blue-700',
@@ -28,6 +22,7 @@ const roleColors: Record<string, string> = {
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [avatarLoading, setAvatarLoading] = useState(false);
@@ -40,9 +35,9 @@ export default function ProfilePage() {
       const uploadRes = await uploadService.upload(file);
       const saveRes = await authService.updateAvatar(uploadRes.data.url);
       updateUser(saveRes.data);
-      toast.success('Photo de profil mise à jour');
+      toast.success(t('profile.avatar_updated'));
     } catch {
-      toast.error('Erreur lors du téléchargement');
+      toast.error(t('profile.avatar_error'));
     } finally {
       setAvatarLoading(false);
       e.target.value = '';
@@ -72,9 +67,9 @@ export default function ProfilePage() {
     mutationFn: (data: typeof profileForm) => authService.updateProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
-      toast.success('Profil mis à jour');
+      toast.success(t('profile.profile_updated'));
     },
-    onError: () => toast.error('Erreur lors de la mise à jour'),
+    onError: () => toast.error(t('profile.profile_error')),
   });
 
   const passwordMutation = useMutation({
@@ -82,10 +77,10 @@ export default function ProfilePage() {
       authService.changePassword(data),
     onSuccess: () => {
       setPasswordForm({ current_password: '', new_password: '', confirm_password: '' });
-      toast.success('Mot de passe modifié');
+      toast.success(t('profile.password_updated'));
     },
     onError: (err: { response?: { data?: { error?: string } } }) => {
-      toast.error(err.response?.data?.error || 'Erreur lors du changement de mot de passe');
+      toast.error(err.response?.data?.error || t('profile.profile_error'));
     },
   });
 
@@ -97,7 +92,7 @@ export default function ProfilePage() {
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordForm.new_password !== passwordForm.confirm_password) {
-      toast.error('Les mots de passe ne correspondent pas');
+      toast.error(t('profile.password_mismatch'));
       return;
     }
     passwordMutation.mutate({
@@ -147,12 +142,12 @@ export default function ProfilePage() {
               </span>
               {user.siret_verified && (
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded">
-                  <BadgeCheck className="w-3 h-3" /> SIRET vérifié
+                  <BadgeCheck className="w-3 h-3" /> {t('profile.siret_verified')}
                 </span>
               )}
               {user.is_banned && (
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 px-2 py-0.5 rounded">
-                  <ShieldAlert className="w-3 h-3" /> Banni
+                  <ShieldAlert className="w-3 h-3" /> {t('profile.banned')}
                 </span>
               )}
             </div>
@@ -161,7 +156,7 @@ export default function ProfilePage() {
               {user.created_at && (
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5" />
-                  Membre depuis {format(new Date(user.created_at), 'MMMM yyyy', { locale: fr })}
+                  {t('profile.member_since')} {format(new Date(user.created_at), 'MMMM yyyy', { locale: fr })}
                 </span>
               )}
             </div>
@@ -173,32 +168,32 @@ export default function ProfilePage() {
           <div className="card">
             <div className="flex items-center gap-2 mb-5">
               <User className="w-4 h-4 text-gray-400" />
-              <h2 className="font-semibold text-gray-900">Informations personnelles</h2>
+              <h2 className="font-semibold text-gray-900">{t('profile.personal_info')}</h2>
             </div>
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Prénom</label>
+                  <label className="label">{t('profile.firstname')}</label>
                   <input
                     className="input"
                     value={profileForm.firstname}
                     onChange={e => setProfileForm(f => ({ ...f, firstname: e.target.value }))}
-                    placeholder="Prénom"
+                    placeholder={t('profile.firstname')}
                   />
                 </div>
                 <div>
-                  <label className="label">Nom</label>
+                  <label className="label">{t('profile.lastname')}</label>
                   <input
                     className="input"
                     value={profileForm.lastname}
                     onChange={e => setProfileForm(f => ({ ...f, lastname: e.target.value }))}
-                    placeholder="Nom"
+                    placeholder={t('profile.lastname')}
                   />
                 </div>
               </div>
               <div>
                 <label className="label">
-                  <Phone className="w-3.5 h-3.5 inline mr-1 text-gray-400" />Téléphone
+                  <Phone className="w-3.5 h-3.5 inline mr-1 text-gray-400" />{t('profile.phone')}
                 </label>
                 <input
                   className="input"
@@ -210,19 +205,19 @@ export default function ProfilePage() {
               </div>
               <div>
                 <label className="label">
-                  <MapPin className="w-3.5 h-3.5 inline mr-1 text-gray-400" />Adresse
+                  <MapPin className="w-3.5 h-3.5 inline mr-1 text-gray-400" />{t('profile.address')}
                 </label>
                 <input
                   className="input"
                   value={profileForm.address}
                   onChange={e => setProfileForm(f => ({ ...f, address: e.target.value }))}
-                  placeholder="Votre adresse"
+                  placeholder={t('profile.address')}
                 />
               </div>
               <div className="flex justify-end pt-1">
                 <button type="submit" disabled={profileMutation.isPending} className="btn-primary flex items-center gap-2">
                   {profileMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Enregistrer
+                  {t('profile.save')}
                 </button>
               </div>
             </form>
@@ -232,11 +227,11 @@ export default function ProfilePage() {
           <div className="card">
             <div className="flex items-center gap-2 mb-5">
               <Lock className="w-4 h-4 text-gray-400" />
-              <h2 className="font-semibold text-gray-900">Changer le mot de passe</h2>
+              <h2 className="font-semibold text-gray-900">{t('profile.change_password')}</h2>
             </div>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
               <div>
-                <label className="label">Mot de passe actuel</label>
+                <label className="label">{t('profile.current_password')}</label>
                 <input
                   type="password"
                   className="input"
@@ -248,7 +243,7 @@ export default function ProfilePage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Nouveau mot de passe</label>
+                  <label className="label">{t('profile.new_password')}</label>
                   <input
                     type="password"
                     className="input"
@@ -260,7 +255,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="label">Confirmer</label>
+                  <label className="label">{t('profile.confirm_password')}</label>
                   <input
                     type="password"
                     className="input"
@@ -272,7 +267,7 @@ export default function ProfilePage() {
                 </div>
               </div>
               {passwordForm.new_password && passwordForm.confirm_password && passwordForm.new_password !== passwordForm.confirm_password && (
-                <p className="text-xs text-red-500">Les mots de passe ne correspondent pas</p>
+                <p className="text-xs text-red-500">{t('profile.password_mismatch')}</p>
               )}
               <div className="flex justify-end pt-1">
                 <button
@@ -281,7 +276,7 @@ export default function ProfilePage() {
                   className="btn-primary flex items-center gap-2"
                 >
                   {passwordMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Modifier le mot de passe
+                  {t('profile.update_password')}
                 </button>
               </div>
             </form>
@@ -289,11 +284,11 @@ export default function ProfilePage() {
 
           {/* Newsletter */}
           <div className="card mt-4">
-            <h2 className="font-semibold text-gray-900 mb-4">Newsletter</h2>
+            <h2 className="font-semibold text-gray-900 mb-4">{t('profile.newsletter')}</h2>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Recevoir la newsletter</p>
-                <p className="text-xs text-gray-400 mt-0.5">Actus, nouveaux ateliers, conseils upcycling</p>
+                <p className="text-sm font-medium text-gray-700">{t('profile.newsletter_sub')}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{t('profile.newsletter_desc')}</p>
               </div>
               <button
                 type="button"
@@ -301,7 +296,7 @@ export default function ProfilePage() {
                   const next = !newsletter;
                   setNewsletter(next);
                   newsletterService.toggle(next).then(() => {
-                    toast.success(next ? 'Inscrit à la newsletter' : 'Désinscrit de la newsletter');
+                    toast.success(next ? t('profile.subscribed_newsletter') : t('profile.unsubscribed_newsletter'));
                     updateUser({ ...(user as any), newsletter_subscribed: next });
                   });
                 }}
@@ -326,25 +321,25 @@ export default function ProfilePage() {
 
           {/* Compte */}
           <div className="card">
-            <h2 className="font-semibold text-gray-900 mb-4">Mon compte</h2>
+            <h2 className="font-semibold text-gray-900 mb-4">{t('profile.my_account')}</h2>
             <dl className="space-y-3 text-sm">
               <div className="flex items-center justify-between py-2 border-b border-gray-50">
                 <dt className="text-gray-500">Email</dt>
                 <dd className="text-gray-900 font-medium">{user.email}</dd>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-50">
-                <dt className="text-gray-500">Rôle</dt>
+                <dt className="text-gray-500">{t('profile.role')}</dt>
                 <dd>
                   <span className={clsx('text-xs font-medium px-2 py-0.5 rounded', roleColors[user.role] || 'bg-gray-100 text-gray-700')}>
-                    {roleLabels[user.role] || user.role}
+                    {t(`auth.role_labels.${user.role}`, { defaultValue: user.role })}
                   </span>
                 </dd>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-50">
-                <dt className="text-gray-500">Statut</dt>
+                <dt className="text-gray-500">{t('profile.status')}</dt>
                 <dd>
                   <span className={clsx('text-xs font-medium px-2 py-0.5 rounded', user.is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700')}>
-                    {user.is_active ? 'Actif' : 'Inactif'}
+                    {user.is_active ? t('profile.account_active') : t('profile.account_inactive')}
                   </span>
                 </dd>
               </div>
@@ -356,13 +351,13 @@ export default function ProfilePage() {
               )}
               {user.phone && (
                 <div className="flex items-center justify-between py-2 border-b border-gray-50">
-                  <dt className="text-gray-500">Téléphone</dt>
+                  <dt className="text-gray-500">{t('profile.phone')}</dt>
                   <dd className="text-gray-900">{user.phone}</dd>
                 </div>
               )}
               {user.address && (
                 <div className="flex items-center justify-between py-2">
-                  <dt className="text-gray-500">Adresse</dt>
+                  <dt className="text-gray-500">{t('profile.address')}</dt>
                   <dd className="text-gray-900 text-right">{user.address}</dd>
                 </div>
               )}

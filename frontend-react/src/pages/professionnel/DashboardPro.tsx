@@ -12,6 +12,7 @@ import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import { proSidebar } from '../../config/sidebars';
+import { useTranslation } from 'react-i18next';
 
 const planColors: Record<string, string> = {
   decouverte: 'badge-gray',
@@ -27,6 +28,7 @@ const planLabels: Record<string, string> = {
 
 export default function DashboardPro() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [siretInput, setSiretInput] = useState('');
 
@@ -59,33 +61,33 @@ export default function DashboardPro() {
   });
 
   return (
-    <DashboardLayout sidebarItems={proSidebar} title="Espace Professionnel">
+    <DashboardLayout sidebarItems={proSidebar} title={t('dashboard_pro.title')}>
       {isLoading ? (
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (
         <div className="space-y-6">
           {/* Welcome */}
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Bonjour, {user?.firstname} !</h2>
-            <p className="text-gray-500 mt-1">Bienvenue dans votre espace professionnel UpcycleConnect.</p>
+            <h2 className="text-xl font-bold text-gray-900">{t('dashboard_pro.welcome', { name: user?.firstname })}</h2>
+            <p className="text-gray-500 mt-1">{t('dashboard_pro.welcome_sub')}</p>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <StatCard
-              title="Mes annonces"
+              title={t('dashboard_pro.my_listings')}
               value={dashboard?.my_listings?.length || 0}
               icon={<Tag className="w-5 h-5" />}
               color="blue"
             />
             <StatCard
-              title="Projets upcycling"
+              title={t('dashboard_pro.projects')}
               value={dashboard?.projects?.length || 0}
               icon={<Briefcase className="w-5 h-5" />}
               color="purple"
             />
             <StatCard
-              title="Vues cette semaine"
+              title={t('dashboard_pro.views_week')}
               value="234"
               icon={<Tag className="w-5 h-5" />}
               color="green"
@@ -95,11 +97,11 @@ export default function DashboardPro() {
           {/* SIRET Verification */}
           <div className="card">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-gray-900">Vérification SIRET</h2>
+              <h2 className="font-semibold text-gray-900">{t('dashboard_pro.siret_verification')}</h2>
               {user?.siret_verified && (
                 <span className="flex items-center gap-1.5 text-sm text-green-600 font-medium">
                   <BadgeCheck className="w-4 h-4" />
-                  Vérifié
+                  {t('dashboard_pro.verified')}
                 </span>
               )}
             </div>
@@ -181,14 +183,14 @@ export default function DashboardPro() {
               <div className="space-y-3">
                 <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-lg text-sm text-amber-700">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <p>Vérifiez votre numéro SIRET pour obtenir le badge professionnel vérifié et accéder à toutes les fonctionnalités.</p>
+                  <p>{t('dashboard_pro.siret_prompt')}</p>
                 </div>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={siretInput}
                     onChange={(e) => setSiretInput(e.target.value.replace(/\D/g, '').slice(0, 14))}
-                    placeholder="14 chiffres ex: 12345678901234"
+                    placeholder={t('dashboard_pro.siret_placeholder')}
                     className="input flex-1 font-mono"
                     maxLength={14}
                   />
@@ -200,11 +202,11 @@ export default function DashboardPro() {
                     {siretMutation.isPending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      'Vérifier'
+                      t('dashboard_pro.siret_verify_btn')
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-gray-400">Vérification via la base SIRENE officielle (INSEE)</p>
+                <p className="text-xs text-gray-400">{t('dashboard_pro.siret_source')}</p>
               </div>
             )}
           </div>
@@ -212,9 +214,9 @@ export default function DashboardPro() {
           {/* Subscription card */}
           <div className="card">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-gray-900">Mon abonnement</h2>
+              <h2 className="font-semibold text-gray-900">{t('dashboard_pro.subscription')}</h2>
               <Link to="/abonnement" className="text-sm text-primary-500 hover:text-primary-600 flex items-center gap-1">
-                Gérer <ArrowRight className="w-3 h-3" />
+                {t('dashboard_pro.manage')} <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
             {dashboard?.subscription ? (
@@ -235,9 +237,9 @@ export default function DashboardPro() {
             ) : (
               <div className="text-center py-6 text-gray-400">
                 <CreditCard className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Aucun abonnement actif</p>
+                <p className="text-sm">{t('dashboard_pro.no_subscription')}</p>
                 <Link to="/abonnement" className="btn-primary text-sm mt-3 inline-block">
-                  Choisir un abonnement
+                  {t('dashboard_pro.choose_subscription')}
                 </Link>
               </div>
             )}
@@ -254,11 +256,11 @@ export default function DashboardPro() {
                     <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mb-3">
                       <Lock className="w-6 h-6 text-primary-600" />
                     </div>
-                    <p className="font-semibold text-gray-900 mb-1">Fonctionnalités Premium</p>
+                    <p className="font-semibold text-gray-900 mb-1">{t('dashboard_pro.premium_title')}</p>
                     <p className="text-sm text-gray-500 text-center max-w-xs mb-4">
-                      Accédez aux statistiques avancées, à l'analyse d'impact écologique et aux alertes prioritaires.
+                      {t('dashboard_pro.premium_desc')}
                     </p>
-                    <Link to="/abonnement" className="btn-primary text-sm">Passer au Premium</Link>
+                    <Link to="/abonnement" className="btn-primary text-sm">{t('dashboard_pro.go_premium')}</Link>
                   </div>
                 )}
                 <div className={clsx('grid grid-cols-1 lg:grid-cols-3 gap-4', !isPremium && 'blur-sm pointer-events-none select-none')}>

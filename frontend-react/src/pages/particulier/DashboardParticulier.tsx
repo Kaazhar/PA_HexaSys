@@ -10,16 +10,18 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
 import { particulierSidebar } from '../../config/sidebars';
+import { useTranslation } from 'react-i18next';
 
 const statusConfig = {
-  pending: { label: 'En attente', class: 'badge-orange', icon: <Clock className="w-3 h-3" /> },
-  active: { label: 'Active', class: 'badge-green', icon: <CheckCircle className="w-3 h-3" /> }, // féminin = annonce
-  rejected: { label: 'Rejetée', class: 'badge-red', icon: null },
-  sold: { label: 'Vendue', class: 'badge-gray', icon: null },
+  pending: { labelKey: 'listings.status.pending', class: 'badge-orange', icon: <Clock className="w-3 h-3" /> },
+  active: { labelKey: 'listings.status.active', class: 'badge-green', icon: <CheckCircle className="w-3 h-3" /> },
+  rejected: { labelKey: 'listings.status.rejected', class: 'badge-red', icon: null },
+  sold: { labelKey: 'listings.status.sold', class: 'badge-gray', icon: null },
 };
 
 export default function DashboardParticulier() {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard', 'particulier'],
@@ -29,36 +31,36 @@ export default function DashboardParticulier() {
   const dashboard = data?.data;
 
   return (
-    <DashboardLayout sidebarItems={particulierSidebar} title="Mon espace">
+    <DashboardLayout sidebarItems={particulierSidebar} title={t('dashboard_particulier.title')}>
       {isLoading ? (
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (
         <div className="space-y-6">
           {/* Welcome */}
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Bonjour, {user?.firstname} !</h2>
-            <p className="text-gray-500 mt-1">Bienvenue sur votre espace UpcycleConnect.</p>
+            <h2 className="text-xl font-bold text-gray-900">{t('dashboard_particulier.welcome', { name: user?.firstname })}</h2>
+            <p className="text-gray-500 mt-1">{t('dashboard_particulier.welcome_sub')}</p>
             {user?.first_login && (
-              <p className="text-sm text-primary-600 mt-2">Commencez par créer votre première annonce.</p>
+              <p className="text-sm text-primary-600 mt-2">{t('dashboard_particulier.first_login')}</p>
             )}
           </div>
 
           {/* Stats */}
           <div id="tour-stats" className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <StatCard
-              title="Annonces actives"
+              title={t('dashboard_particulier.active_listings')}
               value={dashboard?.active_listings || 0}
               icon={<Tag className="w-5 h-5" />}
               color="green"
             />
             <StatCard
-              title="Ateliers suivis"
+              title={t('dashboard_particulier.workshops_attended')}
               value={dashboard?.bookings?.length || 0}
               icon={<BookOpen className="w-5 h-5" />}
               color="blue"
             />
             <StatCard
-              title="Score upcycling"
+              title={t('dashboard_particulier.upcycling_score')}
               value={`${dashboard?.score?.total_points || 0} pts`}
               icon={<Star className="w-5 h-5" />}
               color="coral"
@@ -70,17 +72,17 @@ export default function DashboardParticulier() {
             {/* My listings */}
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Mes dernières annonces</h2>
+                <h2 className="font-semibold text-gray-900">{t('dashboard_particulier.my_listings')}</h2>
                 <Link to="/annonces/creer" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Créer <ArrowRight className="w-3 h-3" />
+                  {t('dashboard_particulier.create')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
               {(dashboard?.my_listings || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <Tag className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Aucune annonce pour le moment</p>
+                  <p className="text-sm">{t('dashboard_particulier.no_listings')}</p>
                   <Link to="/annonces/creer" className="btn-primary text-sm mt-3 inline-block">
-                    Créer une annonce
+                    {t('dashboard_particulier.create_listing')}
                   </Link>
                 </div>
               ) : (
@@ -92,10 +94,10 @@ export default function DashboardParticulier() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{listing.title}</p>
-                        <p className="text-xs text-gray-500">{listing.type === 'don' ? 'Don' : `Vente - ${listing.price}€`}</p>
+                        <p className="text-xs text-gray-500">{listing.type === 'don' ? t('dashboard_particulier.don') : `${t('dashboard_particulier.sale')} - ${listing.price}€`}</p>
                       </div>
                       <span className={clsx('badge', statusConfig[listing.status as keyof typeof statusConfig]?.class || 'badge-gray')}>
-                        {statusConfig[listing.status as keyof typeof statusConfig]?.label || listing.status}
+                        {t(statusConfig[listing.status as keyof typeof statusConfig]?.labelKey || listing.status)}
                       </span>
                     </li>
                   ))}
@@ -106,15 +108,15 @@ export default function DashboardParticulier() {
             {/* Upcoming workshops */}
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Prochaines formations</h2>
+                <h2 className="font-semibold text-gray-900">{t('dashboard_particulier.upcoming_workshops')}</h2>
                 <Link to="/annonces" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Voir tout <ArrowRight className="w-3 h-3" />
+                  {t('dashboard_particulier.see_all')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
               {(dashboard?.upcoming_workshops || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Aucune formation à venir</p>
+                  <p className="text-sm">{t('dashboard_particulier.no_workshops')}</p>
                 </div>
               ) : (
                 <ul className="space-y-3">
@@ -130,7 +132,7 @@ export default function DashboardParticulier() {
                         </p>
                       </div>
                       <span className="text-sm font-bold text-primary-500">
-                        {ws.price === 0 ? 'Gratuit' : `${ws.price}€`}
+                        {ws.price === 0 ? t('common.free') : `${ws.price}€`}
                       </span>
                     </li>
                   ))}
@@ -142,14 +144,14 @@ export default function DashboardParticulier() {
           {/* Quick actions */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'Créer une annonce', path: '/annonces/creer', icon: <PlusCircle className="w-5 h-5" />, color: 'text-primary-500 bg-primary-50' },
-              { label: 'Demande de dépôt', path: '/conteneurs/demande', icon: <Package className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },
-              { label: 'Mon score', path: '/score', icon: <Star className="w-5 h-5" />, color: 'text-amber-500 bg-amber-50' },
-              { label: 'Formations', path: '/annonces', icon: <BookOpen className="w-5 h-5" />, color: 'text-purple-500 bg-purple-50' },
+              { labelKey: 'dashboard_particulier.create_listing', path: '/annonces/creer', icon: <PlusCircle className="w-5 h-5" />, color: 'text-primary-500 bg-primary-50' },
+              { labelKey: 'dashboard_particulier.deposit_request', path: '/conteneurs/demande', icon: <Package className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },
+              { labelKey: 'dashboard_particulier.my_score', path: '/score', icon: <Star className="w-5 h-5" />, color: 'text-amber-500 bg-amber-50' },
+              { labelKey: 'dashboard_particulier.training', path: '/annonces', icon: <BookOpen className="w-5 h-5" />, color: 'text-purple-500 bg-purple-50' },
             ].map((action, i) => (
               <Link key={i} to={action.path} className="card hover:shadow-md transition-shadow flex flex-col items-center gap-3 py-5 text-center">
                 <div className={`p-3 rounded-xl ${action.color}`}>{action.icon}</div>
-                <span className="text-sm font-medium text-gray-700">{action.label}</span>
+                <span className="text-sm font-medium text-gray-700">{t(action.labelKey)}</span>
               </Link>
             ))}
           </div>

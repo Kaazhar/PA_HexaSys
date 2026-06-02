@@ -11,9 +11,11 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
 import type { Conversation } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 export default function MessagesPage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const sidebar = user?.role === 'professionnel' ? proSidebar : user?.role === 'salarie' ? salarieSidebar : user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const queryClient = useQueryClient();
   const location = useLocation();
@@ -78,12 +80,12 @@ export default function MessagesPage() {
   };
 
   return (
-    <DashboardLayout sidebarItems={sidebar} title="Messages" noPadding>
+    <DashboardLayout sidebarItems={sidebar} title={t('messages_page.title')} noPadding>
       <div className="h-full flex gap-4 p-5">
         {/* Conversations list */}
         <div className="w-72 flex-shrink-0 flex flex-col card p-0 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">Messages</h2>
+            <h2 className="font-semibold text-gray-900">{t('messages_page.title')}</h2>
           </div>
 
           {convsLoading ? (
@@ -91,7 +93,7 @@ export default function MessagesPage() {
           ) : conversations.length === 0 ? (
             <div className="text-center py-12 px-4">
               <MessageCircle className="w-8 h-8 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">Aucune conversation</p>
+              <p className="text-sm text-gray-400">{t('messages_page.no_conversations')}</p>
             </div>
           ) : (
             <div className="overflow-y-auto flex-1">
@@ -115,7 +117,7 @@ export default function MessagesPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {other ? `${other.firstname} ${other.lastname}` : 'Utilisateur'}
+                          {other ? `${other.firstname} ${other.lastname}` : t('messages_page.unknown_user')}
                         </p>
                         {conv.last_message && (
                           <p className="text-xs text-gray-400 truncate">{conv.last_message}</p>
@@ -134,10 +136,8 @@ export default function MessagesPage() {
           {!selectedConv ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
               <MessageCircle className="w-12 h-12 text-gray-200 mb-3" />
-              <p className="text-gray-500 font-medium">Sélectionnez une conversation</p>
-              <p className="text-sm text-gray-400 mt-1">
-                Cliquez sur une annonce pour contacter un vendeur
-              </p>
+              <p className="text-gray-500 font-medium">{t('messages_page.select_conversation')}</p>
+              <p className="text-sm text-gray-400 mt-1">{t('messages_page.select_hint')}</p>
             </div>
           ) : (
             <>
@@ -154,10 +154,10 @@ export default function MessagesPage() {
                       </div>
                       <div>
                         <p className="font-medium text-gray-900 text-sm">
-                          {other ? `${other.firstname} ${other.lastname}` : 'Utilisateur'}
+                          {other ? `${other.firstname} ${other.lastname}` : t('messages_page.unknown_user')}
                         </p>
                         {selectedConv.listing && (
-                          <p className="text-xs text-gray-400">Re: {selectedConv.listing.title}</p>
+                          <p className="text-xs text-gray-400">{t('messages_page.re')}: {selectedConv.listing.title}</p>
                         )}
                       </div>
                     </>
@@ -192,7 +192,7 @@ export default function MessagesPage() {
               <div className="px-4 py-3 border-t border-gray-100 flex gap-2">
                 <input
                   className="input flex-1"
-                  placeholder="Écrivez un message..."
+                  placeholder={t('messages_page.write_message')}
                   value={messageText}
                   onChange={e => setMessageText(e.target.value)}
                   onKeyDown={handleKey}
