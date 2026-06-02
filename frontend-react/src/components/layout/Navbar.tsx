@@ -270,13 +270,15 @@ export default function Navbar() {
                       >
                         {t('nav.profile')}
                       </Link>
-                      <Link
-                        to="/abonnement"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        onClick={() => setUserMenuOpen(false)}
-                      >
-                        {t('nav.subscription')}
-                      </Link>
+                      {user?.role === 'professionnel' && (
+                        <Link
+                          to="/abonnement"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          {t('nav.subscription')}
+                        </Link>
+                      )}
                       <hr className="my-1 border-gray-100" />
                       <button
                         onClick={handleLogout}

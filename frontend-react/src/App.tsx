@@ -135,7 +135,7 @@ function App() {
       <Route path="/mes-annonces/:id/modifier" element={<ProtectedRoute roles={['particulier', 'professionnel']}><EditListingPage /></ProtectedRoute>} />
       <Route path="/score" element={<ProtectedRoute roles={['particulier', 'professionnel', 'salarie']}><ScorePage /></ProtectedRoute>} />
       <Route path="/conteneurs/demande" element={<ProtectedRoute roles={['particulier']}><ContainerRequestPage /></ProtectedRoute>} />
-      <Route path="/abonnement" element={<ProtectedRoute roles={['particulier']}><AbonnementPage /></ProtectedRoute>} />
+      <Route path="/abonnement" element={<ProtectedRoute roles={['professionnel']}><AbonnementPage /></ProtectedRoute>} />
       <Route path="/planning" element={<ProtectedRoute roles={['particulier']}><MonPlanningPage /></ProtectedRoute>} />
 
       <Route path="/pro" element={<ProtectedRoute roles={['professionnel']}><DashboardPro /></ProtectedRoute>} />

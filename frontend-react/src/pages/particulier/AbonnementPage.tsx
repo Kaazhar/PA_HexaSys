@@ -1,4 +1,4 @@
-import { CheckCircle, Zap, Star, Building2 } from 'lucide-react';
+import { CheckCircle, Zap, Star } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { proSidebar } from '../../config/sidebars';
@@ -16,41 +16,27 @@ const plans = [
     icon: <Zap className="w-6 h-6" />,
     color: 'border-gray-200',
     features: [
-      'Annonces limitées (5/mois)',
-      'Accès aux formations publiques',
-      'Score upcycling de base',
-      'Messagerie basique',
+      'Annonces illimitées',
+      'Vérification SIRET',
+      'Accès aux formations',
+      'Score upcycling',
+      'Messagerie',
     ],
   },
   {
     id: 'pro',
-    name: 'Pro',
+    name: 'Premium',
     price: 29,
     icon: <Star className="w-6 h-6 text-amber-500" />,
     color: 'border-primary-400 ring-2 ring-primary-200',
     popular: true,
     features: [
-      'Annonces illimitées',
-      'Priorité dans les résultats',
-      'Vérification SIRET',
-      'Statistiques avancées',
-      'Accès aux projets upcycling',
-      'Support prioritaire',
-    ],
-  },
-  {
-    id: 'enterprise',
-    name: 'Entreprise',
-    price: 99,
-    icon: <Building2 className="w-6 h-6 text-purple-500" />,
-    color: 'border-purple-200',
-    features: [
-      'Tout le plan Pro',
-      'Plusieurs comptes collaborateurs',
-      'API d\'intégration',
-      'Tableau de bord entreprise',
-      'Gestionnaire de compte dédié',
-      'Factures personnalisées',
+      'Tout le plan Découverte',
+      'Tableau de bord avancé',
+      'Analyse d\'impact écologique (CO₂, poids)',
+      'Statistiques matériaux disponibles',
+      'Alertes prioritaires de collecte',
+      'Projets upcycling',
     ],
   },
 ];
@@ -133,7 +119,7 @@ export default function AbonnementPage() {
             )}
 
             {/* Plans */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl">
               {plans.map((plan) => {
                 const isCurrent = sub?.plan === plan.id;
                 return (
