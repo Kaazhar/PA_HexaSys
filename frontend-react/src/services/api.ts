@@ -27,6 +27,9 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    if (error.response?.status === 403 && error.response?.data?.ban_reason !== undefined) {
+      window.location.href = '/compte-bloque';
+    }
     return Promise.reject(error);
   }
 );
