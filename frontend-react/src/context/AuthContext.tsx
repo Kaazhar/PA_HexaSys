@@ -49,6 +49,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Vérification périodique du statut du compte (ban, désactivation...)
+  useEffect(() => {
+    if (!token) return;
+    const interval = setInterval(() => {
+      authService.me()
+        .then((res) => {
+          setUser(res.data);
+          localStorage.setItem('user', JSON.stringify(res.data));
+        })
+        .catch(() => {});
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [token]);
+
   const login = async (email: string, password: string) => {
     const res = await authService.login(email, password);
     const { token: newToken, user: newUser } = res.data;
