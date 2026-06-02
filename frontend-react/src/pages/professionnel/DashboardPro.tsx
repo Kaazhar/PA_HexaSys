@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Tag, Briefcase, CreditCard, ArrowRight, BadgeCheck, AlertCircle, Loader2, MapPin, Users, Calendar, TrendingUp, Building2 } from 'lucide-react';
+import { Tag, Briefcase, CreditCard, ArrowRight, BadgeCheck, AlertCircle, Loader2, MapPin, Users, Calendar, TrendingUp, Building2, Lock, Leaf, BarChart2, Bell } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -242,6 +242,98 @@ export default function DashboardPro() {
               </div>
             )}
           </div>
+
+          {/* Section Premium */}
+          {(() => {
+            const isPremium = dashboard?.subscription?.status === 'active';
+            const ps = dashboard?.premium_stats;
+            return (
+              <div className="relative">
+                {!isPremium && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl bg-white/80 backdrop-blur-sm border border-gray-200">
+                    <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mb-3">
+                      <Lock className="w-6 h-6 text-primary-600" />
+                    </div>
+                    <p className="font-semibold text-gray-900 mb-1">Fonctionnalités Premium</p>
+                    <p className="text-sm text-gray-500 text-center max-w-xs mb-4">
+                      Accédez aux statistiques avancées, à l'analyse d'impact écologique et aux alertes prioritaires.
+                    </p>
+                    <Link to="/abonnement" className="btn-primary text-sm">Passer au Premium</Link>
+                  </div>
+                )}
+                <div className={clsx('grid grid-cols-1 lg:grid-cols-3 gap-4', !isPremium && 'blur-sm pointer-events-none select-none')}>
+                  {/* Impact écologique */}
+                  <div className="card space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Leaf className="w-5 h-5 text-green-500" />
+                      <h3 className="font-semibold text-gray-900 text-sm">Impact écologique</h3>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Dons réalisés</span>
+                        <span className="font-bold text-gray-900">{isPremium ? ps?.donations_count ?? 0 : 12}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Poids recyclé</span>
+                        <span className="font-bold text-gray-900">{isPremium ? `${(ps?.total_weight ?? 0).toFixed(1)} kg` : '48.5 kg'}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">CO₂ évité</span>
+                        <span className="font-bold text-green-600">{isPremium ? `${(ps?.co2_saved ?? 0).toFixed(1)} kg` : '121.2 kg'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Top catégories disponibles */}
+                  <div className="card space-y-3">
+                    <div className="flex items-center gap-2">
+                      <BarChart2 className="w-5 h-5 text-blue-500" />
+                      <h3 className="font-semibold text-gray-900 text-sm">Matériaux disponibles</h3>
+                    </div>
+                    <div className="space-y-2">
+                      {(isPremium ? (ps?.top_categories ?? []) : [
+                        { name: 'Mobilier', count: 34 },
+                        { name: 'Électronique', count: 28 },
+                        { name: 'Textile', count: 21 },
+                      ]).map((cat: { name: string; count: number }, i: number) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                            <div className="h-1.5 rounded-full bg-blue-400" style={{ width: `${Math.min(100, (cat.count / 50) * 100)}%` }} />
+                          </div>
+                          <span className="text-xs text-gray-500 w-20 truncate">{cat.name}</span>
+                          <span className="text-xs font-bold text-gray-700 w-6 text-right">{cat.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Alertes prioritaires */}
+                  <div className="card space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Bell className="w-5 h-5 text-amber-500" />
+                      <h3 className="font-semibold text-gray-900 text-sm">Alertes cette semaine</h3>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3 p-2 bg-amber-50 rounded-lg">
+                        <Tag className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs font-medium text-gray-800">{isPremium ? ps?.new_listings ?? 0 : 18} nouvelles annonces</p>
+                          <p className="text-xs text-gray-400">disponibles à collecter</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
+                        <Briefcase className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs font-medium text-gray-800">{isPremium ? ps?.new_deposits ?? 0 : 7} dépôts conteneur</p>
+                          <p className="text-xs text-gray-400">approuvés cette semaine</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* My listings */}

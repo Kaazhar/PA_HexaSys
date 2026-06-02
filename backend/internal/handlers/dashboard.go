@@ -104,11 +104,63 @@ func GetProDashboard(c *gin.Context) {
 	config.DB.Preload("Category").Where("user_id = ?", userID).
 		Order("created_at DESC").Limit(5).Find(&myListings)
 
-	c.JSON(http.StatusOK, gin.H{
+	response := gin.H{
 		"projects":     projects,
 		"subscription": subscription,
 		"my_listings":  myListings,
-	})
+	}
+
+	// Stats premium — uniquement si abonnement actif
+	if subscription.Status == "active" {
+		// Impact écologique : dons réalisés + poids total
+		var donationsCount int64
+		config.DB.Model(&models.Listing{}).
+			Where("user_id = ? AND type = 'don' AND status = 'active'", userID).
+			Count(&donationsCount)
+
+		var totalWeight float64
+		config.DB.Model(&models.Listing{}).
+			Where("user_id = ? AND type = 'don' AND status = 'active' AND weight > 0", userID).
+			Select("COALESCE(SUM(weight), 0)").Scan(&totalWeight)
+
+		// Statistiques matériaux dispo sur la plateforme (top 5 catégories)
+		type CatStat struct {
+			Name  string `json:"name"`
+			Count int64  `json:"count"`
+		}
+		var topCategories []CatStat
+		config.DB.Table("listings").
+			Select("categories.name, COUNT(listings.id) as count").
+			Joins("JOIN categories ON listings.category_id = categories.id").
+			Where("listings.status = 'active'").
+			Group("categories.id, categories.name").
+			Order("count DESC").
+			Limit(5).
+			Scan(&topCategories)
+
+		// Alertes prioritaires : nouveaux dépôts conteneurs cette semaine
+		var newDeposits int64
+		config.DB.Model(&models.ContainerRequest{}).
+			Where("status = 'approved' AND updated_at > ?", time.Now().AddDate(0, 0, -7)).
+			Count(&newDeposits)
+
+		// Nouvelles annonces cette semaine
+		var newListings int64
+		config.DB.Model(&models.Listing{}).
+			Where("status = 'active' AND created_at > ?", time.Now().AddDate(0, 0, -7)).
+			Count(&newListings)
+
+		response["premium_stats"] = gin.H{
+			"donations_count": donationsCount,
+			"total_weight":    totalWeight,
+			"co2_saved":       totalWeight * 2.5,
+			"top_categories":  topCategories,
+			"new_deposits":    newDeposits,
+			"new_listings":    newListings,
+		}
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func GetSalarieDashboard(c *gin.Context) {
