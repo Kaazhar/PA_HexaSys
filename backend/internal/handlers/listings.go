@@ -77,12 +77,6 @@ type CreateListingRequest struct {
 	Images      string  `json:"images"`
 }
 
-var planListingLimits = map[string]int{
-	"decouverte": 5,
-	"pro":        50,
-	"enterprise": -1, // illimité
-}
-
 func CreateListing(c *gin.Context) {
 	var req CreateListingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -91,36 +85,6 @@ func CreateListing(c *gin.Context) {
 	}
 
 	userID, _ := c.Get("userID")
-	role, _ := c.Get("userRole")
-	userRole, _ := role.(models.UserRole)
-
-	// Vérification limite d'abonnement (uniquement pour les professionnels)
-	// Les particuliers ont accès gratuit illimité selon le sujet
-	if userRole == models.RoleProfessionnel {
-		var sub models.Subscription
-		plan := "decouverte"
-		if err := config.DB.Where("user_id = ? AND status = 'active'", userID).First(&sub).Error; err == nil {
-			plan = sub.Plan
-		}
-
-		limit := planListingLimits[plan]
-		if limit != -1 {
-			var count int64
-			config.DB.Model(&models.Listing{}).
-				Where("user_id = ? AND status IN ('active', 'pending')", userID).
-				Count(&count)
-			if int(count) >= limit {
-				c.JSON(http.StatusForbidden, gin.H{
-					"error": "limite_abonnement",
-					"message": "Vous avez atteint la limite de votre abonnement " +
-						"(" + strconv.Itoa(limit) + " annonces). Passez à un plan supérieur pour en publier davantage.",
-					"plan":  plan,
-					"limit": limit,
-				})
-				return
-			}
-		}
-	}
 
 	listing := models.Listing{
 		Title:       req.Title,
