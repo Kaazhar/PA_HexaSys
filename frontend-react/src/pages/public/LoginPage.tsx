@@ -22,7 +22,7 @@ interface LoginResponse {
 }
 
 export default function LoginPage() {
-  const { login, setSession } = useAuth();
+  const { setSession } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>();
@@ -79,8 +79,6 @@ export default function LoginPage() {
       />
     );
   }
-
-  void login;
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
