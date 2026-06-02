@@ -78,8 +78,8 @@ export default function MessagesPage() {
   };
 
   return (
-    <DashboardLayout sidebarItems={sidebar} title="Messages">
-      <div className="h-[calc(100vh-180px)] flex gap-4">
+    <DashboardLayout sidebarItems={sidebar} title="Messages" noPadding>
+      <div className="h-full flex gap-4 p-5">
         {/* Conversations list */}
         <div className="w-72 flex-shrink-0 flex flex-col card p-0 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100">

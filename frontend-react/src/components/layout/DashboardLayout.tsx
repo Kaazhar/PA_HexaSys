@@ -18,6 +18,7 @@ interface DashboardLayoutProps {
   children: ReactNode;
   sidebarItems?: NavItem[];
   title?: string;
+  noPadding?: boolean;
 }
 
 const roleLabels: Record<string, string> = {
@@ -27,7 +28,7 @@ const roleLabels: Record<string, string> = {
   admin: 'Administrateur',
 };
 
-export default function DashboardLayout({ children, sidebarItems = [], title }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, sidebarItems = [], title, noPadding = false }: DashboardLayoutProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [notifOpen, setNotifOpen] = useState(false);
@@ -116,7 +117,7 @@ export default function DashboardLayout({ children, sidebarItems = [], title }: 
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-5">
+        <main className={`flex-1 overflow-hidden ${noPadding ? '' : 'overflow-y-auto p-5'}`}>
           {children}
         </main>
       </div>
