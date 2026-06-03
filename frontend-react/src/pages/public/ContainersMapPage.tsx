@@ -9,6 +9,7 @@ import { containerService } from '../../services/api';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 // Fix default Leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -24,14 +25,15 @@ const statusColors: Record<string, string> = {
   maintenance: 'bg-amber-100 text-amber-700',
 };
 
-const statusLabels: Record<string, string> = {
-  operational: 'Opérationnel',
-  full: 'Complet',
-  maintenance: 'Maintenance',
-};
-
 export default function ContainersMapPage() {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
+
+  const statusLabels: Record<string, string> = {
+    operational: t('containers_map.status.operational'),
+    full: t('containers_map.status.full'),
+    maintenance: t('containers_map.status.maintenance'),
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['containers'],
@@ -45,8 +47,8 @@ export default function ContainersMapPage() {
     <PublicLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">Conteneurs de collecte</h1>
-          <p className="text-gray-500 text-sm">Déposez vos objets dans nos conteneurs répartis dans la ville</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">{t('containers_map.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('containers_map.subtitle')}</p>
         </div>
 
         {isLoading ? (
@@ -86,7 +88,7 @@ export default function ContainersMapPage() {
                 </MapContainer>
               ) : (
                 <div className="h-full flex items-center justify-center bg-gray-50">
-                  <p className="text-gray-400">Aucune donnée de position disponible</p>
+                  <p className="text-gray-400">{t('containers_map.no_coords')}</p>
                 </div>
               )}
             </div>
@@ -117,22 +119,22 @@ export default function ContainersMapPage() {
                     />
                   </div>
                   <p className="text-xs text-gray-400">
-                    {container.current_count}/{container.capacity} objets
+                    {container.current_count}/{container.capacity} {t('containers_map.objects')}
                   </p>
                 </div>
               ))}
 
               {isAuthenticated && (
                 <Link to="/conteneurs/demande" className="btn-primary w-full text-center block mt-2">
-                  Faire une demande de dépôt
+                  {t('containers_map.deposit_btn')}
                 </Link>
               )}
 
               {!isAuthenticated && (
                 <div className="card bg-gray-50 text-center">
                   <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500 mb-3">Connectez-vous pour faire une demande de dépôt</p>
-                  <Link to="/login" className="btn-primary text-sm py-2">Se connecter</Link>
+                  <p className="text-sm text-gray-500 mb-3">{t('containers_map.login_prompt')}</p>
+                  <Link to="/login" className="btn-primary text-sm py-2">{t('containers_map.login_btn')}</Link>
                 </div>
               )}
             </div>

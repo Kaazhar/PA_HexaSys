@@ -9,6 +9,7 @@ import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import { salarieSidebar } from '../../config/sidebars';
+import { useTranslation } from 'react-i18next';
 
 interface Article {
   id: number;
@@ -31,6 +32,7 @@ interface ArticleForm {
 const defaultForm: ArticleForm = { title: '', content: '', tags: '', status: 'draft' };
 
 export default function SalarieArticles() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editArticle, setEditArticle] = useState<Article | null>(null);
@@ -97,15 +99,15 @@ export default function SalarieArticles() {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <DashboardLayout sidebarItems={salarieSidebar} title="Espace Salarié">
+    <DashboardLayout sidebarItems={salarieSidebar} title={t('salarie_articles.title')}>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Mes articles</h2>
-            <p className="text-gray-500 text-sm mt-0.5">{articles.length} article{articles.length !== 1 ? 's' : ''}</p>
+            <h2 className="text-xl font-bold text-gray-900">{t('salarie_articles.title')}</h2>
+            <p className="text-gray-500 text-sm mt-0.5">{articles.length}</p>
           </div>
           <button onClick={() => { setShowForm(true); setEditArticle(null); setForm(defaultForm); }} className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Écrire un article
+            <Plus className="w-4 h-4" /> {t('salarie_articles.write')}
           </button>
         </div>
 
@@ -114,8 +116,8 @@ export default function SalarieArticles() {
         ) : articles.length === 0 ? (
           <div className="card text-center py-16 text-gray-400">
             <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p className="font-medium">Aucun article rédigé</p>
-            <p className="text-sm mt-1">Partagez vos connaissances sur l'upcycling</p>
+            <p className="font-medium">{t('salarie_articles.no_articles')}</p>
+            <p className="text-sm mt-1">{t('salarie_articles.no_articles_sub')}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -126,14 +128,14 @@ export default function SalarieArticles() {
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <h3 className="font-semibold text-gray-900">{article.title}</h3>
                       <span className={clsx('badge text-xs', article.status === 'published' ? 'badge-green' : 'badge-gray')}>
-                        {article.status === 'published' ? 'Publié' : 'Brouillon'}
+                        {article.status === 'published' ? t('salarie_articles.published') : t('salarie_articles.draft')}
                       </span>
                     </div>
                     {article.content && (
                       <p className="text-sm text-gray-500 line-clamp-2 mt-1">{article.content}</p>
                     )}
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-                      <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {article.views} vues</span>
+                      <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {article.views} {t('salarie_articles.views')}</span>
                       <span>{format(new Date(article.created_at), 'dd MMM yyyy', { locale: fr })}</span>
                       {article.tags && <span className="text-primary-400">{article.tags}</span>}
                     </div>
@@ -174,7 +176,7 @@ export default function SalarieArticles() {
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <h3 className="font-bold text-gray-900 text-lg">
-                {editArticle ? 'Modifier l\'article' : 'Écrire un article'}
+                {editArticle ? t('salarie_articles.edit_modal_title') : t('salarie_articles.write_modal_title')}
               </h3>
               <button onClick={() => { setShowForm(false); setEditArticle(null); }} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
@@ -182,11 +184,11 @@ export default function SalarieArticles() {
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="label">Titre *</label>
+                <label className="label">{t('salarie_articles.label_title')}</label>
                 <input className="input" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
               </div>
               <div>
-                <label className="label">Contenu</label>
+                <label className="label">{t('salarie_articles.label_content')}</label>
                 <textarea
                   className="input min-h-[200px] resize-y font-normal"
                   value={form.content}
@@ -196,22 +198,22 @@ export default function SalarieArticles() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Tags</label>
+                  <label className="label">{t('salarie_articles.label_tags')}</label>
                   <input className="input" placeholder="upcycling, textile, ..." value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="label">Statut</label>
+                  <label className="label">{t('salarie_articles.label_status')}</label>
                   <select className="input" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
-                    <option value="draft">Brouillon</option>
-                    <option value="published">Publier</option>
+                    <option value="draft">{t('salarie_articles.status_draft')}</option>
+                    <option value="published">{t('salarie_articles.status_publish')}</option>
                   </select>
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => { setShowForm(false); setEditArticle(null); }} className="btn-secondary">Annuler</button>
+                <button type="button" onClick={() => { setShowForm(false); setEditArticle(null); }} className="btn-secondary">{t('salarie_articles.cancel')}</button>
                 <button type="submit" disabled={isPending} className="btn-primary flex items-center gap-2">
                   {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                  {editArticle ? 'Enregistrer' : 'Créer'}
+                  {editArticle ? t('salarie_articles.save') : t('salarie_articles.create')}
                 </button>
               </div>
             </form>
@@ -230,7 +232,7 @@ export default function SalarieArticles() {
               </button>
             </div>
             <div className="p-6">
-              <p className="text-gray-600 whitespace-pre-line leading-relaxed">{preview.content || 'Aucun contenu.'}</p>
+              <p className="text-gray-600 whitespace-pre-line leading-relaxed">{preview.content || t('salarie_articles.no_content')}</p>
               {preview.tags && (
                 <div className="flex gap-2 flex-wrap mt-4 pt-4 border-t border-gray-100">
                   {preview.tags.split(',').map(tag => (
@@ -247,17 +249,17 @@ export default function SalarieArticles() {
       {deleteId !== null && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm p-6">
-            <h3 className="font-bold text-gray-900 mb-2">Supprimer l'article ?</h3>
-            <p className="text-sm text-gray-500 mb-4">Cette action est irréversible.</p>
+            <h3 className="font-bold text-gray-900 mb-2">{t('salarie_articles.delete_title')}</h3>
+            <p className="text-sm text-gray-500 mb-4">{t('salarie_articles.delete_msg')}</p>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setDeleteId(null)} className="btn-secondary">Annuler</button>
+              <button onClick={() => setDeleteId(null)} className="btn-secondary">{t('salarie_articles.cancel')}</button>
               <button
                 disabled={deleteMutation.isPending}
                 onClick={() => deleteMutation.mutate(deleteId)}
                 className="btn-primary bg-red-500 hover:bg-red-600 flex items-center gap-2"
               >
                 {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                Supprimer
+                {t('salarie_articles.delete_btn')}
               </button>
             </div>
           </div>

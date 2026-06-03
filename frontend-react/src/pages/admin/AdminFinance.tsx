@@ -10,8 +10,10 @@ import { adminSidebar } from '../../config/sidebars';
 import EmptyState from '../../components/common/EmptyState';
 import StatusBadge from '../../components/common/StatusBadge';
 import { invoiceStatuses } from '../../config/statuses';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminFinance() {
+  const { t } = useTranslation();
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ['admin', 'finance'],
     queryFn: () => adminService.getFinance(),
@@ -26,7 +28,7 @@ export default function AdminFinance() {
   const invoices = invoicesData?.data || [];
 
   return (
-    <DashboardLayout sidebarItems={adminSidebar} title="Finance">
+    <DashboardLayout sidebarItems={adminSidebar} title={t('admin_finance.title')}>
       <div className="space-y-6">
         {/* Stats */}
         {statsLoading ? (
@@ -34,43 +36,43 @@ export default function AdminFinance() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <StatCard
-              title="Revenu mensuel"
+              title={t('admin_finance.monthly_revenue')}
               value={`${stats?.monthly_revenue?.toFixed(0) || 0}€`}
               icon={<DollarSign className="w-5 h-5" />}
               color="green"
             />
             <StatCard
-              title="Revenu annuel"
+              title={t('admin_finance.annual_revenue')}
               value={`${stats?.annual_revenue?.toFixed(0) || 0}€`}
               icon={<DollarSign className="w-5 h-5" />}
               color="blue"
             />
             <StatCard
-              title="Factures totales"
+              title={t('admin_finance.total_invoices')}
               value={stats?.total_invoices || 0}
               icon={<FileText className="w-5 h-5" />}
               color="purple"
             />
             <StatCard
-              title="Montant en attente"
+              title={t('admin_finance.pending_amount')}
               value={`${stats?.pending_amount?.toFixed(0) || 0}€`}
               icon={<DollarSign className="w-5 h-5" />}
               color="coral"
             />
             <StatCard
-              title="Commissions (ce mois)"
+              title={t('admin_finance.monthly_commissions')}
               value={`${stats?.monthly_commissions?.toFixed(2) || '0.00'}€`}
               icon={<Percent className="w-5 h-5" />}
               color="green"
             />
             <StatCard
-              title="Commissions totales"
+              title={t('admin_finance.total_commissions')}
               value={`${stats?.total_commissions?.toFixed(2) || '0.00'}€`}
               icon={<Percent className="w-5 h-5" />}
               color="blue"
             />
             <StatCard
-              title="Ventes conclues"
+              title={t('admin_finance.sold_listings')}
               value={stats?.total_sold_listings || 0}
               icon={<FileText className="w-5 h-5" />}
               color="purple"
@@ -81,25 +83,25 @@ export default function AdminFinance() {
         {/* Invoices */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">Factures récentes</h2>
+            <h2 className="font-semibold text-gray-900">{t('admin_finance.recent_invoices')}</h2>
           </div>
           {invoicesLoading ? (
             <div className="flex justify-center py-10"><LoadingSpinner /></div>
           ) : invoices.length === 0 ? (
-            <EmptyState icon={<FileText className="w-10 h-10" />} message="Aucune facture" />
+            <EmptyState icon={<FileText className="w-10 h-10" />} message={t('common.noData')} />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
-                    <th className="table-header">Numéro</th>
-                    <th className="table-header">Client</th>
-                    <th className="table-header">Type</th>
-                    <th className="table-header">Montant HT</th>
-                    <th className="table-header">TVA</th>
-                    <th className="table-header">Total TTC</th>
-                    <th className="table-header">Statut</th>
-                    <th className="table-header">Date</th>
+                    <th className="table-header">{t('admin_finance.col_number')}</th>
+                    <th className="table-header">{t('admin_finance.col_client')}</th>
+                    <th className="table-header">{t('admin_finance.col_type')}</th>
+                    <th className="table-header">{t('admin_finance.col_ht')}</th>
+                    <th className="table-header">{t('admin_finance.col_tva')}</th>
+                    <th className="table-header">{t('admin_finance.col_ttc')}</th>
+                    <th className="table-header">{t('admin_finance.col_status')}</th>
+                    <th className="table-header">{t('admin_finance.col_date')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">

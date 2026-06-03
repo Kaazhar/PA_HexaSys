@@ -6,8 +6,10 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import type { User } from '../../types';
 import logo from '../../assets/logo.png';
+import { useTranslation } from 'react-i18next';
 
 export default function ConfirmEmailPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setSession, user } = useAuth();
@@ -19,7 +21,7 @@ export default function ConfirmEmailPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (code.length !== 6) { toast.error('Le code doit contenir 6 chiffres'); return; }
+    if (code.length !== 6) { toast.error(t('confirm_email.code_error')); return; }
     setLoading(true);
     try {
       const res = await authService.confirmEmail(email, code);
@@ -29,20 +31,20 @@ export default function ConfirmEmailPage() {
       const dashboardMap: Record<string, string> = { admin: '/admin', professionnel: '/pro', salarie: '/salarie', particulier: '/dashboard' };
       setTimeout(() => navigate(dashboardMap[confirmedUser?.role || ''] || '/dashboard'), 1500);
     } catch {
-      toast.error('Code incorrect ou expiré');
+      toast.error(t('confirm_email.confirm_error'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleResend = async () => {
-    if (!email) { toast.error('Email introuvable'); return; }
+    if (!email) { toast.error(t('confirm_email.email_error')); return; }
     setResending(true);
     try {
       await authService.resendConfirmEmail(email);
-      toast.success('Nouveau code envoyé !');
+      toast.success(t('confirm_email.resend_success'));
     } catch {
-      toast.error('Erreur lors de l\'envoi');
+      toast.error(t('confirm_email.resend_error'));
     } finally {
       setResending(false);
     }
@@ -53,8 +55,8 @@ export default function ConfirmEmailPage() {
       <div className="min-h-screen flex items-center justify-center bg-beige-50">
         <div className="text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Email confirmé !</h1>
-          <p className="text-gray-500">Redirection en cours...</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('confirm_email.success_title')}</h1>
+          <p className="text-gray-500">{t('confirm_email.redirecting')}</p>
         </div>
       </div>
     );
@@ -67,8 +69,8 @@ export default function ConfirmEmailPage() {
         <div className="w-14 h-14 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Mail className="w-7 h-7 text-primary-600" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Vérifiez votre email</h1>
-        <p className="text-gray-500 mb-1">Un code à 6 chiffres a été envoyé à</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('confirm_email.title')}</h1>
+        <p className="text-gray-500 mb-1">{t('confirm_email.subtitle')}</p>
         <p className="font-semibold text-gray-800 mb-6">{email}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -83,7 +85,7 @@ export default function ConfirmEmailPage() {
             autoFocus
           />
           <button type="submit" disabled={loading || code.length !== 6} className="btn-primary w-full">
-            {loading ? 'Vérification...' : 'Confirmer mon compte'}
+            {loading ? t('confirm_email.verifying') : t('confirm_email.verify_btn')}
           </button>
         </form>
 
@@ -92,7 +94,7 @@ export default function ConfirmEmailPage() {
           disabled={resending}
           className="mt-4 text-sm text-primary-600 hover:underline disabled:opacity-50"
         >
-          {resending ? 'Envoi en cours...' : 'Renvoyer le code'}
+          {resending ? t('confirm_email.resending') : t('confirm_email.resend')}
         </button>
       </div>
     </div>

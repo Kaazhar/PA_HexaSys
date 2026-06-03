@@ -3,6 +3,7 @@ import { CheckCircle, ArrowRight, Loader2, Download } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api, { invoiceService } from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 type ConfirmResult = {
   status: string;
@@ -13,6 +14,7 @@ type ConfirmResult = {
 };
 
 export default function PaymentSuccessPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const { user } = useAuth();
@@ -26,7 +28,7 @@ export default function PaymentSuccessPage() {
     try {
       await invoiceService.downloadPdf(result.invoice_id);
     } catch {
-      alert('Impossible de télécharger la facture pour le moment.');
+      alert(t('payment_success.download_invoice'));
     } finally {
       setDownloading(false);
     }
@@ -51,10 +53,10 @@ export default function PaymentSuccessPage() {
   };
 
   const getMessage = () => {
-    if (!result) return 'Votre paiement a été confirmé.';
-    if (result.type === 'workshop') return `Votre inscription à "${result.title}" est confirmée !`;
-    if (result.type === 'subscription') return `Abonnement ${result.plan} activé !`;
-    return 'Votre paiement a été confirmé.';
+    if (!result) return t('payment_success.msg_default');
+    if (result.type === 'workshop') return t('payment_success.msg_workshop', { title: result.title });
+    if (result.type === 'subscription') return t('payment_success.msg_subscription', { plan: result.plan });
+    return t('payment_success.msg_default');
   };
 
   return (
@@ -65,15 +67,15 @@ export default function PaymentSuccessPage() {
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Loader2 className="w-10 h-10 text-green-400 animate-spin" />
             </div>
-            <h1 className="text-xl font-bold text-gray-900 mb-2">Confirmation en cours...</h1>
-            <p className="text-gray-400 text-sm">Nous enregistrons votre paiement.</p>
+            <h1 className="text-xl font-bold text-gray-900 mb-2">{t('payment_success.confirming')}</h1>
+            <p className="text-gray-400 text-sm">{t('payment_success.confirming_sub')}</p>
           </>
         ) : (
           <>
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-10 h-10 text-green-500" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Paiement réussi !</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('payment_success.title')}</h1>
             <p className="text-gray-600 mb-6">{getMessage()}</p>
 
             <div className="space-y-3">
@@ -84,21 +86,21 @@ export default function PaymentSuccessPage() {
                   className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-[#2D5016] text-white rounded-xl font-medium hover:bg-[#3a6a1e] transition-colors disabled:opacity-60"
                 >
                   {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                  Télécharger ma facture (PDF)
+                  {downloading ? t('payment_success.downloading') : t('payment_success.download_invoice')}
                 </button>
               )}
               <Link
                 to={getDashboardPath()}
                 className={`flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-medium transition-colors ${result?.invoice_id ? 'border-2 border-gray-200 text-gray-700 hover:bg-gray-50' : 'bg-[#2D5016] text-white hover:bg-[#3a6a1e]'}`}
               >
-                Aller au tableau de bord
+                {t('payment_success.go_dashboard')}
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 to="/formations"
                 className="flex items-center justify-center gap-2 w-full py-3 px-4 border-2 border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors text-sm"
               >
-                Voir les formations
+                {t('payment_success.see_workshops')}
               </Link>
             </div>
           </>

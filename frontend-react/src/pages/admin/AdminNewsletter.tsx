@@ -4,6 +4,7 @@ import { adminSidebar } from '../../config/sidebars';
 import { newsletterService } from '../../services/api';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface NewsletterForm {
   subject: string;
@@ -11,6 +12,7 @@ interface NewsletterForm {
 }
 
 export default function AdminNewsletter() {
+  const { t } = useTranslation();
   const { register, handleSubmit, reset, formState: { isSubmitting, errors } } = useForm<NewsletterForm>();
 
   const onSubmit = async (data: NewsletterForm) => {
@@ -24,7 +26,7 @@ export default function AdminNewsletter() {
   };
 
   return (
-    <DashboardLayout sidebarItems={adminSidebar} title="Newsletter">
+    <DashboardLayout sidebarItems={adminSidebar} title={t('admin_newsletter.title')}>
       <div className="max-w-2xl">
         <div className="card">
           <div className="flex items-center gap-3 mb-6">
@@ -32,16 +34,16 @@ export default function AdminNewsletter() {
               <Mail className="w-5 h-5 text-primary-600" />
             </div>
             <div>
-              <h2 className="font-bold text-gray-900">Envoyer une newsletter</h2>
-              <p className="text-sm text-gray-500">Envoyez un email à tous les abonnés à la newsletter.</p>
+              <h2 className="font-bold text-gray-900">{t('admin_newsletter.heading')}</h2>
+              <p className="text-sm text-gray-500">{t('admin_newsletter.subtitle')}</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
-              <label className="label">Sujet *</label>
+              <label className="label">{t('admin_newsletter.subject')}</label>
               <input
-                {...register('subject', { required: 'Sujet requis' })}
+                {...register('subject', { required: true })}
                 className="input"
                 placeholder="Ex: Nouveautés de la plateforme - Mars 2026"
               />
@@ -49,9 +51,9 @@ export default function AdminNewsletter() {
             </div>
 
             <div>
-              <label className="label">Contenu (HTML) *</label>
+              <label className="label">{t('admin_newsletter.content')}</label>
               <textarea
-                {...register('content', { required: 'Contenu requis' })}
+                {...register('content', { required: true })}
                 className="input min-h-[300px] font-mono text-sm resize-y"
                 placeholder="<h1>Bonjour !</h1><p>Voici les dernières nouvelles...</p>"
               />
@@ -59,9 +61,7 @@ export default function AdminNewsletter() {
             </div>
 
             <div className="p-4 bg-amber-50 rounded-xl border border-amber-100">
-              <p className="text-sm text-amber-700">
-                ⚠️ Cet email sera envoyé à tous les utilisateurs ayant activé la newsletter. Cette action est irréversible.
-              </p>
+              <p className="text-sm text-amber-700">{t('admin_newsletter.warning')}</p>
             </div>
 
             <button
@@ -70,7 +70,7 @@ export default function AdminNewsletter() {
               className="btn-primary flex items-center gap-2"
             >
               <Send className="w-4 h-4" />
-              {isSubmitting ? 'Envoi en cours...' : 'Envoyer la newsletter'}
+              {isSubmitting ? t('admin_newsletter.sending') : t('admin_newsletter.send_btn')}
             </button>
           </form>
         </div>

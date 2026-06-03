@@ -5,6 +5,7 @@ import PublicLayout from '../../components/layout/PublicLayout';
 import { authService } from '../../services/api';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface ResetForm {
   password: string;
@@ -12,6 +13,7 @@ interface ResetForm {
 }
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
@@ -20,13 +22,13 @@ export default function ResetPasswordPage() {
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<ResetForm>();
 
   const onSubmit = async ({ password }: ResetForm) => {
-    if (!token) { toast.error('Lien invalide'); return; }
+    if (!token) { toast.error(t('reset_password.invalid_link')); return; }
     try {
       await authService.resetPassword(token, password);
       setSuccess(true);
       setTimeout(() => navigate('/login'), 3000);
     } catch {
-      toast.error('Lien invalide ou expiré.');
+      toast.error(t('reset_password.expired'));
     }
   };
 
@@ -36,8 +38,8 @@ export default function ResetPasswordPage() {
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center">
             <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Lien invalide</h1>
-            <Link to="/mot-de-passe-oublie" className="btn-primary mt-4 inline-block">Demander un nouveau lien</Link>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('reset_password.invalid_title')}</h1>
+            <Link to="/mot-de-passe-oublie" className="btn-primary mt-4 inline-block">{t('reset_password.request_new')}</Link>
           </div>
         </div>
       </PublicLayout>
@@ -51,8 +53,8 @@ export default function ResetPasswordPage() {
           {success ? (
             <div className="text-center">
               <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Mot de passe mis à jour !</h1>
-              <p className="text-gray-500">Vous allez être redirigé vers la page de connexion...</p>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('reset_password.success_title')}</h1>
+              <p className="text-gray-500">{t('reset_password.success_sub')}</p>
             </div>
           ) : (
             <div className="card">
@@ -60,14 +62,14 @@ export default function ResetPasswordPage() {
                 <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mb-4">
                   <Lock className="w-6 h-6 text-primary-600" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">Nouveau mot de passe</h1>
-                <p className="text-gray-500 mt-1">Choisissez un nouveau mot de passe sécurisé.</p>
+                <h1 className="text-2xl font-bold text-gray-900">{t('reset_password.title')}</h1>
+                <p className="text-gray-500 mt-1">{t('reset_password.subtitle')}</p>
               </div>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
-                  <label className="label">Nouveau mot de passe</label>
+                  <label className="label">{t('reset_password.new_password')}</label>
                   <input
-                    {...register('password', { required: true, minLength: { value: 8, message: 'Minimum 8 caractères' } })}
+                    {...register('password', { required: true, minLength: { value: 8, message: t('reset_password.min_chars') } })}
                     type="password"
                     className="input"
                     placeholder="••••••••"
@@ -75,9 +77,9 @@ export default function ResetPasswordPage() {
                   {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
                 </div>
                 <div>
-                  <label className="label">Confirmer le mot de passe</label>
+                  <label className="label">{t('reset_password.confirm_password')}</label>
                   <input
-                    {...register('confirm', { validate: v => v === watch('password') || 'Les mots de passe ne correspondent pas' })}
+                    {...register('confirm', { validate: v => v === watch('password') || t('reset_password.mismatch') })}
                     type="password"
                     className="input"
                     placeholder="••••••••"
@@ -85,7 +87,7 @@ export default function ResetPasswordPage() {
                   {errors.confirm && <p className="text-red-500 text-xs mt-1">{errors.confirm.message}</p>}
                 </div>
                 <button type="submit" disabled={isSubmitting} className="btn-primary w-full">
-                  {isSubmitting ? 'Mise à jour...' : 'Réinitialiser le mot de passe'}
+                  {isSubmitting ? t('reset_password.submitting') : t('reset_password.submit')}
                 </button>
               </form>
             </div>

@@ -9,6 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { particulierSidebar } from '../../config/sidebars';
+import { useTranslation } from 'react-i18next';
 
 interface ListingForm {
   title: string;
@@ -21,6 +22,7 @@ interface ListingForm {
 }
 
 export default function EditListingPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [images, setImages] = useState<string[]>([]);
@@ -67,10 +69,10 @@ export default function EditListingPage() {
     mutationFn: (data: ListingForm & { images: string }) =>
       listingService.update(Number(id), data),
     onSuccess: () => {
-      toast.success('Annonce mise à jour ! Elle repassera en modération.');
+      toast.success(t('edit_listing.success'));
       navigate('/mes-annonces');
     },
-    onError: () => toast.error('Erreur lors de la mise à jour'),
+    onError: () => toast.error(t('edit_listing.error')),
   });
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,7 +85,7 @@ export default function EditListingPage() {
         setImages(prev => [...prev, res.data.url]);
       }
     } catch {
-      toast.error('Erreur lors du chargement de l\'image');
+      toast.error(t('edit_listing.image_error'));
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -105,26 +107,26 @@ export default function EditListingPage() {
 
   if (listingLoading) {
     return (
-      <DashboardLayout sidebarItems={particulierSidebar} title="Modifier l'annonce">
+      <DashboardLayout sidebarItems={particulierSidebar} title={t('edit_listing.title')}>
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout sidebarItems={particulierSidebar} title="Modifier l'annonce">
+    <DashboardLayout sidebarItems={particulierSidebar} title={t('edit_listing.title')}>
       <div className="max-w-2xl mx-auto">
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="card space-y-5">
-            <h2 className="text-lg font-bold text-gray-900">Modifier : {listing?.title}</h2>
+            <h2 className="text-lg font-bold text-gray-900">{t('edit_listing.edit_prefix')} {listing?.title}</h2>
 
             {/* Type */}
             <div>
-              <label className="label">Type d'annonce</label>
+              <label className="label">{t('edit_listing.type_label')}</label>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { value: 'don', label: 'Don', icon: '🎁', color: 'border-green-500 bg-green-50' },
-                  { value: 'vente', label: 'Vente', icon: '💰', color: 'border-coral-500 bg-coral-400/10' },
+                  { value: 'don', label: t('edit_listing.don'), icon: '🎁', color: 'border-green-500 bg-green-50' },
+                  { value: 'vente', label: t('edit_listing.sale'), icon: '💰', color: 'border-coral-500 bg-coral-400/10' },
                 ].map((opt) => (
                   <label key={opt.value} className={clsx(
                     'flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all',
@@ -140,7 +142,7 @@ export default function EditListingPage() {
 
             {/* Category */}
             <div>
-              <label className="label">Catégorie</label>
+              <label className="label">{t('edit_listing.category_label')}</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {categories.map((cat) => (
                   <label key={cat.id} className={clsx(
@@ -156,9 +158,9 @@ export default function EditListingPage() {
 
             {/* Title */}
             <div>
-              <label className="label">Titre *</label>
+              <label className="label">{t('edit_listing.title_field')}</label>
               <input
-                {...register('title', { required: 'Titre requis', minLength: { value: 5, message: 'Minimum 5 caractères' }, maxLength: { value: 100, message: 'Maximum 100 caractères' } })}
+                {...register('title', { required: t('edit_listing.title_required'), minLength: { value: 5, message: t('edit_listing.title_min') }, maxLength: { value: 100, message: t('edit_listing.title_max') } })}
                 className="input" maxLength={100}
               />
               {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
@@ -166,24 +168,24 @@ export default function EditListingPage() {
 
             {/* Description */}
             <div>
-              <label className="label">Description</label>
-              <textarea {...register('description', { maxLength: { value: 1000, message: 'Maximum 1000 caractères' } })} className="input min-h-[100px] resize-none" maxLength={1000} />
+              <label className="label">{t('edit_listing.description_field')}</label>
+              <textarea {...register('description', { maxLength: { value: 1000, message: t('edit_listing.description_max') } })} className="input min-h-[100px] resize-none" maxLength={1000} />
             </div>
 
             {/* Condition + Price */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="label">État</label>
+                <label className="label">{t('edit_listing.condition_label')}</label>
                 <select {...register('condition')} className="input">
-                  <option value="neuf">Neuf</option>
-                  <option value="bon_etat">Bon état</option>
-                  <option value="use">Usé</option>
-                  <option value="pieces">Pour pièces</option>
+                  <option value="neuf">{t('edit_listing.condition_options.neuf')}</option>
+                  <option value="bon_etat">{t('edit_listing.condition_options.bon_etat')}</option>
+                  <option value="use">{t('edit_listing.condition_options.use')}</option>
+                  <option value="pieces">{t('edit_listing.condition_options.pieces')}</option>
                 </select>
               </div>
               {formValues.type === 'vente' && (
                 <div>
-                  <label className="label">Prix (€)</label>
+                  <label className="label">{t('edit_listing.price_label')}</label>
                   <input {...register('price', { valueAsNumber: true, min: 0, max: 99999.99 })} type="number" step="0.01" min="0" max="99999.99" className="input" />
                 </div>
               )}
@@ -191,14 +193,14 @@ export default function EditListingPage() {
 
             {/* Location */}
             <div>
-              <label className="label">Localisation</label>
-              <input {...register('location', { required: 'Requis' })} className="input" />
+              <label className="label">{t('edit_listing.location_label')}</label>
+              <input {...register('location', { required: t('edit_listing.location_required') })} className="input" />
               {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location.message}</p>}
             </div>
 
             {/* Images */}
             <div>
-              <label className="label">Photos</label>
+              <label className="label">{t('edit_listing.photos_label')}</label>
               <div className="space-y-3">
                 {images.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -221,7 +223,7 @@ export default function EditListingPage() {
                   uploading ? 'border-gray-200 bg-gray-50 text-gray-400' : 'border-gray-300 hover:border-primary-400 hover:bg-primary-50 text-gray-500'
                 )}>
                   {uploading ? <LoadingSpinner size="sm" /> : <Upload className="w-4 h-4" />}
-                  {uploading ? 'Chargement...' : 'Ajouter des photos'}
+                  {uploading ? t('edit_listing.uploading') : t('edit_listing.add_photos')}
                   <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="sr-only" disabled={uploading} />
                 </label>
               </div>
@@ -229,11 +231,11 @@ export default function EditListingPage() {
 
             <div className="flex gap-3 pt-2 border-t border-gray-100">
               <button type="button" onClick={() => navigate('/mes-annonces')} className="btn-secondary flex-1">
-                Annuler
+                {t('edit_listing.cancel')}
               </button>
               <button type="submit" disabled={updateMutation.isPending} className="btn-primary flex-1 flex items-center justify-center gap-2">
-                {updateMutation.isPending ? 'Enregistrement...' : (
-                  <><CheckCircle className="w-4 h-4" /> Enregistrer</>
+                {updateMutation.isPending ? t('edit_listing.saving') : (
+                  <><CheckCircle className="w-4 h-4" /> {t('edit_listing.save')}</>
                 )}
               </button>
             </div>

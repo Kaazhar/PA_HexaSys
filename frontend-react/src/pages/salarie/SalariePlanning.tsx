@@ -8,18 +8,13 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSam
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
 import { salarieSidebar } from '../../config/sidebars';
+import { useTranslation } from 'react-i18next';
 
 const statusColors: Record<string, string> = {
   active: 'bg-green-500',
   pending: 'bg-amber-400',
   cancelled: 'bg-red-400',
   draft: 'bg-gray-400',
-};
-
-const typeLabels: Record<string, string> = {
-  atelier: 'Atelier',
-  formation: 'Formation',
-  conference: 'Conférence',
 };
 
 interface Workshop {
@@ -36,6 +31,16 @@ interface Workshop {
 }
 
 export default function SalariePlanning() {
+  const { t } = useTranslation();
+
+  const typeLabels: Record<string, string> = {
+    atelier: t('workshops.type.atelier'),
+    formation: t('workshops.type.formation'),
+    conference: t('workshops.type.conference'),
+  };
+
+  const DAYS: string[] = t('salarie_planning.days', { returnObjects: true }) as string[];
+
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selected, setSelected] = useState<Workshop | null>(null);
 
@@ -63,11 +68,11 @@ export default function SalariePlanning() {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
-    <DashboardLayout sidebarItems={salarieSidebar} title="Espace Salarié">
+    <DashboardLayout sidebarItems={salarieSidebar} title={t('salarie_planning.title')}>
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Mon planning</h2>
-          <p className="text-gray-500 text-sm mt-0.5">Vue calendrier de vos formations</p>
+          <h2 className="text-xl font-bold text-gray-900">{t('salarie_planning.title')}</h2>
+          <p className="text-gray-500 text-sm mt-0.5">{t('salarie_planning.subtitle')}</p>
         </div>
 
         {isLoading ? (
@@ -91,7 +96,7 @@ export default function SalariePlanning() {
 
               {/* Day headers */}
               <div className="grid grid-cols-7 mb-2">
-                {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
+                {DAYS.map(d => (
                   <div key={d} className="text-center text-xs font-medium text-gray-400 py-1">{d}</div>
                 ))}
               </div>
@@ -139,7 +144,7 @@ export default function SalariePlanning() {
 
               {/* Legend */}
               <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500">
-                {Object.entries({ active: 'Actif', pending: 'En attente', cancelled: 'Annulé' }).map(([k, v]) => (
+                {Object.entries({ active: t('salarie_planning.status_active'), pending: t('salarie_planning.status_pending'), cancelled: t('salarie_planning.status_cancelled') }).map(([k, v]) => (
                   <span key={k} className="flex items-center gap-1.5">
                     <span className={clsx('w-2.5 h-2.5 rounded-full', statusColors[k])} />
                     {v}
@@ -162,19 +167,19 @@ export default function SalariePlanning() {
                     </div>
                     <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-gray-400" />{selected.duration} min</div>
                     {selected.location && <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gray-400" />{selected.location}</div>}
-                    <div className="flex items-center gap-2"><Users className="w-4 h-4 text-gray-400" />{selected.enrolled}/{selected.max_spots} inscrits</div>
+                    <div className="flex items-center gap-2"><Users className="w-4 h-4 text-gray-400" />{selected.enrolled}/{selected.max_spots} {t('salarie_planning.enrolled')}</div>
                   </div>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                     <span className="text-xs badge-gray">{typeLabels[selected.type] || selected.type}</span>
-                    <span className="font-bold text-primary-500">{selected.price === 0 ? 'Gratuit' : `${selected.price}€`}</span>
+                    <span className="font-bold text-primary-500">{selected.price === 0 ? t('salarie_planning.free') : `${selected.price}€`}</span>
                   </div>
                 </div>
               ) : null}
 
               <div className="card">
-                <h3 className="font-semibold text-gray-900 mb-3">À venir</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{t('salarie_planning.upcoming')}</h3>
                 {upcoming.length === 0 ? (
-                  <p className="text-sm text-gray-400 text-center py-4">Aucune formation à venir</p>
+                  <p className="text-sm text-gray-400 text-center py-4">{t('salarie_planning.no_upcoming')}</p>
                 ) : (
                   <ul className="space-y-3">
                     {upcoming.slice(0, 5).map(ws => (
