@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
+import { authService } from '../../services/api';
 import Login2FAScreen from '../../components/Login2FAScreen';
 import toast from 'react-hot-toast';
 import logo from '../../assets/logo.png';
@@ -28,6 +30,13 @@ export default function LoginPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>();
 
   const [userId2FA, setUserId2FA] = useState<number | null>(null);
+  const [googleClientId, setGoogleClientId] = useState<string>('');
+
+  useEffect(() => {
+    authService.googleConfig()
+      .then(res => setGoogleClientId(res.data.client_id || ''))
+      .catch(() => setGoogleClientId(''));
+  }, []);
 
   const redirectApresLogin = (user: User) => {
     const dashboardMap: Record<string, string> = {
@@ -68,6 +77,23 @@ export default function LoginPage() {
   const apresValidation2FA = (token: string, user: User) => {
     setSession(token, user);
     redirectApresLogin(user);
+  };
+
+  const onGoogleSuccess = async (credential?: string) => {
+    if (!credential) { toast.error('Connexion Google annulée'); return; }
+    try {
+      const res = await authService.googleLogin(credential);
+      setSession(res.data.token, res.data.user);
+      toast.success('Connexion réussie');
+      redirectApresLogin(res.data.user);
+    } catch (err: unknown) {
+      const error = err as { response?: { status?: number; data?: { error?: string } } };
+      if (error.response?.status === 403) {
+        navigate('/compte-bloque');
+        return;
+      }
+      toast.error(error.response?.data?.error || 'Échec de la connexion Google');
+    }
   };
 
   if (userId2FA !== null) {
@@ -128,6 +154,27 @@ export default function LoginPage() {
             {isSubmitting ? t('auth.logging_in') : t('auth.login_btn')}
           </button>
         </form>
+
+        {googleClientId && (
+          <>
+            <div className="flex items-center gap-3 my-5">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-xs text-gray-400">ou</span>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+            <div className="flex justify-center">
+              <GoogleOAuthProvider clientId={googleClientId}>
+                <GoogleLogin
+                  onSuccess={(cred) => onGoogleSuccess(cred.credential)}
+                  onError={() => toast.error('Échec de la connexion Google')}
+                  text="signin_with"
+                  shape="rectangular"
+                  locale="fr"
+                />
+              </GoogleOAuthProvider>
+            </div>
+          </>
+        )}
 
         <p className="mt-5 text-center text-sm text-gray-500">
           {t('auth.no_account')}{' '}

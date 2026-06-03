@@ -69,7 +69,7 @@ export default function ContainerRequestPage() {
       }),
     onSuccess: () => {
       toast.success("Demande envoyée ! Vous recevrez votre code d'accès après validation.");
-      navigate('/dashboard');
+      navigate('/mes-depots');
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.error || "Erreur lors de l'envoi");

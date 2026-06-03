@@ -1,12 +1,16 @@
 package handlers
 
 import (
+	"bytes"
 	"fmt"
+	"image/png"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/boombuler/barcode"
+	"github.com/boombuler/barcode/code128"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"upcycleconnect/backend/config"
@@ -313,6 +317,49 @@ func ConfirmDeposit(c *gin.Context) {
 	})
 
 	c.JSON(http.StatusOK, gin.H{"message": "Dépôt confirmé"})
+}
+
+// Génère le code-barres (Code 128) d'une demande en image PNG, à la volée (jamais stocké).
+func GenerateRequestBarcode(c *gin.Context) {
+	id := c.Param("id")
+	userID, _ := c.Get("userID")
+	role, _ := c.Get("userRole")
+
+	var request models.ContainerRequest
+	if err := config.DB.First(&request, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Demande introuvable"})
+		return
+	}
+
+	if request.UserID != userID.(uint) && role != models.RoleAdmin {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Accès interdit"})
+		return
+	}
+
+	if request.Barcode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Aucun code-barres : la demande n'est pas encore approuvée"})
+		return
+	}
+
+	encoded, err := code128.Encode(request.Barcode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de générer le code-barres"})
+		return
+	}
+
+	scaled, err := barcode.Scale(encoded, 600, 150)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de générer le code-barres"})
+		return
+	}
+
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, scaled); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de générer le code-barres"})
+		return
+	}
+
+	c.Data(http.StatusOK, "image/png", buf.Bytes())
 }
 
 // GetMyContainerRequests - GET /containers/requests/mine (user auth)

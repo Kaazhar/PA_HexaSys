@@ -55,6 +55,9 @@ export const authService = {
     api.post<{ token: string; user: User }>('/auth/verify-2fa', { user_id: userId, code }),
   resend2FA: (userId: number) =>
     api.post('/auth/resend-2fa', { user_id: userId }),
+  googleConfig: () => api.get<{ client_id: string }>('/auth/google-config'),
+  googleLogin: (credential: string) =>
+    api.post<{ token: string; user: User }>('/auth/google', { credential }),
 };
 
 export const phoneService = {
@@ -157,6 +160,12 @@ export const containerService = {
   }) => api.post<ContainerRequest>('/containers/requests', data),
   validateRequest: (id: number) => api.put(`/containers/requests/${id}/validate`),
   rejectRequest: (id: number, reason: string) => api.put(`/containers/requests/${id}/reject`, { reason }),
+  getMyRequests: () => api.get<ContainerRequest[]>('/containers/requests/mine'),
+  confirmDeposit: (id: number) => api.put(`/containers/requests/${id}/confirm-deposit`),
+  getBarcodeUrl: async (id: number) => {
+    const res = await api.get(`/containers/requests/${id}/barcode`, { responseType: 'blob' });
+    return window.URL.createObjectURL(res.data as Blob);
+  },
 };
 
 // Score

@@ -118,7 +118,7 @@ export interface ContainerRequest {
   object_title: string;
   object_description: string;
   desired_date: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'deposited';
   access_code?: string;
   barcode?: string;
   reject_reason?: string;

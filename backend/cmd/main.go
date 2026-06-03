@@ -108,6 +108,8 @@ func main() {
 		auth.POST("/resend-confirm", handlers.ResendConfirmEmail)
 		auth.POST("/verify-2fa", handlers.Verify2FA)
 		auth.POST("/resend-2fa", handlers.Resend2FACode)
+		auth.GET("/google-config", handlers.GetGoogleConfig)
+		auth.POST("/google", handlers.GoogleLogin)
 	}
 
 	phone := api.Group("/phone")
@@ -176,6 +178,7 @@ func main() {
 	api.PUT("/containers/requests/:id/reject", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.RejectContainerRequest)
 	api.PUT("/containers/requests/:id/confirm-deposit", middleware.AuthRequired(), handlers.ConfirmDeposit)
 	api.GET("/containers/requests/mine", middleware.AuthRequired(), handlers.GetMyContainerRequests)
+	api.GET("/containers/requests/:id/barcode", middleware.AuthRequired(), handlers.GenerateRequestBarcode)
 	api.DELETE("/containers/:id/slots", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ClearContainerSlots)
 
 	api.GET("/subscription", middleware.AuthRequired(), handlers.GetMySubscription)

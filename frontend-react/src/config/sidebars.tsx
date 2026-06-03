@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign,
   FolderOpen, Flag, PlusCircle, Star, MessageCircle, Map,
-  Briefcase, Image, FileText, Calendar, Send, MessageSquare, Lightbulb,
+  Briefcase, Image, FileText, Calendar, Send, MessageSquare, Lightbulb, PackageCheck,
 } from 'lucide-react';
 
 export const adminSidebar = [
@@ -25,6 +25,7 @@ export const particulierSidebar = [
   { label: 'Messages',         path: '/messages',          icon: <MessageCircle className="w-4 h-4" /> },
   { label: 'Formations',       path: '/formations',        icon: <BookOpen className="w-4 h-4" /> },
   { label: 'Conteneurs',       path: '/conteneurs',        icon: <Map className="w-4 h-4" /> },
+  { label: 'Mes dépôts',       path: '/mes-depots',        icon: <PackageCheck className="w-4 h-4" /> },
   { label: 'Mon score',        path: '/score',             icon: <Star className="w-4 h-4" /> },
 ];
 

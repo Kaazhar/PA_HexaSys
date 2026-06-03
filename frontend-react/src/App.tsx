@@ -37,6 +37,7 @@ import MesAnnoncesPage from './pages/particulier/MesAnnoncesPage';
 import EditListingPage from './pages/particulier/EditListingPage';
 import ScorePage from './pages/particulier/ScorePage';
 import ContainerRequestPage from './pages/particulier/ContainerRequestPage';
+import MesDepotsPage from './pages/particulier/MesDepotsPage';
 import AbonnementPage from './pages/particulier/AbonnementPage';
 import MonPlanningPage from './pages/particulier/MonPlanningPage';
 
@@ -135,6 +136,7 @@ function App() {
       <Route path="/mes-annonces/:id/modifier" element={<ProtectedRoute roles={['particulier', 'professionnel']}><EditListingPage /></ProtectedRoute>} />
       <Route path="/score" element={<ProtectedRoute roles={['particulier', 'professionnel', 'salarie']}><ScorePage /></ProtectedRoute>} />
       <Route path="/conteneurs/demande" element={<ProtectedRoute roles={['particulier']}><ContainerRequestPage /></ProtectedRoute>} />
+      <Route path="/mes-depots" element={<ProtectedRoute roles={['particulier']}><MesDepotsPage /></ProtectedRoute>} />
       <Route path="/abonnement" element={<ProtectedRoute roles={['professionnel']}><AbonnementPage /></ProtectedRoute>} />
       <Route path="/planning" element={<ProtectedRoute roles={['particulier']}><MonPlanningPage /></ProtectedRoute>} />
 
