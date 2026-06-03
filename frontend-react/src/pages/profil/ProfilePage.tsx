@@ -93,7 +93,12 @@ export default function ProfilePage() {
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    profileMutation.mutate(profileForm);
+    profileMutation.mutate({
+      ...profileForm,
+      firstname: profileForm.firstname.trim(),
+      lastname: profileForm.lastname.trim(),
+      address: profileForm.address?.trim(),
+    });
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {

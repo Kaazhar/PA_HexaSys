@@ -29,10 +29,10 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterForm) => {
     try {
       await authRegister({
-        email: data.email,
+        email: data.email.trim(),
         password: data.password,
-        firstname: data.firstname,
-        lastname: data.lastname,
+        firstname: data.firstname.trim(),
+        lastname: data.lastname.trim(),
         role: data.role,
         newsletter: data.newsletter,
       });

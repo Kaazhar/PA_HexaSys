@@ -80,10 +80,11 @@ export default function ProjetsPro() {
 
   const handleSubmit = () => {
     if (!form.title.trim()) return;
+    const trimmed = { ...form, title: form.title.trim(), description: form.description?.trim() };
     if (editing) {
-      updateMutation.mutate({ id: editing.id, d: form });
+      updateMutation.mutate({ id: editing.id, d: trimmed });
     } else {
-      createMutation.mutate(form);
+      createMutation.mutate(trimmed);
     }
   };
 

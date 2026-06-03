@@ -95,6 +95,9 @@ export default function EditListingPage() {
   const onSubmit = (data: ListingForm) => {
     updateMutation.mutate({
       ...data,
+      title: data.title.trim(),
+      description: data.description?.trim(),
+      location: data.location.trim(),
       category_id: Number(data.category_id),
       images: images.join(','),
     });
