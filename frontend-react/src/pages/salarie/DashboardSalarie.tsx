@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
 import { salarieSidebar } from '../../config/sidebars';
+import { useTranslation } from 'react-i18next';
 
 const statusConfig: Record<string, string> = {
   draft: 'badge-gray',
@@ -18,15 +19,16 @@ const statusConfig: Record<string, string> = {
   cancelled: 'badge-red',
 };
 
-const statusLabels: Record<string, string> = {
-  draft: 'Brouillon',
-  pending: 'En attente',
-  active: 'Actif',
-  cancelled: 'Annulé',
-};
-
 export default function DashboardSalarie() {
   const { user } = useAuth();
+  const { t } = useTranslation();
+
+  const statusLabels: Record<string, string> = {
+    draft: t('dashboard_salarie.status.draft'),
+    pending: t('dashboard_salarie.status.pending'),
+    active: t('dashboard_salarie.status.active'),
+    cancelled: t('dashboard_salarie.status.cancelled'),
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard', 'salarie'],
@@ -36,33 +38,33 @@ export default function DashboardSalarie() {
   const dashboard = data?.data;
 
   return (
-    <DashboardLayout sidebarItems={salarieSidebar} title="Espace Salarié">
+    <DashboardLayout sidebarItems={salarieSidebar} title={t('dashboard_salarie.title')}>
       {isLoading ? (
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (
         <div className="space-y-6">
           {/* Welcome */}
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Bonjour, {user?.firstname} !</h2>
-            <p className="text-gray-500 mt-1">Gérez vos formations et articles depuis votre espace salarié.</p>
+            <h2 className="text-xl font-bold text-gray-900">{t('dashboard_salarie.welcome', { name: user?.firstname })}</h2>
+            <p className="text-gray-500 mt-1">{t('dashboard_salarie.welcome_sub')}</p>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <StatCard
-              title="Mes formations"
+              title={t('dashboard_salarie.my_workshops')}
               value={dashboard?.my_workshops?.length || 0}
               icon={<BookOpen className="w-5 h-5" />}
               color="blue"
             />
             <StatCard
-              title="Mes articles"
+              title={t('dashboard_salarie.my_articles')}
               value={dashboard?.my_articles?.length || 0}
               icon={<FileText className="w-5 h-5" />}
               color="purple"
             />
             <StatCard
-              title="Formations à venir"
+              title={t('dashboard_salarie.upcoming')}
               value={dashboard?.upcoming_workshops?.length || 0}
               icon={<Calendar className="w-5 h-5" />}
               color="green"
@@ -73,15 +75,15 @@ export default function DashboardSalarie() {
             {/* My workshops */}
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Mes formations</h2>
+                <h2 className="font-semibold text-gray-900">{t('dashboard_salarie.my_workshops')}</h2>
                 <Link to="/salarie/formations" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Voir tout <ArrowRight className="w-3 h-3" />
+                  {t('dashboard_salarie.see_all')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
               {(dashboard?.my_workshops || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Aucune formation programmée</p>
+                  <p className="text-sm">{t('dashboard_salarie.no_workshops')}</p>
                 </div>
               ) : (
                 <ul className="space-y-3">
@@ -118,12 +120,12 @@ export default function DashboardSalarie() {
             {/* Upcoming workshops */}
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Prochaines formations (plateforme)</h2>
+                <h2 className="font-semibold text-gray-900">{t('dashboard_salarie.upcoming_title')}</h2>
               </div>
               {(dashboard?.upcoming_workshops || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <Calendar className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Aucune formation à venir</p>
+                  <p className="text-sm">{t('dashboard_salarie.no_upcoming')}</p>
                 </div>
               ) : (
                 <ul className="space-y-3">
@@ -147,7 +149,7 @@ export default function DashboardSalarie() {
                           </div>
                         </div>
                         <span className="text-sm font-bold text-primary-500 flex-shrink-0">
-                          {ws.price === 0 ? 'Gratuit' : `${ws.price}€`}
+                          {ws.price === 0 ? t('dashboard_salarie.free') : `${ws.price}€`}
                         </span>
                       </div>
                     </li>
@@ -161,9 +163,9 @@ export default function DashboardSalarie() {
           {(dashboard?.my_articles || []).length > 0 && (
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Mes articles récents</h2>
+                <h2 className="font-semibold text-gray-900">{t('dashboard_salarie.recent_articles')}</h2>
                 <Link to="/salarie/articles" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Voir tout <ArrowRight className="w-3 h-3" />
+                  {t('dashboard_salarie.see_all')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -172,11 +174,11 @@ export default function DashboardSalarie() {
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <p className="text-sm font-medium text-gray-900 line-clamp-1">{article.title}</p>
                       <span className={clsx('badge text-xs flex-shrink-0', article.status === 'published' ? 'badge-green' : 'badge-gray')}>
-                        {article.status === 'published' ? 'Publié' : 'Brouillon'}
+                        {article.status === 'published' ? t('dashboard_salarie.published') : t('dashboard_salarie.draft')}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-gray-400">
-                      <span>{article.views} vues</span>
+                      <span>{article.views} {t('dashboard_salarie.views')}</span>
                       <span>·</span>
                       <span>{article.created_at ? format(new Date(article.created_at), 'dd MMM yyyy', { locale: fr }) : '-'}</span>
                     </div>
@@ -189,9 +191,9 @@ export default function DashboardSalarie() {
           {/* Quick actions */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { label: 'Créer une formation', path: '/salarie/formations', icon: <BookOpen className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },
-              { label: 'Écrire un article', path: '/salarie/articles', icon: <FileText className="w-5 h-5" />, color: 'text-purple-500 bg-purple-50' },
-              { label: 'Mon planning', path: '/salarie/planning', icon: <Calendar className="w-5 h-5" />, color: 'text-amber-500 bg-amber-50' },
+              { label: t('dashboard_salarie.action_create_workshop'), path: '/salarie/formations', icon: <BookOpen className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },
+              { label: t('dashboard_salarie.action_write_article'), path: '/salarie/articles', icon: <FileText className="w-5 h-5" />, color: 'text-purple-500 bg-purple-50' },
+              { label: t('dashboard_salarie.action_planning'), path: '/salarie/planning', icon: <Calendar className="w-5 h-5" />, color: 'text-amber-500 bg-amber-50' },
             ].map((action, i) => (
               <Link key={i} to={action.path} className="card hover:shadow-md transition-shadow flex items-center gap-4">
                 <div className={`p-3 rounded-xl ${action.color}`}>{action.icon}</div>

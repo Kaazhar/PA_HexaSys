@@ -9,6 +9,7 @@ import { projectService } from '../../services/api';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { Project } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 type FormData = {
   title: string;
@@ -27,6 +28,7 @@ const emptyForm: FormData = {
 };
 
 export default function ProjetsPro() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Project | null>(null);
@@ -80,7 +82,7 @@ export default function ProjetsPro() {
   };
 
   const handleSubmit = () => {
-    if (!form.title.trim()) { toast.error('Le titre est requis'); return; }
+    if (!form.title.trim()) { toast.error(t('projects_pro.title_required')); return; }
     const trimmed = { ...form, title: form.title.trim(), description: form.description?.trim() };
     if (editing) {
       updateMutation.mutate({ id: editing.id, d: trimmed });
@@ -92,16 +94,16 @@ export default function ProjetsPro() {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <DashboardLayout sidebarItems={proSidebar} title="Projets upcycling">
+    <DashboardLayout sidebarItems={proSidebar} title={t('projects_pro.title')}>
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Projets Upcycling</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Partagez vos créations avant/après</p>
+            <h1 className="text-xl font-bold text-gray-900">{t('projects_pro.title')}</h1>
+            <p className="text-sm text-gray-500 mt-0.5">{t('projects_pro.subtitle')}</p>
           </div>
           <button onClick={openCreate} className="btn-primary flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            Nouveau projet
+            {t('projects_pro.new')}
           </button>
         </div>
 
@@ -110,11 +112,11 @@ export default function ProjetsPro() {
         ) : projects.length === 0 ? (
           <div className="card text-center py-12">
             <Image className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-            <p className="text-gray-400 font-medium">Aucun projet</p>
-            <p className="text-sm text-gray-400 mb-4">Partagez votre premier projet upcycling !</p>
+            <p className="text-gray-400 font-medium">{t('projects_pro.empty')}</p>
+            <p className="text-sm text-gray-400 mb-4">{t('projects_pro.empty_sub')}</p>
             <button onClick={openCreate} className="btn-primary inline-flex items-center gap-2">
               <Plus className="w-4 h-4" />
-              Créer un projet
+              {t('projects_pro.create')}
             </button>
           </div>
         ) : (
@@ -169,11 +171,11 @@ export default function ProjetsPro() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {editing ? 'Modifier le projet' : 'Nouveau projet'}
+              {editing ? t('projects_pro.modal_edit') : t('projects_pro.modal_new')}
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Titre *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('projects_pro.label_title')}</label>
                 <input
                   className="input w-full"
                   value={form.title}
@@ -183,7 +185,7 @@ export default function ProjetsPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('projects_pro.label_description')}</label>
                 <textarea
                   className="input w-full h-24 resize-none"
                   value={form.description}
@@ -193,7 +195,7 @@ export default function ProjetsPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Images avant (URLs séparées par virgule)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('projects_pro.label_before')}</label>
                 <input
                   className="input w-full"
                   value={form.before_images}
@@ -202,7 +204,7 @@ export default function ProjetsPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Images après (URLs séparées par virgule)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('projects_pro.label_after')}</label>
                 <input
                   className="input w-full"
                   value={form.after_images}
@@ -211,7 +213,7 @@ export default function ProjetsPro() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tags (séparés par virgule)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('projects_pro.label_tags')}</label>
                 <input
                   className="input w-full"
                   value={form.tags}
@@ -221,9 +223,9 @@ export default function ProjetsPro() {
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-5">
-              <button onClick={closeModal} className="btn-secondary">Annuler</button>
+              <button onClick={closeModal} className="btn-secondary">{t('projects_pro.cancel')}</button>
               <button onClick={handleSubmit} disabled={isPending || !form.title.trim()} className="btn-primary">
-                {isPending ? 'Enregistrement...' : editing ? 'Modifier' : 'Créer'}
+                {isPending ? t('projects_pro.saving') : editing ? t('projects_pro.save_edit') : t('projects_pro.save_create')}
               </button>
             </div>
           </div>
@@ -234,16 +236,16 @@ export default function ProjetsPro() {
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Supprimer ce projet ?</h3>
-            <p className="text-sm text-gray-500 mb-5">Cette action est irréversible.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('projects_pro.delete_title')}</h3>
+            <p className="text-sm text-gray-500 mb-5">{t('projects_pro.delete_msg')}</p>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setDeleteId(null)} className="btn-secondary">Annuler</button>
+              <button onClick={() => setDeleteId(null)} className="btn-secondary">{t('projects_pro.cancel')}</button>
               <button
                 onClick={() => deleteMutation.mutate(deleteId)}
                 disabled={deleteMutation.isPending}
                 className="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600 transition-colors"
               >
-                {deleteMutation.isPending ? 'Suppression...' : 'Supprimer'}
+                {deleteMutation.isPending ? t('projects_pro.deleting') : t('projects_pro.delete_confirm')}
               </button>
             </div>
           </div>
