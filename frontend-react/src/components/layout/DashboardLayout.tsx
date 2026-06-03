@@ -7,6 +7,7 @@ import { notificationService } from '../../services/api';
 import { Bell, MessageCircle } from 'lucide-react';
 import type { Notification } from '../../types';
 import PushNotificationButton from '../PushNotificationButton';
+import { useTranslation } from 'react-i18next';
 
 interface NavItem {
   label: string;
@@ -28,8 +29,15 @@ const roleLabels: Record<string, string> = {
   admin: 'Administrateur',
 };
 
+const LANGS = [
+  { code: 'fr', flag: '🇫🇷', label: 'FR' },
+  { code: 'en', flag: '🇬🇧', label: 'EN' },
+];
+
 export default function DashboardLayout({ children, sidebarItems = [], title, noPadding = false }: DashboardLayoutProps) {
   const { user } = useAuth();
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language?.split('-')[0] ?? 'fr';
   const queryClient = useQueryClient();
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -60,6 +68,24 @@ export default function DashboardLayout({ children, sidebarItems = [], title, no
             {title && <h1 className="text-base font-semibold text-gray-800">{title}</h1>}
           </div>
           <div className="flex items-center gap-2">
+            {/* Language switcher */}
+            <div className="flex items-center gap-1 mr-1">
+              {LANGS.map(lang => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => i18n.changeLanguage(lang.code)}
+                  className={`px-2 py-1 rounded text-xs font-semibold border transition-colors ${
+                    currentLang === lang.code
+                      ? 'border-primary-400 bg-primary-50 text-primary-700'
+                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {lang.flag} {lang.label}
+                </button>
+              ))}
+            </div>
+
             {/* Push notifications */}
             <PushNotificationButton />
 
