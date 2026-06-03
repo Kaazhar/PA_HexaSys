@@ -134,7 +134,7 @@ export default function MesAnnoncesPage() {
                     )}
                     {listing.status !== 'sold' && (
                       <Link
-                        to={`/annonces/${listing.id}/modifier`}
+                        to={`/mes-annonces/${listing.id}/modifier`}
                         className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
                       >
                         <Pencil className="w-4 h-4" />

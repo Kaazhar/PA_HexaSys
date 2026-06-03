@@ -181,7 +181,7 @@ export default function EditListingPage() {
               {formValues.type === 'vente' && (
                 <div>
                   <label className="label">Prix (€)</label>
-                  <input {...register('price', { valueAsNumber: true, min: 0 })} type="number" step="0.01" className="input" />
+                  <input {...register('price', { valueAsNumber: true, min: 0, max: 99999.99 })} type="number" step="0.01" max="99999.99" className="input" />
                 </div>
               )}
             </div>

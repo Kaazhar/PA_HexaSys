@@ -274,7 +274,8 @@ export default function CreateListingPage() {
                   <div>
                     <label className="label">Prix (€)</label>
                     <input type="number" value={price} onChange={e => setPrice(e.target.value)}
-                      step="0.01" min="0" className="input" placeholder="0.00" />
+                      step="0.01" min="0" max="99999.99" className="input" placeholder="0.00"
+                      onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setPrice(Math.round(v * 100) / 100 + ''); }} />
                   </div>
                 )}
               </div>
@@ -289,7 +290,8 @@ export default function CreateListingPage() {
                 <div>
                   <label className="label">Poids estimé (kg)</label>
                   <input type="number" value={weight} onChange={e => setWeight(e.target.value)}
-                    step="0.1" min="0" className="input" placeholder="Ex: 2.5" />
+                    step="0.1" min="0" max="9999.9" className="input" placeholder="Ex: 2.5"
+                    onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setWeight(Math.round(v * 10) / 10 + ''); }} />
                 </div>
               </div>
 
