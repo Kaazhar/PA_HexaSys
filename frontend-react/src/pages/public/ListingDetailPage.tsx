@@ -10,19 +10,26 @@ import { useAuth } from '../../context/AuthContext';
 import clsx from 'clsx';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
-const conditionLabels: Record<string, string> = {
-  neuf: 'Neuf',
-  bon_etat: 'Bon état',
-  use: 'Usé',
-  pieces: 'Pour pièces',
-};
+function useConditionLabels() {
+  const { t } = useTranslation();
+  return {
+    neuf: t('listings.condition.neuf'),
+    bon_etat: t('listings.condition.bon_etat'),
+    use: t('listings.condition.use'),
+    pieces: t('listings.condition.pieces'),
+  };
+}
 
-const roleLabels: Record<string, string> = {
-  particulier: 'Particulier',
-  professionnel: 'Professionnel',
-  salarie: 'Salarié',
-};
+function useRoleLabels() {
+  const { t } = useTranslation();
+  return {
+    particulier: t('auth.role_labels.particulier'),
+    professionnel: t('auth.role_labels.professionnel'),
+    salarie: t('auth.role_labels.salarie'),
+  };
+}
 
 function StarRating({ value, onChange }: { value: number; onChange?: (v: number) => void }) {
   const [hovered, setHovered] = useState(0);
@@ -47,6 +54,9 @@ function StarRating({ value, onChange }: { value: number; onChange?: (v: number)
 }
 
 export default function ListingDetailPage() {
+  const { t } = useTranslation();
+  const conditionLabels = useConditionLabels();
+  const roleLabels = useRoleLabels();
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
@@ -125,14 +135,14 @@ export default function ListingDetailPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link to="/annonces" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
           <ArrowLeft className="w-4 h-4" />
-          Retour aux annonces
+          {t('listing_detail.back')}
         </Link>
 
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : isError || !listing ? (
           <div className="text-center py-20 text-gray-400">
-            <p className="text-lg font-medium">Annonce introuvable</p>
+            <p className="text-lg font-medium">{t('listing_detail.not_found')}</p>
           </div>
         ) : (
           <>
@@ -156,7 +166,7 @@ export default function ListingDetailPage() {
                       )}
                       <div className="absolute top-4 left-4 flex gap-2">
                         <span className={clsx('badge font-semibold', listing.type === 'don' ? 'bg-green-500 text-white' : 'bg-coral-500 text-white')}>
-                          {listing.type === 'don' ? 'Don' : 'Vente'}
+                          {listing.type === 'don' ? t('listings.type.don') : t('listings.type.vente')}
                         </span>
                         {listing.condition && (
                           <span className="badge bg-white/20 text-white backdrop-blur-sm">
@@ -166,7 +176,7 @@ export default function ListingDetailPage() {
                       </div>
                       <div className="absolute bottom-4 right-4">
                         <span className="text-2xl font-bold text-white drop-shadow">
-                          {listing.type === 'vente' && listing.price ? `${listing.price}€` : 'Gratuit'}
+                          {listing.type === 'vente' && listing.price ? `${listing.price}€` : t('common.free')}
                         </span>
                       </div>
                     </div>
@@ -210,7 +220,7 @@ export default function ListingDetailPage() {
 
                 {listing.description && (
                   <div>
-                    <h2 className="font-semibold text-gray-900 mb-2">Description</h2>
+                    <h2 className="font-semibold text-gray-900 mb-2">{t('listing_detail.description')}</h2>
                     <p className="text-gray-600 whitespace-pre-line leading-relaxed">{listing.description}</p>
                   </div>
                 )}
@@ -220,7 +230,7 @@ export default function ListingDetailPage() {
             {/* Seller card */}
             <div className="space-y-4">
               <div className="card">
-                <h2 className="font-semibold text-gray-900 mb-4">Vendeur / Donateur</h2>
+                <h2 className="font-semibold text-gray-900 mb-4">{t('listing_detail.seller')}</h2>
 
                 {seller ? (
                   <div className="space-y-4">
@@ -251,7 +261,7 @@ export default function ListingDetailPage() {
                           {seller.siret_verified && (
                             <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">
                               <BadgeCheck className="w-3 h-3" />
-                              Pro vérifié
+                              {t('listing_detail.pro_verified')}
                             </span>
                           )}
                         </div>
@@ -261,7 +271,7 @@ export default function ListingDetailPage() {
                     {/* Member since */}
                     {seller.created_at && (
                       <div className="text-xs text-gray-400 border-t border-gray-50 pt-3">
-                        Membre depuis {format(new Date(seller.created_at), 'MMMM yyyy', { locale: fr })}
+                        {t('listing_detail.member_since')} {format(new Date(seller.created_at), 'MMMM yyyy', { locale: fr })}
                       </div>
                     )}
 
@@ -295,7 +305,7 @@ export default function ListingDetailPage() {
                             <div className="flex items-center gap-2">
                               <Calendar className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                               <p className="text-xs text-gray-600">
-                                Créée le {format(new Date(company.date_creation), 'dd MMMM yyyy', { locale: fr })}
+                                {t('listing_detail.company_founded')} {format(new Date(company.date_creation), 'dd MMMM yyyy', { locale: fr })}
                               </p>
                             </div>
                           )}
@@ -317,7 +327,7 @@ export default function ListingDetailPage() {
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400">Informations vendeur indisponibles</p>
+                  <p className="text-sm text-gray-400">{t('listing_detail.no_seller')}</p>
                 )}
               </div>
 
@@ -328,7 +338,7 @@ export default function ListingDetailPage() {
                   className="w-full flex items-center justify-center gap-2 text-xs text-gray-400 hover:text-red-500 transition-colors py-1"
                 >
                   <Flag className="w-3.5 h-3.5" />
-                  Signaler cette annonce
+                  {t('listing_detail.report')}
                 </button>
               )}
 
@@ -337,13 +347,13 @@ export default function ListingDetailPage() {
                 <div className="text-center mb-4">
                   {listing.type === 'vente' && listing.price ? (
                     <>
-                      <p className="text-sm text-gray-500 mb-1">Prix demandé</p>
+                      <p className="text-sm text-gray-500 mb-1">{t('listing_detail.price_label')}</p>
                       <p className="text-3xl font-bold text-primary-600">{listing.price}€</p>
                     </>
                   ) : (
                     <>
-                      <p className="text-sm text-gray-500 mb-1">Type</p>
-                      <p className="text-2xl font-bold text-green-600">Don gratuit</p>
+                      <p className="text-sm text-gray-500 mb-1">{t('listings.type.don')}</p>
+                      <p className="text-2xl font-bold text-green-600">{t('listing_detail.free')}</p>
                     </>
                   )}
                 </div>
@@ -356,12 +366,12 @@ export default function ListingDetailPage() {
                         className="w-full flex items-center justify-center gap-2 bg-coral-500 hover:bg-coral-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50"
                       >
                         <ShoppingCart className="w-4 h-4" />
-                        {buyMutation.isPending ? 'Redirection...' : 'Acheter maintenant'}
+                        {buyMutation.isPending ? t('listing_detail.redirecting') : t('listing_detail.buy')}
                       </button>
                     )}
                     {listing.status === 'sold' && (
                       <div className="w-full text-center text-sm text-gray-500 bg-gray-100 py-2.5 px-4 rounded-lg font-medium">
-                        Annonce vendue
+                        {t('listing_detail.sold')}
                       </div>
                     )}
                     <button
@@ -370,12 +380,12 @@ export default function ListingDetailPage() {
                       className="btn-primary w-full flex items-center justify-center gap-2"
                     >
                       <MessageCircle className="w-4 h-4" />
-                      Contacter le vendeur
+                      {t('listing_detail.contact')}
                     </button>
                   </div>
                 ) : !isAuthenticated ? (
                   <Link to="/login" className="btn-primary w-full text-center block">
-                    Se connecter pour contacter
+                    {t('listing_detail.login_to_contact')}
                   </Link>
                 ) : null}
               </div>
@@ -386,7 +396,7 @@ export default function ListingDetailPage() {
           <div className="mt-8 space-y-5">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Star className="w-5 h-5 text-amber-400" />
-              Avis ({reviews.length})
+              {t('listing_detail.reviews')} ({reviews.length})
             </h2>
 
             {reviews.length > 0 && (
@@ -417,17 +427,17 @@ export default function ListingDetailPage() {
 
             {isAuthenticated && user?.id !== listing.user_id && (
               <div className="card">
-                <h3 className="font-medium text-gray-900 mb-3">Laisser un avis</h3>
+                <h3 className="font-medium text-gray-900 mb-3">{t('listing_detail.leave_review')}</h3>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Note</label>
+                    <label className="block text-sm text-gray-600 mb-1">{t('listing_detail.rating')}</label>
                     <StarRating value={reviewRating} onChange={setReviewRating} />
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Commentaire</label>
+                    <label className="block text-sm text-gray-600 mb-1">{t('listing_detail.comment')}</label>
                     <textarea
                       className="input w-full h-20 resize-none"
-                      placeholder="Partagez votre expérience..."
+                      placeholder={t('listing_detail.review_placeholder')}
                       value={reviewComment}
                       onChange={e => setReviewComment(e.target.value)}
                     />
@@ -438,10 +448,10 @@ export default function ListingDetailPage() {
                     className="btn-primary flex items-center gap-2 disabled:opacity-40"
                   >
                     <Send className="w-4 h-4" />
-                    {reviewMutation.isPending ? 'Envoi...' : 'Publier'}
+                    {reviewMutation.isPending ? t('listing_detail.sending') : t('listing_detail.publish')}
                   </button>
                   {reviewMutation.isError && (
-                    <p className="text-xs text-red-500">Vous avez peut-être déjà laissé un avis.</p>
+                    <p className="text-xs text-red-500">{t('listing_detail.already_reviewed')}</p>
                   )}
                 </div>
               </div>
@@ -455,19 +465,19 @@ export default function ListingDetailPage() {
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
             <div className="flex items-center gap-2 mb-4">
               <Flag className="w-5 h-5 text-red-500" />
-              <h3 className="text-lg font-semibold text-gray-900">Signaler cette annonce</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('listing_detail.report')}</h3>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Raison *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('listing_detail.report_reason')}</label>
                 <div className="space-y-2">
                   {[
-                    { value: 'spam', label: 'Spam ou publicité' },
-                    { value: 'inappropriate', label: 'Contenu inapproprié ou offensant' },
-                    { value: 'fake', label: 'Annonce frauduleuse ou fausse' },
-                    { value: 'prohibited', label: 'Objet interdit ou illégal' },
-                    { value: 'other', label: 'Autre' },
+                    { value: 'spam', label: t('listing_detail.report_reasons.spam') },
+                    { value: 'inappropriate', label: t('listing_detail.report_reasons.inappropriate') },
+                    { value: 'fake', label: t('listing_detail.report_reasons.fake') },
+                    { value: 'prohibited', label: t('listing_detail.report_reasons.prohibited') },
+                    { value: 'other', label: t('listing_detail.report_reasons.other') },
                   ].map((r) => (
                     <label key={r.value} className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -486,11 +496,11 @@ export default function ListingDetailPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Détails <span className="text-gray-400 font-normal">(optionnel)</span>
+                  {t('listing_detail.report_details')} <span className="text-gray-400 font-normal">{t('listing_detail.report_optional')}</span>
                 </label>
                 <textarea
                   className="input w-full h-20 resize-none"
-                  placeholder="Précisez le problème..."
+                  placeholder={t('listing_detail.report_placeholder')}
                   value={reportDetails}
                   onChange={e => setReportDetails(e.target.value)}
                 />
@@ -502,14 +512,14 @@ export default function ListingDetailPage() {
                 onClick={() => { setShowReportModal(false); setReportReason(''); setReportDetails(''); }}
                 className="btn-secondary"
               >
-                Annuler
+                {t('common.cancel')}
               </button>
               <button
                 onClick={() => reportMutation.mutate()}
                 disabled={!reportReason || reportMutation.isPending}
                 className="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-40"
               >
-                {reportMutation.isPending ? 'Envoi...' : 'Envoyer le signalement'}
+                {reportMutation.isPending ? t('listing_detail.sending') : t('listing_detail.send_report')}
               </button>
             </div>
           </div>

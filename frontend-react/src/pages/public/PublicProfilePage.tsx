@@ -7,12 +7,7 @@ import PublicLayout from '../../components/layout/PublicLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { userService, reviewService } from '../../services/api';
 import clsx from 'clsx';
-
-const roleLabels: Record<string, string> = {
-  particulier: 'Particulier',
-  professionnel: 'Professionnel',
-  salarie: 'Salarié',
-};
+import { useTranslation } from 'react-i18next';
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -28,6 +23,12 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function PublicProfilePage() {
+  const { t } = useTranslation();
+  const roleLabels: Record<string, string> = {
+    particulier: t('auth.role_labels.particulier'),
+    professionnel: t('auth.role_labels.professionnel'),
+    salarie: t('auth.role_labels.salarie'),
+  };
   const { id } = useParams<{ id: string }>();
 
   const { data, isLoading, isError } = useQuery({
@@ -53,14 +54,14 @@ export default function PublicProfilePage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link to="/annonces" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
           <ArrowLeft className="w-4 h-4" />
-          Retour
+          {t('public_profile.back')}
         </Link>
 
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : isError || !profile?.user ? (
           <div className="text-center py-20 text-gray-400">
-            <p className="text-lg font-medium">Profil introuvable</p>
+            <p className="text-lg font-medium">{t('public_profile.not_found')}</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -80,7 +81,7 @@ export default function PublicProfilePage() {
                     {profile.user.siret_verified && (
                       <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">
                         <BadgeCheck className="w-3 h-3" />
-                        Pro vérifié
+                        {t('public_profile.pro_verified')}
                       </span>
                     )}
                   </div>
@@ -90,12 +91,12 @@ export default function PublicProfilePage() {
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="w-4 h-4" />
-                      Membre depuis {format(new Date(profile.user.created_at), 'MMMM yyyy', { locale: fr })}
+                      {t('public_profile.member_since')} {format(new Date(profile.user.created_at), 'MMMM yyyy', { locale: fr })}
                     </span>
                     {reviewCount > 0 && (
                       <span className="flex items-center gap-1.5">
                         <Star className="w-4 h-4 text-amber-400" />
-                        {avgRating.toFixed(1)} ({reviewCount} avis)
+                        {avgRating.toFixed(1)} ({reviewCount} {t('public_profile.reviews')})
                       </span>
                     )}
                   </div>
@@ -108,7 +109,7 @@ export default function PublicProfilePage() {
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <Package className="w-5 h-5 text-primary-500" />
-                  Annonces actives ({activeListings.length})
+                  {t('public_profile.active_listings')} ({activeListings.length})
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {activeListings.map((listing: any) => (
@@ -117,7 +118,7 @@ export default function PublicProfilePage() {
                         <span className={clsx('badge text-xs',
                           listing.type === 'don' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
                         )}>
-                          {listing.type === 'don' ? 'Don' : 'Vente'}
+                          {listing.type === 'don' ? t('listings.type.don') : t('listings.type.vente')}
                         </span>
                         {listing.price && listing.type === 'vente' && (
                           <span className="font-semibold text-sm text-gray-900">{listing.price}€</span>
@@ -140,7 +141,7 @@ export default function PublicProfilePage() {
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <Star className="w-5 h-5 text-amber-400" />
-                  Avis reçus ({reviewCount})
+                  {t('public_profile.reviews_received')} ({reviewCount})
                 </h2>
                 <div className="space-y-3">
                   {reviews.map((review: any) => (

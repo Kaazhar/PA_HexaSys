@@ -10,14 +10,15 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { useState } from 'react';
 import clsx from 'clsx';
-
-const typeLabels: Record<string, string> = {
-  atelier: 'Atelier',
-  formation: 'Formation',
-  conference: 'Conférence',
-};
+import { useTranslation } from 'react-i18next';
 
 export default function WorkshopDetailPage() {
+  const { t } = useTranslation();
+  const typeLabels: Record<string, string> = {
+    atelier: t('workshops.type.atelier'),
+    formation: t('workshops.type.formation'),
+    conference: t('workshops.type.conference'),
+  };
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated, user } = useAuth();
   const queryClient = useQueryClient();
@@ -65,14 +66,14 @@ export default function WorkshopDetailPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link to="/formations" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
           <ArrowLeft className="w-4 h-4" />
-          Retour aux formations
+          {t('workshop_detail.back')}
         </Link>
 
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : isError || !workshop ? (
           <div className="text-center py-20 text-gray-400">
-            <p className="text-lg font-medium">Formation introuvable</p>
+            <p className="text-lg font-medium">{t('workshop_detail.not_found')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -99,7 +100,7 @@ export default function WorkshopDetailPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-primary-500" />
-                    Durée : {workshop.duration} min
+                    {t('workshop_detail.duration')} : {workshop.duration} min
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-primary-500" />
@@ -107,7 +108,7 @@ export default function WorkshopDetailPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-primary-500" />
-                    {workshop.enrolled} / {workshop.max_spots} inscrits
+                    {workshop.enrolled} / {workshop.max_spots} {t('workshop_detail.enrolled')}
                   </div>
                   {workshop.category && (
                     <div className="flex items-center gap-2">
@@ -119,7 +120,7 @@ export default function WorkshopDetailPage() {
 
                 {workshop.description && (
                   <div>
-                    <h2 className="font-semibold text-gray-900 mb-2">Description</h2>
+                    <h2 className="font-semibold text-gray-900 mb-2">{t('workshop_detail.description')}</h2>
                     <p className="text-gray-600 whitespace-pre-line leading-relaxed">{workshop.description}</p>
                   </div>
                 )}
@@ -131,24 +132,24 @@ export default function WorkshopDetailPage() {
               {/* Price + booking */}
               <div className="card">
                 <div className="text-center mb-4">
-                  <p className="text-sm text-gray-500 mb-1">Prix</p>
+                  <p className="text-sm text-gray-500 mb-1">{t('workshop_detail.price')}</p>
                   <p className="text-3xl font-bold text-primary-600">
-                    {workshop.price === 0 ? 'Gratuit' : `${workshop.price}€`}
+                    {workshop.price === 0 ? t('common.free') : `${workshop.price}€`}
                   </p>
                 </div>
 
                 {booked ? (
                   <div className="flex items-center gap-2 justify-center text-green-600 bg-green-50 rounded-lg py-3">
                     <CheckCircle className="w-5 h-5" />
-                    <span className="font-medium">Inscription confirmée !</span>
+                    <span className="font-medium">{t('workshop_detail.confirmed')}</span>
                   </div>
                 ) : workshop.enrolled >= workshop.max_spots ? (
                   <button disabled className="btn-primary w-full opacity-50 cursor-not-allowed">
-                    Complet
+                    {t('workshop_detail.full')}
                   </button>
                 ) : !isAuthenticated ? (
                   <Link to="/login" className="btn-primary w-full text-center block">
-                    Se connecter pour s'inscrire
+                    {t('workshop_detail.login')}
                   </Link>
                 ) : (
                   <button
@@ -156,21 +157,23 @@ export default function WorkshopDetailPage() {
                     disabled={bookMutation.isPending || stripeLoading}
                     className="btn-primary w-full flex items-center justify-center gap-2"
                   >
-                    {(bookMutation.isPending || stripeLoading) ? 'Chargement...' : (
-                      workshop.price > 0 ? `Payer ${workshop.price}€ et s'inscrire` : "S'inscrire gratuitement"
+                    {(bookMutation.isPending || stripeLoading) ? t('workshop_detail.loading') : (
+                      workshop.price > 0
+                        ? t('workshop_detail.pay_register', { price: workshop.price })
+                        : t('workshop_detail.register_free')
                     )}
                   </button>
                 )}
 
                 <div className="mt-3 text-xs text-gray-400 text-center">
-                  Minimum {workshop.min_spots} participants requis
+                  {t('workshop_detail.min_participants', { min: workshop.min_spots })}
                 </div>
               </div>
 
               {/* Instructor */}
               {workshop.instructor && (
                 <div className="card">
-                  <h2 className="font-semibold text-gray-900 mb-3">Animateur</h2>
+                  <h2 className="font-semibold text-gray-900 mb-3">{t('workshop_detail.host')}</h2>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
                       <UserIcon className="w-5 h-5 text-primary-600" />
@@ -179,7 +182,7 @@ export default function WorkshopDetailPage() {
                       <p className="font-medium text-gray-900">
                         {workshop.instructor.firstname} {workshop.instructor.lastname}
                       </p>
-                      <p className="text-xs text-gray-500">Salarié UpcycleConnect</p>
+                      <p className="text-xs text-gray-500">{t('workshop_detail.employee')}</p>
                     </div>
                   </div>
                 </div>
@@ -188,7 +191,7 @@ export default function WorkshopDetailPage() {
               {/* Spots bar */}
               <div className="card">
                 <div className="flex justify-between text-sm text-gray-600 mb-2">
-                  <span>Places occupées</span>
+                  <span>{t('workshop_detail.spots_taken')}</span>
                   <span className="font-medium">{workshop.enrolled}/{workshop.max_spots}</span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2">

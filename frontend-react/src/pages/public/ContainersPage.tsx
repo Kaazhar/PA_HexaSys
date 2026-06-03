@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { containerService } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 
 // Fix leaflet default icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -17,12 +18,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const statusLabel: Record<string, string> = {
-  operational: 'Disponible',
-  full: 'Plein',
-  maintenance: 'En maintenance',
-};
-
 const statusClass: Record<string, string> = {
   operational: 'badge-green',
   full: 'badge-red',
@@ -30,6 +25,12 @@ const statusClass: Record<string, string> = {
 };
 
 export default function ContainersPage() {
+  const { t } = useTranslation();
+  const statusLabel: Record<string, string> = {
+    operational: t('containers.available'),
+    full: t('containers.full_label'),
+    maintenance: t('containers.maintenance_label'),
+  };
   const { data, isLoading } = useQuery({
     queryKey: ['containers-public'],
     queryFn: () => containerService.getAll(),
@@ -42,9 +43,9 @@ export default function ContainersPage() {
     <PublicLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Conteneurs UpcycleConnect</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('containers.page_title')}</h1>
           <p className="text-gray-500 mt-2">
-            {containers.length} conteneur{containers.length > 1 ? 's' : ''} disponible{containers.length > 1 ? 's' : ''} à Paris
+            {t(containers.length > 1 ? 'containers.count_plural' : 'containers.count', { count: containers.length })}
           </p>
         </div>
 
@@ -86,7 +87,7 @@ export default function ContainersPage() {
                             </span>
                           </p>
                           <p className="text-xs text-gray-400 mt-2">
-                            Remplissage : {container.current_count}/{container.capacity}
+                            {t('containers.fill')} : {container.current_count}/{container.capacity}
                           </p>
                         </div>
                       </Popup>
@@ -97,7 +98,7 @@ export default function ContainersPage() {
                 <div className="h-full flex items-center justify-center text-gray-400 bg-gray-50">
                   <div className="text-center">
                     <MapPin className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p>Coordonnées GPS non disponibles</p>
+                    <p>{t('containers.no_coords')}</p>
                   </div>
                 </div>
               )}
@@ -108,7 +109,7 @@ export default function ContainersPage() {
               {containers.length === 0 ? (
                 <div className="text-center py-20 text-gray-400">
                   <Package className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                  <p className="text-lg font-medium">Aucun conteneur disponible</p>
+                  <p className="text-lg font-medium">{t('containers.none')}</p>
                 </div>
               ) : (
                 containers.map((container) => {
@@ -129,8 +130,8 @@ export default function ContainersPage() {
                       </div>
                       <div>
                         <div className="flex justify-between text-xs text-gray-400 mb-1">
-                          <span>Remplissage</span>
-                          <span>{container.current_count}/{container.capacity} objets</span>
+                          <span>{t('containers.fill')}</span>
+                          <span>{container.current_count}/{container.capacity} {t('containers.objects')}</span>
                         </div>
                         <div className="w-full bg-gray-100 rounded-full h-2">
                           <div

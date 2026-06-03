@@ -13,15 +13,16 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Pagination from '../../components/common/Pagination';
 import EmptyState from '../../components/common/EmptyState';
-
-const statusConfig: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
-  pending: { label: 'En attente', icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-amber-100 text-amber-700' },
-  active: { label: 'Active', icon: <CheckCircle className="w-3.5 h-3.5" />, cls: 'bg-green-100 text-green-700' }, // "Active" est féminin ici car "annonce"
-  rejected: { label: 'Rejetée', icon: <XCircle className="w-3.5 h-3.5" />, cls: 'bg-red-100 text-red-700' },
-  sold: { label: 'Vendue/Donnée', icon: <CheckCircle className="w-3.5 h-3.5" />, cls: 'bg-gray-100 text-gray-600' },
-};
+import { useTranslation } from 'react-i18next';
 
 export default function MesAnnoncesPage() {
+  const { t } = useTranslation();
+  const statusConfig: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
+    pending: { label: t('listings.status.pending'), icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-amber-100 text-amber-700' },
+    active: { label: t('listings.status.active'), icon: <CheckCircle className="w-3.5 h-3.5" />, cls: 'bg-green-100 text-green-700' },
+    rejected: { label: t('listings.status.rejected'), icon: <XCircle className="w-3.5 h-3.5" />, cls: 'bg-red-100 text-red-700' },
+    sold: { label: t('listings.status.sold'), icon: <CheckCircle className="w-3.5 h-3.5" />, cls: 'bg-gray-100 text-gray-600' },
+  };
   const { user } = useAuth();
   const sidebar = user?.role === 'professionnel' ? proSidebar : user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const [statusFilter, setStatusFilter] = useState('');
@@ -53,12 +54,12 @@ export default function MesAnnoncesPage() {
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Mes annonces</h1>
+            <h1 className="text-xl font-bold text-gray-900">{t('my_listings.title')}</h1>
             <p className="text-sm text-gray-500 mt-0.5">{total} annonce{total > 1 ? 's' : ''} au total</p>
           </div>
           <Link to="/annonces/creer" className="btn-primary flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            Nouvelle annonce
+            {t('my_listings.new')}
           </Link>
         </div>
 
@@ -75,7 +76,7 @@ export default function MesAnnoncesPage() {
                   : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
               )}
             >
-              {s === '' ? 'Toutes' : statusConfig[s]?.label ?? s}
+              {s === '' ? t('my_listings.all') : statusConfig[s]?.label ?? s}
             </button>
           ))}
         </div>
@@ -97,7 +98,7 @@ export default function MesAnnoncesPage() {
                         {s.label}
                       </span>
                       <span className={clsx('badge text-xs', listing.type === 'don' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700')}>
-                        {listing.type === 'don' ? 'Don' : 'Vente'}
+                        {listing.type === 'don' ? t('listings.type.don') : t('listings.type.vente')}
                       </span>
                       {listing.price && listing.type === 'vente' && (
                         <span className="text-sm font-semibold text-gray-700">{listing.price}€</span>
@@ -117,7 +118,7 @@ export default function MesAnnoncesPage() {
                     </div>
                     {listing.reject_reason && (
                       <p className="text-xs text-red-500 mt-1.5 bg-red-50 px-2 py-1 rounded">
-                        Raison : {listing.reject_reason}
+                        {t('my_listings.reason')} {listing.reject_reason}
                       </p>
                     )}
                   </div>
@@ -129,7 +130,7 @@ export default function MesAnnoncesPage() {
                         disabled={soldMutation.isPending}
                         className="text-xs px-3 py-1.5 rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors font-medium"
                       >
-                        Marquer vendue
+                        {t('my_listings.mark_sold')}
                       </button>
                     )}
                     {listing.status !== 'sold' && (
@@ -160,16 +161,16 @@ export default function MesAnnoncesPage() {
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Supprimer l'annonce ?</h3>
-            <p className="text-sm text-gray-500 mb-5">Cette action est irréversible.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('my_listings.delete_title')}</h3>
+            <p className="text-sm text-gray-500 mb-5">{t('my_listings.irreversible')}</p>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setDeleteId(null)} className="btn-secondary">Annuler</button>
+              <button onClick={() => setDeleteId(null)} className="btn-secondary">{t('common.cancel')}</button>
               <button
                 onClick={() => deleteMutation.mutate(deleteId)}
                 disabled={deleteMutation.isPending}
                 className="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600 transition-colors"
               >
-                {deleteMutation.isPending ? 'Suppression...' : 'Supprimer'}
+                {deleteMutation.isPending ? t('my_listings.deleting') : t('common.delete')}
               </button>
             </div>
           </div>
