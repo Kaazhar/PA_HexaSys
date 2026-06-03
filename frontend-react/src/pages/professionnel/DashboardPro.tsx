@@ -20,15 +20,14 @@ const planColors: Record<string, string> = {
   enterprise: 'badge-purple',
 };
 
-const planLabels: Record<string, string> = {
-  decouverte: 'Découverte (Gratuit)',
-  pro: 'Pro',
-  enterprise: 'Enterprise',
-};
-
 export default function DashboardPro() {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const planLabels: Record<string, string> = {
+    decouverte: t('dashboard_pro.plan_decouverte'),
+    pro: t('dashboard_pro.plan_pro'),
+    enterprise: t('dashboard_pro.plan_enterprise'),
+  };
   const queryClient = useQueryClient();
   const [siretInput, setSiretInput] = useState('');
 
@@ -116,7 +115,7 @@ export default function DashboardPro() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-semibold text-gray-900">{companyInfo?.company_name || 'Entreprise vérifiée'}</p>
                       <span className="flex items-center gap-1 text-xs text-green-600 font-medium bg-green-100 px-2 py-0.5 rounded-full">
-                        <BadgeCheck className="w-3 h-3" /> Vérifié
+                        <BadgeCheck className="w-3 h-3" /> {t('dashboard_pro.verified_badge')}
                       </span>
                     </div>
                     {companyInfo?.category && <p className="text-xs text-gray-500 mt-0.5">{companyInfo.category}</p>}
@@ -129,7 +128,7 @@ export default function DashboardPro() {
                     <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
                       <MapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Adresse</p>
+                        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">{t('dashboard_pro.address')}</p>
                         <p className="text-sm text-gray-700">{companyInfo.address}</p>
                         {companyInfo.city && (
                           <p className="text-xs text-gray-500">{companyInfo.postal_code} {companyInfo.city}</p>
@@ -141,7 +140,7 @@ export default function DashboardPro() {
                     <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
                       <Users className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Effectifs</p>
+                        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">{t('dashboard_pro.employees')}</p>
                         <p className="text-sm text-gray-700">{companyInfo.employees}</p>
                       </div>
                     </div>
@@ -150,7 +149,7 @@ export default function DashboardPro() {
                     <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
                       <Calendar className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Création</p>
+                        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">{t('dashboard_pro.creation')}</p>
                         <p className="text-sm text-gray-700">
                           {format(new Date(companyInfo.date_creation), 'dd MMMM yyyy', { locale: fr })}
                         </p>
@@ -227,11 +226,11 @@ export default function DashboardPro() {
                 <div>
                   <p className="font-semibold text-gray-900">{planLabels[dashboard.subscription.plan] || dashboard.subscription.plan}</p>
                   <p className="text-sm text-gray-500">
-                    Renouvellement le {dashboard.subscription.renewal_date ? format(new Date(dashboard.subscription.renewal_date), 'dd MMMM yyyy', { locale: fr }) : '-'}
+                    {t('dashboard_pro.renewal')} {dashboard.subscription.renewal_date ? format(new Date(dashboard.subscription.renewal_date), 'dd MMMM yyyy', { locale: fr }) : '-'}
                   </p>
                 </div>
                 <span className={clsx('ml-auto badge', dashboard.subscription.status === 'active' ? 'badge-green' : 'badge-red')}>
-                  {dashboard.subscription.status === 'active' ? 'Actif' : 'Inactif'}
+                  {dashboard.subscription.status === 'active' ? t('dashboard_pro.active') : t('dashboard_pro.inactive')}
                 </span>
               </div>
             ) : (
@@ -268,19 +267,19 @@ export default function DashboardPro() {
                   <div className="card space-y-3">
                     <div className="flex items-center gap-2">
                       <Leaf className="w-5 h-5 text-green-500" />
-                      <h3 className="font-semibold text-gray-900 text-sm">Impact écologique</h3>
+                      <h3 className="font-semibold text-gray-900 text-sm">{t('dashboard_pro.eco_impact')}</h3>
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Dons réalisés</span>
+                        <span className="text-gray-500">{t('dashboard_pro.donations')}</span>
                         <span className="font-bold text-gray-900">{isPremium ? ps?.donations_count ?? 0 : 12}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Poids recyclé</span>
+                        <span className="text-gray-500">{t('dashboard_pro.weight')}</span>
                         <span className="font-bold text-gray-900">{isPremium ? `${(ps?.total_weight ?? 0).toFixed(1)} kg` : '48.5 kg'}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">CO₂ évité</span>
+                        <span className="text-gray-500">{t('dashboard_pro.co2')}</span>
                         <span className="font-bold text-green-600">{isPremium ? `${(ps?.co2_saved ?? 0).toFixed(1)} kg` : '121.2 kg'}</span>
                       </div>
                     </div>
@@ -290,7 +289,7 @@ export default function DashboardPro() {
                   <div className="card space-y-3">
                     <div className="flex items-center gap-2">
                       <BarChart2 className="w-5 h-5 text-blue-500" />
-                      <h3 className="font-semibold text-gray-900 text-sm">Matériaux disponibles</h3>
+                      <h3 className="font-semibold text-gray-900 text-sm">{t('dashboard_pro.materials')}</h3>
                     </div>
                     <div className="space-y-2">
                       {(isPremium ? (ps?.top_categories ?? []) : [
@@ -313,21 +312,21 @@ export default function DashboardPro() {
                   <div className="card space-y-3">
                     <div className="flex items-center gap-2">
                       <Bell className="w-5 h-5 text-amber-500" />
-                      <h3 className="font-semibold text-gray-900 text-sm">Alertes cette semaine</h3>
+                      <h3 className="font-semibold text-gray-900 text-sm">{t('dashboard_pro.alerts_week')}</h3>
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-3 p-2 bg-amber-50 rounded-lg">
                         <Tag className="w-4 h-4 text-amber-500 flex-shrink-0" />
                         <div>
-                          <p className="text-xs font-medium text-gray-800">{isPremium ? ps?.new_listings ?? 0 : 18} nouvelles annonces</p>
-                          <p className="text-xs text-gray-400">disponibles à collecter</p>
+                          <p className="text-xs font-medium text-gray-800">{t('dashboard_pro.new_listings_count', { count: isPremium ? ps?.new_listings ?? 0 : 18 })}</p>
+                          <p className="text-xs text-gray-400">{t('dashboard_pro.new_listings_sub')}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
                         <Briefcase className="w-4 h-4 text-green-500 flex-shrink-0" />
                         <div>
-                          <p className="text-xs font-medium text-gray-800">{isPremium ? ps?.new_deposits ?? 0 : 7} dépôts conteneur</p>
-                          <p className="text-xs text-gray-400">approuvés cette semaine</p>
+                          <p className="text-xs font-medium text-gray-800">{t('dashboard_pro.new_deposits_count', { count: isPremium ? ps?.new_deposits ?? 0 : 7 })}</p>
+                          <p className="text-xs text-gray-400">{t('dashboard_pro.new_deposits_sub')}</p>
                         </div>
                       </div>
                     </div>
@@ -341,15 +340,15 @@ export default function DashboardPro() {
             {/* My listings */}
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Mes annonces</h2>
+                <h2 className="font-semibold text-gray-900">{t('dashboard_pro.my_listings')}</h2>
                 <Link to="/annonces/creer" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Créer <ArrowRight className="w-3 h-3" />
+                  {t('dashboard_pro.create')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
               {(dashboard?.my_listings || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <Tag className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Aucune annonce</p>
+                  <p className="text-sm">{t('dashboard_pro.no_listings')}</p>
                 </div>
               ) : (
                 <ul className="space-y-2">
@@ -360,10 +359,10 @@ export default function DashboardPro() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{listing.title}</p>
-                        <p className="text-xs text-gray-500">{listing.type === 'don' ? 'Don' : `${listing.price}€`}</p>
+                        <p className="text-xs text-gray-500">{listing.type === 'don' ? t('listings.type.don') : `${listing.price}€`}</p>
                       </div>
                       <span className={clsx('badge text-xs', listing.status === 'active' ? 'badge-green' : listing.status === 'pending' ? 'badge-orange' : 'badge-gray')}>
-                        {listing.status === 'active' ? 'Active' : listing.status === 'pending' ? 'En attente' : listing.status === 'sold' ? 'Vendue' : listing.status === 'rejected' ? 'Refusée' : 'Inactif'}
+                        {listing.status === 'active' ? t('listings.status.active') : listing.status === 'pending' ? t('listings.status.pending') : listing.status === 'sold' ? t('listings.status.sold') : listing.status === 'rejected' ? t('listings.status.rejected') : t('dashboard_pro.inactive')}
                       </span>
                     </li>
                   ))}
@@ -374,16 +373,16 @@ export default function DashboardPro() {
             {/* My projects */}
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Mes projets upcycling</h2>
+                <h2 className="font-semibold text-gray-900">{t('dashboard_pro.projects')}</h2>
                 <Link to="/pro/projets" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  Voir tout <ArrowRight className="w-3 h-3" />
+                  {t('dashboard_pro.see_all')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
               {(dashboard?.projects || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <Briefcase className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Aucun projet pour le moment</p>
-                  <p className="text-xs mt-1">Partagez vos réalisations d'upcycling</p>
+                  <p className="text-sm">{t('dashboard_pro.no_projects')}</p>
+                  <p className="text-xs mt-1">{t('dashboard_pro.no_projects_sub')}</p>
                 </div>
               ) : (
                 <ul className="space-y-2">
@@ -394,9 +393,9 @@ export default function DashboardPro() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{project.title}</p>
-                        <p className="text-xs text-gray-500">{project.views} vues · {project.likes} j'aime</p>
+                        <p className="text-xs text-gray-500">{project.views} {t('dashboard_pro.views')} · {project.likes} {t('dashboard_pro.likes')}</p>
                       </div>
-                      {project.is_featured && <span className="badge-orange text-xs">Mis en avant</span>}
+                      {project.is_featured && <span className="badge-orange text-xs">{t('dashboard_pro.featured')}</span>}
                     </li>
                   ))}
                 </ul>
