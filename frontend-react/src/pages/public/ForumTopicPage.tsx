@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Lock, Pin, Trash2, MessageSquare, Send, Eye } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PublicLayout from '../../components/layout/PublicLayout';
@@ -28,6 +28,7 @@ function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' }) {
 export default function ForumTopicPage() {
   const { id } = useParams<{ id: string }>();
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language?.startsWith('en') ? enUS : fr;
@@ -75,7 +76,7 @@ export default function ForumTopicPage() {
     mutationFn: () => forumService.deleteTopic(Number(id)),
     onSuccess: () => {
       toast.success('Sujet supprimé');
-      window.location.href = '/forum';
+      navigate('/forum');
     },
   });
 

@@ -177,6 +177,7 @@ export default function ProjetsPro() {
                   value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="Mon projet upcycling"
+                  maxLength={100}
                 />
               </div>
               <div>
@@ -186,6 +187,7 @@ export default function ProjetsPro() {
                   value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   placeholder="Décrivez votre projet..."
+                  maxLength={1000}
                 />
               </div>
               <div>

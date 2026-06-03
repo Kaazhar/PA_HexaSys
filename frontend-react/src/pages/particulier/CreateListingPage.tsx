@@ -250,14 +250,14 @@ export default function CreateListingPage() {
               <div>
                 <label className="label">Titre *</label>
                 <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-                  className="input" placeholder="Ex: Table basse en bois massif" />
+                  className="input" placeholder="Ex: Table basse en bois massif" maxLength={100} />
               </div>
 
               <div>
                 <label className="label">Description</label>
                 <textarea value={description} onChange={e => setDescription(e.target.value)}
                   className="input min-h-[100px] resize-none"
-                  placeholder="Décrivez votre objet (état, dimensions, particularités...)" />
+                  placeholder="Décrivez votre objet (état, dimensions, particularités...)" maxLength={1000} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -273,7 +273,7 @@ export default function CreateListingPage() {
                 {type === 'vente' && (
                   <div>
                     <label className="label">Prix (€)</label>
-                    <input type="number" value={price} onChange={e => setPrice(e.target.value)}
+                    <input type="number" value={price} onChange={e => { if (parseFloat(e.target.value) >= 0 || e.target.value === '') setPrice(e.target.value); }}
                       step="0.01" min="0" max="99999.99" className="input" placeholder="0.00"
                       onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setPrice(Math.round(v * 100) / 100 + ''); }} />
                   </div>
@@ -289,7 +289,7 @@ export default function CreateListingPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="label">Poids estimé (kg)</label>
-                  <input type="number" value={weight} onChange={e => setWeight(e.target.value)}
+                  <input type="number" value={weight} onChange={e => { if (parseFloat(e.target.value) >= 0 || e.target.value === '') setWeight(e.target.value); }}
                     step="0.1" min="0" max="9999.9" className="input" placeholder="Ex: 2.5"
                     onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setWeight(Math.round(v * 10) / 10 + ''); }} />
                 </div>

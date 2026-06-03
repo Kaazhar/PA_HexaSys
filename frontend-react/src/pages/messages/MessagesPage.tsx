@@ -195,6 +195,7 @@ export default function MessagesPage() {
                   placeholder={t('messages_page.write_message')}
                   value={messageText}
                   onChange={e => setMessageText(e.target.value)}
+                  maxLength={2000}
                   onKeyDown={handleKey}
                 />
                 <button

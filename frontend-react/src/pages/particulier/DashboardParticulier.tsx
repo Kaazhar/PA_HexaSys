@@ -147,7 +147,7 @@ export default function DashboardParticulier() {
               { labelKey: 'dashboard_particulier.create_listing', path: '/annonces/creer', icon: <PlusCircle className="w-5 h-5" />, color: 'text-primary-500 bg-primary-50' },
               { labelKey: 'dashboard_particulier.deposit_request', path: '/conteneurs/demande', icon: <Package className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },
               { labelKey: 'dashboard_particulier.my_score', path: '/score', icon: <Star className="w-5 h-5" />, color: 'text-amber-500 bg-amber-50' },
-              { labelKey: 'dashboard_particulier.training', path: '/annonces', icon: <BookOpen className="w-5 h-5" />, color: 'text-purple-500 bg-purple-50' },
+              { labelKey: 'dashboard_particulier.training', path: '/formations', icon: <BookOpen className="w-5 h-5" />, color: 'text-purple-500 bg-purple-50' },
             ].map((action, i) => (
               <Link key={i} to={action.path} className="card hover:shadow-md transition-shadow flex flex-col items-center gap-3 py-5 text-center">
                 <div className={`p-3 rounded-xl ${action.color}`}>{action.icon}</div>

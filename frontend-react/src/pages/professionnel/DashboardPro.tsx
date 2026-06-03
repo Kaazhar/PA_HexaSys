@@ -88,7 +88,7 @@ export default function DashboardPro() {
             />
             <StatCard
               title={t('dashboard_pro.views_week')}
-              value="234"
+              value={dashboard?.views_week || 0}
               icon={<Tag className="w-5 h-5" />}
               color="green"
             />

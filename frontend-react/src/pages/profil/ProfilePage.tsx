@@ -20,6 +20,13 @@ const roleColors: Record<string, string> = {
   admin: 'bg-red-50 text-red-700',
 };
 
+const roleLabels: Record<string, string> = {
+  particulier: 'Particulier',
+  professionnel: 'Professionnel',
+  salarie: 'Salarié',
+  admin: 'Administrateur',
+};
+
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
   const { t } = useTranslation();

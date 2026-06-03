@@ -151,6 +151,7 @@ export default function ContainerRequestPage() {
                   onChange={e => setObjectTitle(e.target.value)}
                   className="input"
                   placeholder="Ex: Chaise en bois"
+                  maxLength={100}
                 />
               </div>
 
@@ -161,6 +162,7 @@ export default function ContainerRequestPage() {
                   onChange={e => setObjectDescription(e.target.value)}
                   className="input min-h-[80px] resize-none"
                   placeholder="État, matériaux, particularités..."
+                  maxLength={500}
                 />
               </div>
 

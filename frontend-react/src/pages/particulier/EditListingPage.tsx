@@ -155,8 +155,8 @@ export default function EditListingPage() {
             <div>
               <label className="label">Titre *</label>
               <input
-                {...register('title', { required: 'Titre requis', minLength: { value: 5, message: 'Minimum 5 caractères' } })}
-                className="input"
+                {...register('title', { required: 'Titre requis', minLength: { value: 5, message: 'Minimum 5 caractères' }, maxLength: { value: 100, message: 'Maximum 100 caractères' } })}
+                className="input" maxLength={100}
               />
               {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
             </div>
@@ -164,7 +164,7 @@ export default function EditListingPage() {
             {/* Description */}
             <div>
               <label className="label">Description</label>
-              <textarea {...register('description')} className="input min-h-[100px] resize-none" />
+              <textarea {...register('description', { maxLength: { value: 1000, message: 'Maximum 1000 caractères' } })} className="input min-h-[100px] resize-none" maxLength={1000} />
             </div>
 
             {/* Condition + Price */}
@@ -181,7 +181,7 @@ export default function EditListingPage() {
               {formValues.type === 'vente' && (
                 <div>
                   <label className="label">Prix (€)</label>
-                  <input {...register('price', { valueAsNumber: true, min: 0, max: 99999.99 })} type="number" step="0.01" max="99999.99" className="input" />
+                  <input {...register('price', { valueAsNumber: true, min: 0, max: 99999.99 })} type="number" step="0.01" min="0" max="99999.99" className="input" />
                 </div>
               )}
             </div>
