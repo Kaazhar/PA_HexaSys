@@ -7,10 +7,12 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { Category } from '../../types';
 import { adminSidebar } from '../../config/sidebars';
 import EmptyState from '../../components/common/EmptyState';
+import { useTranslation } from 'react-i18next';
 
 const emptyForm = { name: '', slug: '', description: '', icon: '', color: '#2D5016', is_active: true };
 
 export default function AdminCategories() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -32,7 +34,7 @@ export default function AdminCategories() {
       setForm(emptyForm);
       setError('');
     },
-    onError: () => setError('Erreur lors de la création'),
+    onError: () => setError(t('admin_categories.create_error')),
   });
 
   const updateMutation = useMutation({
@@ -43,7 +45,7 @@ export default function AdminCategories() {
       setForm(emptyForm);
       setError('');
     },
-    onError: () => setError('Erreur lors de la modification'),
+    onError: () => setError(t('admin_categories.update_error')),
   });
 
   const deleteMutation = useMutation({
@@ -53,7 +55,7 @@ export default function AdminCategories() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) { setError('Le nom est requis'); return; }
+    if (!form.name.trim()) { setError(t('admin_categories.name_required')); return; }
     const slug = form.slug.trim() || form.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const payload = { ...form, slug };
     if (editingId !== null) {
@@ -77,40 +79,40 @@ export default function AdminCategories() {
   };
 
   return (
-    <DashboardLayout sidebarItems={adminSidebar} title="Gestion des catégories">
+    <DashboardLayout sidebarItems={adminSidebar} title={t('admin_categories.title')}>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <p className="text-gray-500 text-sm">{categories.length} catégorie{categories.length > 1 ? 's' : ''}</p>
+          <p className="text-gray-500 text-sm">{categories.length} {t('admin_categories.col_category').toLowerCase()}{categories.length > 1 ? 's' : ''}</p>
           {!showForm && (
             <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2 text-sm">
-              <Plus className="w-4 h-4" /> Nouvelle catégorie
+              <Plus className="w-4 h-4" /> {t('admin_categories.new')}
             </button>
           )}
         </div>
 
         {showForm && (
           <div className="card border-primary-200">
-            <h2 className="font-semibold text-gray-900 mb-4">{editingId ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h2>
+            <h2 className="font-semibold text-gray-900 mb-4">{editingId ? t('admin_categories.edit_title') : t('admin_categories.create_title')}</h2>
             {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
             <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-                <input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Mobilier" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_categories.label_name')}</label>
+                <input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-                <input className="input" value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} placeholder="Auto-généré si vide" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_categories.label_slug')}</label>
+                <input className="input" value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} placeholder={t('admin_categories.slug_auto')} />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <input className="input" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Description courte" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_categories.label_desc')}</label>
+                <input className="input" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Icône (nom lucide)</label>
-                <input className="input" value={form.icon} onChange={e => setForm(f => ({ ...f, icon: e.target.value }))} placeholder="Ex: sofa, cpu, shirt..." />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_categories.label_icon')}</label>
+                <input className="input" value={form.icon} onChange={e => setForm(f => ({ ...f, icon: e.target.value }))} placeholder="sofa, cpu, shirt..." />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Couleur</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_categories.label_color')}</label>
                 <div className="flex items-center gap-2">
                   <input type="color" value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} className="w-10 h-10 rounded cursor-pointer border border-gray-200" />
                   <input className="input flex-1" value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} />
@@ -118,14 +120,14 @@ export default function AdminCategories() {
               </div>
               <div className="sm:col-span-2 flex items-center gap-2">
                 <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))} className="rounded" />
-                <label htmlFor="is_active" className="text-sm text-gray-700">Catégorie active</label>
+                <label htmlFor="is_active" className="text-sm text-gray-700">{t('admin_categories.label_active')}</label>
               </div>
               <div className="sm:col-span-2 flex gap-3">
                 <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="btn-primary flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4" /> {editingId ? 'Modifier' : 'Créer'}
+                  <Check className="w-4 h-4" /> {editingId ? t('admin_categories.edit_btn') : t('admin_categories.create_btn')}
                 </button>
                 <button type="button" onClick={cancelForm} className="btn-secondary flex items-center gap-2 text-sm">
-                  <X className="w-4 h-4" /> Annuler
+                  <X className="w-4 h-4" /> {t('admin_categories.cancel')}
                 </button>
               </div>
             </form>
@@ -141,11 +143,11 @@ export default function AdminCategories() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Catégorie</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Slug</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Description</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Statut</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('admin_categories.col_category')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">{t('admin_categories.col_slug')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">{t('admin_categories.col_desc')}</th>
+                  <th className="text-center px-4 py-3 font-medium text-gray-600">{t('admin_categories.col_status')}</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-600">{t('admin_categories.col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -163,7 +165,7 @@ export default function AdminCategories() {
                     <td className="px-4 py-3 text-gray-500 hidden lg:table-cell truncate max-w-xs">{cat.description || '-'}</td>
                     <td className="px-4 py-3 text-center">
                       <span className={`badge ${cat.is_active ? 'badge-green' : 'badge-gray'}`}>
-                        {cat.is_active ? 'Actif' : 'Inactif'}
+                        {cat.is_active ? t('admin_categories.status_active') : t('admin_categories.status_inactive')}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -171,7 +173,7 @@ export default function AdminCategories() {
                         <button onClick={() => startEdit(cat)} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button onClick={() => { if (confirm(`Supprimer "${cat.name}" ?`)) deleteMutation.mutate(cat.id); }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <button onClick={() => { if (confirm(t('admin_categories.delete_confirm', { name: cat.name }))) deleteMutation.mutate(cat.id); }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>

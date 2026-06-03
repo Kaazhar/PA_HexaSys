@@ -10,6 +10,7 @@ import { fr } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import type { WorkshopBooking } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 const TYPE_COLORS: Record<string, string> = {
   atelier: 'bg-green-500',
@@ -17,15 +18,17 @@ const TYPE_COLORS: Record<string, string> = {
   conference: 'bg-purple-500',
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  atelier: 'Atelier',
-  formation: 'Formation',
-  conference: 'Conférence',
-};
-
-const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-
 export default function MonPlanningPage() {
+  const { t } = useTranslation();
+
+  const TYPE_LABELS: Record<string, string> = {
+    atelier: t('planning.type_atelier'),
+    formation: t('planning.type_formation'),
+    conference: t('planning.type_conference'),
+  };
+
+  const DAYS: string[] = t('salarie_planning.days', { returnObjects: true }) as string[];
+
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
@@ -64,16 +67,16 @@ export default function MonPlanningPage() {
     .sort((a, b) => new Date(b.workshop!.date).getTime() - new Date(a.workshop!.date).getTime());
 
   return (
-    <DashboardLayout sidebarItems={particulierSidebar} title="Mon planning">
+    <DashboardLayout sidebarItems={particulierSidebar} title={t('planning.title')}>
       {isLoading ? (
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : bookings.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
           <Calendar className="w-16 h-16 mx-auto mb-4 opacity-20" />
-          <p className="text-lg font-medium text-gray-600">Aucune formation inscrite</p>
-          <p className="text-sm mt-1">Inscrivez-vous à une formation pour la voir apparaître ici.</p>
+          <p className="text-lg font-medium text-gray-600">{t('planning.no_bookings')}</p>
+          <p className="text-sm mt-1">{t('planning.no_bookings_sub')}</p>
           <Link to="/formations" className="btn-primary mt-6 inline-block">
-            Voir les formations
+            {t('planning.see_workshops')}
           </Link>
         </div>
       ) : (
@@ -163,7 +166,7 @@ export default function MonPlanningPage() {
               ))}
               <span className="flex items-center gap-1.5 text-xs text-gray-500 ml-auto">
                 <span className="w-4 h-4 rounded-lg border-2 border-[#2D5016] inline-block" />
-                Aujourd'hui
+                {t('planning.today')}
               </span>
             </div>
           </div>
@@ -175,7 +178,7 @@ export default function MonPlanningPage() {
                 {format(selectedDay, 'EEEE d MMMM yyyy', { locale: fr })}
               </h3>
               {selectedDayBookings.length === 0 ? (
-                <p className="text-sm text-gray-400">Aucune formation ce jour.</p>
+                <p className="text-sm text-gray-400">{t('planning.no_day_bookings')}</p>
               ) : (
                 <div className="space-y-3">
                   {selectedDayBookings.map(b => (
@@ -191,7 +194,7 @@ export default function MonPlanningPage() {
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-[#2D5016]" />
-                Prochaines formations ({upcoming.length})
+                {t('planning.upcoming')} ({upcoming.length})
               </h3>
               <div className="space-y-3">
                 {upcoming.map(b => (
@@ -206,7 +209,7 @@ export default function MonPlanningPage() {
             <div className="card">
               <h3 className="font-semibold text-gray-500 mb-4 flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                Formations passées ({past.length})
+                {t('planning.past')} ({past.length})
               </h3>
               <div className="space-y-3 opacity-60">
                 {past.map(b => (
@@ -222,8 +225,15 @@ export default function MonPlanningPage() {
 }
 
 function WorkshopCard({ booking, past = false }: { booking: WorkshopBooking; past?: boolean }) {
+  const { t } = useTranslation();
   const ws = booking.workshop;
   if (!ws) return null;
+
+  const TYPE_LABELS: Record<string, string> = {
+    atelier: t('planning.type_atelier'),
+    formation: t('planning.type_formation'),
+    conference: t('planning.type_conference'),
+  };
 
   const date = new Date(ws.date);
   const typeColor = TYPE_COLORS[ws.type] ?? 'bg-gray-400';
@@ -268,13 +278,13 @@ function WorkshopCard({ booking, past = false }: { booking: WorkshopBooking; pas
       {/* Right side */}
       <div className="flex-shrink-0 flex flex-col items-end gap-2">
         <span className={clsx('text-sm font-bold', past ? 'text-gray-400' : 'text-[#2D5016]')}>
-          {ws.price === 0 ? 'Gratuit' : `${ws.price}€`}
+          {ws.price === 0 ? t('planning.free') : `${ws.price}€`}
         </span>
         <Link
           to={`/formations/${ws.id}`}
           className="flex items-center gap-1 text-xs text-gray-400 hover:text-[#2D5016] transition-colors"
         >
-          Voir <ExternalLink className="w-3 h-3" />
+          {t('planning.see')} <ExternalLink className="w-3 h-3" />
         </Link>
       </div>
     </div>

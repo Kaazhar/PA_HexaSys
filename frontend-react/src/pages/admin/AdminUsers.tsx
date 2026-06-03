@@ -14,6 +14,7 @@ import clsx from 'clsx';
 import { adminSidebar } from '../../config/sidebars';
 import Pagination from '../../components/common/Pagination';
 import EmptyState from '../../components/common/EmptyState';
+import { useTranslation } from 'react-i18next';
 
 interface BanFormData {
   reason: string;
@@ -28,13 +29,6 @@ const roleColors: Record<UserRole, string> = {
   particulier: 'bg-green-100 text-green-800',
 };
 
-const roleLabels: Record<UserRole, string> = {
-  admin: 'Admin',
-  professionnel: 'Professionnel',
-  salarie: 'Salarié',
-  particulier: 'Particulier',
-};
-
 interface UserFormData {
   firstname: string;
   lastname: string;
@@ -46,6 +40,7 @@ interface UserFormData {
 }
 
 function UserForm({ user, onSubmit, isLoading }: { user?: User; onSubmit: (data: UserFormData) => void; isLoading: boolean }) {
+  const { t } = useTranslation();
   const { register, handleSubmit, formState: { errors } } = useForm<UserFormData>({
     defaultValues: user ? {
       firstname: user.firstname,
@@ -60,50 +55,50 @@ function UserForm({ user, onSubmit, isLoading }: { user?: User; onSubmit: (data:
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="label">Prénom</label>
+          <label className="label">{t('admin_users.form_firstname')}</label>
           <input {...register('firstname', { required: true })} className="input" placeholder="Marie" />
-          {errors.firstname && <p className="text-red-500 text-xs mt-1">Requis</p>}
+          {errors.firstname && <p className="text-red-500 text-xs mt-1">{t('admin_users.form_required')}</p>}
         </div>
         <div>
-          <label className="label">Nom</label>
+          <label className="label">{t('admin_users.form_lastname')}</label>
           <input {...register('lastname', { required: true })} className="input" placeholder="Dupont" />
-          {errors.lastname && <p className="text-red-500 text-xs mt-1">Requis</p>}
+          {errors.lastname && <p className="text-red-500 text-xs mt-1">{t('admin_users.form_required')}</p>}
         </div>
       </div>
       <div>
-        <label className="label">Email</label>
+        <label className="label">{t('admin_users.form_email')}</label>
         <input {...register('email', { required: true })} type="email" className="input" placeholder="marie@exemple.com" />
-        {errors.email && <p className="text-red-500 text-xs mt-1">Requis</p>}
+        {errors.email && <p className="text-red-500 text-xs mt-1">{t('admin_users.form_required')}</p>}
       </div>
       {!user && (
         <div>
-          <label className="label">Mot de passe</label>
+          <label className="label">{t('admin_users.form_password')}</label>
           <input {...register('password', { required: !user, minLength: 6 })} type="password" className="input" placeholder="••••••••" />
-          {errors.password && <p className="text-red-500 text-xs mt-1">Minimum 6 caractères</p>}
+          {errors.password && <p className="text-red-500 text-xs mt-1">{t('admin_users.form_min_chars')}</p>}
         </div>
       )}
       <div>
-        <label className="label">Rôle</label>
+        <label className="label">{t('admin_users.form_role')}</label>
         <select {...register('role')} className="input">
-          <option value="particulier">Particulier</option>
-          <option value="professionnel">Professionnel</option>
-          <option value="salarie">Salarié</option>
-          <option value="admin">Admin</option>
+          <option value="particulier">{t('admin_users.role_particulier')}</option>
+          <option value="professionnel">{t('admin_users.role_pro')}</option>
+          <option value="salarie">{t('admin_users.role_salarie')}</option>
+          <option value="admin">{t('admin_users.role_admin')}</option>
         </select>
       </div>
       <div className="flex items-center gap-3">
         <input {...register('is_active')} type="checkbox" id="is_active" className="w-4 h-4 rounded text-primary-500" />
-        <label htmlFor="is_active" className="text-sm text-gray-700 cursor-pointer">Compte actif</label>
+        <label htmlFor="is_active" className="text-sm text-gray-700 cursor-pointer">{t('admin_users.form_active')}</label>
       </div>
       {!user && (
         <div className="flex items-center gap-3">
           <input {...register('is_verified')} type="checkbox" id="is_verified" className="w-4 h-4 rounded text-primary-500" />
-          <label htmlFor="is_verified" className="text-sm text-gray-700 cursor-pointer">Email vérifié <span className="text-gray-400">(compte de test)</span></label>
+          <label htmlFor="is_verified" className="text-sm text-gray-700 cursor-pointer">{t('admin_users.form_verified')} <span className="text-gray-400">{t('admin_users.form_verified_note')}</span></label>
         </div>
       )}
       <div className="flex gap-3 pt-2">
         <button type="submit" disabled={isLoading} className="btn-primary flex-1">
-          {isLoading ? 'Enregistrement...' : 'Enregistrer'}
+          {isLoading ? t('admin_users.form_saving') : t('admin_users.form_save')}
         </button>
       </div>
     </form>
@@ -111,6 +106,7 @@ function UserForm({ user, onSubmit, isLoading }: { user?: User; onSubmit: (data:
 }
 
 export default function AdminUsers() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -135,14 +131,21 @@ export default function AdminUsers() {
   const total = data?.data?.total || 0;
   const totalPages = Math.ceil(total / 10);
 
+  const roleLabels: Record<UserRole, string> = {
+    admin: t('admin_users.role_admin'),
+    professionnel: t('admin_users.role_pro'),
+    salarie: t('admin_users.role_salarie'),
+    particulier: t('admin_users.role_particulier'),
+  };
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<User> }) => userService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setEditUser(null);
-      toast.success('Utilisateur mis à jour');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur lors de la mise à jour'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const createMutation = useMutation({
@@ -150,9 +153,9 @@ export default function AdminUsers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setShowCreateModal(false);
-      toast.success('Utilisateur créé');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur lors de la création'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const deleteMutation = useMutation({
@@ -160,7 +163,7 @@ export default function AdminUsers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setDeleteUserId(null);
-      toast.success('Utilisateur supprimé');
+      toast.success(t('common.success'));
     },
   });
 
@@ -168,7 +171,7 @@ export default function AdminUsers() {
     mutationFn: ({ id, is_active }: { id: number; is_active: boolean }) => userService.update(id, { is_active }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      toast.success('Statut modifié');
+      toast.success(t('common.success'));
     },
   });
 
@@ -178,9 +181,9 @@ export default function AdminUsers() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setBanUser(null);
       resetBan();
-      toast.success('Utilisateur banni');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur lors du bannissement'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const unbanMutation = useMutation({
@@ -188,13 +191,13 @@ export default function AdminUsers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setUnbanUserId(null);
-      toast.success('Utilisateur débanni');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur lors du débannissement'),
+    onError: () => toast.error(t('common.error')),
   });
 
   return (
-    <DashboardLayout sidebarItems={adminSidebar} title="Gestion des utilisateurs">
+    <DashboardLayout sidebarItems={adminSidebar} title={t('admin_users.title')}>
       <div className="space-y-5">
         {/* Header */}
         <div className="flex flex-col sm:flex-row gap-3 justify-between">
@@ -203,23 +206,23 @@ export default function AdminUsers() {
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Rechercher un utilisateur..."
+                placeholder={t('admin_users.search')}
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 className="input pl-9"
               />
             </div>
             <select value={roleFilter} onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }} className="input w-auto">
-              <option value="">Tous les rôles</option>
-              <option value="particulier">Particulier</option>
-              <option value="professionnel">Professionnel</option>
-              <option value="salarie">Salarié</option>
-              <option value="admin">Admin</option>
+              <option value="">{t('admin_users.all_roles')}</option>
+              <option value="particulier">{t('admin_users.role_particulier')}</option>
+              <option value="professionnel">{t('admin_users.role_pro')}</option>
+              <option value="salarie">{t('admin_users.role_salarie')}</option>
+              <option value="admin">{t('admin_users.role_admin')}</option>
             </select>
             <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className="input w-auto">
-              <option value="">Tous les statuts</option>
-              <option value="active">Actif</option>
-              <option value="inactive">Inactif</option>
+              <option value="">{t('admin_users.all_statuses')}</option>
+              <option value="active">{t('admin_users.option_active')}</option>
+              <option value="inactive">{t('admin_users.option_inactive')}</option>
             </select>
           </div>
           <button
@@ -227,14 +230,14 @@ export default function AdminUsers() {
             className="btn-primary flex items-center gap-2 whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
-            Nouvel utilisateur
+            {t('admin_users.new_user')}
           </button>
         </div>
 
         {/* Table */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <p className="text-sm text-gray-500">{total} utilisateur{total > 1 ? 's' : ''} trouvé{total > 1 ? 's' : ''}</p>
+            <p className="text-sm text-gray-500">{total} {t('admin_users.col_user').toLowerCase()}{total > 1 ? 's' : ''}</p>
           </div>
 
           {isLoading ? (
@@ -244,12 +247,12 @@ export default function AdminUsers() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
-                    <th className="table-header">Utilisateur</th>
-                    <th className="table-header">Email</th>
-                    <th className="table-header">Rôle</th>
-                    <th className="table-header">Statut</th>
-                    <th className="table-header">Inscription</th>
-                    <th className="table-header">Actions</th>
+                    <th className="table-header">{t('admin_users.col_user')}</th>
+                    <th className="table-header">{t('admin_users.col_email')}</th>
+                    <th className="table-header">{t('admin_users.col_role')}</th>
+                    <th className="table-header">{t('admin_users.col_status')}</th>
+                    <th className="table-header">{t('admin_users.col_joined')}</th>
+                    <th className="table-header">{t('admin_users.col_actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -262,10 +265,12 @@ export default function AdminUsers() {
                           </div>
                           <div>
                             <p className="font-medium text-gray-900">{user.firstname} {user.lastname}</p>
-                            {!user.is_verified && <p className="text-xs text-amber-500">Non vérifié</p>}
+                            {!user.is_verified && <p className="text-xs text-amber-500">{t('admin_users.not_verified')}</p>}
                             {user.is_banned && (
                               <p className="text-xs text-red-500 font-medium">
-                                Banni{user.ban_expires_at ? ` jusqu'au ${format(new Date(user.ban_expires_at), 'dd/MM/yyyy')}` : ' définitivement'}
+                                {user.ban_expires_at
+                                  ? t('admin_users.banned_until', { date: format(new Date(user.ban_expires_at), 'dd/MM/yyyy') })
+                                  : t('admin_users.banned_permanently')}
                               </p>
                             )}
                           </div>
@@ -279,7 +284,7 @@ export default function AdminUsers() {
                       </td>
                       <td className="table-cell">
                         <span className={clsx('badge', user.is_banned ? 'bg-red-100 text-red-700' : user.is_active ? 'badge-green' : 'badge-red')}>
-                          {user.is_banned ? 'Banni' : user.is_active ? 'Actif' : 'Inactif'}
+                          {user.is_banned ? t('admin_users.status_banned') : user.is_active ? t('admin_users.status_active') : t('admin_users.status_inactive')}
                         </span>
                       </td>
                       <td className="table-cell text-gray-500">
@@ -332,7 +337,7 @@ export default function AdminUsers() {
                 </tbody>
               </table>
               {users.length === 0 && (
-                <EmptyState icon={<Users className="w-10 h-10" />} message="Aucun utilisateur trouvé" />
+                <EmptyState icon={<Users className="w-10 h-10" />} message={t('common.noData')} />
               )}
             </div>
           )}
@@ -341,7 +346,7 @@ export default function AdminUsers() {
         </div>
 
         {/* Edit Modal */}
-        <Modal isOpen={!!editUser} onClose={() => setEditUser(null)} title="Modifier l'utilisateur">
+        <Modal isOpen={!!editUser} onClose={() => setEditUser(null)} title={t('admin_users.edit_modal')}>
           {editUser && (
             <UserForm
               user={editUser}
@@ -352,7 +357,7 @@ export default function AdminUsers() {
         </Modal>
 
         {/* Create Modal */}
-        <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Créer un utilisateur">
+        <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title={t('admin_users.create_modal')}>
           <UserForm
             onSubmit={(data) => createMutation.mutate(data as UserFormData & { password: string })}
             isLoading={createMutation.isPending}
@@ -360,38 +365,38 @@ export default function AdminUsers() {
         </Modal>
 
         {/* Delete Confirm Modal */}
-        <Modal isOpen={!!deleteUserId} onClose={() => setDeleteUserId(null)} title="Confirmer la suppression" size="sm">
-          <p className="text-gray-600 mb-5">Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.</p>
+        <Modal isOpen={!!deleteUserId} onClose={() => setDeleteUserId(null)} title={t('admin_users.delete_modal')} size="sm">
+          <p className="text-gray-600 mb-5">{t('admin_users.delete_msg')}</p>
           <div className="flex gap-3">
-            <button onClick={() => setDeleteUserId(null)} className="btn-secondary flex-1">Annuler</button>
+            <button onClick={() => setDeleteUserId(null)} className="btn-secondary flex-1">{t('common.cancel')}</button>
             <button
               onClick={() => deleteUserId && deleteMutation.mutate(deleteUserId)}
               disabled={deleteMutation.isPending}
               className="btn-danger flex-1"
             >
-              {deleteMutation.isPending ? 'Suppression...' : 'Supprimer'}
+              {deleteMutation.isPending ? t('admin_users.deleting') : t('common.delete')}
             </button>
           </div>
         </Modal>
 
         {/* Ban Modal */}
-        <Modal isOpen={!!banUser} onClose={() => { setBanUser(null); resetBan(); }} title={`Bannir ${banUser?.firstname} ${banUser?.lastname}`} size="sm">
+        <Modal isOpen={!!banUser} onClose={() => { setBanUser(null); resetBan(); }} title={t('admin_users.ban_title', { name: `${banUser?.firstname} ${banUser?.lastname}` })} size="sm">
           <form onSubmit={handleBanSubmit((data) => banUser && banMutation.mutate({ id: banUser.id, data }))} className="space-y-4">
             <div>
-              <label className="label">Raison du bannissement</label>
+              <label className="label">{t('admin_users.ban_reason')}</label>
               <textarea
                 {...registerBan('reason', { required: true })}
                 className="input resize-none min-h-[80px]"
-                placeholder="Comportement inapproprié, spam, violation des CGU..."
+                placeholder={t('admin_users.ban_placeholder')}
               />
             </div>
             <div className="flex items-center gap-3">
               <input {...registerBan('is_permanent')} type="checkbox" id="is_permanent" className="w-4 h-4 rounded" />
-              <label htmlFor="is_permanent" className="text-sm text-gray-700 cursor-pointer">Bannissement permanent</label>
+              <label htmlFor="is_permanent" className="text-sm text-gray-700 cursor-pointer">{t('admin_users.ban_permanent')}</label>
             </div>
             {!isPermanentBan && (
               <div>
-                <label className="label">Durée (jours)</label>
+                <label className="label">{t('admin_users.ban_duration')}</label>
                 <input
                   {...registerBan('duration', { valueAsNumber: true, min: 1 })}
                   type="number"
@@ -401,25 +406,25 @@ export default function AdminUsers() {
               </div>
             )}
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => { setBanUser(null); resetBan(); }} className="btn-secondary flex-1">Annuler</button>
+              <button type="button" onClick={() => { setBanUser(null); resetBan(); }} className="btn-secondary flex-1">{t('common.cancel')}</button>
               <button type="submit" disabled={banMutation.isPending} className="btn-danger flex-1">
-                {banMutation.isPending ? 'Bannissement...' : 'Bannir'}
+                {banMutation.isPending ? t('admin_users.banning') : t('admin_users.ban_btn')}
               </button>
             </div>
           </form>
         </Modal>
 
         {/* Unban Confirm Modal */}
-        <Modal isOpen={!!unbanUserId} onClose={() => setUnbanUserId(null)} title="Lever le bannissement" size="sm">
-          <p className="text-gray-600 mb-5">Êtes-vous sûr de vouloir débannir cet utilisateur ? Il pourra de nouveau accéder à son compte.</p>
+        <Modal isOpen={!!unbanUserId} onClose={() => setUnbanUserId(null)} title={t('admin_users.unban_modal')} size="sm">
+          <p className="text-gray-600 mb-5">{t('admin_users.unban_msg')}</p>
           <div className="flex gap-3">
-            <button onClick={() => setUnbanUserId(null)} className="btn-secondary flex-1">Annuler</button>
+            <button onClick={() => setUnbanUserId(null)} className="btn-secondary flex-1">{t('common.cancel')}</button>
             <button
               onClick={() => unbanUserId && unbanMutation.mutate(unbanUserId)}
               disabled={unbanMutation.isPending}
               className="btn-primary flex-1"
             >
-              {unbanMutation.isPending ? 'Débannissement...' : 'Débannir'}
+              {unbanMutation.isPending ? t('admin_users.unbanning') : t('admin_users.unban_btn')}
             </button>
           </div>
         </Modal>

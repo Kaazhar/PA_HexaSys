@@ -15,12 +15,7 @@ import { adminSidebar } from '../../config/sidebars';
 import EmptyState from '../../components/common/EmptyState';
 import StatusBadge from '../../components/common/StatusBadge';
 import { workshopStatuses } from '../../config/statuses';
-
-const typeLabels: Record<string, string> = {
-  atelier: 'Atelier',
-  formation: 'Formation',
-  conference: 'Conférence',
-};
+import { useTranslation } from 'react-i18next';
 
 interface CreateWorkshopForm {
   title: string;
@@ -35,6 +30,14 @@ interface CreateWorkshopForm {
 }
 
 export default function AdminWorkshops() {
+  const { t } = useTranslation();
+
+  const typeLabels: Record<string, string> = {
+    atelier: t('workshops.type.atelier'),
+    formation: t('workshops.type.formation'),
+    conference: t('workshops.type.conference'),
+  };
+
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState('');
   const [showCreate, setShowCreate] = useState(false);
@@ -65,9 +68,9 @@ export default function AdminWorkshops() {
     mutationFn: (id: number) => workshopService.validate(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
-      toast.success('Formation validée !');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur lors de la validation'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const createMutation = useMutation({
@@ -79,9 +82,9 @@ export default function AdminWorkshops() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
       setShowCreate(false);
       reset();
-      toast.success('Formation créée !');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur lors de la création'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const cancelMutation = useMutation({
@@ -90,9 +93,9 @@ export default function AdminWorkshops() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
       setCancelWorkshop(null);
       setCancelReason('');
-      toast.success('Événement annulé, participants notifiés');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur lors de l\'annulation'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const deleteMutation = useMutation({
@@ -100,22 +103,22 @@ export default function AdminWorkshops() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
       setDeleteWorkshopId(null);
-      toast.success('Événement supprimé, participants notifiés');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur lors de la suppression'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const checkEnrollmentMutation = useMutation({
     mutationFn: () => workshopService.checkEnrollment(),
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
-      toast.success(res.data.message || 'Vérification terminée');
+      toast.success(res.data.message || t('common.success'));
     },
-    onError: () => toast.error('Erreur lors de la vérification'),
+    onError: () => toast.error(t('common.error')),
   });
 
   return (
-    <DashboardLayout sidebarItems={adminSidebar} title="Gestion des formations">
+    <DashboardLayout sidebarItems={adminSidebar} title={t('admin_workshops.title')}>
       <div className="space-y-5">
         {/* Header */}
         <div className="flex flex-col sm:flex-row gap-3 justify-between">
@@ -131,7 +134,7 @@ export default function AdminWorkshops() {
                     : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 )}
               >
-                {s === '' ? 'Toutes' : workshopStatuses[s]?.label || s}
+                {s === '' ? t('admin_workshops.all') : workshopStatuses[s]?.label || s}
               </button>
             ))}
           </div>
@@ -140,13 +143,12 @@ export default function AdminWorkshops() {
               onClick={() => checkEnrollmentMutation.mutate()}
               disabled={checkEnrollmentMutation.isPending}
               className="btn-secondary flex items-center gap-2 whitespace-nowrap"
-              title="Annule automatiquement les événements dans les 48h avec moins de participants que le minimum"
             >
               <RefreshCw className={clsx('w-4 h-4', checkEnrollmentMutation.isPending && 'animate-spin')} />
-              Vérifier inscriptions
+              {t('admin_workshops.check_enrollments')}
             </button>
             <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-2 whitespace-nowrap">
-              <Plus className="w-4 h-4" /> Nouvelle formation
+              <Plus className="w-4 h-4" /> {t('admin_workshops.new')}
             </button>
           </div>
         </div>
@@ -154,7 +156,7 @@ export default function AdminWorkshops() {
         {/* Table */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100">
-            <p className="text-sm text-gray-500">{total} formation{total > 1 ? 's' : ''}</p>
+            <p className="text-sm text-gray-500">{total} {t('admin_workshops.col_workshop').toLowerCase()}{total > 1 ? 's' : ''}</p>
           </div>
 
           {isLoading ? (
@@ -164,15 +166,15 @@ export default function AdminWorkshops() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
-                    <th className="table-header">Formation</th>
-                    <th className="table-header">Type</th>
-                    <th className="table-header">Date</th>
-                    <th className="table-header">Lieu</th>
-                    <th className="table-header">Places</th>
-                    <th className="table-header">Prix</th>
-                    <th className="table-header">Inscriptions</th>
-                    <th className="table-header">Statut</th>
-                    <th className="table-header">Actions</th>
+                    <th className="table-header">{t('admin_workshops.col_workshop')}</th>
+                    <th className="table-header">{t('admin_workshops.col_type')}</th>
+                    <th className="table-header">{t('admin_workshops.col_date')}</th>
+                    <th className="table-header">{t('admin_workshops.col_location')}</th>
+                    <th className="table-header">{t('admin_workshops.col_spots')}</th>
+                    <th className="table-header">{t('admin_workshops.col_price')}</th>
+                    <th className="table-header">{t('admin_workshops.col_enrollments')}</th>
+                    <th className="table-header">{t('admin_workshops.col_status')}</th>
+                    <th className="table-header">{t('admin_workshops.col_actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -203,7 +205,7 @@ export default function AdminWorkshops() {
                         </span>
                       </td>
                       <td className="table-cell font-medium text-gray-700">
-                        {workshop.price === 0 ? 'Gratuit' : `${workshop.price}€`}
+                        {workshop.price === 0 ? t('admin_workshops.free') : `${workshop.price}€`}
                       </td>
                       <td className="table-cell">
                         <div className="text-sm">
@@ -230,7 +232,7 @@ export default function AdminWorkshops() {
                               className="flex items-center gap-1 px-2.5 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
                             >
                               <CheckCircle className="w-3.5 h-3.5" />
-                              Valider
+                              {t('admin_workshops.validate_btn')}
                             </button>
                           )}
                           {workshop.status !== 'cancelled' && (
@@ -239,7 +241,7 @@ export default function AdminWorkshops() {
                               className="flex items-center gap-1 px-2.5 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-medium hover:bg-orange-100 transition-colors"
                             >
                               <XCircle className="w-3.5 h-3.5" />
-                              Annuler
+                              {t('admin_workshops.cancel_btn')}
                             </button>
                           )}
                           <button
@@ -256,114 +258,113 @@ export default function AdminWorkshops() {
                 </tbody>
               </table>
               {workshops.length === 0 && (
-                <EmptyState icon={<BookOpen className="w-10 h-10" />} message="Aucune formation trouvée" />
+                <EmptyState icon={<BookOpen className="w-10 h-10" />} message={t('common.noData')} />
               )}
             </div>
           )}
         </div>
 
         {/* Create Modal */}
-        <Modal isOpen={showCreate} onClose={() => { setShowCreate(false); reset(); }} title="Créer une formation" size="lg">
+        <Modal isOpen={showCreate} onClose={() => { setShowCreate(false); reset(); }} title={t('admin_workshops.create_modal')} size="lg">
           <form onSubmit={handleSubmit((d) => createMutation.mutate(d))} className="space-y-4">
             <div>
-              <label className="label">Titre</label>
-              <input {...register('title', { required: true })} className="input" placeholder="Atelier upcycling textile" />
-              {errors.title && <p className="text-red-500 text-xs mt-1">Requis</p>}
+              <label className="label">{t('admin_workshops.label_title')}</label>
+              <input {...register('title', { required: true })} className="input" />
+              {errors.title && <p className="text-red-500 text-xs mt-1">{t('admin_users.form_required')}</p>}
             </div>
             <div>
-              <label className="label">Description</label>
-              <textarea {...register('description')} className="input min-h-[80px] resize-none" placeholder="Description de la formation..." />
+              <label className="label">{t('admin_workshops.label_desc')}</label>
+              <textarea {...register('description')} className="input min-h-[80px] resize-none" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="label">Date et heure</label>
+                <label className="label">{t('admin_workshops.label_date')}</label>
                 <input {...register('date', { required: true })} type="datetime-local" className="input" />
-                {errors.date && <p className="text-red-500 text-xs mt-1">Requis</p>}
+                {errors.date && <p className="text-red-500 text-xs mt-1">{t('admin_users.form_required')}</p>}
               </div>
               <div>
-                <label className="label">Durée (minutes)</label>
+                <label className="label">{t('admin_workshops.label_duration')}</label>
                 <input {...register('duration', { valueAsNumber: true })} type="number" className="input" placeholder="120" />
               </div>
             </div>
             <div>
-              <label className="label">Lieu</label>
-              <input {...register('location')} className="input" placeholder="Atelier Paris 11e" />
+              <label className="label">{t('admin_workshops.label_location')}</label>
+              <input {...register('location')} className="input" />
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="label">Prix (€)</label>
+                <label className="label">{t('admin_workshops.label_price')}</label>
                 <input {...register('price', { valueAsNumber: true })} type="number" step="0.01" className="input" placeholder="0" />
               </div>
               <div>
-                <label className="label">Places max</label>
+                <label className="label">{t('admin_workshops.label_max')}</label>
                 <input {...register('max_spots', { valueAsNumber: true })} type="number" className="input" placeholder="15" />
               </div>
               <div>
-                <label className="label">Type</label>
+                <label className="label">{t('admin_workshops.label_type')}</label>
                 <select {...register('type')} className="input">
-                  <option value="atelier">Atelier</option>
-                  <option value="formation">Formation</option>
-                  <option value="conference">Conférence</option>
+                  <option value="atelier">{t('workshops.type.atelier')}</option>
+                  <option value="formation">{t('workshops.type.formation')}</option>
+                  <option value="conference">{t('workshops.type.conference')}</option>
                 </select>
               </div>
             </div>
             <div>
-              <label className="label">Catégorie</label>
+              <label className="label">{t('admin_workshops.label_category')}</label>
               <select {...register('category_id', { valueAsNumber: true })} className="input">
-                <option value={0}>Sélectionner une catégorie</option>
+                <option value={0}>{t('admin_workshops.select_category')}</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </select>
             </div>
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => { setShowCreate(false); reset(); }} className="btn-secondary flex-1">Annuler</button>
+              <button type="button" onClick={() => { setShowCreate(false); reset(); }} className="btn-secondary flex-1">{t('common.cancel')}</button>
               <button type="submit" disabled={createMutation.isPending} className="btn-primary flex-1">
-                {createMutation.isPending ? 'Création...' : 'Créer'}
+                {createMutation.isPending ? t('admin_workshops.creating') : t('admin_workshops.create_btn')}
               </button>
             </div>
           </form>
         </Modal>
 
         {/* Cancel Modal */}
-        <Modal isOpen={!!cancelWorkshop} onClose={() => { setCancelWorkshop(null); setCancelReason(''); }} title="Annuler l'événement" size="sm">
+        <Modal isOpen={!!cancelWorkshop} onClose={() => { setCancelWorkshop(null); setCancelReason(''); }} title={t('admin_workshops.cancel_modal')} size="sm">
           <p className="text-sm text-gray-600 mb-3">
-            Tous les participants inscrits à <strong>{cancelWorkshop?.title}</strong> seront notifiés.
+            <strong>{cancelWorkshop?.title}</strong>
           </p>
           <div className="mb-4">
-            <label className="label">Raison de l'annulation</label>
+            <label className="label">{t('admin_workshops.cancel_reason')}</label>
             <textarea
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
               className="input resize-none min-h-[80px]"
-              placeholder="Manque de participants, problème logistique..."
             />
           </div>
           <div className="flex gap-3">
-            <button onClick={() => { setCancelWorkshop(null); setCancelReason(''); }} className="btn-secondary flex-1">Fermer</button>
+            <button onClick={() => { setCancelWorkshop(null); setCancelReason(''); }} className="btn-secondary flex-1">{t('admin_workshops.close')}</button>
             <button
               onClick={() => cancelWorkshop && cancelReason.trim() && cancelMutation.mutate({ id: cancelWorkshop.id, reason: cancelReason })}
               disabled={cancelMutation.isPending || !cancelReason.trim()}
               className="btn-danger flex-1"
             >
-              {cancelMutation.isPending ? 'Annulation...' : 'Confirmer'}
+              {cancelMutation.isPending ? t('admin_workshops.cancelling') : t('admin_workshops.confirm_cancel')}
             </button>
           </div>
         </Modal>
 
         {/* Delete Modal */}
-        <Modal isOpen={!!deleteWorkshopId} onClose={() => setDeleteWorkshopId(null)} title="Supprimer l'événement" size="sm">
+        <Modal isOpen={!!deleteWorkshopId} onClose={() => setDeleteWorkshopId(null)} title={t('admin_workshops.delete_modal')} size="sm">
           <p className="text-gray-600 mb-5">
-            Cet événement sera supprimé définitivement et tous les inscrits seront notifiés. Cette action est irréversible.
+            {t('admin_workshops.delete_modal_desc')}
           </p>
           <div className="flex gap-3">
-            <button onClick={() => setDeleteWorkshopId(null)} className="btn-secondary flex-1">Annuler</button>
+            <button onClick={() => setDeleteWorkshopId(null)} className="btn-secondary flex-1">{t('common.cancel')}</button>
             <button
               onClick={() => deleteWorkshopId && deleteMutation.mutate(deleteWorkshopId)}
               disabled={deleteMutation.isPending}
               className="btn-danger flex-1"
             >
-              {deleteMutation.isPending ? 'Suppression...' : 'Supprimer'}
+              {deleteMutation.isPending ? t('admin_users.deleting') : t('common.delete')}
             </button>
           </div>
         </Modal>

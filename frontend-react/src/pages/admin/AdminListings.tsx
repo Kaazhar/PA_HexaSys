@@ -16,8 +16,10 @@ import Pagination from '../../components/common/Pagination';
 import EmptyState from '../../components/common/EmptyState';
 import StatusBadge from '../../components/common/StatusBadge';
 import { listingStatuses } from '../../config/statuses';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminListings() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -40,9 +42,9 @@ export default function AdminListings() {
     mutationFn: (id: number) => listingService.validate(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'listings'] });
-      toast.success('Annonce validée !');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur lors de la validation'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const sponsorMutation = useMutation({
@@ -50,9 +52,9 @@ export default function AdminListings() {
       listingService.sponsor(id, isSponsored),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'listings'] });
-      toast.success('Mise en avant mise à jour !');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const rejectMutation = useMutation({
@@ -61,9 +63,9 @@ export default function AdminListings() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'listings'] });
       setRejectListing(null);
       reset();
-      toast.success('Annonce rejetée');
+      toast.success(t('common.success'));
     },
-    onError: () => toast.error('Erreur lors du rejet'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const onRejectSubmit = (data: { reason: string }) => {
@@ -73,7 +75,7 @@ export default function AdminListings() {
   };
 
   return (
-    <DashboardLayout sidebarItems={adminSidebar} title="Gestion des annonces">
+    <DashboardLayout sidebarItems={adminSidebar} title={t('admin_listings.title')}>
       <div className="space-y-5">
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
@@ -81,7 +83,7 @@ export default function AdminListings() {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Rechercher une annonce..."
+              placeholder={t('admin_listings.search')}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="input pl-9"
@@ -99,7 +101,7 @@ export default function AdminListings() {
                     : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 )}
               >
-                {s === '' ? 'Toutes' : listingStatuses[s]?.label || s}
+                {s === '' ? t('admin_listings.all') : listingStatuses[s]?.label || s}
               </button>
             ))}
           </div>
@@ -108,7 +110,7 @@ export default function AdminListings() {
         {/* Table */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100">
-            <p className="text-sm text-gray-500">{total} annonce{total > 1 ? 's' : ''}</p>
+            <p className="text-sm text-gray-500">{total} {t('admin_listings.col_listing').toLowerCase()}{total > 1 ? 's' : ''}</p>
           </div>
 
           {isLoading ? (
@@ -118,13 +120,13 @@ export default function AdminListings() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
-                    <th className="table-header">Annonce</th>
-                    <th className="table-header">Type</th>
-                    <th className="table-header">Auteur</th>
-                    <th className="table-header">Prix</th>
-                    <th className="table-header">Statut</th>
-                    <th className="table-header">Date</th>
-                    <th className="table-header">Actions</th>
+                    <th className="table-header">{t('admin_listings.col_listing')}</th>
+                    <th className="table-header">{t('admin_listings.col_type')}</th>
+                    <th className="table-header">{t('admin_listings.col_author')}</th>
+                    <th className="table-header">{t('admin_listings.col_price')}</th>
+                    <th className="table-header">{t('admin_listings.col_status')}</th>
+                    <th className="table-header">{t('admin_listings.col_date')}</th>
+                    <th className="table-header">{t('admin_listings.col_actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -133,19 +135,19 @@ export default function AdminListings() {
                       <td className="table-cell">
                         <div>
                           <p className="font-medium text-gray-900 line-clamp-1">{listing.title}</p>
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{listing.category?.name || 'Sans catégorie'}</p>
+                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{listing.category?.name || t('admin_listings.no_category')}</p>
                         </div>
                       </td>
                       <td className="table-cell">
                         <span className={clsx('badge', listing.type === 'don' ? 'bg-green-100 text-green-700' : 'bg-coral-400/20 text-coral-600')}>
-                          {listing.type === 'don' ? 'Don' : 'Vente'}
+                          {listing.type === 'don' ? t('admin_listings.don') : t('admin_listings.vente')}
                         </span>
                       </td>
                       <td className="table-cell text-gray-500">
                         {listing.user ? `${listing.user.firstname} ${listing.user.lastname}` : `User #${listing.user_id}`}
                       </td>
                       <td className="table-cell font-medium text-gray-700">
-                        {listing.price ? `${listing.price}€` : 'Gratuit'}
+                        {listing.price ? `${listing.price}€` : t('admin_listings.free')}
                       </td>
                       <td className="table-cell">
                         <StatusBadge status={listing.status} config={listingStatuses} />
@@ -197,7 +199,7 @@ export default function AdminListings() {
                 </tbody>
               </table>
               {listings.length === 0 && (
-                <EmptyState icon={<Tag className="w-10 h-10" />} message="Aucune annonce trouvée" />
+                <EmptyState icon={<Tag className="w-10 h-10" />} message={t('common.noData')} />
               )}
             </div>
           )}
@@ -206,30 +208,29 @@ export default function AdminListings() {
         </div>
 
         {/* Reject Modal */}
-        <Modal isOpen={!!rejectListing} onClose={() => { setRejectListing(null); reset(); }} title="Rejeter l'annonce" size="sm">
+        <Modal isOpen={!!rejectListing} onClose={() => { setRejectListing(null); reset(); }} title={t('admin_listings.reject_modal')} size="sm">
           <p className="text-sm text-gray-600 mb-4">
-            Annonce : <strong>"{rejectListing?.title}"</strong>
+            <strong>"{rejectListing?.title}"</strong>
           </p>
           <form onSubmit={handleSubmit(onRejectSubmit)} className="space-y-4">
             <div>
-              <label className="label">Motif du rejet</label>
+              <label className="label">{t('admin_listings.reject_label')}</label>
               <textarea
                 {...register('reason', { required: true })}
                 className="input min-h-[100px] resize-none"
-                placeholder="Expliquez pourquoi cette annonce est rejetée..."
               />
             </div>
             <div className="flex gap-3">
-              <button type="button" onClick={() => { setRejectListing(null); reset(); }} className="btn-secondary flex-1">Annuler</button>
+              <button type="button" onClick={() => { setRejectListing(null); reset(); }} className="btn-secondary flex-1">{t('common.cancel')}</button>
               <button type="submit" disabled={rejectMutation.isPending} className="btn-danger flex-1">
-                {rejectMutation.isPending ? 'Rejet...' : 'Rejeter'}
+                {rejectMutation.isPending ? t('admin_listings.rejecting') : t('admin_listings.reject_btn')}
               </button>
             </div>
           </form>
         </Modal>
 
         {/* View Modal */}
-        <Modal isOpen={!!viewListing} onClose={() => setViewListing(null)} title="Détail de l'annonce" size="lg">
+        <Modal isOpen={!!viewListing} onClose={() => setViewListing(null)} title={t('admin_listings.view_modal')} size="lg">
           {viewListing && (
             <div className="space-y-4">
               <div>
@@ -238,16 +239,16 @@ export default function AdminListings() {
               </div>
               <p className="text-gray-700">{viewListing.description}</p>
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><span className="text-gray-500">Type :</span> <strong>{viewListing.type}</strong></div>
-                <div><span className="text-gray-500">Prix :</span> <strong>{viewListing.price ? `${viewListing.price}€` : 'Gratuit'}</strong></div>
-                <div><span className="text-gray-500">État :</span> <strong>{viewListing.condition}</strong></div>
-                <div><span className="text-gray-500">Lieu :</span> <strong>{viewListing.location}</strong></div>
-                <div><span className="text-gray-500">Auteur :</span> <strong>{viewListing.user ? `${viewListing.user.firstname} ${viewListing.user.lastname}` : '-'}</strong></div>
-                <div><span className="text-gray-500">Statut :</span> <strong>{viewListing.status}</strong></div>
+                <div><span className="text-gray-500">{t('admin_listings.type_label')}</span> <strong>{viewListing.type}</strong></div>
+                <div><span className="text-gray-500">{t('admin_listings.price_label')}</span> <strong>{viewListing.price ? `${viewListing.price}€` : t('admin_listings.free')}</strong></div>
+                <div><span className="text-gray-500">{t('admin_listings.condition_label')}</span> <strong>{viewListing.condition}</strong></div>
+                <div><span className="text-gray-500">{t('admin_listings.location_label')}</span> <strong>{viewListing.location}</strong></div>
+                <div><span className="text-gray-500">{t('admin_listings.author_label')}</span> <strong>{viewListing.user ? `${viewListing.user.firstname} ${viewListing.user.lastname}` : '-'}</strong></div>
+                <div><span className="text-gray-500">{t('admin_listings.status_label')}</span> <strong>{viewListing.status}</strong></div>
               </div>
               {viewListing.reject_reason && (
                 <div className="p-3 bg-red-50 rounded-lg">
-                  <p className="text-sm text-red-700"><strong>Motif du rejet :</strong> {viewListing.reject_reason}</p>
+                  <p className="text-sm text-red-700"><strong>{t('admin_listings.reject_label')} :</strong> {viewListing.reject_reason}</p>
                 </div>
               )}
               {viewListing.status === 'pending' && (
@@ -256,13 +257,13 @@ export default function AdminListings() {
                     onClick={() => { validateMutation.mutate(viewListing.id); setViewListing(null); }}
                     className="btn-primary flex-1 flex items-center justify-center gap-2"
                   >
-                    <CheckCircle className="w-4 h-4" /> Valider
+                    <CheckCircle className="w-4 h-4" /> {t('admin_listings.validate_btn')}
                   </button>
                   <button
                     onClick={() => { setRejectListing(viewListing); setViewListing(null); }}
                     className="btn-danger flex-1 flex items-center justify-center gap-2"
                   >
-                    <XCircle className="w-4 h-4" /> Rejeter
+                    <XCircle className="w-4 h-4" /> {t('admin_listings.reject_btn')}
                   </button>
                 </div>
               )}

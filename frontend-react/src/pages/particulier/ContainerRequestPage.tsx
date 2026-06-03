@@ -9,17 +9,26 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import clsx from 'clsx';
 import { particulierSidebar } from '../../config/sidebars';
 import type { ContainerSlot } from '../../types';
+import { useTranslation } from 'react-i18next';
 
-const SIZE_OPTIONS = [
-  { value: 'S', label: 'Petit (S)', desc: '≤ 30×30×30 cm · max 5 kg', example: 'Livre, vêtement, gadget', color: '#3B82F6' },
-  { value: 'M', label: 'Moyen (M)', desc: '≤ 60×40×40 cm · max 15 kg', example: 'Micro-onde, outil, chaussures', color: '#F59E0B' },
-  { value: 'L', label: 'Grand (L)', desc: '≤ 100×60×60 cm · max 30 kg', example: 'TV, vélo pliant, meuble léger', color: '#EF4444' },
-];
-
-const STEP_LABELS = ['Objet', 'Conteneur', 'Case', 'Confirmation'];
+const SIZE_COLORS = { S: '#3B82F6', M: '#F59E0B', L: '#EF4444' };
 
 export default function ContainerRequestPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const SIZE_OPTIONS = [
+    { value: 'S', label: t('container_request.size_s_label'), desc: t('container_request.size_s_desc'), example: t('container_request.size_s_example'), color: SIZE_COLORS.S },
+    { value: 'M', label: t('container_request.size_m_label'), desc: t('container_request.size_m_desc'), example: t('container_request.size_m_example'), color: SIZE_COLORS.M },
+    { value: 'L', label: t('container_request.size_l_label'), desc: t('container_request.size_l_desc'), example: t('container_request.size_l_example'), color: SIZE_COLORS.L },
+  ];
+
+  const STEP_LABELS = [
+    t('container_request.step_object'),
+    t('container_request.step_container'),
+    t('container_request.step_slot'),
+    t('container_request.step_confirm'),
+  ];
 
   // ── Étape courante ──────────────────────────────────────────────────────
   const [step, setStep] = useState(0);
@@ -68,11 +77,11 @@ export default function ContainerRequestPage() {
         slot_id: slotId!,
       }),
     onSuccess: () => {
-      toast.success("Demande envoyée ! Vous recevrez votre code d'accès après validation.");
+      toast.success(t('container_request.success'));
       navigate('/mes-depots');
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.error || "Erreur lors de l'envoi");
+      toast.error(err?.response?.data?.error || t('common.error'));
     },
   });
 
@@ -85,16 +94,16 @@ export default function ContainerRequestPage() {
   // ── Navigation ──────────────────────────────────────────────────────────
   const goNext = () => {
     if (step === 0) {
-      if (!objectTitle.trim()) { toast.error('Le nom de l\'objet est requis'); return; }
-      if (!sizeCategory) { toast.error('La taille du colis est requise'); return; }
+      if (!objectTitle.trim()) { toast.error(t('container_request.error_object_required')); return; }
+      if (!sizeCategory) { toast.error(t('container_request.error_size_required')); return; }
       setStep(1);
     } else if (step === 1) {
-      if (!containerId) { toast.error('Veuillez sélectionner un conteneur'); return; }
+      if (!containerId) { toast.error(t('container_request.error_container_required')); return; }
       setSlotId(null);
       setSlotCode('');
       setStep(2);
     } else if (step === 2) {
-      if (!slotId) { toast.error('Veuillez sélectionner une case'); return; }
+      if (!slotId) { toast.error(t('container_request.error_slot_required')); return; }
       setStep(3);
     }
   };
@@ -104,14 +113,14 @@ export default function ContainerRequestPage() {
   };
 
   const handleSubmit = () => {
-    if (!desiredDate) { toast.error('La date de dépôt est requise'); return; }
-    if (!containerId || !slotId) { toast.error('Données manquantes, veuillez recommencer'); return; }
+    if (!desiredDate) { toast.error(t('container_request.error_date_required')); return; }
+    if (!containerId || !slotId) { toast.error(t('container_request.error_missing_data')); return; }
     createMutation.mutate();
   };
 
   // ── Rendu ────────────────────────────────────────────────────────────────
   return (
-    <DashboardLayout sidebarItems={particulierSidebar} title="Demande de dépôt en conteneur">
+    <DashboardLayout sidebarItems={particulierSidebar} title={t('container_request.title')}>
       <div className="max-w-2xl mx-auto">
 
         {/* Stepper */}
@@ -141,10 +150,10 @@ export default function ContainerRequestPage() {
           {/* ── Étape 0 : Infos objet ──────────────────────────────────── */}
           {step === 0 && (
             <div className="space-y-5">
-              <h2 className="text-lg font-bold text-gray-900">Décrivez votre objet</h2>
+              <h2 className="text-lg font-bold text-gray-900">{t('container_request.describe_object')}</h2>
 
               <div>
-                <label className="label">Nom de l'objet *</label>
+                <label className="label">{t('container_request.object_name')}</label>
                 <input
                   type="text"
                   value={objectTitle}
@@ -156,7 +165,7 @@ export default function ContainerRequestPage() {
               </div>
 
               <div>
-                <label className="label">Description <span className="text-gray-400 font-normal">(optionnel)</span></label>
+                <label className="label">{t('container_request.object_desc')} <span className="text-gray-400 font-normal">{t('container_request.optional')}</span></label>
                 <textarea
                   value={objectDescription}
                   onChange={e => setObjectDescription(e.target.value)}
@@ -167,8 +176,8 @@ export default function ContainerRequestPage() {
               </div>
 
               <div>
-                <label className="label">Taille du colis *</label>
-                <p className="text-xs text-gray-400 mb-3">Détermine quelle case vous sera réservée dans le conteneur.</p>
+                <label className="label">{t('container_request.size_title')}</label>
+                <p className="text-xs text-gray-400 mb-3">{t('container_request.size_desc')}</p>
                 <div className="space-y-2">
                   {SIZE_OPTIONS.map((opt) => (
                     <button
@@ -202,15 +211,15 @@ export default function ContainerRequestPage() {
           {/* ── Étape 1 : Choix conteneur ──────────────────────────────── */}
           {step === 1 && (
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-gray-900">Choisissez un conteneur</h2>
-              <p className="text-sm text-gray-500">Sélectionnez un point de dépôt disponible près de chez vous.</p>
+              <h2 className="text-lg font-bold text-gray-900">{t('container_request.choose_container')}</h2>
+              <p className="text-sm text-gray-500">{t('container_request.choose_container_sub')}</p>
 
               {containersQuery.isLoading ? (
                 <div className="flex justify-center py-8"><LoadingSpinner /></div>
               ) : containers.length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <AlertCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">Aucun conteneur disponible pour le moment.</p>
+                  <p className="text-sm">{t('container_request.no_containers')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -240,7 +249,7 @@ export default function ContainerRequestPage() {
                             <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium',
                               isFull ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'
                             )}>
-                              {isFull ? 'Plein' : 'Disponible'}
+                              {isFull ? t('container_request.full') : t('container_request.available')}
                             </span>
                           </div>
                           <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
@@ -249,7 +258,7 @@ export default function ContainerRequestPage() {
                           </div>
                           <div className="mt-2">
                             <div className="flex justify-between text-xs text-gray-400 mb-1">
-                              <span>Remplissage</span>
+                              <span>{t('container_request.fill')}</span>
                               <span>{c.current_count}/{c.capacity}</span>
                             </div>
                             <div className="w-full bg-gray-100 rounded-full h-1.5">
@@ -274,47 +283,45 @@ export default function ContainerRequestPage() {
           {step === 2 && (
             <div className="space-y-5">
               <div>
-                <h2 className="text-lg font-bold text-gray-900">Choisissez votre case</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  Cases <strong>taille {sizeCategory}</strong> disponibles dans <strong>{selectedContainer?.name}</strong>
-                </p>
+                <h2 className="text-lg font-bold text-gray-900">{t('container_request.choose_slot')}</h2>
+                <p className="text-sm text-gray-500 mt-1" dangerouslySetInnerHTML={{ __html: t('container_request.slots_available', { size: `<strong>${sizeCategory}</strong>`, name: `<strong>${selectedContainer?.name}</strong>` }) }} />
               </div>
 
               {slotsQuery.isLoading ? (
                 <div className="flex flex-col items-center py-12 gap-3">
                   <LoadingSpinner size="lg" />
-                  <p className="text-sm text-gray-400">Chargement des cases...</p>
+                  <p className="text-sm text-gray-400">{t('container_request.slots_loading')}</p>
                 </div>
               ) : slotsQuery.isError ? (
                 <div className="text-center py-10">
                   <AlertCircle className="w-12 h-12 mx-auto mb-3 text-red-400" />
-                  <p className="text-sm font-medium text-red-600">Impossible de charger les cases</p>
+                  <p className="text-sm font-medium text-red-600">{t('container_request.slots_error')}</p>
                   <p className="text-xs text-gray-400 mt-1">
-                    {(slotsQuery.error as any)?.message ?? 'Erreur réseau'}
+                    {(slotsQuery.error as any)?.message ?? t('common.error')}
                   </p>
                   <button
                     type="button"
                     onClick={() => slotsQuery.refetch()}
                     className="mt-3 text-sm text-[#2D5016] underline"
                   >
-                    Réessayer
+                    {t('container_request.retry')}
                   </button>
                 </div>
               ) : allSlots.length === 0 ? (
                 <div className="text-center py-10 text-gray-400">
                   <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm font-medium text-gray-600">Ce conteneur n'a pas encore de cases configurées</p>
-                  <p className="text-xs text-gray-400 mt-1">Contactez l'administrateur.</p>
+                  <p className="text-sm font-medium text-gray-600">{t('container_request.no_slots')}</p>
+                  <p className="text-xs text-gray-400 mt-1">{t('container_request.no_slots_sub')}</p>
                   <button type="button" onClick={goBack} className="text-[#2D5016] text-sm mt-3 underline">
-                    Choisir un autre conteneur
+                    {t('container_request.change_container')}
                   </button>
                 </div>
               ) : sizeSlots.length === 0 ? (
                 <div className="text-center py-10 text-gray-400">
                   <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm font-medium text-gray-600">Aucune case taille {sizeCategory} dans ce conteneur</p>
+                  <p className="text-sm font-medium text-gray-600">{t('container_request.no_size_slots', { size: sizeCategory })}</p>
                   <button type="button" onClick={goBack} className="text-[#2D5016] text-sm mt-3 underline">
-                    Choisir un autre conteneur
+                    {t('container_request.change_container')}
                   </button>
                 </div>
               ) : (
@@ -325,8 +332,8 @@ export default function ContainerRequestPage() {
                     freeCount === 0 ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-800'
                   )}>
                     {freeCount === 0
-                      ? <><AlertCircle className="w-4 h-4" /> Aucune case libre taille {sizeCategory} dans ce conteneur</>
-                      : <><CheckCircle className="w-4 h-4" /> {freeCount} case{freeCount > 1 ? 's' : ''} libre{freeCount > 1 ? 's' : ''} sur {sizeSlots.length}</>
+                      ? <><AlertCircle className="w-4 h-4" /> {t('container_request.no_free_slots', { size: sizeCategory })}</>
+                      : <><CheckCircle className="w-4 h-4" /> {freeCount > 1 ? t('container_request.free_slots_plural', { count: freeCount, total: sizeSlots.length }) : t('container_request.free_slots', { count: freeCount, total: sizeSlots.length })}</>
                     }
                   </div>
 
@@ -338,7 +345,7 @@ export default function ContainerRequestPage() {
                     return (
                       <div key={size} className={clsx(!isActiveSize && 'opacity-30 pointer-events-none select-none')}>
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                          Taille {size}{!isActiveSize ? ' — autre taille (non sélectionnable)' : ''}
+                          {t('admin_containers.slot_size', { size })}{!isActiveSize ? ` ${t('container_request.other_size_note')}` : ''}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {group.map((slot) => {
@@ -365,7 +372,7 @@ export default function ContainerRequestPage() {
                                 <span>{slot.slot_code}</span>
                                 {!isFree && (
                                   <span className="text-[9px] uppercase opacity-70 leading-none">
-                                    {slot.status === 'reserved' ? 'Rés.' : 'Occ.'}
+                                    {slot.status === 'reserved' ? t('container_request.slot_reserved_abbr') : t('container_request.slot_occupied_abbr')}
                                   </span>
                                 )}
                               </button>
@@ -379,16 +386,16 @@ export default function ContainerRequestPage() {
                   {/* Légende */}
                   <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
                     <span className="flex items-center gap-1.5">
-                      <span className="w-4 h-4 rounded border-2 border-gray-200 bg-white inline-block" />Libre
+                      <span className="w-4 h-4 rounded border-2 border-gray-200 bg-white inline-block" />{t('container_request.legend_free')}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="w-4 h-4 rounded border-2 border-[#2D5016] bg-[#2D5016] inline-block" />Sélectionnée
+                      <span className="w-4 h-4 rounded border-2 border-[#2D5016] bg-[#2D5016] inline-block" />{t('container_request.legend_selected')}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="w-4 h-4 rounded border-2 border-amber-200 bg-amber-50 inline-block" />Réservée
+                      <span className="w-4 h-4 rounded border-2 border-amber-200 bg-amber-50 inline-block" />{t('container_request.legend_reserved')}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="w-4 h-4 rounded border-2 border-red-200 bg-red-50 inline-block" />Occupée
+                      <span className="w-4 h-4 rounded border-2 border-red-200 bg-red-50 inline-block" />{t('container_request.legend_occupied')}
                     </span>
                   </div>
 
@@ -397,7 +404,7 @@ export default function ContainerRequestPage() {
                     <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
                       <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
                       <p className="text-sm text-green-800">
-                        Case <strong className="font-mono">{slotCode}</strong> sélectionnée
+                        {t('container_request.slot_chosen', { code: slotCode })}
                       </p>
                     </div>
                   )}
@@ -409,31 +416,31 @@ export default function ContainerRequestPage() {
           {/* ── Étape 3 : Date + récap ──────────────────────────────────── */}
           {step === 3 && (
             <div className="space-y-5">
-              <h2 className="text-lg font-bold text-gray-900">Confirmation</h2>
+              <h2 className="text-lg font-bold text-gray-900">{t('container_request.confirmation_title')}</h2>
 
               {/* Récap */}
               <div className="p-4 bg-gray-50 rounded-xl space-y-3 text-sm border border-gray-100">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-500">Conteneur</span>
+                  <span className="text-gray-500">{t('container_request.container_label')}</span>
                   <span className="font-semibold text-gray-900">{selectedContainer?.name}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-500">Case réservée</span>
+                  <span className="text-gray-500">{t('container_request.slot_reserved')}</span>
                   <span className="font-mono font-bold text-[#2D5016] text-base">{slotCode}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-500">Taille</span>
+                  <span className="text-gray-500">{t('container_request.size_label')}</span>
                   <span className="font-medium">
                     {SIZE_OPTIONS.find(s => s.value === sizeCategory)?.label}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-500">Objet</span>
+                  <span className="text-gray-500">{t('container_request.object_label')}</span>
                   <span className="font-medium text-right max-w-[60%] truncate">{objectTitle}</span>
                 </div>
                 {objectDescription && (
                   <div className="flex justify-between items-start gap-4">
-                    <span className="text-gray-500 flex-shrink-0">Description</span>
+                    <span className="text-gray-500 flex-shrink-0">{t('container_request.desc_label')}</span>
                     <span className="text-gray-700 text-right text-xs">{objectDescription}</span>
                   </div>
                 )}
@@ -441,7 +448,7 @@ export default function ContainerRequestPage() {
 
               {/* Date */}
               <div>
-                <label className="label">Date de dépôt souhaitée *</label>
+                <label className="label">{t('container_request.date_label')}</label>
                 <input
                   type="date"
                   value={desiredDate}
@@ -454,7 +461,7 @@ export default function ContainerRequestPage() {
 
               <div className="p-4 bg-amber-50 rounded-xl border border-amber-100">
                 <p className="text-sm text-amber-800">
-                  Votre demande sera vérifiée par notre équipe. Vous recevrez votre code d'accès et le détail de votre case par notification.
+                  {t('container_request.validation_note')}
                 </p>
               </div>
             </div>
@@ -464,12 +471,12 @@ export default function ContainerRequestPage() {
           <div className="flex gap-3 mt-6 pt-6 border-t border-gray-100">
             {step > 0 && (
               <button type="button" onClick={goBack} className="btn-secondary flex-1">
-                Retour
+                {t('container_request.back')}
               </button>
             )}
             {step < 3 ? (
               <button type="button" onClick={goNext} className="btn-primary flex-1 flex items-center justify-center gap-2">
-                Suivant <ChevronRight className="w-4 h-4" />
+                {t('container_request.next')} <ChevronRight className="w-4 h-4" />
               </button>
             ) : (
               <button
@@ -478,7 +485,7 @@ export default function ContainerRequestPage() {
                 disabled={createMutation.isPending}
                 className="btn-primary flex-1"
               >
-                {createMutation.isPending ? 'Envoi en cours...' : 'Envoyer la demande'}
+                {createMutation.isPending ? t('container_request.sending') : t('container_request.send')}
               </button>
             )}
           </div>

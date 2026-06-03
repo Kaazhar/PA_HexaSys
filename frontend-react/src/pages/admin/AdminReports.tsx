@@ -14,26 +14,28 @@ import toast from 'react-hot-toast';
 import { adminSidebar } from '../../config/sidebars';
 import Pagination from '../../components/common/Pagination';
 import EmptyState from '../../components/common/EmptyState';
-
-const reasonLabels: Record<string, string> = {
-  spam: 'Spam / Publicité',
-  inappropriate: 'Contenu inapproprié',
-  fake: 'Annonce frauduleuse',
-  prohibited: 'Objet interdit',
-  other: 'Autre',
-};
-
-const statusConfig: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
-  pending: { label: 'En attente', cls: 'bg-amber-100 text-amber-700', icon: <Clock className="w-3.5 h-3.5" /> },
-  resolved: { label: 'Résolu', cls: 'bg-green-100 text-green-700', icon: <CheckCircle className="w-3.5 h-3.5" /> },
-  dismissed: { label: 'Ignoré', cls: 'bg-gray-100 text-gray-500', icon: <XCircle className="w-3.5 h-3.5" /> },
-};
+import { useTranslation } from 'react-i18next';
 
 export default function AdminReports() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState('pending');
   const [resolving, setResolving] = useState<{ id: number; action: 'resolved' | 'dismissed' } | null>(null);
   const [adminNote, setAdminNote] = useState('');
+
+  const reasonLabels: Record<string, string> = {
+    spam: t('admin_reports.reasons.spam'),
+    inappropriate: t('admin_reports.reasons.inappropriate'),
+    fake: t('admin_reports.reasons.fake'),
+    prohibited: t('admin_reports.reasons.prohibited'),
+    other: t('admin_reports.reasons.other'),
+  };
+
+  const statusConfig: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
+    pending: { label: t('admin_reports.status.pending'), cls: 'bg-amber-100 text-amber-700', icon: <Clock className="w-3.5 h-3.5" /> },
+    resolved: { label: t('admin_reports.status.resolved'), cls: 'bg-green-100 text-green-700', icon: <CheckCircle className="w-3.5 h-3.5" /> },
+    dismissed: { label: t('admin_reports.status.dismissed'), cls: 'bg-gray-100 text-gray-500', icon: <XCircle className="w-3.5 h-3.5" /> },
+  };
 
   const { items: reports, total, totalPages, isLoading, page, setPage } = usePaginatedQuery({
     queryKey: ['admin-reports', statusFilter],
@@ -46,21 +48,21 @@ export default function AdminReports() {
     mutationFn: ({ id, status, note }: { id: number; status: string; note: string }) =>
       reportService.resolve(id, { status, admin_note: note }),
     onSuccess: (_, vars) => {
-      toast.success(vars.status === 'resolved' ? 'Annonce retirée et signalement résolu.' : 'Signalement ignoré.');
+      toast.success(vars.status === 'resolved' ? t('admin_reports.confirm_remove') : t('admin_reports.ignore'));
       setResolving(null);
       setAdminNote('');
       queryClient.invalidateQueries({ queryKey: ['admin-reports'] });
     },
-    onError: () => toast.error('Une erreur est survenue.'),
+    onError: () => toast.error(t('common.error')),
   });
 
   return (
-    <DashboardLayout sidebarItems={adminSidebar} title="Signalements">
+    <DashboardLayout sidebarItems={adminSidebar} title={t('admin_reports.title')}>
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Signalements</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{total} signalement{total > 1 ? 's' : ''}</p>
+            <h1 className="text-xl font-bold text-gray-900">{t('admin_reports.title')}</h1>
+            <p className="text-sm text-gray-500 mt-0.5">{total} {t('admin_reports.title').toLowerCase()}{total > 1 ? 's' : ''}</p>
           </div>
         </div>
 
@@ -77,7 +79,7 @@ export default function AdminReports() {
                   : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
               )}
             >
-              {s === '' ? 'Tous' : statusConfig[s]?.label}
+              {s === '' ? t('admin_reports.all') : statusConfig[s]?.label}
             </button>
           ))}
         </div>
@@ -124,7 +126,7 @@ export default function AdminReports() {
 
                       {/* Reporter */}
                       <p className="text-xs text-gray-500 mb-1">
-                        Signalé par <span className="font-medium">{report.user?.firstname} {report.user?.lastname}</span>
+                        {t('admin_reports.reported_by')} <span className="font-medium">{report.user?.firstname} {report.user?.lastname}</span>
                         {' · '}
                         {format(new Date(report.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
                       </p>
@@ -136,7 +138,7 @@ export default function AdminReports() {
                       )}
 
                       {report.admin_note && (
-                        <p className="text-xs text-gray-400 mt-1 italic">Note admin : {report.admin_note}</p>
+                        <p className="text-xs text-gray-400 mt-1 italic">{t('admin_reports.admin_note')} {report.admin_note}</p>
                       )}
                     </div>
 
@@ -147,7 +149,7 @@ export default function AdminReports() {
                           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
                         >
                           <CheckCircle className="w-3.5 h-3.5" />
-                          Retirer l'annonce
+                          {t('admin_reports.remove_listing')}
                         </button>
                         <button
                           onClick={() => resolveMutation.mutate({ id: report.id, status: 'dismissed', note: '' })}
@@ -155,7 +157,7 @@ export default function AdminReports() {
                           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 transition-colors"
                         >
                           <XCircle className="w-3.5 h-3.5" />
-                          Ignorer
+                          {t('admin_reports.ignore')}
                         </button>
                       </div>
                     )}
@@ -175,28 +177,27 @@ export default function AdminReports() {
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
             <div className="flex items-center gap-2 mb-4">
               <AlertCircle className="w-5 h-5 text-red-500" />
-              <h3 className="text-lg font-semibold text-gray-900">Retirer l'annonce ?</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('admin_reports.remove_modal_title')}</h3>
             </div>
             <p className="text-sm text-gray-500 mb-4">
-              L'annonce sera rejetée et le propriétaire en sera notifié.
+              {t('admin_reports.remove_modal_desc')}
             </p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Note pour le propriétaire</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_reports.note_label')}</label>
               <textarea
                 className="input w-full h-20 resize-none"
-                placeholder="Expliquez la raison du retrait..."
                 value={adminNote}
                 onChange={e => setAdminNote(e.target.value)}
               />
             </div>
             <div className="flex justify-end gap-3 mt-4">
-              <button onClick={() => { setResolving(null); setAdminNote(''); }} className="btn-secondary">Annuler</button>
+              <button onClick={() => { setResolving(null); setAdminNote(''); }} className="btn-secondary">{t('common.cancel')}</button>
               <button
                 onClick={() => resolveMutation.mutate({ id: resolving.id, status: resolving.action, note: adminNote })}
                 disabled={resolveMutation.isPending}
                 className="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600 transition-colors"
               >
-                {resolveMutation.isPending ? 'Traitement...' : 'Confirmer le retrait'}
+                {resolveMutation.isPending ? t('admin_reports.processing') : t('admin_reports.confirm_remove')}
               </button>
             </div>
           </div>
