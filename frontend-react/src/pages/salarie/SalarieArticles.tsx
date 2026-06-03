@@ -85,10 +85,11 @@ export default function SalarieArticles() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmed = { ...form, title: form.title.trim(), content: form.content?.trim() };
     if (editArticle) {
-      updateMutation.mutate({ id: editArticle.id, data: form });
+      updateMutation.mutate({ id: editArticle.id, data: trimmed });
     } else {
-      createMutation.mutate(form);
+      createMutation.mutate(trimmed);
     }
   };
 

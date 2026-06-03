@@ -87,11 +87,11 @@ export default function SalarieFormations() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createMutation.mutate({
-      title: form.title,
-      description: form.description,
+      title: form.title.trim(),
+      description: form.description?.trim(),
       date: form.date,
       duration: Number(form.duration),
-      location: form.location,
+      location: form.location.trim(),
       price: Number(form.price),
       max_spots: Number(form.max_spots),
       min_spots: Number(form.min_spots),

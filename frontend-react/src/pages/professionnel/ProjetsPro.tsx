@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2, Eye, Heart, Image } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { proSidebar } from '../../config/sidebars';
@@ -79,7 +80,7 @@ export default function ProjetsPro() {
   };
 
   const handleSubmit = () => {
-    if (!form.title.trim()) return;
+    if (!form.title.trim()) { toast.error('Le titre est requis'); return; }
     const trimmed = { ...form, title: form.title.trim(), description: form.description?.trim() };
     if (editing) {
       updateMutation.mutate({ id: editing.id, d: trimmed });

@@ -374,7 +374,7 @@ export default function AdminContainers() {
               </div>
               <div>
                 <label className="label">Capacité</label>
-                <input {...register('capacity', { valueAsNumber: true })} type="number" className="input" placeholder="25" />
+                <input {...register('capacity', { valueAsNumber: true, min: 1 })} type="number" min="1" className="input" placeholder="25" />
               </div>
             </div>
             <div className="flex gap-3 pt-2">
