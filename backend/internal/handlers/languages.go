@@ -31,14 +31,13 @@ func GetTranslation(c *gin.Context) {
 // POST /api/admin/languages — admin only
 func CreateLanguage(c *gin.Context) {
 	var req struct {
-		Code      string `json:"code"`
-		Name      string `json:"name"`
-		Label     string `json:"label"`
-		Flag      string `json:"flag"`
-		DeepLCode string `json:"deepl_code"`
+		Code  string `json:"code"`
+		Name  string `json:"name"`
+		Label string `json:"label"`
+		Flag  string `json:"flag"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil || req.Code == "" || req.Name == "" || req.DeepLCode == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "code, name et deepl_code sont requis"})
+	if err := c.ShouldBindJSON(&req); err != nil || req.Code == "" || req.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "code et name sont requis"})
 		return
 	}
 	req.Code = strings.ToLower(strings.TrimSpace(req.Code))
@@ -58,7 +57,7 @@ func CreateLanguage(c *gin.Context) {
 		return
 	}
 
-	translated, err := services.TranslateJSON(frTranslation.Data, req.DeepLCode)
+	translated, err := services.TranslateJSON(frTranslation.Data, req.Code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "traduction échouée: " + err.Error()})
 		return
@@ -69,7 +68,7 @@ func CreateLanguage(c *gin.Context) {
 		Name:      req.Name,
 		Label:     req.Label,
 		Flag:      req.Flag,
-		DeepLCode: strings.ToUpper(req.DeepLCode),
+		DeepLCode: req.Code,
 		Active:    true,
 	}
 	if err := config.DB.Create(&lang).Error; err != nil {
@@ -114,7 +113,7 @@ func RetranslateLanguage(c *gin.Context) {
 		return
 	}
 
-	translated, err := services.TranslateJSON(frTranslation.Data, lang.DeepLCode)
+	translated, err := services.TranslateJSON(frTranslation.Data, lang.Code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "traduction échouée: " + err.Error()})
 		return

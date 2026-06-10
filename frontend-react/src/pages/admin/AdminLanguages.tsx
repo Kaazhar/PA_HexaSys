@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Globe, Plus, Trash2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Globe, Plus, Trash2, RefreshCw, Info } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import api from '../../services/api';
 import { useTranslation } from 'react-i18next';
@@ -11,19 +11,16 @@ interface Language {
   name: string;
   label: string;
   flag: string;
-  deepl_code: string;
   active: boolean;
   created_at: string;
 }
-
-const DEEPL_CODES_HINT = 'FR, EN-US, EN-GB, ES, DE, IT, PT-PT, PT-BR, NL, PL, RU, JA, ZH, KO, SV, DA, FI, NB, TR, CS, RO, HU, SK, BG, LT, LV, SL, ET';
 
 export default function AdminLanguages() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ code: '', name: '', label: '', flag: '', deepl_code: '' });
+  const [form, setForm] = useState({ code: '', name: '', label: '', flag: '' });
   const [error, setError] = useState('');
   const [retranslating, setRetranslating] = useState<string | null>(null);
 
@@ -38,7 +35,7 @@ export default function AdminLanguages() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-languages'] });
       setShowModal(false);
-      setForm({ code: '', name: '', label: '', flag: '', deepl_code: '' });
+      setForm({ code: '', name: '', label: '', flag: '' });
       setError('');
     },
     onError: (err: any) => {
@@ -71,7 +68,7 @@ export default function AdminLanguages() {
 
   const handleSubmit = () => {
     setError('');
-    if (!form.code || !form.name || !form.deepl_code) {
+    if (!form.code || !form.name) {
       setError(t('admin_languages.required_fields'));
       return;
     }
@@ -98,13 +95,12 @@ export default function AdminLanguages() {
           </button>
         </div>
 
-        {/* Info banner DeepL */}
+        {/* Info banner LibreTranslate */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex gap-3">
-          <AlertCircle className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+          <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-blue-800">
-            <p className="font-medium mb-1">{t('admin_languages.deepl_info_title')}</p>
-            <p>{t('admin_languages.deepl_info_desc')}</p>
-            <p className="mt-1 text-xs text-blue-600">{t('admin_languages.deepl_key_env')}</p>
+            <p className="font-medium mb-1">{t('admin_languages.libre_info_title')}</p>
+            <p>{t('admin_languages.libre_info_desc')}</p>
           </div>
         </div>
 
@@ -117,7 +113,6 @@ export default function AdminLanguages() {
                 <tr>
                   <th className="px-4 py-3 text-left font-medium text-gray-600">{t('admin_languages.col_lang')}</th>
                   <th className="px-4 py-3 text-left font-medium text-gray-600">{t('admin_languages.col_code')}</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">{t('admin_languages.col_deepl')}</th>
                   <th className="px-4 py-3 text-left font-medium text-gray-600">{t('admin_languages.col_added')}</th>
                   <th className="px-4 py-3 text-right font-medium text-gray-600">{t('admin_languages.col_actions')}</th>
                 </tr>
@@ -142,13 +137,12 @@ export default function AdminLanguages() {
                         </div>
                       </td>
                       <td className="px-4 py-3 font-mono text-gray-600">{lang.code}</td>
-                      <td className="px-4 py-3 font-mono text-gray-500 text-xs">{lang.deepl_code || '—'}</td>
                       <td className="px-4 py-3 text-gray-500">
                         {new Date(lang.created_at).toLocaleDateString('fr-FR')}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
-                          {!isDefault && lang.deepl_code && (
+                          {!isDefault && (
                             <button
                               onClick={() => handleRetranslate(lang)}
                               disabled={retranslating === lang.code}
@@ -242,19 +236,6 @@ export default function AdminLanguages() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin_languages.field_deepl')} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    value={form.deepl_code}
-                    onChange={e => setForm(f => ({ ...f, deepl_code: e.target.value.toUpperCase() }))}
-                    placeholder="ES"
-                    className="input-field"
-                    maxLength={10}
-                  />
-                  <p className="text-xs text-gray-400 mt-1">{DEEPL_CODES_HINT}</p>
-                </div>
               </div>
 
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-4 text-xs text-amber-800">

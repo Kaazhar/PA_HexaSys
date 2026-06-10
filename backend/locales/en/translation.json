@@ -506,11 +506,10 @@
   },
   "admin_languages": {
     "title": "Language Management",
-    "subtitle": "Add languages via automatic DeepL translation — no code changes needed",
+    "subtitle": "Add languages via automatic translation — no code changes needed",
     "add": "Add a language",
     "col_lang": "Language",
     "col_code": "Code",
-    "col_deepl": "DeepL Code",
     "col_added": "Added on",
     "col_actions": "Actions",
     "default": "Default",
@@ -523,16 +522,14 @@
     "field_label": "Short label",
     "field_name": "Full name",
     "field_flag": "Flag emoji",
-    "field_deepl": "DeepL Code",
     "code_hint": "e.g.: es, de, it, pt",
     "label_hint": "Leave empty for auto (e.g.: ES)",
     "create_btn": "Create and translate",
     "translating": "Translating...",
-    "required_fields": "Code, name and DeepL code are required",
-    "deepl_info_title": "DeepL required",
-    "deepl_info_desc": "Automatic translation uses the DeepL API. Create a free account at deepl.com to get an API key (500,000 free characters/month).",
-    "deepl_key_env": "Required environment variable: DEEPL_API_KEY",
-    "translation_warning": "Translation may take 30 to 60 seconds depending on file size. Do not close the window."
+    "required_fields": "Code and name are required",
+    "libre_info_title": "Free automatic translation",
+    "libre_info_desc": "Uses LibreTranslate (open source, 100% free, no API key needed). Translation takes 1 to 2 minutes depending on the language.",
+    "translation_warning": "Translation may take 1 to 2 minutes. Do not close the window."
   },
   "create_listing": {
     "title": "Create a listing",

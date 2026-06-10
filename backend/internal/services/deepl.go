@@ -9,20 +9,23 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"upcycleconnect/backend/config"
 )
 
+// Nombre de workers parallèles pour LibreTranslate
+const translateWorkers = 8
+
+// Instance publique par défaut — pas de clé requise
+const defaultLibreURL = "https://translate.argosopentech.com/translate"
+
 var i18nVarRegex = regexp.MustCompile(`\{\{[^}]+\}\}`)
 
-func getDeepLEndpoint() string {
-	key := config.GetEnv("DEEPL_API_KEY", "")
-	if strings.HasSuffix(key, ":fx") {
-		return "https://api-free.deepl.com/v2/translate"
-	}
-	return "https://api.deepl.com/v2/translate"
+func getLibreURL() string {
+	return config.GetEnv("LIBRETRANSLATE_URL", defaultLibreURL)
 }
 
-// Remplace {{var}} par des placeholders neutres pour DeepL
+// Remplace {{var}} par des placeholders neutres (LibreTranslate peut les casser sinon)
 func protectVars(s string) (string, []string) {
 	vars := []string{}
 	result := i18nVarRegex.ReplaceAllStringFunc(s, func(match string) string {
@@ -40,73 +43,48 @@ func restoreVars(s string, vars []string) string {
 	return s
 }
 
-type deeplRequest struct {
-	Text               []string `json:"text"`
-	SourceLang         string   `json:"source_lang"`
-	TargetLang         string   `json:"target_lang"`
-	PreserveFormatting bool     `json:"preserve_formatting"`
+type libreRequest struct {
+	Q      string `json:"q"`
+	Source string `json:"source"`
+	Target string `json:"target"`
+	Format string `json:"format"`
+	APIKey string `json:"api_key,omitempty"`
 }
 
-type deeplResponse struct {
-	Translations []struct {
-		Text string `json:"text"`
-	} `json:"translations"`
+type libreResponse struct {
+	TranslatedText string `json:"translatedText"`
 }
 
-func translateBatch(texts []string, targetLang string) ([]string, error) {
-	apiKey := config.GetEnv("DEEPL_API_KEY", "")
-	if apiKey == "" {
-		return nil, fmt.Errorf("DEEPL_API_KEY non configurée")
-	}
+func translateOne(text, targetLang string) (string, error) {
+	protected, vars := protectVars(text)
 
-	protected := make([]string, len(texts))
-	varMaps := make([][]string, len(texts))
-	for i, t := range texts {
-		protected[i], varMaps[i] = protectVars(t)
-	}
+	apiKey := config.GetEnv("LIBRETRANSLATE_API_KEY", "")
 
-	reqBody, err := json.Marshal(deeplRequest{
-		Text:               protected,
-		SourceLang:         "FR",
-		TargetLang:         strings.ToUpper(targetLang),
-		PreserveFormatting: true,
+	reqBody, _ := json.Marshal(libreRequest{
+		Q:      protected,
+		Source: "fr",
+		Target: strings.ToLower(targetLang),
+		Format: "text",
+		APIKey: apiKey,
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	req, err := http.NewRequest("POST", getDeepLEndpoint(), bytes.NewBuffer(reqBody))
+	resp, err := http.Post(getLibreURL(), "application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "DeepL-Auth-Key "+apiKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("DeepL API erreur %d: %s", resp.StatusCode, string(body))
+		return "", fmt.Errorf("LibreTranslate erreur %d: %s", resp.StatusCode, string(body))
 	}
 
-	var result deeplResponse
+	var result libreResponse
 	if err := json.Unmarshal(body, &result); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	if len(result.Translations) != len(texts) {
-		return nil, fmt.Errorf("DeepL: réponse inattendue (%d résultats pour %d textes)", len(result.Translations), len(texts))
-	}
-
-	translated := make([]string, len(texts))
-	for i, t := range result.Translations {
-		translated[i] = restoreVars(t.Text, varMaps[i])
-	}
-	return translated, nil
+	return restoreVars(result.TranslatedText, vars), nil
 }
 
 // Collecte toutes les strings d'un objet JSON (ordre déterministe par clés triées)
@@ -159,8 +137,8 @@ func setAllStrings(obj interface{}, translated []string, idx *int) interface{} {
 	}
 }
 
-// TranslateJSON traduit toutes les valeurs string d'un JSON du français vers targetLang (code DeepL)
-func TranslateJSON(sourceJSON string, targetLang string) (string, error) {
+// TranslateJSON traduit toutes les valeurs string d'un JSON depuis le français vers targetLang (code ISO)
+func TranslateJSON(sourceJSON, targetLang string) (string, error) {
 	var sourceObj interface{}
 	if err := json.Unmarshal([]byte(sourceJSON), &sourceObj); err != nil {
 		return "", fmt.Errorf("JSON invalide: %w", err)
@@ -173,19 +151,39 @@ func TranslateJSON(sourceJSON string, targetLang string) (string, error) {
 		return sourceJSON, nil
 	}
 
-	// Traduction par lots de 50 (limite DeepL)
+	// Pool de workers parallèles
+	type job struct {
+		idx  int
+		text string
+	}
+
 	translated := make([]string, len(texts))
-	batchSize := 50
-	for i := 0; i < len(texts); i += batchSize {
-		end := i + batchSize
-		if end > len(texts) {
-			end = len(texts)
-		}
-		batch, err := translateBatch(texts[i:end], targetLang)
+	errs := make([]error, len(texts))
+	jobs := make(chan job, len(texts))
+
+	var wg sync.WaitGroup
+	for i := 0; i < translateWorkers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := range jobs {
+				res, err := translateOne(j.text, targetLang)
+				translated[j.idx] = res
+				errs[j.idx] = err
+			}
+		}()
+	}
+
+	for i, text := range texts {
+		jobs <- job{idx: i, text: text}
+	}
+	close(jobs)
+	wg.Wait()
+
+	for i, err := range errs {
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("erreur traduction item %d: %w", i, err)
 		}
-		copy(translated[i:end], batch)
 	}
 
 	idx := 0
