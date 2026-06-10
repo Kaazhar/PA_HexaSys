@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign,
   FolderOpen, Flag, PlusCircle, Star, MessageCircle, Map,
-  Briefcase, Image, FileText, Calendar, Send, MessageSquare, Lightbulb, PackageCheck,
+  Briefcase, Image, FileText, Calendar, Send, MessageSquare, Lightbulb, PackageCheck, Globe,
 } from 'lucide-react';
 
 export const adminSidebar = [
@@ -14,6 +14,7 @@ export const adminSidebar = [
   { label: 'Finance',        path: '/admin/finance',        icon: <DollarSign className="w-4 h-4" /> },
   { label: 'Signalements',   path: '/admin/signalements',   icon: <Flag className="w-4 h-4" /> },
   { label: 'Newsletter',     path: '/admin/newsletter',     icon: <Send className="w-4 h-4" /> },
+  { label: 'Langues',        path: '/admin/langues',        icon: <Globe className="w-4 h-4" /> },
   { label: 'Forum',          path: '/salarie/forum',        icon: <MessageSquare className="w-4 h-4" /> },
 ];
 

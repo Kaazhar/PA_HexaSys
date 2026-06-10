@@ -10,6 +10,7 @@ import (
 	"upcycleconnect/backend/internal/middleware"
 	"upcycleconnect/backend/internal/models"
 	"upcycleconnect/backend/internal/services"
+	"upcycleconnect/backend/locales"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -49,12 +50,15 @@ func main() {
 		&models.ContainerSlot{},
 		&models.ForumTopic{},
 		&models.ForumPost{},
+		&models.Language{},
+		&models.Translation{},
 	); err != nil {
 		log.Fatal("Migration failed:", err)
 	}
 
 	seedData()
 	seedSlots()
+	seedTranslations()
 
 	go func() {
 		for {
@@ -129,6 +133,10 @@ func main() {
 		push.POST("/subscribe", handlers.SubscribePush)
 		push.DELETE("/unsubscribe", handlers.UnsubscribePush)
 	}
+
+	// Langues & Traductions
+	api.GET("/languages", handlers.GetLanguages)
+	api.GET("/translations/:lang", handlers.GetTranslation)
 
 	api.GET("/categories", handlers.GetCategories)
 	api.POST("/categories", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.CreateCategory)
@@ -222,6 +230,10 @@ func main() {
 	adminGroup := api.Group("/admin")
 	adminGroup.Use(middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin))
 	{
+		adminGroup.GET("/languages", handlers.GetAdminLanguages)
+		adminGroup.POST("/languages", handlers.CreateLanguage)
+		adminGroup.DELETE("/languages/:code", handlers.DeleteLanguage)
+		adminGroup.PUT("/languages/:code/retranslate", handlers.RetranslateLanguage)
 		adminGroup.GET("/users", handlers.GetUsers)
 		adminGroup.POST("/users", handlers.CreateUser)
 		adminGroup.PUT("/users/:id", handlers.UpdateUser)
@@ -380,6 +392,41 @@ func seedData() {
 	}
 
 	log.Println("Seed data inserted successfully")
+}
+
+func seedTranslations() {
+	type seedLang struct {
+		code  string
+		name  string
+		label string
+		flag  string
+		data  []byte
+	}
+	seeds := []seedLang{
+		{"fr", "Français", "FR", "🇫🇷", locales.FR},
+		{"en", "English", "EN", "🇬🇧", locales.EN},
+	}
+	for _, s := range seeds {
+		var existing models.Language
+		if err := config.DB.Where("code = ?", s.code).First(&existing).Error; err != nil {
+			config.DB.Create(&models.Language{
+				Code:   s.code,
+				Name:   s.name,
+				Label:  s.label,
+				Flag:   s.flag,
+				Active: true,
+			})
+			log.Printf("Langue seedée : %s", s.code)
+		}
+		var existingTrad models.Translation
+		if err := config.DB.Where("lang_code = ?", s.code).First(&existingTrad).Error; err != nil {
+			config.DB.Create(&models.Translation{
+				LangCode: s.code,
+				Data:     string(s.data),
+			})
+			log.Printf("Traduction seedée : %s", s.code)
+		}
+	}
 }
 
 func seedSlots() {

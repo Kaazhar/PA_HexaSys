@@ -25,6 +25,22 @@ type Base struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+type Language struct {
+	Base
+	Code      string `json:"code" gorm:"uniqueIndex;size:10"`
+	Name      string `json:"name" gorm:"size:100"`
+	Label     string `json:"label" gorm:"size:10"`
+	Flag      string `json:"flag" gorm:"size:10"`
+	DeepLCode string `json:"deepl_code" gorm:"size:20"`
+	Active    bool   `json:"active" gorm:"default:true"`
+}
+
+type Translation struct {
+	Base
+	LangCode string `json:"lang_code" gorm:"uniqueIndex;size:10"`
+	Data     string `json:"data" gorm:"type:longtext"`
+}
+
 type UserRole string
 
 const (
