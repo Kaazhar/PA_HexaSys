@@ -407,25 +407,18 @@ func seedTranslations() {
 		{"en", "English", "EN", "🇬🇧", locales.EN},
 	}
 	for _, s := range seeds {
-		var existing models.Language
-		if err := config.DB.Where("code = ?", s.code).First(&existing).Error; err != nil {
-			config.DB.Create(&models.Language{
-				Code:   s.code,
-				Name:   s.name,
-				Label:  s.label,
-				Flag:   s.flag,
-				Active: true,
-			})
-			log.Printf("Langue seedée : %s", s.code)
+		var lang models.Language
+		if err := config.DB.Where("code = ?", s.code).First(&lang).Error; err != nil {
+			config.DB.Create(&models.Language{Code: s.code, Name: s.name, Label: s.label, Flag: s.flag, Active: true})
 		}
-		var existingTrad models.Translation
-		if err := config.DB.Where("lang_code = ?", s.code).First(&existingTrad).Error; err != nil {
-			config.DB.Create(&models.Translation{
-				LangCode: s.code,
-				Data:     string(s.data),
-			})
-			log.Printf("Traduction seedée : %s", s.code)
+		// Toujours mettre à jour la traduction FR/EN (nouvelles clés après déploiement)
+		var trad models.Translation
+		if err := config.DB.Where("lang_code = ?", s.code).First(&trad).Error; err != nil {
+			config.DB.Create(&models.Translation{LangCode: s.code, Data: string(s.data)})
+		} else {
+			config.DB.Model(&trad).Update("data", string(s.data))
 		}
+		log.Printf("Traduction %s synchronisée", s.code)
 	}
 }
 
