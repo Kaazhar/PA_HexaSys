@@ -12,6 +12,22 @@ i18n
     defaultNS: 'translation',
     backend: {
       loadPath: '/api/translations/{{lng}}',
+      request: (_options, url, _payload, callback) => {
+        fetch(url)
+          .then(r => {
+            if (r.ok) return r.text();
+            // fallback fichiers statiques si l'API est down
+            const lang = url.split('/').pop() ?? 'fr';
+            return fetch(`/locales/${lang}/translation.json`).then(r2 => r2.text());
+          })
+          .then(data => callback(null, { status: 200, data }))
+          .catch(() => {
+            fetch('/locales/fr/translation.json')
+              .then(r => r.text())
+              .then(data => callback(null, { status: 200, data }))
+              .catch(err => callback(err, { status: 500, data: '' }));
+          });
+      },
     },
     interpolation: {
       escapeValue: false,
