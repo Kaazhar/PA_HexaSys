@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"upcycleconnect/backend/config"
@@ -58,6 +59,7 @@ func main() {
 
 	seedData()
 	seedSlots()
+	cleanCorruptedTranslations()
 	seedTranslations()
 
 	go func() {
@@ -392,6 +394,22 @@ func seedData() {
 	}
 
 	log.Println("Seed data inserted successfully")
+}
+
+// cleanCorruptedTranslations supprime les langues dont la traduction contient des messages d'erreur API
+func cleanCorruptedTranslations() {
+	var translations []models.Translation
+	config.DB.Find(&translations)
+	for _, t := range translations {
+		if t.LangCode == "fr" || t.LangCode == "en" {
+			continue // ne jamais toucher aux langues de base
+		}
+		if strings.Contains(t.Data, "MYMEMORY WARNING") || strings.Contains(t.Data, "YOU USED ALL AVAILABLE") {
+			log.Printf("Suppression traduction corrompue: %s", t.LangCode)
+			config.DB.Unscoped().Where("lang_code = ?", t.LangCode).Delete(&models.Translation{})
+			config.DB.Unscoped().Where("code = ?", t.LangCode).Delete(&models.Language{})
+		}
+	}
 }
 
 func seedTranslations() {
