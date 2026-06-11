@@ -22,15 +22,13 @@ export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const [languages, setLanguages] = useState<{ code: string; label: string; flag: string }[]>([]);
   const currentLang = i18n.language?.split('-')[0] ?? 'fr';
 
-  useEffect(() => {
-    fetch('/api/languages')
-      .then(r => r.json())
-      .then(setLanguages)
-      .catch(() => setLanguages([{ code: 'fr', label: 'FR', flag: '🇫🇷' }, { code: 'en', label: 'EN', flag: '🇬🇧' }]));
-  }, []);
+  const { data: languages = [{ code: 'fr', label: 'FR', flag: '🇫🇷' }, { code: 'en', label: 'EN', flag: '🇬🇧' }] } = useQuery({
+    queryKey: ['languages'],
+    queryFn: () => fetch('/api/languages').then(r => r.json()),
+    staleTime: 5 * 60 * 1000,
+  });
   const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);

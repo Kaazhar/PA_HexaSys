@@ -34,6 +34,7 @@ export default function AdminLanguages() {
     mutationFn: (payload: typeof form) => api.post('/admin/languages', payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-languages'] });
+      queryClient.invalidateQueries({ queryKey: ['languages'] });
       setShowModal(false);
       setForm({ code: '', name: '', label: '', flag: '' });
       setError('');
@@ -45,7 +46,10 @@ export default function AdminLanguages() {
 
   const deleteMutation = useMutation({
     mutationFn: (code: string) => api.delete(`/admin/languages/${code}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-languages'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-languages'] });
+      queryClient.invalidateQueries({ queryKey: ['languages'] });
+    },
   });
 
   const handleRetranslate = async (lang: Language) => {
