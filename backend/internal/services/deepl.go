@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -73,6 +74,9 @@ func translateOne(text, targetLang string) (string, error) {
 	if translated == "" {
 		return text, nil // retourne l'original si échec
 	}
+	if strings.HasPrefix(translated, "MYMEMORY WARNING") {
+		return "", fmt.Errorf("limite quotidienne MyMemory atteinte — réessayez dans 24h")
+	}
 
 	return restoreVars(translated, vars), nil
 }
@@ -141,11 +145,14 @@ func TranslateJSON(sourceJSON, targetLang string) (string, error) {
 		return sourceJSON, nil
 	}
 
-	// Pool de workers parallèles
+	// Pool de workers parallèles avec annulation dès le premier rate-limit
 	type job struct {
 		idx  int
 		text string
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	translated := make([]string, len(texts))
 	errs := make([]error, len(texts))
@@ -157,9 +164,17 @@ func TranslateJSON(sourceJSON, targetLang string) (string, error) {
 		go func() {
 			defer wg.Done()
 			for j := range jobs {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+				}
 				res, err := translateOne(j.text, targetLang)
 				translated[j.idx] = res
 				errs[j.idx] = err
+				if err != nil {
+					cancel() // stoppe les autres workers
+				}
 			}
 		}()
 	}
