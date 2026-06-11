@@ -56,13 +56,19 @@ func translateOne(text, targetLang string) (string, error) {
 	body, _ := io.ReadAll(resp.Body)
 
 	// Réponse : [[[\"translated\",\"original\",...], ...], null, \"fr\"]
-	var raw [][][]interface{}
-	if err := json.Unmarshal(body, &raw); err != nil || len(raw) == 0 || len(raw[0]) == 0 {
-		return text, nil // retourne l'original si format inattendu
+	// On parse le tableau externe en RawMessage pour éviter les erreurs sur null/"fr"
+	var outerRaw []json.RawMessage
+	if err := json.Unmarshal(body, &outerRaw); err != nil || len(outerRaw) == 0 {
+		return text, nil
+	}
+
+	var chunks [][]interface{}
+	if err := json.Unmarshal(outerRaw[0], &chunks); err != nil || len(chunks) == 0 {
+		return text, nil
 	}
 
 	var translated strings.Builder
-	for _, chunk := range raw[0] {
+	for _, chunk := range chunks {
 		if len(chunk) > 0 {
 			if s, ok := chunk[0].(string); ok {
 				translated.WriteString(s)
