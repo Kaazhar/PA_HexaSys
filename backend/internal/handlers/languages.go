@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"upcycleconnect/backend/config"
@@ -46,9 +47,15 @@ func CreateLanguage(c *gin.Context) {
 	}
 
 	var existing models.Language
-	if err := config.DB.Where("code = ?", req.Code).First(&existing).Error; err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "cette langue existe déjà"})
-		return
+	if err := config.DB.Unscoped().Where("code = ?", req.Code).First(&existing).Error; err == nil {
+		if existing.DeletedAt.Valid {
+			// Nettoyer l'enregistrement soft-deleted pour permettre la recréation
+			config.DB.Unscoped().Delete(&existing)
+			config.DB.Unscoped().Where("lang_code = ?", req.Code).Delete(&models.Translation{})
+		} else {
+			c.JSON(http.StatusConflict, gin.H{"error": "cette langue existe déjà"})
+			return
+		}
 	}
 
 	var frTranslation models.Translation
@@ -72,7 +79,8 @@ func CreateLanguage(c *gin.Context) {
 		Active:    true,
 	}
 	if err := config.DB.Create(&lang).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "erreur création langue"})
+		log.Printf("[CreateLanguage] DB error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "erreur création langue: " + err.Error()})
 		return
 	}
 
