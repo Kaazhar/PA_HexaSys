@@ -26,7 +26,7 @@ export default function Navbar() {
   const currentLang = i18n.language?.split('-')[0] ?? 'fr';
 
   useEffect(() => {
-    fetch('/api/languages')
+    fetch('/locales/languages.json')
       .then(r => r.json())
       .then(setLanguages)
       .catch(() => setLanguages([{ code: 'fr', label: 'FR', flag: '🇫🇷' }, { code: 'en', label: 'EN', flag: '🇬🇧' }]));

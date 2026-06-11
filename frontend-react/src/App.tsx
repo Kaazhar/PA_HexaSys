@@ -30,7 +30,6 @@ import AdminFinance from './pages/admin/AdminFinance';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminReports from './pages/admin/AdminReports';
 import AdminNewsletter from './pages/admin/AdminNewsletter';
-import AdminLanguages from './pages/admin/AdminLanguages';
 
 import DashboardParticulier from './pages/particulier/DashboardParticulier';
 import CreateListingPage from './pages/particulier/CreateListingPage';
@@ -130,7 +129,6 @@ function App() {
       <Route path="/admin/categories" element={<ProtectedRoute roles={['admin']}><AdminCategories /></ProtectedRoute>} />
       <Route path="/admin/signalements" element={<ProtectedRoute roles={['admin']}><AdminReports /></ProtectedRoute>} />
       <Route path="/admin/newsletter" element={<ProtectedRoute roles={['admin']}><AdminNewsletter /></ProtectedRoute>} />
-      <Route path="/admin/langues" element={<ProtectedRoute roles={['admin']}><AdminLanguages /></ProtectedRoute>} />
 
       <Route path="/dashboard" element={<ProtectedRoute roles={['particulier']}><DashboardParticulier /></ProtectedRoute>} />
       <Route path="/annonces/creer" element={<ProtectedRoute roles={['particulier', 'professionnel']}><CreateListingPage /></ProtectedRoute>} />
