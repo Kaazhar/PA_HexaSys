@@ -11,7 +11,7 @@ i18n
     fallbackLng: 'fr',
     defaultNS: 'translation',
     backend: {
-      loadPath: '/locales/{{lng}}/translation.json',
+      loadPath: '/api/translations/{{lng}}',
     },
     interpolation: {
       escapeValue: false,
