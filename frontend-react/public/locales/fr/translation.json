@@ -1045,7 +1045,7 @@
     "translating": "Traduction en cours...",
     "required_fields": "Le code et le nom sont requis",
     "libre_info_title": "Traduction automatique gratuite",
-    "libre_info_desc": "Utilise MyMemory (100% gratuit, sans compte, sans clé). La traduction prend 1 à 2 minutes selon la langue.",
+    "libre_info_desc": "Utilise Google Translate (sans compte, sans clé). La traduction prend 1 à 2 minutes selon la langue.",
     "translation_warning": "La traduction peut prendre 1 à 2 minutes. Ne fermez pas la fenêtre."
   },
   "create_listing": {

@@ -11,14 +11,11 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"upcycleconnect/backend/config"
 )
 
-// MyMemory : gratuit, sans compte, sans clé
-// 5000 mots/jour anonyme — suffisant pour ajouter quelques langues
-// Optionnel : TRANSLATE_EMAIL pour monter à 50 000 mots/jour
-const myMemoryURL = "https://api.mymemory.translated.net/get"
-const translateWorkers = 4 // limité pour respecter le rate limit MyMemory
+// Google Translate non-officiel (client=gtx) : sans clé, sans compte, sans limite quotidienne stricte
+const googleTranslateURL = "https://translate.googleapis.com/translate_a/single"
+const translateWorkers = 6
 
 var i18nVarRegex = regexp.MustCompile(`\{\{[^}]+\}\}`)
 
@@ -40,24 +37,17 @@ func restoreVars(s string, vars []string) string {
 	return s
 }
 
-type myMemoryResponse struct {
-	ResponseData struct {
-		TranslatedText string `json:"translatedText"`
-	} `json:"responseData"`
-	ResponseStatus interface{} `json:"responseStatus"`
-}
-
 func translateOne(text, targetLang string) (string, error) {
 	protected, vars := protectVars(text)
 
 	params := url.Values{}
+	params.Set("client", "gtx")
+	params.Set("sl", "fr")
+	params.Set("tl", strings.ToLower(targetLang))
+	params.Set("dt", "t")
 	params.Set("q", protected)
-	params.Set("langpair", "fr|"+strings.ToLower(targetLang))
-	if email := config.GetEnv("TRANSLATE_EMAIL", ""); email != "" {
-		params.Set("de", email)
-	}
 
-	resp, err := http.Get(myMemoryURL + "?" + params.Encode())
+	resp, err := http.Get(googleTranslateURL + "?" + params.Encode())
 	if err != nil {
 		return "", err
 	}
@@ -65,20 +55,26 @@ func translateOne(text, targetLang string) (string, error) {
 
 	body, _ := io.ReadAll(resp.Body)
 
-	var result myMemoryResponse
-	if err := json.Unmarshal(body, &result); err != nil {
-		return "", fmt.Errorf("réponse invalide: %w", err)
+	// Réponse : [[[\"translated\",\"original\",...], ...], null, \"fr\"]
+	var raw [][][]interface{}
+	if err := json.Unmarshal(body, &raw); err != nil || len(raw) == 0 || len(raw[0]) == 0 {
+		return text, nil // retourne l'original si format inattendu
 	}
 
-	translated := result.ResponseData.TranslatedText
-	if translated == "" {
-		return text, nil // retourne l'original si échec
-	}
-	if strings.HasPrefix(translated, "MYMEMORY WARNING") {
-		return "", fmt.Errorf("limite quotidienne MyMemory atteinte — réessayez dans 24h")
+	var translated strings.Builder
+	for _, chunk := range raw[0] {
+		if len(chunk) > 0 {
+			if s, ok := chunk[0].(string); ok {
+				translated.WriteString(s)
+			}
+		}
 	}
 
-	return restoreVars(translated, vars), nil
+	result := translated.String()
+	if result == "" {
+		return text, nil
+	}
+	return restoreVars(result, vars), nil
 }
 
 // Collecte toutes les strings d'un objet JSON (ordre déterministe par clés triées)

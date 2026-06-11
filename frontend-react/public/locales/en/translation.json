@@ -528,7 +528,7 @@
     "translating": "Translating...",
     "required_fields": "Code and name are required",
     "libre_info_title": "Free automatic translation",
-    "libre_info_desc": "Uses MyMemory (100% free, no account, no API key needed). Translation takes 1 to 2 minutes depending on the language.",
+    "libre_info_desc": "Uses Google Translate (no account, no API key needed). Translation takes 1 to 2 minutes depending on the language.",
     "translation_warning": "Translation may take 1 to 2 minutes. Do not close the window."
   },
   "create_listing": {
