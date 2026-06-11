@@ -1,11 +1,11 @@
 package services
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -13,19 +13,15 @@ import (
 	"upcycleconnect/backend/config"
 )
 
-// Nombre de workers parallèles pour LibreTranslate
-const translateWorkers = 8
-
-// Instance publique par défaut — pas de clé requise
-const defaultLibreURL = "https://translate.argosopentech.com/translate"
+// MyMemory : gratuit, sans compte, sans clé
+// 5000 mots/jour anonyme — suffisant pour ajouter quelques langues
+// Optionnel : TRANSLATE_EMAIL pour monter à 50 000 mots/jour
+const myMemoryURL = "https://api.mymemory.translated.net/get"
+const translateWorkers = 4 // limité pour respecter le rate limit MyMemory
 
 var i18nVarRegex = regexp.MustCompile(`\{\{[^}]+\}\}`)
 
-func getLibreURL() string {
-	return config.GetEnv("LIBRETRANSLATE_URL", defaultLibreURL)
-}
-
-// Remplace {{var}} par des placeholders neutres (LibreTranslate peut les casser sinon)
+// Remplace {{var}} par des placeholders neutres
 func protectVars(s string) (string, []string) {
 	vars := []string{}
 	result := i18nVarRegex.ReplaceAllStringFunc(s, func(match string) string {
@@ -43,48 +39,42 @@ func restoreVars(s string, vars []string) string {
 	return s
 }
 
-type libreRequest struct {
-	Q      string `json:"q"`
-	Source string `json:"source"`
-	Target string `json:"target"`
-	Format string `json:"format"`
-	APIKey string `json:"api_key,omitempty"`
-}
-
-type libreResponse struct {
-	TranslatedText string `json:"translatedText"`
+type myMemoryResponse struct {
+	ResponseData struct {
+		TranslatedText string `json:"translatedText"`
+	} `json:"responseData"`
+	ResponseStatus interface{} `json:"responseStatus"`
 }
 
 func translateOne(text, targetLang string) (string, error) {
 	protected, vars := protectVars(text)
 
-	apiKey := config.GetEnv("LIBRETRANSLATE_API_KEY", "")
+	params := url.Values{}
+	params.Set("q", protected)
+	params.Set("langpair", "fr|"+strings.ToLower(targetLang))
+	if email := config.GetEnv("TRANSLATE_EMAIL", ""); email != "" {
+		params.Set("de", email)
+	}
 
-	reqBody, _ := json.Marshal(libreRequest{
-		Q:      protected,
-		Source: "fr",
-		Target: strings.ToLower(targetLang),
-		Format: "text",
-		APIKey: apiKey,
-	})
-
-	resp, err := http.Post(getLibreURL(), "application/json", bytes.NewBuffer(reqBody))
+	resp, err := http.Get(myMemoryURL + "?" + params.Encode())
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("LibreTranslate erreur %d: %s", resp.StatusCode, string(body))
-	}
 
-	var result libreResponse
+	var result myMemoryResponse
 	if err := json.Unmarshal(body, &result); err != nil {
-		return "", err
+		return "", fmt.Errorf("réponse invalide: %w", err)
 	}
 
-	return restoreVars(result.TranslatedText, vars), nil
+	translated := result.ResponseData.TranslatedText
+	if translated == "" {
+		return text, nil // retourne l'original si échec
+	}
+
+	return restoreVars(translated, vars), nil
 }
 
 // Collecte toutes les strings d'un objet JSON (ordre déterministe par clés triées)
