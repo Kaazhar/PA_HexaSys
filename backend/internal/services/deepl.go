@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"regexp"
 	"sort"
 	"strings"
 	"sync"
+	"time"
 )
 
 // Google Translate non-officiel (client=gtx) : sans clé, sans compte, sans limite quotidienne stricte
@@ -37,6 +39,8 @@ func restoreVars(s string, vars []string) string {
 	return s
 }
 
+var httpClient = &http.Client{Timeout: 10 * time.Second}
+
 func translateOne(text, targetLang string) (string, error) {
 	protected, vars := protectVars(text)
 
@@ -47,24 +51,37 @@ func translateOne(text, targetLang string) (string, error) {
 	params.Set("dt", "t")
 	params.Set("q", protected)
 
-	resp, err := http.Get(googleTranslateURL + "?" + params.Encode())
+	req, err := http.NewRequest("GET", googleTranslateURL+"?"+params.Encode(), nil)
 	if err != nil {
 		return "", err
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("google translate injoignable: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
 
+	if resp.StatusCode != 200 {
+		log.Printf("[translateOne] HTTP %d: %s", resp.StatusCode, string(body)[:min(200, len(body))])
+		return "", fmt.Errorf("google translate HTTP %d", resp.StatusCode)
+	}
+
 	// Réponse : [[[\"translated\",\"original\",...], ...], null, \"fr\"]
 	// On parse le tableau externe en RawMessage pour éviter les erreurs sur null/"fr"
 	var outerRaw []json.RawMessage
 	if err := json.Unmarshal(body, &outerRaw); err != nil || len(outerRaw) == 0 {
-		return text, nil
+		log.Printf("[translateOne] parse error: %s | body: %s", err, string(body)[:min(200, len(body))])
+		return "", fmt.Errorf("réponse google translate invalide")
 	}
 
 	var chunks [][]interface{}
 	if err := json.Unmarshal(outerRaw[0], &chunks); err != nil || len(chunks) == 0 {
-		return text, nil
+		log.Printf("[translateOne] chunks error: %s", err)
+		return "", fmt.Errorf("chunks google translate invalides")
 	}
 
 	var translated strings.Builder
@@ -78,9 +95,16 @@ func translateOne(text, targetLang string) (string, error) {
 
 	result := translated.String()
 	if result == "" {
-		return text, nil
+		return "", fmt.Errorf("traduction vide retournée par google")
 	}
 	return restoreVars(result, vars), nil
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 // Collecte toutes les strings d'un objet JSON (ordre déterministe par clés triées)
