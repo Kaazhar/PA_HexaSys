@@ -28,7 +28,7 @@ export default function ForumPage() {
     <PublicLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* Header */}
+        
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{t('forum.title')}</h1>
@@ -73,7 +73,7 @@ function TopicRow({ topic }: { topic: ForumTopic }) {
         topic.is_pinned ? 'border-amber-200 bg-amber-50/30' : 'border-gray-100'
       )}
     >
-      {/* Icône */}
+      
       <div className={clsx(
         'w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0',
         topic.is_locked ? 'bg-gray-100' : topic.is_pinned ? 'bg-amber-100' : 'bg-green-50'
@@ -84,7 +84,7 @@ function TopicRow({ topic }: { topic: ForumTopic }) {
         }
       </div>
 
-      {/* Contenu */}
+      
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-0.5">
           {topic.is_pinned && (
@@ -107,7 +107,7 @@ function TopicRow({ topic }: { topic: ForumTopic }) {
         </p>
       </div>
 
-      {/* Stats */}
+      
       <div className="flex items-center gap-5 flex-shrink-0 text-xs text-gray-400">
         <span className="flex items-center gap-1">
           <MessageSquare className="w-3.5 h-3.5" />

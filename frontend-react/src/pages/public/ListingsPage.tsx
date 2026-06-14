@@ -49,7 +49,7 @@ export default function ListingsPage() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar filters */}
+          
           <aside className="w-full lg:w-64 flex-shrink-0">
             <div className="card sticky top-24">
               <div className="flex items-center gap-2 mb-4">
@@ -57,7 +57,7 @@ export default function ListingsPage() {
                 <h2 className="font-semibold text-gray-900">{t('listings.filters')}</h2>
               </div>
 
-              {/* Type filter */}
+              
               <div className="mb-5">
                 <label className="label">{t('listings.filter_type')}</label>
                 <div className="space-y-2">
@@ -81,7 +81,7 @@ export default function ListingsPage() {
                 </div>
               </div>
 
-              {/* Category filter */}
+              
               <div className="mb-5">
                 <label className="label">{t('listings.filter_category')}</label>
                 <div className="space-y-2">
@@ -123,9 +123,9 @@ export default function ListingsPage() {
             </div>
           </aside>
 
-          {/* Main content */}
+          
           <div className="flex-1">
-            {/* Search bar */}
+            
             <div className="relative mb-6">
               <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -137,7 +137,7 @@ export default function ListingsPage() {
               />
             </div>
 
-            {/* Results */}
+            
             {isLoading ? (
               <div className="flex justify-center py-20">
                 <LoadingSpinner size="lg" />

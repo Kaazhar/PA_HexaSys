@@ -55,14 +55,12 @@ export default function SalariePlanning() {
   const monthEnd = endOfMonth(currentMonth);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  // Pad start to Monday
   const startPad = (monthStart.getDay() + 6) % 7;
   const paddedDays = [...Array(startPad).fill(null), ...days];
 
   const getWorkshopsForDay = (day: Date) =>
     workshops.filter(ws => ws.date && isSameDay(parseISO(ws.date), day));
 
-  // Upcoming sorted
   const upcoming = workshops
     .filter(ws => ws.date && new Date(ws.date) >= new Date() && ws.status !== 'cancelled')
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -79,9 +77,9 @@ export default function SalariePlanning() {
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Calendar */}
+            
             <div className="lg:col-span-2 card">
-              {/* Header */}
+              
               <div className="flex items-center justify-between mb-5">
                 <button onClick={() => setCurrentMonth(m => subMonths(m, 1))} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
                   <ChevronLeft className="w-5 h-5 text-gray-600" />
@@ -94,14 +92,14 @@ export default function SalariePlanning() {
                 </button>
               </div>
 
-              {/* Day headers */}
+              
               <div className="grid grid-cols-7 mb-2">
                 {DAYS.map(d => (
                   <div key={d} className="text-center text-xs font-medium text-gray-400 py-1">{d}</div>
                 ))}
               </div>
 
-              {/* Days grid */}
+              
               <div className="grid grid-cols-7 gap-1">
                 {paddedDays.map((day, i) => {
                   if (!day) return <div key={`pad-${i}`} />;
@@ -142,7 +140,7 @@ export default function SalariePlanning() {
                 })}
               </div>
 
-              {/* Legend */}
+              
               <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500">
                 {Object.entries({ active: t('salarie_planning.status_active'), pending: t('salarie_planning.status_pending'), cancelled: t('salarie_planning.status_cancelled') }).map(([k, v]) => (
                   <span key={k} className="flex items-center gap-1.5">
@@ -153,7 +151,7 @@ export default function SalariePlanning() {
               </div>
             </div>
 
-            {/* Sidebar: upcoming + detail */}
+            
             <div className="space-y-4">
               {selected ? (
                 <div className="card border-l-4 border-primary-400">

@@ -120,7 +120,7 @@ export default function AdminWorkshops() {
   return (
     <DashboardLayout sidebarItems={adminSidebar} title={t('admin_workshops.title')}>
       <div className="space-y-5">
-        {/* Header */}
+        
         <div className="flex flex-col sm:flex-row gap-3 justify-between">
           <div className="flex gap-2 flex-wrap">
             {['', 'pending', 'active', 'draft', 'cancelled'].map((s) => (
@@ -153,7 +153,7 @@ export default function AdminWorkshops() {
           </div>
         </div>
 
-        {/* Table */}
+        
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100">
             <p className="text-sm text-gray-500">{total} {t('admin_workshops.col_workshop').toLowerCase()}{total > 1 ? 's' : ''}</p>
@@ -264,7 +264,7 @@ export default function AdminWorkshops() {
           )}
         </div>
 
-        {/* Create Modal */}
+        
         <Modal isOpen={showCreate} onClose={() => { setShowCreate(false); reset(); }} title={t('admin_workshops.create_modal')} size="lg">
           <form onSubmit={handleSubmit((d) => createMutation.mutate(d))} className="space-y-4">
             <div>
@@ -327,7 +327,7 @@ export default function AdminWorkshops() {
           </form>
         </Modal>
 
-        {/* Cancel Modal */}
+        
         <Modal isOpen={!!cancelWorkshop} onClose={() => { setCancelWorkshop(null); setCancelReason(''); }} title={t('admin_workshops.cancel_modal')} size="sm">
           <p className="text-sm text-gray-600 mb-3">
             <strong>{cancelWorkshop?.title}</strong>
@@ -352,7 +352,7 @@ export default function AdminWorkshops() {
           </div>
         </Modal>
 
-        {/* Delete Modal */}
+        
         <Modal isOpen={!!deleteWorkshopId} onClose={() => setDeleteWorkshopId(null)} title={t('admin_workshops.delete_modal')} size="sm">
           <p className="text-gray-600 mb-5">
             {t('admin_workshops.delete_modal_desc')}

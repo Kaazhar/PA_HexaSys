@@ -136,7 +136,6 @@ func main() {
 		push.DELETE("/unsubscribe", handlers.UnsubscribePush)
 	}
 
-	// Langues & Traductions
 	api.GET("/languages", handlers.GetLanguages)
 	api.GET("/translations/:lang", handlers.GetTranslation)
 
@@ -198,11 +197,9 @@ func main() {
 	api.GET("/invoices/mine", middleware.AuthRequired(), handlers.GetMyInvoices)
 	api.GET("/invoices/:id/pdf", middleware.AuthRequired(), handlers.DownloadInvoicePDF)
 
-	// Articles (public)
 	api.GET("/articles", handlers.GetPublicArticles)
 	api.GET("/articles/:id", handlers.GetPublicArticle)
 
-	// Forum
 	api.GET("/forum/topics", handlers.GetForumTopics)
 	api.GET("/forum/topics/:id", handlers.GetForumTopic)
 	api.POST("/forum/topics", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.CreateForumTopic)
@@ -213,7 +210,6 @@ func main() {
 	api.POST("/forum/topics/:id/posts", middleware.AuthRequired(), handlers.CreateForumPost)
 	api.DELETE("/forum/posts/:id", middleware.AuthRequired(), handlers.DeleteForumPost)
 
-	// Stripe
 	api.POST("/stripe/workshop-checkout", middleware.AuthRequired(), handlers.CreateWorkshopCheckout)
 	api.POST("/stripe/listing-checkout", middleware.AuthRequired(), handlers.CreateListingCheckout)
 	api.POST("/stripe/subscription-checkout", middleware.AuthRequired(), handlers.CreateSubscriptionCheckout)
@@ -397,13 +393,12 @@ func seedData() {
 	log.Println("Seed data inserted successfully")
 }
 
-// cleanCorruptedTranslations supprime les langues dont la traduction contient des messages d'erreur API
 func cleanCorruptedTranslations() {
 	var translations []models.Translation
 	config.DB.Find(&translations)
 	for _, t := range translations {
 		if t.LangCode == "fr" || t.LangCode == "en" {
-			continue // ne jamais toucher aux langues de base
+			continue
 		}
 		if strings.Contains(t.Data, "MYMEMORY WARNING") || strings.Contains(t.Data, "YOU USED ALL AVAILABLE") {
 			log.Printf("Suppression traduction corrompue: %s", t.LangCode)
@@ -430,7 +425,6 @@ func seedTranslations() {
 		if err := config.DB.Where("code = ?", s.code).First(&lang).Error; err != nil {
 			config.DB.Create(&models.Language{Code: s.code, Name: s.name, Label: s.label, Flag: s.flag, Active: true})
 		}
-		// Toujours mettre à jour la traduction FR/EN (nouvelles clés après déploiement)
 		var trad models.Translation
 		if err := config.DB.Where("lang_code = ?", s.code).First(&trad).Error; err != nil {
 			config.DB.Create(&models.Translation{LangCode: s.code, Data: string(s.data)})

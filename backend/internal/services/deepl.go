@@ -15,13 +15,11 @@ import (
 	"time"
 )
 
-// Google Translate non-officiel (client=gtx) : sans clé, sans compte, sans limite quotidienne stricte
 const googleTranslateURL = "https://translate.googleapis.com/translate_a/single"
 const translateWorkers = 6
 
 var i18nVarRegex = regexp.MustCompile(`\{\{[^}]+\}\}`)
 
-// Remplace {{var}} par des placeholders neutres
 func protectVars(s string) (string, []string) {
 	vars := []string{}
 	result := i18nVarRegex.ReplaceAllStringFunc(s, func(match string) string {
@@ -70,8 +68,6 @@ func translateOne(text, targetLang string) (string, error) {
 		return "", fmt.Errorf("google translate HTTP %d", resp.StatusCode)
 	}
 
-	// Réponse : [[[\"translated\",\"original\",...], ...], null, \"fr\"]
-	// On parse le tableau externe en RawMessage pour éviter les erreurs sur null/"fr"
 	var outerRaw []json.RawMessage
 	if err := json.Unmarshal(body, &outerRaw); err != nil || len(outerRaw) == 0 {
 		log.Printf("[translateOne] parse error: %s | body: %s", err, string(body)[:min(200, len(body))])
@@ -107,7 +103,6 @@ func min(a, b int) int {
 	return b
 }
 
-// Collecte toutes les strings d'un objet JSON (ordre déterministe par clés triées)
 func collectAllStrings(obj interface{}, result *[]string) {
 	switch v := obj.(type) {
 	case map[string]interface{}:
@@ -128,7 +123,6 @@ func collectAllStrings(obj interface{}, result *[]string) {
 	}
 }
 
-// Remet les strings traduites dans l'objet (même ordre de traversal)
 func setAllStrings(obj interface{}, translated []string, idx *int) interface{} {
 	switch v := obj.(type) {
 	case map[string]interface{}:
@@ -157,7 +151,6 @@ func setAllStrings(obj interface{}, translated []string, idx *int) interface{} {
 	}
 }
 
-// TranslateJSON traduit toutes les valeurs string d'un JSON depuis le français vers targetLang (code ISO)
 func TranslateJSON(sourceJSON, targetLang string) (string, error) {
 	var sourceObj interface{}
 	if err := json.Unmarshal([]byte(sourceJSON), &sourceObj); err != nil {
@@ -171,7 +164,6 @@ func TranslateJSON(sourceJSON, targetLang string) (string, error) {
 		return sourceJSON, nil
 	}
 
-	// Pool de workers parallèles avec annulation dès le premier rate-limit
 	type job struct {
 		idx  int
 		text string
@@ -199,7 +191,7 @@ func TranslateJSON(sourceJSON, targetLang string) (string, error) {
 				translated[j.idx] = res
 				errs[j.idx] = err
 				if err != nil {
-					cancel() // stoppe les autres workers
+					cancel()
 				}
 			}
 		}()

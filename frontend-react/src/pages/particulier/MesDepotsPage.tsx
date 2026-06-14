@@ -17,7 +17,6 @@ const STATUS_META: Record<string, { label: string; className: string; icon: Reac
   deposited: { label: 'Déposé', className: 'bg-blue-100 text-blue-700', icon: <Package className="w-3.5 h-3.5" /> },
 };
 
-// Récupère l'image du code-barres (endpoint authentifié) en blob et l'affiche.
 function BarcodeImage({ requestId }: { requestId: number }) {
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState(false);

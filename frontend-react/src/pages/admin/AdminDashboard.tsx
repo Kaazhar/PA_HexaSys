@@ -24,7 +24,7 @@ export default function AdminDashboard() {
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (
         <div className="space-y-6">
-          {/* KPI Cards */}
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <StatCard title={t('admin_dashboard.kpi_users')} value={stats?.total_users || 0} icon={<Users className="w-5 h-5" />} color="green" />
             <StatCard title={t('admin_dashboard.kpi_listings')} value={stats?.active_listings || 0} icon={<Tag className="w-5 h-5" />} color="blue" />
@@ -32,7 +32,7 @@ export default function AdminDashboard() {
             <StatCard title={t('admin_dashboard.kpi_revenue')} value={`${stats?.monthly_revenue_total?.toFixed(0) || 0}€`} icon={<DollarSign className="w-5 h-5" />} color="coral" />
           </div>
 
-          {/* Alerts */}
+          
           {((stats?.pending_listings || 0) > 0 || (stats?.pending_workshops || 0) > 0 || (stats?.pending_container_requests || 0) > 0) && (
             <div className="card border-l-4 border-amber-400">
               <div className="flex items-center gap-2 mb-3">
@@ -71,7 +71,7 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Summary */}
+          
           <div className="card">
             <h2 className="font-semibold text-gray-900 mb-4">{t('admin_dashboard.activity_summary')}</h2>
             <div className="divide-y divide-gray-100">
@@ -82,7 +82,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Quick links */}
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: t('admin_dashboard.manage_users'), path: '/admin/utilisateurs', icon: <Users className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },

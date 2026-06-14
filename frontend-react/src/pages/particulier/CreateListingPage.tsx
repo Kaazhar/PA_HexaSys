@@ -38,14 +38,11 @@ export default function CreateListingPage() {
     t('create_listing.step_summary'),
   ];
 
-  // ── Étape ────────────────────────────────────────────────────────────────
   const [step, setStep] = useState(0);
 
-  // ── Étape 0 ──────────────────────────────────────────────────────────────
   const [type, setType] = useState<'don' | 'vente'>('don');
   const [categoryId, setCategoryId] = useState<number | null>(null);
 
-  // ── Étape 1 ──────────────────────────────────────────────────────────────
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [condition, setCondition] = useState('bon_etat');
@@ -56,13 +53,11 @@ export default function CreateListingPage() {
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  // ── Étape 2 : Conteneur (optionnel) ──────────────────────────────────────
   const [containerId, setContainerId] = useState<number | null>(null);
   const [slotId, setSlotId] = useState<number | null>(null);
   const [slotCode, setSlotCode] = useState('');
   const [skipContainer, setSkipContainer] = useState(false);
 
-  // ── Queries ───────────────────────────────────────────────────────────────
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
     queryFn: () => categoryService.getAll(),
@@ -88,7 +83,6 @@ export default function CreateListingPage() {
   const sizeSlots = allSlots.filter(s => s.size === sizeCategory);
   const freeCount = sizeSlots.filter(s => s.status === 'free').length;
 
-  // ── Upload image ──────────────────────────────────────────────────────────
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
@@ -106,7 +100,6 @@ export default function CreateListingPage() {
     }
   };
 
-  // ── Mutation listing ──────────────────────────────────────────────────────
   const createMutation = useMutation({
     mutationFn: async () => {
       const listingRes = await listingService.create({
@@ -122,7 +115,6 @@ export default function CreateListingPage() {
         images: images.join(','),
       } as any);
 
-      // Si un slot a été choisi, créer la demande de dépôt automatiquement
       if (!skipContainer && containerId && slotId) {
         const today = new Date();
         today.setDate(today.getDate() + 7);
@@ -152,7 +144,6 @@ export default function CreateListingPage() {
     },
   });
 
-  // ── Navigation ────────────────────────────────────────────────────────────
   const goNext = () => {
     if (step === 0) {
       if (!categoryId) { toast.error(t('create_listing.category_title')); return; }
@@ -183,12 +174,11 @@ export default function CreateListingPage() {
     createMutation.mutate();
   };
 
-  // ── Rendu ─────────────────────────────────────────────────────────────────
   return (
     <DashboardLayout sidebarItems={sidebar} title={t('create_listing.title')}>
       <div className="max-w-2xl mx-auto">
 
-        {/* Stepper */}
+        
         <div className="flex items-center gap-2 mb-8">
           {STEPS.map((label, i) => (
             <div key={i} className="flex items-center gap-2 flex-1">
@@ -212,7 +202,7 @@ export default function CreateListingPage() {
 
         <div className="card">
 
-          {/* ── Étape 0 : Type & Catégorie ───────────────────────────────── */}
+          
           {step === 0 && (
             <div className="space-y-6">
               <div>
@@ -250,7 +240,7 @@ export default function CreateListingPage() {
             </div>
           )}
 
-          {/* ── Étape 1 : Détails ────────────────────────────────────────── */}
+          
           {step === 1 && (
             <div className="space-y-5">
               <h2 className="text-lg font-bold text-gray-900">{t('create_listing.details_title')}</h2>
@@ -327,7 +317,7 @@ export default function CreateListingPage() {
                 </div>
               </div>
 
-              {/* Photos */}
+              
               <div>
                 <label className="label">{t('create_listing.photos')} <span className="text-gray-400 font-normal">{t('create_listing.optional')}</span></label>
                 <div className="space-y-3">
@@ -355,7 +345,7 @@ export default function CreateListingPage() {
             </div>
           )}
 
-          {/* ── Étape 2 : Conteneur & Case ───────────────────────────────── */}
+          
           {step === 2 && (
             <div className="space-y-5">
               <div>
@@ -365,7 +355,7 @@ export default function CreateListingPage() {
                 </p>
               </div>
 
-              {/* Bouton passer */}
+              
               <button type="button" onClick={() => { setSkipContainer(true); setContainerId(null); setSlotId(null); setSlotCode(''); setStep(3); }}
                 className="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-gray-300 hover:text-gray-500 transition-all">
                 <SkipForward className="w-4 h-4" />
@@ -377,7 +367,7 @@ export default function CreateListingPage() {
                 <div className="relative flex justify-center text-xs text-gray-400"><span className="bg-white px-3">{t('create_listing.or_choose')}</span></div>
               </div>
 
-              {/* Liste des conteneurs */}
+              
               {containersQuery.isLoading ? (
                 <div className="flex justify-center py-6"><LoadingSpinner /></div>
               ) : (
@@ -421,7 +411,7 @@ export default function CreateListingPage() {
                 </div>
               )}
 
-              {/* Grille de cases */}
+              
               {containerId && (
                 <div className="space-y-4 pt-2 border-t border-gray-100">
                   <div>
@@ -487,7 +477,7 @@ export default function CreateListingPage() {
                         );
                       })}
 
-                      {/* Légende */}
+                      
                       <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400 pt-2 border-t border-gray-100">
                         <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded border-2 border-gray-200 bg-white inline-block" />{t('create_listing.legend_free')}</span>
                         <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded border-2 border-[#2D5016] bg-[#2D5016] inline-block" />{t('create_listing.legend_selected')}</span>
@@ -510,7 +500,7 @@ export default function CreateListingPage() {
             </div>
           )}
 
-          {/* ── Étape 3 : Récapitulatif ──────────────────────────────────── */}
+          
           {step === 3 && (
             <div className="space-y-5">
               <h2 className="text-lg font-bold text-gray-900">{t('create_listing.summary_title')}</h2>
@@ -541,7 +531,7 @@ export default function CreateListingPage() {
                 </div>
               </div>
 
-              {/* Résumé conteneur */}
+              
               {!skipContainer && containerId && slotId ? (
                 <div className="p-4 bg-green-50 rounded-xl border border-green-200 flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -575,7 +565,7 @@ export default function CreateListingPage() {
             </div>
           )}
 
-          {/* ── Boutons ──────────────────────────────────────────────────── */}
+          
           <div className="flex gap-3 mt-6 pt-6 border-t border-gray-100">
             {step > 0 && (
               <button type="button" onClick={goBack} className="btn-secondary flex-1">{t('create_listing.back')}</button>

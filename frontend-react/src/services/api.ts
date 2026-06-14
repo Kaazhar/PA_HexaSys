@@ -34,7 +34,6 @@ api.interceptors.response.use(
   }
 );
 
-// Auth
 export const authService = {
   login: (email: string, password: string) =>
     api.post<AuthResponse>('/auth/login', { email, password }),
@@ -74,7 +73,6 @@ export const newsletterService = {
   send: (subject: string, content: string) => api.post('/admin/newsletter', { subject, content }),
 };
 
-// Users
 export const userService = {
   getAll: (params?: { page?: number; limit?: number; role?: string; status?: string; search?: string }) =>
     api.get<{ users: User[]; total: number; page: number; limit: number }>('/admin/users', { params }),
@@ -89,7 +87,6 @@ export const userService = {
   getBanHistory: (id: number) => api.get(`/admin/users/${id}/bans`),
 };
 
-// Listings
 export const listingService = {
   getAll: (params?: { page?: number; limit?: number; status?: string; category?: string; type?: string; search?: string }) =>
     api.get<{ listings: Listing[]; total: number; page: number; limit: number }>('/listings', { params }),
@@ -107,7 +104,6 @@ export const listingService = {
   delete: (id: number) => api.delete(`/listings/${id}`),
 };
 
-// Workshops
 export const workshopService = {
   getAll: (params?: { page?: number; limit?: number; status?: string; type?: string }) =>
     api.get<{ workshops: Workshop[]; total: number; page: number; limit: number }>('/workshops', { params }),
@@ -123,7 +119,6 @@ export const workshopService = {
   checkEnrollment: () => api.post('/workshops/check-enrollment'),
 };
 
-// SIRET (professionnels)
 export const siretService = {
   verify: (siret: string) => api.post('/pro/verify-siret', { siret }),
   getStatus: () => api.get('/pro/siret-status'),
@@ -131,7 +126,6 @@ export const siretService = {
   getCompanyBySiret: (siret: string) => api.get(`/companies/${siret}`),
 };
 
-// Categories
 export const categoryService = {
   getAll: () => api.get<Category[]>('/categories'),
   create: (data: Partial<Category>) => api.post<Category>('/categories', data),
@@ -139,7 +133,6 @@ export const categoryService = {
   delete: (id: number) => api.delete(`/categories/${id}`),
 };
 
-// Containers
 export const containerService = {
   getAll: () => api.get<Container[]>('/containers'),
   getOne: (id: number) => api.get<Container>(`/containers/${id}`),
@@ -169,32 +162,27 @@ export const containerService = {
   },
 };
 
-// Score
 export const scoreService = {
   getMyScore: () => api.get('/score/me'),
 };
 
-// Notifications
 export const notificationService = {
   getAll: () => api.get<Notification[]>('/notifications'),
   markRead: (id: number) => api.put(`/notifications/${id}/read`),
 };
 
-// Admin stats
 export const adminService = {
   getStats: () => api.get<AdminStats>('/admin/stats'),
   getFinance: () => api.get('/admin/finance'),
   getInvoices: (params?: { status?: string }) => api.get<Invoice[]>('/admin/invoices', { params }),
 };
 
-// Dashboards
 export const dashboardService = {
   getParticulier: () => api.get('/particulier/dashboard'),
   getPro: () => api.get('/pro/dashboard'),
   getSalarie: () => api.get('/salarie/dashboard'),
 };
 
-// Salarié
 export const salarieService = {
   getMyWorkshops: (params?: { status?: string }) => api.get('/salarie/workshops', { params }),
   getMyArticles: () => api.get('/salarie/articles'),
@@ -205,13 +193,11 @@ export const salarieService = {
   deleteArticle: (id: number) => api.delete(`/salarie/articles/${id}`),
 };
 
-// Subscription
 export const subscriptionService = {
   getMy: () => api.get<Subscription>('/subscription'),
   upgrade: (plan: string) => api.post<Subscription>('/subscription/upgrade', { plan }),
 };
 
-// Projects
 export const projectService = {
   getAll: (params?: { search?: string }) => api.get<Project[]>('/projects', { params }),
   getMine: () => api.get<Project[]>('/pro/projects'),
@@ -220,7 +206,6 @@ export const projectService = {
   delete: (id: number) => api.delete(`/pro/projects/${id}`),
 };
 
-// Messages
 export const messageService = {
   getConversations: () => api.get<Conversation[]>('/conversations'),
   getOrCreate: (data: { other_user_id: number; listing_id?: number }) =>
@@ -231,7 +216,6 @@ export const messageService = {
     api.post<Message>(`/conversations/${conversationId}/messages`, { content }),
 };
 
-// Reviews
 export const reviewService = {
   getForListing: (listingId: number) => api.get<Review[]>(`/listings/${listingId}/reviews`),
   getForUser: (userId: number) => api.get(`/users/${userId}/reviews`),
@@ -240,7 +224,6 @@ export const reviewService = {
   delete: (id: number) => api.delete(`/reviews/${id}`),
 };
 
-// Reports
 export const reportService = {
   create: (listingId: number, data: { reason: string; details?: string }) =>
     api.post(`/listings/${listingId}/report`, data),
@@ -250,14 +233,12 @@ export const reportService = {
     api.put(`/admin/reports/${id}/resolve`, data),
 };
 
-// Articles (public)
 export const articleService = {
   getAll: (params?: { page?: number; limit?: number; tag?: string }) =>
     api.get<{ articles: Article[]; total: number; page: number; limit: number }>('/articles', { params }),
   getOne: (id: number) => api.get<Article>(`/articles/${id}`),
 };
 
-// Forum
 export const forumService = {
   getTopics: (params?: { page?: number; limit?: number }) =>
     api.get<{ topics: ForumTopic[]; total: number; page: number; limit: number }>('/forum/topics', { params }),
@@ -275,12 +256,10 @@ export const forumService = {
   deletePost: (id: number) => api.delete(`/forum/posts/${id}`),
 };
 
-// User bookings
 export const bookingService = {
   getMyBookings: () => api.get<WorkshopBooking[]>('/user/bookings'),
 };
 
-// Stripe
 export const stripeService = {
   createWorkshopCheckout: (workshopId: number) =>
     api.post<{ checkout_url: string }>('/stripe/workshop-checkout', { workshop_id: workshopId }),
@@ -290,7 +269,6 @@ export const stripeService = {
     api.post<{ checkout_url: string }>('/stripe/subscription-checkout', { plan }),
 };
 
-// Factures
 export const invoiceService = {
   getMine: () => api.get<Invoice[]>('/invoices/mine'),
   downloadPdf: async (id: number, number?: string) => {
@@ -306,7 +284,6 @@ export const invoiceService = {
   },
 };
 
-// Search
 export const searchService = {
   global: (q: string) => api.get<SearchResults>('/search', { params: { q } }),
 };

@@ -65,7 +65,6 @@ function App() {
   const [showTutorial, setShowTutorial] = useState(false);
   const location = useLocation();
 
-  // Refetch user à chaque changement de page pour détecter ban/désactivation
   useEffect(() => {
     if (!token) return;
     authService.me().then(res => updateUser(res.data)).catch(() => {});

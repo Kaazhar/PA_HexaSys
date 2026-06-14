@@ -24,7 +24,7 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
       className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group"
       onClick={onClick ?? (() => navigate(`/annonces/${listing.id}`))}
     >
-      {/* Image */}
+      
       <div className="h-48 bg-gradient-to-br from-primary-500 to-primary-600 relative overflow-hidden">
         {listing.images ? (
           <img
@@ -61,7 +61,7 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
         )}
       </div>
 
-      {/* Content */}
+      
       <div className="p-4">
         <h3 className="font-semibold text-gray-900 group-hover:text-primary-500 transition-colors line-clamp-1">
           {listing.title}

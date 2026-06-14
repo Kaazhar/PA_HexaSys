@@ -11,14 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GET /api/languages — public
 func GetLanguages(c *gin.Context) {
 	var languages []models.Language
 	config.DB.Where("active = true").Order("created_at asc").Find(&languages)
 	c.JSON(http.StatusOK, languages)
 }
 
-// GET /api/translations/:lang — public
 func GetTranslation(c *gin.Context) {
 	lang := c.Param("lang")
 	var translation models.Translation
@@ -29,7 +27,6 @@ func GetTranslation(c *gin.Context) {
 	c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(translation.Data))
 }
 
-// POST /api/admin/languages — admin only
 func CreateLanguage(c *gin.Context) {
 	var req struct {
 		Code  string `json:"code"`
@@ -49,7 +46,6 @@ func CreateLanguage(c *gin.Context) {
 	var existing models.Language
 	if err := config.DB.Unscoped().Where("code = ?", req.Code).First(&existing).Error; err == nil {
 		if existing.DeletedAt.Valid {
-			// Nettoyer l'enregistrement soft-deleted pour permettre la recréation
 			config.DB.Unscoped().Delete(&existing)
 			config.DB.Unscoped().Where("lang_code = ?", req.Code).Delete(&models.Translation{})
 		} else {
@@ -93,7 +89,6 @@ func CreateLanguage(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"language": lang, "message": "Langue créée et traduite avec succès"})
 }
 
-// DELETE /api/admin/languages/:code — admin only
 func DeleteLanguage(c *gin.Context) {
 	code := strings.ToLower(c.Param("code"))
 	if code == "fr" || code == "en" {
@@ -105,7 +100,6 @@ func DeleteLanguage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "langue supprimée"})
 }
 
-// PUT /api/admin/languages/:code/retranslate — admin only
 func RetranslateLanguage(c *gin.Context) {
 	code := strings.ToLower(c.Param("code"))
 
@@ -131,7 +125,6 @@ func RetranslateLanguage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "retraduction réussie"})
 }
 
-// GET /api/admin/languages — admin only (liste complète avec deepl_code)
 func GetAdminLanguages(c *gin.Context) {
 	var languages []models.Language
 	config.DB.Order("created_at asc").Find(&languages)

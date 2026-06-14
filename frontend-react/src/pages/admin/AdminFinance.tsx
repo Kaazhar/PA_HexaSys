@@ -30,7 +30,7 @@ export default function AdminFinance() {
   return (
     <DashboardLayout sidebarItems={adminSidebar} title={t('admin_finance.title')}>
       <div className="space-y-6">
-        {/* Stats */}
+        
         {statsLoading ? (
           <div className="flex justify-center py-8"><LoadingSpinner /></div>
         ) : (
@@ -80,7 +80,7 @@ export default function AdminFinance() {
           </div>
         )}
 
-        {/* Invoices */}
+        
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
             <h2 className="font-semibold text-gray-900">{t('admin_finance.recent_invoices')}</h2>

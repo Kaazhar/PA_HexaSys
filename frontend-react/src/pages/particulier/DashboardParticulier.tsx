@@ -36,7 +36,7 @@ export default function DashboardParticulier() {
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (
         <div className="space-y-6">
-          {/* Welcome */}
+          
           <div>
             <h2 className="text-xl font-bold text-gray-900">{t('dashboard_particulier.welcome', { name: user?.firstname })}</h2>
             <p className="text-gray-500 mt-1">{t('dashboard_particulier.welcome_sub')}</p>
@@ -45,7 +45,7 @@ export default function DashboardParticulier() {
             )}
           </div>
 
-          {/* Stats */}
+          
           <div id="tour-stats" className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <StatCard
               title={t('dashboard_particulier.active_listings')}
@@ -69,7 +69,7 @@ export default function DashboardParticulier() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* My listings */}
+            
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{t('dashboard_particulier.my_listings')}</h2>
@@ -105,7 +105,7 @@ export default function DashboardParticulier() {
               )}
             </div>
 
-            {/* Upcoming workshops */}
+            
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{t('dashboard_particulier.upcoming_workshops')}</h2>
@@ -141,7 +141,7 @@ export default function DashboardParticulier() {
             </div>
           </div>
 
-          {/* Quick actions */}
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { labelKey: 'dashboard_particulier.create_listing', path: '/annonces/creer', icon: <PlusCircle className="w-5 h-5" />, color: 'text-primary-500 bg-primary-50' },

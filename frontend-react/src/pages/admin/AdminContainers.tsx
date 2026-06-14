@@ -58,7 +58,7 @@ function SlotsModal({ container, onClose }: { container: Container; onClose: () 
   return (
     <Modal isOpen onClose={onClose} title={`Cases — ${container.name}`} size="lg">
       <div className="space-y-5">
-        {/* Summary */}
+        
         <div className="grid grid-cols-3 gap-3">
           {['S', 'M', 'L'].map(size => (
             <div key={size} className="p-3 bg-gray-50 rounded-xl text-center">
@@ -68,7 +68,7 @@ function SlotsModal({ container, onClose }: { container: Container; onClose: () 
           ))}
         </div>
 
-        {/* Slot grid */}
+        
         {isLoading ? (
           <div className="flex justify-center py-4"><LoadingSpinner /></div>
         ) : slots.length === 0 ? (
@@ -95,7 +95,7 @@ function SlotsModal({ container, onClose }: { container: Container; onClose: () 
                 </div>
               );
             })}
-            {/* Legend */}
+            
             <div className="flex items-center gap-4 text-xs text-gray-400 pt-2 border-t border-gray-100">
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded border border-gray-200 bg-white" /> {t('admin_containers.legend_free')}</span>
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded border border-amber-300 bg-amber-50" /> {t('admin_containers.legend_reserved')}</span>
@@ -104,7 +104,7 @@ function SlotsModal({ container, onClose }: { container: Container; onClose: () 
           </div>
         )}
 
-        {/* Add slots form */}
+        
         <div className="border-t border-gray-100 pt-4">
           <p className="text-sm font-semibold text-gray-700 mb-3">{t('admin_containers.add_slots')}</p>
           <form onSubmit={handleSubmit((d) => seedMutation.mutate({ S: Number(d.S), M: Number(d.M), L: Number(d.L) }))} className="space-y-3">
@@ -191,7 +191,7 @@ export default function AdminContainers() {
   return (
     <DashboardLayout sidebarItems={adminSidebar} title={t('admin_containers.title')}>
       <div className="space-y-8">
-        {/* Containers grid */}
+        
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">{t('admin_containers.containers_count', { count: containers.length })}</h2>
@@ -221,7 +221,7 @@ export default function AdminContainers() {
                       <StatusBadge status={container.status} config={containerStatuses} />
                     </div>
 
-                    {/* Capacity gauge */}
+                    
                     <div className="mb-2">
                       <div className="flex justify-between text-xs text-gray-500 mb-1">
                         <span>{t('admin_containers.fill')}</span>
@@ -251,7 +251,7 @@ export default function AdminContainers() {
           )}
         </div>
 
-        {/* Requests table */}
+        
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">{t('admin_containers.requests_title')}</h2>
@@ -358,7 +358,7 @@ export default function AdminContainers() {
           )}
         </div>
 
-        {/* Create Container Modal */}
+        
         <Modal isOpen={showCreate} onClose={() => { setShowCreate(false); reset(); }} title={t('admin_containers.create_modal')} size="sm">
           <form onSubmit={handleSubmit((d) => createMutation.mutate(d))} className="space-y-4">
             <div>
@@ -389,12 +389,12 @@ export default function AdminContainers() {
           </form>
         </Modal>
 
-        {/* Slots Modal */}
+        
         {slotsContainer && (
           <SlotsModal container={slotsContainer} onClose={() => setSlotsContainer(null)} />
         )}
 
-        {/* Reject Modal */}
+        
         <Modal isOpen={!!rejectRequest} onClose={() => { setRejectRequest(null); resetReject(); }} title={t('admin_containers.reject_modal')} size="sm">
           <form onSubmit={handleRejectSubmit((d) => rejectRequest && rejectMutation.mutate({ id: rejectRequest.id, reason: d.reason }))} className="space-y-4">
             <p className="text-sm text-gray-600"><strong>{rejectRequest?.user ? `${rejectRequest.user.firstname} ${rejectRequest.user.lastname}` : ''}</strong></p>

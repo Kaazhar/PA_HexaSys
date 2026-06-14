@@ -17,7 +17,6 @@ func UploadFile(c *gin.Context) {
 		return
 	}
 
-	// Only allow images
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	allowed := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".webp": true, ".gif": true}
 	if !allowed[ext] {
@@ -25,7 +24,6 @@ func UploadFile(c *gin.Context) {
 		return
 	}
 
-	// Max 5MB
 	if file.Size > 5*1024*1024 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Fichier trop volumineux (max 5MB)"})
 		return

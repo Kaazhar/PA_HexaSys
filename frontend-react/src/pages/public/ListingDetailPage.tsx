@@ -147,9 +147,9 @@ export default function ListingDetailPage() {
         ) : (
           <>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main listing info */}
+            
             <div className="lg:col-span-2 space-y-5">
-              {/* Images */}
+              
               {(() => {
                 const imgs = listing.images?.split(',').filter(Boolean) || [];
                 return (
@@ -195,7 +195,7 @@ export default function ListingDetailPage() {
                 );
               })()}
 
-              {/* Details card */}
+              
               <div className="card space-y-4">
                 <h1 className="text-2xl font-bold text-gray-900">{listing.title}</h1>
 
@@ -227,14 +227,14 @@ export default function ListingDetailPage() {
               </div>
             </div>
 
-            {/* Seller card */}
+            
             <div className="space-y-4">
               <div className="card">
                 <h2 className="font-semibold text-gray-900 mb-4">{t('listing_detail.seller')}</h2>
 
                 {seller ? (
                   <div className="space-y-4">
-                    {/* Avatar + name */}
+                    
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {(seller as any).avatar_url ? (
@@ -268,14 +268,14 @@ export default function ListingDetailPage() {
                       </div>
                     </div>
 
-                    {/* Member since */}
+                    
                     {seller.created_at && (
                       <div className="text-xs text-gray-400 border-t border-gray-50 pt-3">
                         {t('listing_detail.member_since')} {format(new Date(seller.created_at), 'MMMM yyyy', { locale: fr })}
                       </div>
                     )}
 
-                    {/* Company info */}
+                    
                     {company && (
                       <div className="border-t border-gray-50 pt-3 space-y-2">
                         <div className="flex items-center gap-2 mb-2">
@@ -331,7 +331,7 @@ export default function ListingDetailPage() {
                 )}
               </div>
 
-              {/* Report button */}
+              
               {isAuthenticated && seller && seller.id !== user?.id && (
                 <button
                   onClick={() => setShowReportModal(true)}
@@ -342,7 +342,7 @@ export default function ListingDetailPage() {
                 </button>
               )}
 
-              {/* Price + Contact */}
+              
               <div className="card bg-primary-50 border-primary-100">
                 <div className="text-center mb-4">
                   {listing.type === 'vente' && listing.price ? (
@@ -392,7 +392,7 @@ export default function ListingDetailPage() {
             </div>
           </div>
 
-          {/* Reviews section */}
+          
           <div className="mt-8 space-y-5">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Star className="w-5 h-5 text-amber-400" />

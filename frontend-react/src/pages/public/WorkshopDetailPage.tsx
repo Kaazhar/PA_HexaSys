@@ -77,7 +77,7 @@ export default function WorkshopDetailPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main */}
+            
             <div className="lg:col-span-2 space-y-5">
               <div className="h-56 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center relative overflow-hidden">
                 <span className="text-white/20 text-8xl font-bold">
@@ -127,9 +127,9 @@ export default function WorkshopDetailPage() {
               </div>
             </div>
 
-            {/* Sidebar */}
+            
             <div className="space-y-4">
-              {/* Price + booking */}
+              
               <div className="card">
                 <div className="text-center mb-4">
                   <p className="text-sm text-gray-500 mb-1">{t('workshop_detail.price')}</p>
@@ -170,7 +170,7 @@ export default function WorkshopDetailPage() {
                 </div>
               </div>
 
-              {/* Instructor */}
+              
               {workshop.instructor && (
                 <div className="card">
                   <h2 className="font-semibold text-gray-900 mb-3">{t('workshop_detail.host')}</h2>
@@ -188,7 +188,7 @@ export default function WorkshopDetailPage() {
                 </div>
               )}
 
-              {/* Spots bar */}
+              
               <div className="card">
                 <div className="flex justify-between text-sm text-gray-600 mb-2">
                   <span>{t('workshop_detail.spots_taken')}</span>

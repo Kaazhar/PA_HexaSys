@@ -77,7 +77,7 @@ export default function AdminListings() {
   return (
     <DashboardLayout sidebarItems={adminSidebar} title={t('admin_listings.title')}>
       <div className="space-y-5">
-        {/* Filters */}
+        
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 max-w-sm">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -107,7 +107,7 @@ export default function AdminListings() {
           </div>
         </div>
 
-        {/* Table */}
+        
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100">
             <p className="text-sm text-gray-500">{total} {t('admin_listings.col_listing').toLowerCase()}{total > 1 ? 's' : ''}</p>
@@ -207,7 +207,7 @@ export default function AdminListings() {
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="px-4 py-3 border-t border-gray-100" />
         </div>
 
-        {/* Reject Modal */}
+        
         <Modal isOpen={!!rejectListing} onClose={() => { setRejectListing(null); reset(); }} title={t('admin_listings.reject_modal')} size="sm">
           <p className="text-sm text-gray-600 mb-4">
             <strong>"{rejectListing?.title}"</strong>
@@ -229,7 +229,7 @@ export default function AdminListings() {
           </form>
         </Modal>
 
-        {/* View Modal */}
+        
         <Modal isOpen={!!viewListing} onClose={() => setViewListing(null)} title={t('admin_listings.view_modal')} size="lg">
           {viewListing && (
             <div className="space-y-4">

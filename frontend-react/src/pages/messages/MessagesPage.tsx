@@ -31,7 +31,6 @@ export default function MessagesPage() {
 
   const conversations: Conversation[] = convsData?.data ?? [];
 
-  // Auto-select conversation passed from "Contacter le vendeur"
   useEffect(() => {
     const targetId = location.state?.conversationId;
     if (targetId && conversations.length > 0 && !selectedConv) {
@@ -82,7 +81,7 @@ export default function MessagesPage() {
   return (
     <DashboardLayout sidebarItems={sidebar} title={t('messages_page.title')} noPadding>
       <div className="h-full flex gap-4 p-5">
-        {/* Conversations list */}
+        
         <div className="w-72 flex-shrink-0 flex flex-col card p-0 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100">
             <h2 className="font-semibold text-gray-900">{t('messages_page.title')}</h2>
@@ -131,7 +130,7 @@ export default function MessagesPage() {
           )}
         </div>
 
-        {/* Chat panel */}
+        
         <div className="flex-1 flex flex-col card p-0 overflow-hidden">
           {!selectedConv ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
@@ -141,7 +140,7 @@ export default function MessagesPage() {
             </div>
           ) : (
             <>
-              {/* Header */}
+              
               <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
                 {(() => {
                   const other = getOtherUser(selectedConv);
@@ -165,7 +164,7 @@ export default function MessagesPage() {
                 })()}
               </div>
 
-              {/* Messages */}
+              
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.map((msg: any) => {
                   const isMe = msg.sender_id === user?.id;
@@ -188,7 +187,7 @@ export default function MessagesPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input */}
+              
               <div className="px-4 py-3 border-t border-gray-100 flex gap-2">
                 <input
                   className="input flex-1"

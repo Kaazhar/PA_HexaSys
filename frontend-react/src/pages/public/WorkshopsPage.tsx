@@ -43,7 +43,7 @@ export default function WorkshopsPage() {
           <p className="text-gray-500 text-sm">{t('workshops.subtitle')}</p>
         </div>
 
-        {/* Filters */}
+        
         <div className="flex flex-wrap gap-2 mb-6">
           {['', 'atelier', 'formation', 'conference'].map((wtype) => (
             <button

@@ -30,25 +30,19 @@ export default function ContainerRequestPage() {
     t('container_request.step_confirm'),
   ];
 
-  // ── Étape courante ──────────────────────────────────────────────────────
   const [step, setStep] = useState(0);
 
-  // ── Étape 0 : infos objet ───────────────────────────────────────────────
   const [objectTitle, setObjectTitle] = useState('');
   const [objectDescription, setObjectDescription] = useState('');
   const [sizeCategory, setSizeCategory] = useState('');
 
-  // ── Étape 1 : conteneur ─────────────────────────────────────────────────
   const [containerId, setContainerId] = useState<number | null>(null);
 
-  // ── Étape 2 : case ──────────────────────────────────────────────────────
   const [slotId, setSlotId] = useState<number | null>(null);
   const [slotCode, setSlotCode] = useState('');
 
-  // ── Étape 3 : date ──────────────────────────────────────────────────────
   const [desiredDate, setDesiredDate] = useState('');
 
-  // ── Requêtes ────────────────────────────────────────────────────────────
   const containersQuery = useQuery({
     queryKey: ['containers'],
     queryFn: () => containerService.getAll(),
@@ -85,13 +79,11 @@ export default function ContainerRequestPage() {
     },
   });
 
-  // ── Date limits ─────────────────────────────────────────────────────────
   const today = new Date().toISOString().split('T')[0];
   const maxDate = new Date();
   maxDate.setMonth(maxDate.getMonth() + 3);
   const maxDateStr = maxDate.toISOString().split('T')[0];
 
-  // ── Navigation ──────────────────────────────────────────────────────────
   const goNext = () => {
     if (step === 0) {
       if (!objectTitle.trim()) { toast.error(t('container_request.error_object_required')); return; }
@@ -118,12 +110,11 @@ export default function ContainerRequestPage() {
     createMutation.mutate();
   };
 
-  // ── Rendu ────────────────────────────────────────────────────────────────
   return (
     <DashboardLayout sidebarItems={particulierSidebar} title={t('container_request.title')}>
       <div className="max-w-2xl mx-auto">
 
-        {/* Stepper */}
+        
         <div className="flex items-center gap-2 mb-8">
           {STEP_LABELS.map((label, i) => (
             <div key={i} className="flex items-center gap-2 flex-1">
@@ -147,7 +138,7 @@ export default function ContainerRequestPage() {
 
         <div className="card">
 
-          {/* ── Étape 0 : Infos objet ──────────────────────────────────── */}
+          
           {step === 0 && (
             <div className="space-y-5">
               <h2 className="text-lg font-bold text-gray-900">{t('container_request.describe_object')}</h2>
@@ -208,7 +199,7 @@ export default function ContainerRequestPage() {
             </div>
           )}
 
-          {/* ── Étape 1 : Choix conteneur ──────────────────────────────── */}
+          
           {step === 1 && (
             <div className="space-y-4">
               <h2 className="text-lg font-bold text-gray-900">{t('container_request.choose_container')}</h2>
@@ -279,7 +270,7 @@ export default function ContainerRequestPage() {
             </div>
           )}
 
-          {/* ── Étape 2 : Grille des cases ─────────────────────────────── */}
+          
           {step === 2 && (
             <div className="space-y-5">
               <div>
@@ -326,7 +317,7 @@ export default function ContainerRequestPage() {
                 </div>
               ) : (
                 <>
-                  {/* Compteur */}
+                  
                   <div className={clsx(
                     'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium',
                     freeCount === 0 ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-800'
@@ -337,7 +328,7 @@ export default function ContainerRequestPage() {
                     }
                   </div>
 
-                  {/* Grille par taille */}
+                  
                   {['S', 'M', 'L'].map((size) => {
                     const group = allSlots.filter(s => s.size === size);
                     if (group.length === 0) return null;
@@ -383,7 +374,7 @@ export default function ContainerRequestPage() {
                     );
                   })}
 
-                  {/* Légende */}
+                  
                   <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
                     <span className="flex items-center gap-1.5">
                       <span className="w-4 h-4 rounded border-2 border-gray-200 bg-white inline-block" />{t('container_request.legend_free')}
@@ -399,7 +390,7 @@ export default function ContainerRequestPage() {
                     </span>
                   </div>
 
-                  {/* Case sélectionnée */}
+                  
                   {slotId && (
                     <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
                       <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
@@ -413,12 +404,12 @@ export default function ContainerRequestPage() {
             </div>
           )}
 
-          {/* ── Étape 3 : Date + récap ──────────────────────────────────── */}
+          
           {step === 3 && (
             <div className="space-y-5">
               <h2 className="text-lg font-bold text-gray-900">{t('container_request.confirmation_title')}</h2>
 
-              {/* Récap */}
+              
               <div className="p-4 bg-gray-50 rounded-xl space-y-3 text-sm border border-gray-100">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-500">{t('container_request.container_label')}</span>
@@ -446,7 +437,7 @@ export default function ContainerRequestPage() {
                 )}
               </div>
 
-              {/* Date */}
+              
               <div>
                 <label className="label">{t('container_request.date_label')}</label>
                 <input
@@ -467,7 +458,7 @@ export default function ContainerRequestPage() {
             </div>
           )}
 
-          {/* ── Boutons navigation ──────────────────────────────────────── */}
+          
           <div className="flex gap-3 mt-6 pt-6 border-t border-gray-100">
             {step > 0 && (
               <button type="button" onClick={goBack} className="btn-secondary flex-1">

@@ -31,14 +31,14 @@ export default function Sidebar({ items, collapsed = false }: SidebarProps) {
       'h-screen bg-gray-900 text-white flex flex-col',
       collapsed ? 'w-14' : 'w-56'
     )}>
-      {/* Logo */}
+      
       <div className="px-4 py-3 border-b border-gray-700">
         <Link to="/" className="flex items-center justify-center">
           <img src={logo} alt="UpcycleConnect" className={collapsed ? 'h-8' : 'h-10'} />
         </Link>
       </div>
 
-      {/* Navigation */}
+      
       <nav className="flex-1 py-3 overflow-y-auto">
         <ul className="space-y-0.5 px-2">
           {items.map((item) => {
@@ -66,7 +66,7 @@ export default function Sidebar({ items, collapsed = false }: SidebarProps) {
         </ul>
       </nav>
 
-      {/* Bottom links */}
+      
       <div className="p-2 border-t border-gray-700 space-y-0.5">
         <Link
           to="/profil"

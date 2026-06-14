@@ -23,7 +23,6 @@ export default function ConseilsPage() {
 
   const articles: Article[] = data?.data?.articles ?? [];
 
-  // Collecte tous les tags uniques
   const allTags = Array.from(
     new Set(
       articles.flatMap(a => (a.tags ? a.tags.split(',').map(t => t.trim()).filter(Boolean) : []))
@@ -34,13 +33,13 @@ export default function ConseilsPage() {
     <PublicLayout>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* Header */}
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">{t('conseils.title')}</h1>
           <p className="text-gray-500 mt-1">{t('conseils.subtitle')}</p>
         </div>
 
-        {/* Filtres par tag */}
+        
         {allTags.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap mb-6">
             <button
@@ -70,7 +69,7 @@ export default function ConseilsPage() {
           </div>
         )}
 
-        {/* Contenu */}
+        
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : articles.length === 0 ? (
@@ -102,7 +101,7 @@ function ArticleCard({ article }: { article: Article }) {
       to={`/conseils/${article.id}`}
       className="bg-white rounded-2xl border-2 border-gray-100 p-5 hover:border-[#2D5016]/30 hover:shadow-sm transition-all group flex flex-col gap-3"
     >
-      {/* Tags */}
+      
       {tags.length > 0 && (
         <div className="flex gap-1.5 flex-wrap">
           {tags.map(tag => (
@@ -113,19 +112,19 @@ function ArticleCard({ article }: { article: Article }) {
         </div>
       )}
 
-      {/* Titre */}
+      
       <h3 className="font-bold text-gray-900 text-lg leading-snug group-hover:text-[#2D5016] transition-colors">
         {article.title}
       </h3>
 
-      {/* Extrait */}
+      
       {excerpt && (
         <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">
           {excerpt}{article.content.length > 140 ? '…' : ''}
         </p>
       )}
 
-      {/* Footer */}
+      
       <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
         <div className="text-xs text-gray-400">
           <span className="font-medium text-gray-600">

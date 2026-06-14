@@ -52,12 +52,12 @@ export default function ConseilDetailPage() {
     <PublicLayout>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* Retour */}
+        
         <Link to="/conseils" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
           <ArrowLeft className="w-4 h-4" /> {t('conseils.back')}
         </Link>
 
-        {/* Tags */}
+        
         {tags.length > 0 && (
           <div className="flex gap-2 flex-wrap mb-4">
             {tags.map(tag => (
@@ -69,12 +69,12 @@ export default function ConseilDetailPage() {
           </div>
         )}
 
-        {/* Titre */}
+        
         <h1 className="text-3xl font-bold text-gray-900 leading-tight mb-4">
           {article.title}
         </h1>
 
-        {/* Meta */}
+        
         <div className="flex items-center gap-4 text-sm text-gray-500 mb-8 pb-6 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-[#2D5016] text-white flex items-center justify-center text-xs font-bold">
@@ -89,12 +89,12 @@ export default function ConseilDetailPage() {
           <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {article.views} {t('conseils.views')}</span>
         </div>
 
-        {/* Contenu */}
+        
         <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-line text-base">
           {article.content}
         </div>
 
-        {/* Pied de page */}
+        
         <div className="mt-10 pt-6 border-t border-gray-100 flex items-center justify-between">
           <Link to="/conseils" className="text-sm text-[#2D5016] hover:underline flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" /> {t('conseils.back')}

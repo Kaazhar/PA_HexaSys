@@ -73,7 +73,6 @@ func GetMessages(c *gin.Context) {
 		return
 	}
 
-	// Mark received messages as read
 	config.DB.Model(&models.Message{}).
 		Where("conversation_id = ? AND sender_id != ? AND read = false", convID, uid).
 		Update("read", true)
@@ -118,7 +117,6 @@ func SendMessage(c *gin.Context) {
 		"last_message":    req.Content,
 	})
 
-	// Notify the recipient
 	recipientID := conv.ParticipantOneID
 	if conv.ParticipantOneID == uid {
 		recipientID = conv.ParticipantTwoID
@@ -136,7 +134,6 @@ func SendMessage(c *gin.Context) {
 	}
 	config.DB.Create(&notif)
 
-	// Envoi email de notification en arrière-plan
 	var recipient models.User
 	if err := config.DB.First(&recipient, recipientID).Error; err == nil {
 		senderName := sender.Firstname + " " + sender.Lastname

@@ -103,12 +103,12 @@ export default function ForumTopicPage() {
     <PublicLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* Retour */}
+        
         <Link to="/forum" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
           <ArrowLeft className="w-4 h-4" /> {t('forum.back')}
         </Link>
 
-        {/* Topic header */}
+        
         <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 mb-4">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex-1 min-w-0">
@@ -127,7 +127,7 @@ export default function ForumTopicPage() {
               <h1 className="text-2xl font-bold text-gray-900">{topic.title}</h1>
             </div>
 
-            {/* Actions modération */}
+            
             {canModerate && (
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
@@ -162,7 +162,7 @@ export default function ForumTopicPage() {
             )}
           </div>
 
-          {/* Auteur + meta */}
+          
           <div className="flex items-center gap-3 mb-5">
             <Avatar name={`${topic.author?.firstname ?? '?'} ${topic.author?.lastname ?? ''}`} />
             <div>
@@ -186,7 +186,7 @@ export default function ForumTopicPage() {
           </div>
         </div>
 
-        {/* Réponses */}
+        
         {posts.length > 0 && (
           <div className="space-y-3 mb-4">
             <h2 className="font-semibold text-gray-700 text-sm px-1">
@@ -204,7 +204,7 @@ export default function ForumTopicPage() {
           </div>
         )}
 
-        {/* Zone de réponse */}
+        
         {topic.is_locked ? (
           <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-5 text-center text-gray-400">
             <Lock className="w-6 h-6 mx-auto mb-2" />

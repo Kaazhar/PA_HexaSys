@@ -66,7 +66,7 @@ export default function AdminReports() {
           </div>
         </div>
 
-        {/* Filters */}
+        
         <div className="flex flex-wrap gap-2">
           {['pending', 'resolved', 'dismissed', ''].map((s) => (
             <button
@@ -106,7 +106,7 @@ export default function AdminReports() {
                         </span>
                       </div>
 
-                      {/* Listing */}
+                      
                       {report.listing && (
                         <div className="flex items-center gap-2 mb-1">
                           <Tag className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -124,7 +124,7 @@ export default function AdminReports() {
                         </div>
                       )}
 
-                      {/* Reporter */}
+                      
                       <p className="text-xs text-gray-500 mb-1">
                         {t('admin_reports.reported_by')} <span className="font-medium">{report.user?.firstname} {report.user?.lastname}</span>
                         {' · '}
@@ -171,7 +171,7 @@ export default function AdminReports() {
         <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
 
-      {/* Confirm resolve modal */}
+      
       {resolving && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">

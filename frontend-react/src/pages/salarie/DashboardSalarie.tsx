@@ -43,13 +43,13 @@ export default function DashboardSalarie() {
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (
         <div className="space-y-6">
-          {/* Welcome */}
+          
           <div>
             <h2 className="text-xl font-bold text-gray-900">{t('dashboard_salarie.welcome', { name: user?.firstname })}</h2>
             <p className="text-gray-500 mt-1">{t('dashboard_salarie.welcome_sub')}</p>
           </div>
 
-          {/* Stats */}
+          
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <StatCard
               title={t('dashboard_salarie.my_workshops')}
@@ -72,7 +72,7 @@ export default function DashboardSalarie() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* My workshops */}
+            
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{t('dashboard_salarie.my_workshops')}</h2>
@@ -117,7 +117,7 @@ export default function DashboardSalarie() {
               )}
             </div>
 
-            {/* Upcoming workshops */}
+            
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{t('dashboard_salarie.upcoming_title')}</h2>
@@ -159,7 +159,7 @@ export default function DashboardSalarie() {
             </div>
           </div>
 
-          {/* My articles */}
+          
           {(dashboard?.my_articles || []).length > 0 && (
             <div className="card">
               <div className="flex items-center justify-between mb-4">
@@ -188,7 +188,7 @@ export default function DashboardSalarie() {
             </div>
           )}
 
-          {/* Quick actions */}
+          
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { label: t('dashboard_salarie.action_create_workshop'), path: '/salarie/formations', icon: <BookOpen className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },

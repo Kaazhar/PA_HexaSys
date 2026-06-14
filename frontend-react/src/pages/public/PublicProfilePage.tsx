@@ -65,7 +65,7 @@ export default function PublicProfilePage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Profile header */}
+            
             <div className="card">
               <div className="flex items-start gap-4">
                 <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -104,7 +104,7 @@ export default function PublicProfilePage() {
               </div>
             </div>
 
-            {/* Active listings */}
+            
             {activeListings.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -136,7 +136,7 @@ export default function PublicProfilePage() {
               </div>
             )}
 
-            {/* Reviews */}
+            
             {reviews.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">

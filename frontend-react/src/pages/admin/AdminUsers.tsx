@@ -199,7 +199,7 @@ export default function AdminUsers() {
   return (
     <DashboardLayout sidebarItems={adminSidebar} title={t('admin_users.title')}>
       <div className="space-y-5">
-        {/* Header */}
+        
         <div className="flex flex-col sm:flex-row gap-3 justify-between">
           <div className="flex flex-col sm:flex-row gap-3 flex-1">
             <div className="relative flex-1 max-w-sm">
@@ -234,7 +234,7 @@ export default function AdminUsers() {
           </button>
         </div>
 
-        {/* Table */}
+        
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <p className="text-sm text-gray-500">{total} {t('admin_users.col_user').toLowerCase()}{total > 1 ? 's' : ''}</p>
@@ -345,7 +345,7 @@ export default function AdminUsers() {
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="px-4 py-3 border-t border-gray-100" />
         </div>
 
-        {/* Edit Modal */}
+        
         <Modal isOpen={!!editUser} onClose={() => setEditUser(null)} title={t('admin_users.edit_modal')}>
           {editUser && (
             <UserForm
@@ -356,7 +356,7 @@ export default function AdminUsers() {
           )}
         </Modal>
 
-        {/* Create Modal */}
+        
         <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title={t('admin_users.create_modal')}>
           <UserForm
             onSubmit={(data) => createMutation.mutate(data as UserFormData & { password: string })}
@@ -364,7 +364,7 @@ export default function AdminUsers() {
           />
         </Modal>
 
-        {/* Delete Confirm Modal */}
+        
         <Modal isOpen={!!deleteUserId} onClose={() => setDeleteUserId(null)} title={t('admin_users.delete_modal')} size="sm">
           <p className="text-gray-600 mb-5">{t('admin_users.delete_msg')}</p>
           <div className="flex gap-3">
@@ -379,7 +379,7 @@ export default function AdminUsers() {
           </div>
         </Modal>
 
-        {/* Ban Modal */}
+        
         <Modal isOpen={!!banUser} onClose={() => { setBanUser(null); resetBan(); }} title={t('admin_users.ban_title', { name: `${banUser?.firstname} ${banUser?.lastname}` })} size="sm">
           <form onSubmit={handleBanSubmit((data) => banUser && banMutation.mutate({ id: banUser.id, data }))} className="space-y-4">
             <div>
@@ -414,7 +414,7 @@ export default function AdminUsers() {
           </form>
         </Modal>
 
-        {/* Unban Confirm Modal */}
+        
         <Modal isOpen={!!unbanUserId} onClose={() => setUnbanUserId(null)} title={t('admin_users.unban_modal')} size="sm">
           <p className="text-gray-600 mb-5">{t('admin_users.unban_msg')}</p>
           <div className="flex gap-3">

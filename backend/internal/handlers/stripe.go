@@ -29,7 +29,6 @@ func getFrontendURL() string {
 	return "http://localhost:5173"
 }
 
-// CreateWorkshopCheckout - POST /api/stripe/workshop-checkout
 func CreateWorkshopCheckout(c *gin.Context) {
 	stripe.Key = getStripeKey()
 	userID, _ := c.Get("userID")
@@ -98,7 +97,6 @@ func CreateWorkshopCheckout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"checkout_url": s.URL})
 }
 
-// CreateListingCheckout - POST /api/stripe/listing-checkout
 func CreateListingCheckout(c *gin.Context) {
 	stripe.Key = getStripeKey()
 	userID, _ := c.Get("userID")
@@ -170,7 +168,6 @@ func CreateListingCheckout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"checkout_url": s.URL})
 }
 
-// CreateSubscriptionCheckout - POST /api/stripe/subscription-checkout
 func CreateSubscriptionCheckout(c *gin.Context) {
 	stripe.Key = getStripeKey()
 	userID, _ := c.Get("userID")
@@ -235,8 +232,6 @@ func CreateSubscriptionCheckout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"checkout_url": s.URL})
 }
 
-// ConfirmSession - GET /api/stripe/confirm?session_id=xxx
-// Appelé par la page /payment/success pour confirmer sans webhook
 func ConfirmSession(c *gin.Context) {
 	stripe.Key = getStripeKey()
 	sessionID := c.Query("session_id")
@@ -375,7 +370,6 @@ func ConfirmSession(c *gin.Context) {
 	}
 }
 
-// StripeWebhook - POST /api/stripe/webhook
 func StripeWebhook(c *gin.Context) {
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -394,7 +388,6 @@ func StripeWebhook(c *gin.Context) {
 			return
 		}
 	} else {
-		// Mode dev sans vérification de signature
 		if err := json.Unmarshal(body, &event); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot parse event"})
 			return
@@ -424,7 +417,6 @@ func StripeWebhook(c *gin.Context) {
 				break
 			}
 
-			// Idempotence : évite double inscription
 			var existing models.WorkshopBooking
 			if config.DB.Where("workshop_id = ? AND user_id = ?", workshopID, userID).First(&existing).Error == nil {
 				break

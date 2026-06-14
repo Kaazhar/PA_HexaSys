@@ -121,7 +121,7 @@ export default function ProfilePage() {
     <PublicLayout>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
 
-        {/* Header */}
+        
         <div className="flex items-center gap-5 mb-8 pb-8 border-b border-gray-200">
           <div className="relative flex-shrink-0">
             <button
@@ -176,7 +176,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="space-y-6">
-          {/* Informations */}
+          
           <div className="card">
             <div className="flex items-center gap-2 mb-5">
               <User className="w-4 h-4 text-gray-400" />
@@ -235,7 +235,7 @@ export default function ProfilePage() {
             </form>
           </div>
 
-          {/* Mot de passe */}
+          
           <div className="card">
             <div className="flex items-center gap-2 mb-5">
               <Lock className="w-4 h-4 text-gray-400" />
@@ -294,7 +294,7 @@ export default function ProfilePage() {
             </form>
           </div>
 
-          {/* Newsletter */}
+          
           <div className="card mt-4">
             <h2 className="font-semibold text-gray-900 mb-4">{t('profile.newsletter')}</h2>
             <div className="flex items-center justify-between">
@@ -331,7 +331,7 @@ export default function ProfilePage() {
             onSuccess={handleUserUpdated}
           />
 
-          {/* Compte */}
+          
           <div className="card">
             <h2 className="font-semibold text-gray-900 mb-4">{t('profile.my_account')}</h2>
             <dl className="space-y-3 text-sm">

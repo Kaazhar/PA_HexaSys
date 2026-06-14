@@ -9,7 +9,6 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-// GetPublicArticles - GET /api/articles (public, published only)
 func GetPublicArticles(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "12"))
@@ -29,7 +28,6 @@ func GetPublicArticles(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"articles": articles, "total": total, "page": page, "limit": limit})
 }
 
-// GetPublicArticle - GET /api/articles/:id (public, published only)
 func GetPublicArticle(c *gin.Context) {
 	id := c.Param("id")
 	var article models.Article

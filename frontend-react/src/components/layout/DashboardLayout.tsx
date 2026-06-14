@@ -55,13 +55,13 @@ export default function DashboardLayout({ children, sidebarItems = [], title, no
       <Sidebar items={sidebarItems} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar */}
+        
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
           <div>
             {title && <h1 className="text-base font-semibold text-gray-800">{title}</h1>}
           </div>
           <div className="flex items-center gap-2">
-            {/* Language switcher */}
+            
             <div className="flex items-center gap-1 mr-1">
               {LANGS.map(lang => (
                 <button
@@ -79,15 +79,15 @@ export default function DashboardLayout({ children, sidebarItems = [], title, no
               ))}
             </div>
 
-            {/* Push notifications */}
+            
             <PushNotificationButton />
 
-            {/* Messages */}
+            
             <Link id="tour-messages" to="/messages" className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
               <MessageCircle className="w-5 h-5" />
             </Link>
 
-            {/* Notifications */}
+            
             <div id="tour-notifications" ref={notifRef} className="relative">
               <button onClick={() => setNotifOpen(!notifOpen)} className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
                 <Bell className="w-5 h-5" />
@@ -135,7 +135,7 @@ export default function DashboardLayout({ children, sidebarItems = [], title, no
           </Link>
         </header>
 
-        {/* Main content */}
+        
         <main className={`flex-1 overflow-hidden ${noPadding ? '' : 'overflow-y-auto p-5'}`}>
           {children}
         </main>

@@ -48,7 +48,6 @@ func AuthRequired() gin.HandlerFunc {
 			return
 		}
 
-		// Check ban status from DB
 		var user models.User
 		if err := config.DB.Select("id, is_banned, ban_reason, ban_expires_at").First(&user, claims.UserID).Error; err == nil {
 			if user.IsBanned {
@@ -60,7 +59,6 @@ func AuthRequired() gin.HandlerFunc {
 					c.Abort()
 					return
 				}
-				// Ban expired — auto-lift
 				config.DB.Model(&user).Updates(map[string]interface{}{
 					"is_banned":      false,
 					"ban_reason":     "",

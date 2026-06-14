@@ -32,7 +32,6 @@ export default function ProtectedRoute({ children, roles }: ProtectedRouteProps)
   }
 
   if (roles && user && !roles.includes(user.role)) {
-    // Redirect to correct dashboard
     const dashboardMap: Record<UserRole, string> = {
       admin: '/admin',
       professionnel: '/pro',

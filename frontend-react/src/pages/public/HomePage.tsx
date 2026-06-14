@@ -27,7 +27,7 @@ export default function HomePage() {
 
   return (
     <PublicLayout>
-      {/* Hero */}
+      
       <section className="bg-primary-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="max-w-2xl">
@@ -52,7 +52,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How it works */}
+      
       <section className="py-20 bg-beige-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -78,7 +78,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Recent listings */}
+      
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-10">
@@ -105,7 +105,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Upcoming workshops */}
+      
       {workshops.length > 0 && (
         <section className="py-20 bg-beige-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -151,7 +151,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* CTA */}
+      
       <section className="py-20 bg-primary-500">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">

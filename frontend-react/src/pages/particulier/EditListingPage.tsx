@@ -120,7 +120,7 @@ export default function EditListingPage() {
           <div className="card space-y-5">
             <h2 className="text-lg font-bold text-gray-900">{t('edit_listing.edit_prefix')} {listing?.title}</h2>
 
-            {/* Type */}
+            
             <div>
               <label className="label">{t('edit_listing.type_label')}</label>
               <div className="grid grid-cols-2 gap-4">
@@ -140,7 +140,7 @@ export default function EditListingPage() {
               </div>
             </div>
 
-            {/* Category */}
+            
             <div>
               <label className="label">{t('edit_listing.category_label')}</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -156,7 +156,7 @@ export default function EditListingPage() {
               </div>
             </div>
 
-            {/* Title */}
+            
             <div>
               <label className="label">{t('edit_listing.title_field')}</label>
               <input
@@ -166,13 +166,13 @@ export default function EditListingPage() {
               {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
             </div>
 
-            {/* Description */}
+            
             <div>
               <label className="label">{t('edit_listing.description_field')}</label>
               <textarea {...register('description', { maxLength: { value: 1000, message: t('edit_listing.description_max') } })} className="input min-h-[100px] resize-none" maxLength={1000} />
             </div>
 
-            {/* Condition + Price */}
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="label">{t('edit_listing.condition_label')}</label>
@@ -191,14 +191,14 @@ export default function EditListingPage() {
               )}
             </div>
 
-            {/* Location */}
+            
             <div>
               <label className="label">{t('edit_listing.location_label')}</label>
               <input {...register('location', { required: t('edit_listing.location_required') })} className="input" />
               {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location.message}</p>}
             </div>
 
-            {/* Images */}
+            
             <div>
               <label className="label">{t('edit_listing.photos_label')}</label>
               <div className="space-y-3">

@@ -11,7 +11,6 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
-// Fix leaflet default icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -66,7 +65,7 @@ export default function ContainersPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Map */}
+            
             <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-[500px]">
               {withCoords.length > 0 ? (
                 <MapContainer
@@ -115,7 +114,7 @@ export default function ContainersPage() {
               )}
             </div>
 
-            {/* List */}
+            
             <div className="space-y-4 overflow-y-auto max-h-[500px] pr-1">
               {containers.length === 0 ? (
                 <div className="text-center py-20 text-gray-400">
@@ -161,7 +160,7 @@ export default function ContainersPage() {
             </div>
           </div>
         )}
-        {/* Section pro : objets disponibles à récupérer */}
+        
         {isPro && (
           <div className="mt-10">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">

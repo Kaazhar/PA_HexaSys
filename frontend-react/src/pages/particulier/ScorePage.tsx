@@ -36,7 +36,7 @@ export default function ScorePage() {
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (
         <div className="space-y-6 max-w-3xl">
-          {/* Score card */}
+          
           <div className="card text-center py-8">
             <div className="text-4xl mb-2">{currentLevel.emoji}</div>
             <p className="text-sm text-gray-500 mb-1">{t('score.current_level')}</p>
@@ -58,7 +58,7 @@ export default function ScorePage() {
             )}
           </div>
 
-          {/* Impact environnemental */}
+          
           <div className="card">
             <h2 className="font-semibold text-gray-900 mb-4">{t('score.env_impact')}</h2>
             <div className="grid grid-cols-3 gap-4 text-center">
@@ -80,7 +80,7 @@ export default function ScorePage() {
             </div>
           </div>
 
-          {/* Niveaux */}
+          
           <div className="card">
             <h2 className="font-semibold text-gray-900 mb-4">{t('score.levels_title')}</h2>
             <div className="divide-y divide-gray-100">
@@ -100,7 +100,7 @@ export default function ScorePage() {
             </div>
           </div>
 
-          {/* Historique */}
+          
           {entries.length > 0 && (
             <div className="card">
               <h2 className="font-semibold text-gray-900 mb-4">{t('score.history_title')}</h2>

@@ -63,7 +63,6 @@ export default function Navbar() {
 
   const searchResults = searchData?.data;
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
@@ -106,12 +105,12 @@ export default function Navbar() {
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
-          {/* Logo */}
+          
           <Link to="/" className="flex items-center flex-shrink-0">
             <img src={logo} alt="UpcycleConnect" className="h-8" style={{ filter: 'invert(1) brightness(0)' }} />
           </Link>
 
-          {/* Desktop nav links */}
+          
           <div className="hidden md:flex items-center gap-5">
             <Link to="/" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.home')}</Link>
             <Link to="/annonces" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.listings')}</Link>
@@ -123,7 +122,7 @@ export default function Navbar() {
             <Link to="/forum" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.forum')}</Link>
           </div>
 
-          {/* Search bar */}
+          
           <div ref={searchRef} className="hidden md:block relative flex-1 max-w-xs">
             <form onSubmit={handleSearchSubmit}>
               <div className="relative">
@@ -182,11 +181,11 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Right side */}
+          
           <div className="hidden md:flex items-center gap-2">
             {isAuthenticated && user ? (
               <>
-                {/* Messages */}
+                
                 <Link
                   to="/messages"
                   className="relative p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
@@ -194,7 +193,7 @@ export default function Navbar() {
                   <MessageCircle className="w-5 h-5" />
                 </Link>
 
-                {/* Notifications */}
+                
                 <div ref={notifRef} className="relative">
                   <button
                     onClick={() => setNotifOpen(!notifOpen)}
@@ -236,7 +235,7 @@ export default function Navbar() {
                   )}
                 </div>
 
-                {/* User menu */}
+                
                 <div className="relative">
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -296,7 +295,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Language switcher */}
+          
           <div className="hidden md:flex items-center gap-1">
             {languages.map(lang => (
               <button
@@ -315,7 +314,7 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Mobile menu button */}
+          
           <button
             className="md:hidden p-2 rounded-lg hover:bg-gray-50"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -325,7 +324,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white py-3 px-4 space-y-2">
           <Link to="/" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.home')}</Link>

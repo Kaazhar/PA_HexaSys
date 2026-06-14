@@ -12,7 +12,6 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-// Crée la facture si elle n'existe pas déjà (idempotent via son numéro), sinon renvoie l'existante.
 func ensureInvoice(number string, userID uint, invoiceType, description string, amount float64) models.Invoice {
 	var inv models.Invoice
 	if config.DB.Where("number = ?", number).First(&inv).Error == nil {
@@ -34,7 +33,6 @@ func ensureInvoice(number string, userID uint, invoiceType, description string, 
 	return inv
 }
 
-// Renvoie les factures de l'utilisateur connecté.
 func GetMyInvoices(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	var invoices []models.Invoice
@@ -42,7 +40,6 @@ func GetMyInvoices(c *gin.Context) {
 	c.JSON(http.StatusOK, invoices)
 }
 
-// Génère et télécharge le PDF d'une facture (réservé à son propriétaire ou à un admin).
 func DownloadInvoicePDF(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	role, _ := c.Get("userRole")
@@ -70,7 +67,6 @@ func DownloadInvoicePDF(c *gin.Context) {
 	c.Data(http.StatusOK, "application/pdf", pdfBytes)
 }
 
-// Construit le PDF de la facture : en-tête, infos client, ligne d'achat, totaux HT/TVA/TTC.
 func buildInvoicePDF(inv models.Invoice) ([]byte, error) {
 	pdf := fpdf.New("P", "mm", "A4", "")
 	pdf.SetMargins(20, 20, 20)
@@ -149,7 +145,6 @@ func buildInvoicePDF(inv models.Invoice) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Texte de la ligne d'achat affichée sur la facture, selon le type.
 func libelleFacture(inv models.Invoice) string {
 	if inv.Description != "" {
 		return inv.Description

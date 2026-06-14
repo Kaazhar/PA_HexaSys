@@ -248,7 +248,6 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
     setSpotRect(null);
 
     const run = async () => {
-      // Navigate to route if needed
       if (step.route) {
         navigate(step.route);
         await sleep(700);
@@ -260,7 +259,6 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
         return;
       }
 
-      // Scroll element into view then get its rect
       const el = document.getElementById(step.target);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -285,7 +283,6 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
 
   const progress = ((current + 1) / steps.length) * 100;
 
-  // ── Shared: dots row ──────────────────────────────────────────────────────
   const DotsRow = ({ compact }: { compact: boolean }) => (
     <div className="flex justify-center gap-1.5 pb-3">
       {steps.map((_, i) => (
@@ -303,7 +300,6 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
     </div>
   );
 
-  // ── Shared: nav row ───────────────────────────────────────────────────────
   const NavRow = ({ compact }: { compact: boolean }) => (
     <div className={`flex gap-2 ${compact ? 'px-4 pb-4' : 'px-8 pb-8'}`}>
       {current > 0 ? (
@@ -330,25 +326,21 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
     </div>
   );
 
-  // ── Loading ───────────────────────────────────────────────────────────────
   if (!spotReady) {
     return <div className="fixed inset-0 z-50" style={{ backgroundColor: 'rgba(0,0,0,0.65)' }} />;
   }
 
-  // ── Spotlight (target found) ──────────────────────────────────────────────
   if (step.target && spotRect) {
     const W = window.innerWidth;
     const H = window.innerHeight;
     const p = PADDING;
     const { top, left, width, height } = spotRect;
 
-    // SVG overlay with evenodd hole
     const svgPath = [
       `M0 0 L${W} 0 L${W} ${H} L0 ${H} Z`,
       `M${left - p} ${top - p} L${left - p} ${top + height + p} L${left + width + p} ${top + height + p} L${left + width + p} ${top - p} Z`,
     ].join(' ');
 
-    // Tooltip position
     const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
     const placement = step.placement ?? 'bottom';
     const tooltipStyle: React.CSSProperties = (() => {
@@ -367,12 +359,12 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
 
     return (
       <>
-        {/* Dark overlay with cutout */}
+        
         <svg style={{ position: 'fixed', top: 0, left: 0, zIndex: 40, pointerEvents: 'none' }} width={W} height={H}>
           <path d={svgPath} fill="rgba(0,0,0,0.7)" fillRule="evenodd" style={{ pointerEvents: 'all' }} />
         </svg>
 
-        {/* Green glow border around spotlight */}
+        
         <div
           style={{
             position: 'fixed',
@@ -383,7 +375,7 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
           }}
         />
 
-        {/* Tooltip */}
+        
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden" style={{ ...tooltipStyle, position: 'fixed', zIndex: 50 }}>
           <div className="px-4 pt-4 pb-3" style={{ background: 'linear-gradient(135deg, #2D5016 0%, #4a7c28 100%)' }}>
             <div className="flex items-start justify-between gap-2">
@@ -407,19 +399,18 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
     );
   }
 
-  // ── Page overview (has route, no spotlight) ───────────────────────────────
   if (step.route) {
     return (
       <>
-        {/* Semi-transparent overlay so the page is visible in the background */}
+        
         <div className="fixed inset-0 z-40" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} />
 
-        {/* Bottom card */}
+        
         <div
           className="fixed z-50 bg-white rounded-2xl shadow-2xl overflow-hidden"
           style={{ bottom: 32, left: '50%', transform: 'translateX(-50%)', width: 460 }}
         >
-          {/* Header */}
+          
           <div className="px-6 pt-5 pb-4" style={{ background: 'linear-gradient(135deg, #2D5016 0%, #4a7c28 100%)' }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -435,12 +426,12 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
             </div>
           </div>
 
-          {/* Progress bar */}
+          
           <div className="h-1 bg-gray-100">
             <div className="h-1 transition-all duration-500" style={{ width: `${progress}%`, backgroundColor: '#2D5016' }} />
           </div>
 
-          {/* Body */}
+          
           <div className="px-6 py-4">
             <p className="text-gray-600 text-sm leading-relaxed">{step.description}</p>
           </div>
@@ -452,7 +443,6 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
     );
   }
 
-  // ── Centered welcome modal (first/last step) ──────────────────────────────
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"

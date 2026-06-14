@@ -39,7 +39,6 @@ export default function MonPlanningPage() {
 
   const bookings: WorkshopBooking[] = data?.data ?? [];
 
-  // ── Calendrier ───────────────────────────────────────────────────────────
   const calendarDays = useMemo(() => {
     const start = startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 1 });
     const end = endOfWeek(endOfMonth(currentMonth), { weekStartsOn: 1 });
@@ -57,7 +56,6 @@ export default function MonPlanningPage() {
 
   const selectedDayBookings = selectedDay ? getBookingsForDay(selectedDay) : [];
 
-  // ── Prochaines formations ─────────────────────────────────────────────────
   const upcoming = bookings
     .filter(b => b.workshop && !isPast(new Date(b.workshop.date)))
     .sort((a, b) => new Date(a.workshop!.date).getTime() - new Date(b.workshop!.date).getTime());
@@ -82,9 +80,9 @@ export default function MonPlanningPage() {
       ) : (
         <div className="space-y-6">
 
-          {/* ── Calendrier ───────────────────────────────────────────────── */}
+          
           <div className="card">
-            {/* Header navigation */}
+            
             <div className="flex items-center justify-between mb-6">
               <button type="button" onClick={() => { setCurrentMonth(subMonths(currentMonth, 1)); setSelectedDay(null); }}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
@@ -99,14 +97,14 @@ export default function MonPlanningPage() {
               </button>
             </div>
 
-            {/* Jours de la semaine */}
+            
             <div className="grid grid-cols-7 mb-2">
               {DAYS.map(d => (
                 <div key={d} className="text-center text-xs font-semibold text-gray-400 py-2">{d}</div>
               ))}
             </div>
 
-            {/* Grille des jours */}
+            
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((day, i) => {
                 const dayBookings = getBookingsForDay(day);
@@ -132,7 +130,7 @@ export default function MonPlanningPage() {
                       {format(day, 'd')}
                     </span>
 
-                    {/* Points de couleur pour chaque formation */}
+                    
                     {dayBookings.length > 0 && (
                       <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
                         {dayBookings.slice(0, 3).map((b, j) => (
@@ -156,7 +154,7 @@ export default function MonPlanningPage() {
               })}
             </div>
 
-            {/* Légende */}
+            
             <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-gray-100">
               {Object.entries(TYPE_COLORS).map(([type, color]) => (
                 <span key={type} className="flex items-center gap-1.5 text-xs text-gray-500">
@@ -171,7 +169,7 @@ export default function MonPlanningPage() {
             </div>
           </div>
 
-          {/* ── Détail du jour sélectionné ───────────────────────────────── */}
+          
           {selectedDay && (
             <div className="card border-2 border-[#2D5016]/20">
               <h3 className="font-semibold text-gray-900 mb-3 capitalize">
@@ -189,7 +187,7 @@ export default function MonPlanningPage() {
             </div>
           )}
 
-          {/* ── Prochaines formations ────────────────────────────────────── */}
+          
           {upcoming.length > 0 && (
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -204,7 +202,7 @@ export default function MonPlanningPage() {
             </div>
           )}
 
-          {/* ── Formations passées ───────────────────────────────────────── */}
+          
           {past.length > 0 && (
             <div className="card">
               <h3 className="font-semibold text-gray-500 mb-4 flex items-center gap-2">
@@ -244,7 +242,7 @@ function WorkshopCard({ booking, past = false }: { booking: WorkshopBooking; pas
       'flex items-start gap-4 p-4 rounded-xl border transition-all',
       past ? 'border-gray-100 bg-gray-50' : 'border-gray-200 hover:border-[#2D5016]/30 hover:bg-green-50/30'
     )}>
-      {/* Date block */}
+      
       <div className="flex-shrink-0 w-14 text-center">
         <div className={clsx('w-14 h-14 rounded-xl flex flex-col items-center justify-center', past ? 'bg-gray-200' : 'bg-[#2D5016]')}>
           <span className={clsx('text-xs font-semibold uppercase', past ? 'text-gray-500' : 'text-green-200')}>
@@ -256,7 +254,7 @@ function WorkshopCard({ booking, past = false }: { booking: WorkshopBooking; pas
         </div>
       </div>
 
-      {/* Content */}
+      
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className={clsx('w-2 h-2 rounded-full flex-shrink-0', typeColor)} />
@@ -275,7 +273,7 @@ function WorkshopCard({ booking, past = false }: { booking: WorkshopBooking; pas
         </div>
       </div>
 
-      {/* Right side */}
+      
       <div className="flex-shrink-0 flex flex-col items-end gap-2">
         <span className={clsx('text-sm font-bold', past ? 'text-gray-400' : 'text-[#2D5016]')}>
           {ws.price === 0 ? t('planning.free') : `${ws.price}€`}

@@ -70,10 +70,8 @@ export default function AbonnementPage() {
     const planData = plans.find(p => p.id === plan);
     if (!planData) return;
     if (planData.price === 0) {
-      // Plan gratuit : pas de Stripe
       upgradeMutation.mutate(plan);
     } else {
-      // Plan payant : redirection Stripe Checkout
       setStripeLoading(true);
       try {
         const res = await stripeService.createSubscriptionCheckout(plan);
@@ -97,7 +95,7 @@ export default function AbonnementPage() {
           <div className="flex justify-center py-12"><LoadingSpinner /></div>
         ) : (
           <>
-            {/* Current plan */}
+            
             {sub && (
               <div className="card bg-primary-50 border-primary-100">
                 <div className="flex items-center justify-between">
@@ -120,7 +118,7 @@ export default function AbonnementPage() {
               </div>
             )}
 
-            {/* Plans */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl">
               {plans.map((plan) => {
                 const isCurrent = sub?.plan === plan.id;
@@ -179,7 +177,7 @@ export default function AbonnementPage() {
         )}
       </div>
 
-      {/* Confirm modal */}
+      
       {selectedPlan && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">

@@ -6,16 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
-// Hook GORM : envoie un push à chaque nouvelle notification créée en BDD
 func (n *Notification) AfterCreate(tx *gorm.DB) error {
 	go func() {
-		// Import circulaire évité via interface — le push_service est appelé via main
 		PushSender(n.UserID, "UpcycleConnect", n.Message)
 	}()
 	return nil
 }
 
-// PushSender est initialisé par main.go pour éviter l'import circulaire
 var PushSender func(userID uint, title, body string) = func(userID uint, title, body string) {}
 
 type Base struct {
@@ -348,6 +345,6 @@ type Review struct {
 	TargetUserID uint     `json:"target_user_id"`
 	ListingID    uint     `json:"listing_id"`
 	Listing      *Listing `gorm:"foreignKey:ListingID" json:"listing,omitempty"`
-	Rating       int      `gorm:"not null" json:"rating"` // 1-5
+	Rating       int      `gorm:"not null" json:"rating"`
 	Comment      string   `gorm:"type:text" json:"comment"`
 }

@@ -314,7 +314,6 @@ func DeleteWorkshop(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Événement supprimé, participants notifiés"})
 }
 
-// GetMyBookings - GET /api/user/bookings
 func GetMyBookings(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	var bookings []models.WorkshopBooking

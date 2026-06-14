@@ -49,7 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Vérification périodique du statut du compte (ban, désactivation...)
   useEffect(() => {
     if (!token) return;
     const interval = setInterval(() => {

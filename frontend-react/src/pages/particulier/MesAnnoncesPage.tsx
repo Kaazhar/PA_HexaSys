@@ -63,7 +63,7 @@ export default function MesAnnoncesPage() {
           </Link>
         </div>
 
-        {/* Filters */}
+        
         <div className="flex flex-wrap gap-2">
           {['', 'pending', 'active', 'rejected', 'sold'].map((s) => (
             <button
@@ -157,7 +157,7 @@ export default function MesAnnoncesPage() {
         <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
 
-      {/* Delete modal */}
+      
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">

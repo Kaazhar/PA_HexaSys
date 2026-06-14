@@ -110,9 +110,7 @@ func GetProDashboard(c *gin.Context) {
 		"my_listings":  myListings,
 	}
 
-	// Stats premium — uniquement si abonnement actif
 	if subscription.Status == "active" {
-		// Impact écologique : dons réalisés + poids total
 		var donationsCount int64
 		config.DB.Model(&models.Listing{}).
 			Where("user_id = ? AND type = 'don' AND status = 'active'", userID).
@@ -123,7 +121,6 @@ func GetProDashboard(c *gin.Context) {
 			Where("user_id = ? AND type = 'don' AND status = 'active' AND weight > 0", userID).
 			Select("COALESCE(SUM(weight), 0)").Scan(&totalWeight)
 
-		// Statistiques matériaux dispo sur la plateforme (top 5 catégories)
 		type CatStat struct {
 			Name  string `json:"name"`
 			Count int64  `json:"count"`
@@ -138,13 +135,11 @@ func GetProDashboard(c *gin.Context) {
 			Limit(5).
 			Scan(&topCategories)
 
-		// Alertes prioritaires : nouveaux dépôts conteneurs cette semaine
 		var newDeposits int64
 		config.DB.Model(&models.ContainerRequest{}).
 			Where("status = 'approved' AND updated_at > ?", time.Now().AddDate(0, 0, -7)).
 			Count(&newDeposits)
 
-		// Nouvelles annonces cette semaine
 		var newListings int64
 		config.DB.Model(&models.Listing{}).
 			Where("status = 'active' AND created_at > ?", time.Now().AddDate(0, 0, -7)).

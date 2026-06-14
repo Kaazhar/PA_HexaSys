@@ -9,7 +9,6 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-// GetForumTopics - GET /api/forum/topics
 func GetForumTopics(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
@@ -27,7 +26,6 @@ func GetForumTopics(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"topics": topics, "total": total, "page": page, "limit": limit})
 }
 
-// GetForumTopic - GET /api/forum/topics/:id
 func GetForumTopic(c *gin.Context) {
 	id := c.Param("id")
 
@@ -37,7 +35,6 @@ func GetForumTopic(c *gin.Context) {
 		return
 	}
 
-	// Incrémenter les vues
 	config.DB.Model(&topic).UpdateColumn("views", topic.Views+1)
 
 	var posts []models.ForumPost
@@ -46,7 +43,6 @@ func GetForumTopic(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"topic": topic, "posts": posts})
 }
 
-// CreateForumTopic - POST /api/forum/topics (salarié/admin)
 func CreateForumTopic(c *gin.Context) {
 	userID, _ := c.Get("userID")
 
@@ -74,7 +70,6 @@ func CreateForumTopic(c *gin.Context) {
 	c.JSON(http.StatusCreated, topic)
 }
 
-// UpdateForumTopic - PUT /api/forum/topics/:id (salarié/admin auteur)
 func UpdateForumTopic(c *gin.Context) {
 	id := c.Param("id")
 	userID, _ := c.Get("userID")
@@ -111,7 +106,6 @@ func UpdateForumTopic(c *gin.Context) {
 	c.JSON(http.StatusOK, topic)
 }
 
-// DeleteForumTopic - DELETE /api/forum/topics/:id (salarié/admin)
 func DeleteForumTopic(c *gin.Context) {
 	id := c.Param("id")
 	userID, _ := c.Get("userID")
@@ -134,7 +128,6 @@ func DeleteForumTopic(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Sujet supprimé"})
 }
 
-// PinForumTopic - PUT /api/forum/topics/:id/pin (salarié/admin)
 func PinForumTopic(c *gin.Context) {
 	id := c.Param("id")
 	var topic models.ForumTopic
@@ -146,7 +139,6 @@ func PinForumTopic(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"is_pinned": !topic.IsPinned})
 }
 
-// LockForumTopic - PUT /api/forum/topics/:id/lock (salarié/admin)
 func LockForumTopic(c *gin.Context) {
 	id := c.Param("id")
 	var topic models.ForumTopic
@@ -158,7 +150,6 @@ func LockForumTopic(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"is_locked": !topic.IsLocked})
 }
 
-// CreateForumPost - POST /api/forum/topics/:id/posts (authentifié)
 func CreateForumPost(c *gin.Context) {
 	topicID := c.Param("id")
 	userID, _ := c.Get("userID")
@@ -199,7 +190,6 @@ func CreateForumPost(c *gin.Context) {
 	c.JSON(http.StatusCreated, post)
 }
 
-// DeleteForumPost - DELETE /api/forum/posts/:id (auteur/salarié/admin)
 func DeleteForumPost(c *gin.Context) {
 	id := c.Param("id")
 	userID, _ := c.Get("userID")

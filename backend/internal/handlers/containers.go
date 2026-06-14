@@ -21,7 +21,6 @@ func GetContainers(c *gin.Context) {
 	var containers []models.Container
 	config.DB.Order("name ASC").Find(&containers)
 
-	// Auto-sync status from actual slot occupancy
 	for i := range containers {
 		var occupiedCount int64
 		config.DB.Model(&models.ContainerSlot{}).
@@ -115,7 +114,6 @@ func UpdateContainer(c *gin.Context) {
 	c.JSON(http.StatusOK, container)
 }
 
-// GetContainerSlots - GET /api/containers/slots?container_id=X
 func GetContainerSlots(c *gin.Context) {
 	containerID := c.Query("container_id")
 	if containerID == "" {
@@ -127,8 +125,6 @@ func GetContainerSlots(c *gin.Context) {
 	c.JSON(http.StatusOK, slots)
 }
 
-// SeedContainerSlots - POST /api/containers/:id/slots (admin)
-// Body: { "S": 6, "M": 4, "L": 2 }
 func SeedContainerSlots(c *gin.Context) {
 	id := c.Param("id")
 	containerID, err := strconv.ParseUint(id, 10, 64)
@@ -213,7 +209,6 @@ func CreateContainerRequestHandler(c *gin.Context) {
 		Status:            "pending",
 	}
 
-	// If a slot was selected, reserve it atomically
 	if req.SlotID > 0 {
 		txErr := config.DB.Transaction(func(tx *gorm.DB) error {
 			var slot models.ContainerSlot
@@ -263,7 +258,6 @@ func ValidateContainerRequest(c *gin.Context) {
 		"barcode":     barcode,
 	})
 
-	// Slot reste "reserved" jusqu'à confirmation de dépôt par l'utilisateur
 
 	config.DB.Model(&models.Container{}).Where("id = ?", request.ContainerID).
 		UpdateColumn("current_count", gorm.Expr("current_count + 1"))
@@ -278,8 +272,6 @@ func ValidateContainerRequest(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Request approved", "access_code": accessCode, "barcode": barcode})
 }
 
-// ConfirmDeposit - PUT /containers/requests/:id/confirm-deposit (user auth)
-// L'utilisateur confirme qu'il a déposé l'objet → slot passe de "reserved" à "occupied"
 func ConfirmDeposit(c *gin.Context) {
 	id := c.Param("id")
 	userID, _ := c.Get("userID")
@@ -319,7 +311,6 @@ func ConfirmDeposit(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Dépôt confirmé"})
 }
 
-// Génère le code-barres (Code 128) d'une demande en image PNG, à la volée (jamais stocké).
 func GenerateRequestBarcode(c *gin.Context) {
 	id := c.Param("id")
 	userID, _ := c.Get("userID")
@@ -362,7 +353,6 @@ func GenerateRequestBarcode(c *gin.Context) {
 	c.Data(http.StatusOK, "image/png", buf.Bytes())
 }
 
-// GetMyContainerRequests - GET /containers/requests/mine (user auth)
 func GetMyContainerRequests(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	var requests []models.ContainerRequest
@@ -371,8 +361,6 @@ func GetMyContainerRequests(c *gin.Context) {
 	c.JSON(http.StatusOK, requests)
 }
 
-// ClearContainerSlots - DELETE /containers/:id/slots (admin)
-// Remet tous les slots à "free" et remet current_count à 0
 func ClearContainerSlots(c *gin.Context) {
 	id := c.Param("id")
 	containerID, err := strconv.ParseUint(id, 10, 64)
@@ -410,7 +398,6 @@ func RejectContainerRequest(c *gin.Context) {
 		"reject_reason": req.Reason,
 	})
 
-	// Free the slot
 	if request.SlotID != nil {
 		config.DB.Model(&models.ContainerSlot{}).Where("id = ?", *request.SlotID).
 			Updates(map[string]interface{}{"status": "free", "request_id": nil})
@@ -426,8 +413,6 @@ func RejectContainerRequest(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Request rejected"})
 }
 
-// GetAvailableObjects - GET /api/containers/available-objects
-// Retourne tous les slots "occupied" avec les infos de l'objet et du conteneur (pour les pros)
 func GetAvailableObjects(c *gin.Context) {
 	type AvailableObject struct {
 		SlotID        uint    `json:"slot_id"`

@@ -13,7 +13,6 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-// Expose le Client ID Google au front (lu depuis le .env), comme la clé VAPID des push.
 func GetGoogleConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"client_id": os.Getenv("GOOGLE_CLIENT_ID")})
 }
@@ -29,7 +28,6 @@ type googleTokenInfo struct {
 	Sub           string `json:"sub"`
 }
 
-// Vérifie le token Google auprès de Google et renvoie ses infos (ou une erreur).
 func verifierTokenGoogle(credential string) (*googleTokenInfo, error) {
 	resp, err := http.Get("https://oauth2.googleapis.com/tokeninfo?id_token=" + url.QueryEscape(credential))
 	if err != nil {
@@ -48,7 +46,6 @@ func verifierTokenGoogle(credential string) (*googleTokenInfo, error) {
 	return &info, nil
 }
 
-// Connexion / inscription via Google : vérifie le token, trouve ou crée le compte, renvoie notre JWT.
 func GoogleLogin(c *gin.Context) {
 	var req struct {
 		Credential string `json:"credential" binding:"required"`

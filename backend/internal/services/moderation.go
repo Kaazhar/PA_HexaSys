@@ -29,8 +29,6 @@ var motsInterdits = []string{
 	"drogue", "cannabis", "cocaïne", "cocaine", "héroïne", "heroine", "ecstasy",
 }
 
-// Vérifie si l'un des textes contient un mot interdit (insensible à la casse, mot entier).
-// Renvoie true + le mot trouvé, sinon false.
 func ContientMotInterdit(textes ...string) (bool, string) {
 	for _, texte := range textes {
 		tokens := strings.FieldsFunc(strings.ToLower(texte), func(r rune) bool {

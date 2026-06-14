@@ -65,13 +65,13 @@ export default function DashboardPro() {
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (
         <div className="space-y-6">
-          {/* Welcome */}
+          
           <div>
             <h2 className="text-xl font-bold text-gray-900">{t('dashboard_pro.welcome', { name: user?.firstname })}</h2>
             <p className="text-gray-500 mt-1">{t('dashboard_pro.welcome_sub')}</p>
           </div>
 
-          {/* Stats */}
+          
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <StatCard
               title={t('dashboard_pro.my_listings')}
@@ -93,7 +93,7 @@ export default function DashboardPro() {
             />
           </div>
 
-          {/* SIRET Verification */}
+          
           <div className="card">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-gray-900">{t('dashboard_pro.siret_verification')}</h2>
@@ -106,7 +106,7 @@ export default function DashboardPro() {
             </div>
             {user?.siret_verified ? (
               <div className="space-y-3">
-                {/* Header entreprise */}
+                
                 <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl">
                   <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Building2 className="w-5 h-5 text-green-600" />
@@ -122,7 +122,7 @@ export default function DashboardPro() {
                   </div>
                 </div>
 
-                {/* Détails */}
+                
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {companyInfo?.address && (
                     <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
@@ -171,7 +171,7 @@ export default function DashboardPro() {
                   )}
                 </div>
 
-                {/* Identifiants */}
+                
                 <div className="flex items-center gap-4 px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-500 font-mono">
                   <span>SIRET : {user.siret}</span>
                   {companyInfo?.siren && <span>SIREN : {companyInfo.siren}</span>}
@@ -210,7 +210,7 @@ export default function DashboardPro() {
             )}
           </div>
 
-          {/* Subscription card */}
+          
           <div className="card">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-gray-900">{t('dashboard_pro.subscription')}</h2>
@@ -244,7 +244,7 @@ export default function DashboardPro() {
             )}
           </div>
 
-          {/* Section Premium */}
+          
           {(() => {
             const isPremium = dashboard?.subscription?.status === 'active';
             const ps = dashboard?.premium_stats;
@@ -263,7 +263,7 @@ export default function DashboardPro() {
                   </div>
                 )}
                 <div className={clsx('grid grid-cols-1 lg:grid-cols-3 gap-4', !isPremium && 'blur-sm pointer-events-none select-none')}>
-                  {/* Impact écologique */}
+                  
                   <div className="card space-y-3">
                     <div className="flex items-center gap-2">
                       <Leaf className="w-5 h-5 text-green-500" />
@@ -285,7 +285,7 @@ export default function DashboardPro() {
                     </div>
                   </div>
 
-                  {/* Top catégories disponibles */}
+                  
                   <div className="card space-y-3">
                     <div className="flex items-center gap-2">
                       <BarChart2 className="w-5 h-5 text-blue-500" />
@@ -308,7 +308,7 @@ export default function DashboardPro() {
                     </div>
                   </div>
 
-                  {/* Alertes prioritaires */}
+                  
                   <div className="card space-y-3">
                     <div className="flex items-center gap-2">
                       <Bell className="w-5 h-5 text-amber-500" />
@@ -337,7 +337,7 @@ export default function DashboardPro() {
           })()}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* My listings */}
+            
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{t('dashboard_pro.my_listings')}</h2>
@@ -370,7 +370,7 @@ export default function DashboardPro() {
               )}
             </div>
 
-            {/* My projects */}
+            
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{t('dashboard_pro.projects')}</h2>

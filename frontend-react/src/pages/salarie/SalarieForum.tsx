@@ -63,7 +63,7 @@ export default function SalarieForum() {
     <DashboardLayout sidebarItems={salarieSidebar} title={t('salarie_forum.title')}>
       <div className="max-w-4xl mx-auto">
 
-        {/* Header */}
+        
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('salarie_forum.title')}</h1>
@@ -79,7 +79,7 @@ export default function SalarieForum() {
           </button>
         </div>
 
-        {/* Formulaire création */}
+        
         {showCreate && (
           <div className="bg-white rounded-2xl border-2 border-[#2D5016]/20 p-6 mb-6">
             <h2 className="font-semibold text-gray-900 mb-4">{t('salarie_forum.create_title')}</h2>
@@ -126,7 +126,7 @@ export default function SalarieForum() {
           </div>
         )}
 
-        {/* Liste des sujets */}
+        
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : topics.length === 0 ? (
@@ -165,7 +165,7 @@ function TopicRow({ topic, onPin, onLock, onDelete }: {
       'bg-white rounded-xl border-2 p-4 flex items-center gap-4',
       topic.is_pinned ? 'border-amber-200 bg-amber-50/30' : 'border-gray-100'
     )}>
-      {/* Icône */}
+      
       <div className={clsx(
         'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
         topic.is_locked ? 'bg-gray-100' : topic.is_pinned ? 'bg-amber-100' : 'bg-green-50'
@@ -176,7 +176,7 @@ function TopicRow({ topic, onPin, onLock, onDelete }: {
         )} />
       </div>
 
-      {/* Contenu */}
+      
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-0.5">
           {topic.is_pinned && (
@@ -198,13 +198,13 @@ function TopicRow({ topic, onPin, onLock, onDelete }: {
         </p>
       </div>
 
-      {/* Stats */}
+      
       <div className="flex items-center gap-4 text-xs text-gray-400 flex-shrink-0">
         <span className="flex items-center gap-1"><MessageSquare className="w-3.5 h-3.5" />{topic.replies_count}</span>
         <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" />{topic.views}</span>
       </div>
 
-      {/* Actions */}
+      
       <div className="flex items-center gap-1 flex-shrink-0">
         <button
           type="button"
