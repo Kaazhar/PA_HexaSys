@@ -328,23 +328,23 @@ export default function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white py-3 px-4 space-y-2">
-          <Link to="/" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Accueil</Link>
-          <Link to="/annonces" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Annonces</Link>
-          <Link to="/formations" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Formations</Link>
-          <Link to="/conteneurs" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Conteneurs</Link>
-          <Link to="/conseils" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Conseils</Link>
-          <Link to="/forum" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Forum</Link>
+          <Link to="/" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.home')}</Link>
+          <Link to="/annonces" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.listings')}</Link>
+          <Link to="/formations" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.workshops')}</Link>
+          <Link to="/conteneurs" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.containers')}</Link>
+          <Link to="/conseils" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.conseils')}</Link>
+          <Link to="/forum" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.forum')}</Link>
           {isAuthenticated ? (
             <>
-              <Link to={getDashboardPath()} className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Tableau de bord</Link>
-              <Link to="/messages" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Messages</Link>
-              <Link to="/profil" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Mon profil</Link>
-              <button onClick={handleLogout} className="block py-2 text-sm text-red-600">Déconnexion</button>
+              <Link to={getDashboardPath()} className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.dashboard')}</Link>
+              <Link to="/messages" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.messages')}</Link>
+              <Link to="/profil" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.profile')}</Link>
+              <button onClick={handleLogout} className="block py-2 text-sm text-red-600">{t('nav.logout')}</button>
             </>
           ) : (
             <>
-              <Link to="/login" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>Connexion</Link>
-              <Link to="/register" className="block py-2 text-sm text-primary-500 font-medium" onClick={() => setMobileOpen(false)}>S'inscrire</Link>
+              <Link to="/login" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.login')}</Link>
+              <Link to="/register" className="block py-2 text-sm text-primary-500 font-medium" onClick={() => setMobileOpen(false)}>{t('nav.register')}</Link>
             </>
           )}
         </div>

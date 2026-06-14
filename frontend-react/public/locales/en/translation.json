@@ -1,4 +1,13 @@
 {
+  "footer": {
+    "tagline": "The platform connecting upcycling stakeholders for a more sustainable and circular future.",
+    "nav": "Navigation",
+    "contact": "Contact",
+    "rights": "© 2026 UpcycleConnect. All rights reserved."
+  },
+  "dashboard": {
+    "unread": "{{count}} unread"
+  },
   "nav": {
     "home": "Home",
     "listings": "Listings",

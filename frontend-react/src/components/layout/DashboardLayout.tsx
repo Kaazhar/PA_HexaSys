@@ -22,13 +22,6 @@ interface DashboardLayoutProps {
   noPadding?: boolean;
 }
 
-const roleLabels: Record<string, string> = {
-  particulier: 'Particulier',
-  professionnel: 'Professionnel',
-  salarie: 'Salarié',
-  admin: 'Administrateur',
-};
-
 const LANGS = [
   { code: 'fr', flag: '🇫🇷', label: 'FR' },
   { code: 'en', flag: '🇬🇧', label: 'EN' },
@@ -36,7 +29,7 @@ const LANGS = [
 
 export default function DashboardLayout({ children, sidebarItems = [], title, noPadding = false }: DashboardLayoutProps) {
   const { user } = useAuth();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLang = i18n.language?.split('-')[0] ?? 'fr';
   const queryClient = useQueryClient();
   const [notifOpen, setNotifOpen] = useState(false);
@@ -107,12 +100,12 @@ export default function DashboardLayout({ children, sidebarItems = [], title, no
               {notifOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-50">
                   <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                    <p className="text-sm font-semibold text-gray-900">Notifications</p>
-                    {unreadCount > 0 && <span className="text-xs text-gray-400">{unreadCount} non lue{unreadCount > 1 ? 's' : ''}</span>}
+                    <p className="text-sm font-semibold text-gray-900">{t('nav.notifications')}</p>
+                    {unreadCount > 0 && <span className="text-xs text-gray-400">{t('dashboard.unread', { count: unreadCount })}</span>}
                   </div>
                   <div className="max-h-80 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <p className="text-sm text-gray-400 px-4 py-4 text-center">Aucune notification</p>
+                      <p className="text-sm text-gray-400 px-4 py-4 text-center">{t('nav.no_notifications')}</p>
                     ) : (
                       notifications.slice(0, 10).map((n) => (
                         <div key={n.id} onClick={() => !n.read && markRead.mutate(n.id)}
@@ -137,7 +130,7 @@ export default function DashboardLayout({ children, sidebarItems = [], title, no
             </div>
             <div className="hidden md:block text-left">
               <p className="text-sm font-medium text-gray-700 leading-tight">{user?.firstname} {user?.lastname}</p>
-              <p className="text-xs text-gray-400">{roleLabels[user?.role || ''] || user?.role}</p>
+              <p className="text-xs text-gray-400">{t(`auth.role_labels.${user?.role}`, { defaultValue: user?.role })}</p>
             </div>
           </Link>
         </header>

@@ -3,8 +3,10 @@ import Navbar from './Navbar';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.png';
+import { useTranslation } from 'react-i18next';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
@@ -17,19 +19,19 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                 <img src={logo} alt="UpcycleConnect" className="h-10" />
               </div>
               <p className="text-white/70 text-sm leading-relaxed max-w-sm">
-                La plateforme qui connecte les acteurs de l'upcycling pour un avenir plus durable et circulaire.
+                {t('footer.tagline')}
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Navigation</h3>
+              <h3 className="font-semibold mb-4">{t('footer.nav')}</h3>
               <ul className="space-y-2 text-sm text-white/70">
-                <li><Link to="/" className="hover:text-white transition-colors">Accueil</Link></li>
-                <li><Link to="/annonces" className="hover:text-white transition-colors">Annonces</Link></li>
-                <li><Link to="/register" className="hover:text-white transition-colors">S'inscrire</Link></li>
+                <li><Link to="/" className="hover:text-white transition-colors">{t('nav.home')}</Link></li>
+                <li><Link to="/annonces" className="hover:text-white transition-colors">{t('nav.listings')}</Link></li>
+                <li><Link to="/register" className="hover:text-white transition-colors">{t('nav.register')}</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Contact</h3>
+              <h3 className="font-semibold mb-4">{t('footer.contact')}</h3>
               <ul className="space-y-2 text-sm text-white/70">
                 <li className="flex items-center gap-2"><Mail className="w-4 h-4" /> contact@upcycleconnect.fr</li>
                 <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> +33 1 23 45 67 89</li>
@@ -38,7 +40,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="border-t border-white/20 mt-8 pt-8 text-center text-sm text-white/50">
-            © 2026 UpcycleConnect. Tous droits réservés.
+            {t('footer.rights')}
           </div>
         </div>
       </footer>
