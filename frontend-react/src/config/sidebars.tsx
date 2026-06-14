@@ -35,6 +35,7 @@ export const proSidebar = [
   { label: 'Mes annonces',      path: '/mes-annonces',    icon: <Tag className="w-4 h-4" /> },
   { label: 'Créer une annonce', path: '/annonces/creer',  icon: <PlusCircle className="w-4 h-4" /> },
   { label: 'Projets upcycling', path: '/pro/projets',     icon: <Image className="w-4 h-4" /> },
+  { label: 'Conteneurs',        path: '/conteneurs',      icon: <Map className="w-4 h-4" /> },
   { label: 'Messages',          path: '/messages',        icon: <MessageCircle className="w-4 h-4" /> },
   { label: 'Abonnement',        path: '/abonnement',      icon: <Briefcase className="w-4 h-4" /> },
 ];

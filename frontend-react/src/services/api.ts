@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type {
   User, Listing, Workshop, WorkshopBooking, Container, ContainerRequest, ContainerSlot,
-  Category, Notification, Invoice, AdminStats, AuthResponse,
+  Category, Notification, Invoice, AdminStats, AuthResponse, AvailableObject,
   Subscription, Project, Conversation, Message, Review, SearchResults,
   ForumTopic, ForumPost, Article
 } from '../types';
@@ -162,6 +162,7 @@ export const containerService = {
   rejectRequest: (id: number, reason: string) => api.put(`/containers/requests/${id}/reject`, { reason }),
   getMyRequests: () => api.get<ContainerRequest[]>('/containers/requests/mine'),
   confirmDeposit: (id: number) => api.put(`/containers/requests/${id}/confirm-deposit`),
+  getAvailableObjects: () => api.get<AvailableObject[]>('/containers/available-objects'),
   getBarcodeUrl: async (id: number) => {
     const res = await api.get(`/containers/requests/${id}/barcode`, { responseType: 'blob' });
     return window.URL.createObjectURL(res.data as Blob);

@@ -190,6 +190,7 @@ func main() {
 	api.GET("/containers/requests/mine", middleware.AuthRequired(), handlers.GetMyContainerRequests)
 	api.GET("/containers/requests/:id/barcode", middleware.AuthRequired(), handlers.GenerateRequestBarcode)
 	api.DELETE("/containers/:id/slots", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ClearContainerSlots)
+	api.GET("/containers/available-objects", middleware.AuthRequired(), middleware.RequireRole(models.RoleProfessionnel, models.RoleAdmin), handlers.GetAvailableObjects)
 
 	api.GET("/subscription", middleware.AuthRequired(), handlers.GetMySubscription)
 	api.POST("/subscription/upgrade", middleware.AuthRequired(), handlers.UpgradeSubscription)

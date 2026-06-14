@@ -128,6 +128,21 @@ export interface ContainerRequest {
   created_at: string;
 }
 
+export interface AvailableObject {
+  slot_id: number;
+  slot_code: string;
+  size: 'S' | 'M' | 'L';
+  container_id: number;
+  container_name: string;
+  address: string;
+  district: string;
+  latitude: number;
+  longitude: number;
+  request_id: number;
+  object_title: string;
+  object_description: string;
+}
+
 export interface UpcyclingScore {
   id: number;
   user_id: number;

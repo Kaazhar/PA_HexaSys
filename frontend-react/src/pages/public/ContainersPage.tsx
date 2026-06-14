@@ -2,13 +2,14 @@ import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, Package } from 'lucide-react';
+import { MapPin, Package, Box } from 'lucide-react';
 import PublicLayout from '../../components/layout/PublicLayout';
 import { useQuery } from '@tanstack/react-query';
 import { containerService } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
 
 // Fix leaflet default icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -26,6 +27,9 @@ const statusClass: Record<string, string> = {
 
 export default function ContainersPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isPro = user?.role === 'professionnel';
+
   const statusLabel: Record<string, string> = {
     operational: t('containers.available'),
     full: t('containers.full_label'),
@@ -36,8 +40,15 @@ export default function ContainersPage() {
     queryFn: () => containerService.getAll(),
   });
 
+  const { data: availableData } = useQuery({
+    queryKey: ['containers-available-objects'],
+    queryFn: () => containerService.getAvailableObjects(),
+    enabled: isPro,
+  });
+
   const containers = data?.data || [];
   const withCoords = containers.filter(c => c.latitude !== 0 && c.longitude !== 0);
+  const availableObjects = availableData?.data || [];
 
   return (
     <PublicLayout>
@@ -148,6 +159,49 @@ export default function ContainersPage() {
                 })
               )}
             </div>
+          </div>
+        )}
+        {/* Section pro : objets disponibles à récupérer */}
+        {isPro && (
+          <div className="mt-10">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Box className="w-5 h-5 text-primary-600" />
+              Objets disponibles à récupérer
+            </h2>
+            {availableObjects.length === 0 ? (
+              <div className="text-center py-12 text-gray-400">
+                <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p>Aucun objet disponible pour le moment.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {availableObjects.map((obj) => (
+                  <div key={obj.slot_id} className="card hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900">{obj.object_title}</h3>
+                      <span className={clsx(
+                        'text-xs font-bold px-2 py-0.5 rounded-full',
+                        obj.size === 'S' ? 'bg-blue-100 text-blue-700' :
+                        obj.size === 'M' ? 'bg-amber-100 text-amber-700' :
+                        'bg-purple-100 text-purple-700'
+                      )}>
+                        {obj.size}
+                      </span>
+                    </div>
+                    {obj.object_description && (
+                      <p className="text-sm text-gray-500 mb-3 line-clamp-2">{obj.object_description}</p>
+                    )}
+                    <div className="flex items-center gap-1 text-xs text-gray-400">
+                      <MapPin className="w-3 h-3" />
+                      <span>{obj.container_name} — {obj.address}, {obj.district}</span>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-400">
+                      Emplacement : <span className="font-mono font-semibold text-gray-600">{obj.slot_code}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

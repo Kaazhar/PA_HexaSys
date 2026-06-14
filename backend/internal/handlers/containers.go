@@ -425,3 +425,51 @@ func RejectContainerRequest(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Request rejected"})
 }
+
+// GetAvailableObjects - GET /api/containers/available-objects
+// Retourne tous les slots "occupied" avec les infos de l'objet et du conteneur (pour les pros)
+func GetAvailableObjects(c *gin.Context) {
+	type AvailableObject struct {
+		SlotID        uint    `json:"slot_id"`
+		SlotCode      string  `json:"slot_code"`
+		Size          string  `json:"size"`
+		ContainerID   uint    `json:"container_id"`
+		ContainerName string  `json:"container_name"`
+		Address       string  `json:"address"`
+		District      string  `json:"district"`
+		Latitude      float64 `json:"latitude"`
+		Longitude     float64 `json:"longitude"`
+		RequestID     uint    `json:"request_id"`
+		ObjectTitle   string  `json:"object_title"`
+		ObjectDesc    string  `json:"object_description"`
+	}
+
+	var slots []models.ContainerSlot
+	config.DB.Where("status = 'occupied'").Find(&slots)
+
+	result := []AvailableObject{}
+	for _, slot := range slots {
+		if slot.RequestID == nil {
+			continue
+		}
+		var req models.ContainerRequest
+		if err := config.DB.Preload("Container").First(&req, *slot.RequestID).Error; err != nil {
+			continue
+		}
+		result = append(result, AvailableObject{
+			SlotID:        slot.ID,
+			SlotCode:      slot.SlotCode,
+			Size:          slot.Size,
+			ContainerID:   req.ContainerID,
+			ContainerName: req.Container.Name,
+			Address:       req.Container.Address,
+			District:      req.Container.District,
+			Latitude:      req.Container.Latitude,
+			Longitude:     req.Container.Longitude,
+			RequestID:     req.ID,
+			ObjectTitle:   req.ObjectTitle,
+			ObjectDesc:    req.ObjectDescription,
+		})
+	}
+	c.JSON(http.StatusOK, result)
+}
