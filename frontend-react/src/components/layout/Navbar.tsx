@@ -26,8 +26,8 @@ export default function Navbar() {
 
   const { data: languages = [{ code: 'fr', label: 'FR', flag: '🇫🇷' }, { code: 'en', label: 'EN', flag: '🇬🇧' }] } = useQuery({
     queryKey: ['languages'],
-    queryFn: () => fetch('/api/languages').then(r => r.json()),
-    staleTime: 5 * 60 * 1000,
+    queryFn: () => fetch('/locales/languages.json').then(r => r.json()),
+    staleTime: Infinity,
   });
   const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
