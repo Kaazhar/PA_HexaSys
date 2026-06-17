@@ -1034,7 +1034,7 @@
   },
   "admin_languages": {
     "title": "Gestion des langues",
-    "subtitle": "Ajoutez des langues via traduction automatique — sans toucher au code",
+    "subtitle": "Gérez les langues disponibles sur la plateforme",
     "add": "Ajouter une langue",
     "col_lang": "Langue",
     "col_code": "Code",
@@ -1052,12 +1052,12 @@
     "field_flag": "Emoji drapeau",
     "code_hint": "ex: es, de, it, pt",
     "label_hint": "Laissez vide pour auto (ex: ES)",
-    "create_btn": "Créer et traduire",
-    "translating": "Traduction en cours...",
+    "create_btn": "Créer la langue",
+    "translating": "Création en cours...",
     "required_fields": "Le code et le nom sont requis",
-    "libre_info_title": "Traduction automatique gratuite",
-    "libre_info_desc": "Utilise Google Translate (sans compte, sans clé). La traduction prend 1 à 2 minutes selon la langue.",
-    "translation_warning": "La traduction peut prendre 1 à 2 minutes. Ne fermez pas la fenêtre."
+    "libre_info_title": "Comment ajouter une langue ?",
+    "libre_info_desc": "Le fichier de traduction doit être présent dans le dépôt (public/locales/[code]/translation.json) et déclaré dans languages.json avant d'activer la langue.",
+    "translation_warning": "Assurez-vous que le fichier de traduction a bien été déployé avant de créer la langue."
   },
   "create_listing": {
     "title": "Créer une annonce",
