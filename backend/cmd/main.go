@@ -232,7 +232,6 @@ func main() {
 		adminGroup.GET("/languages", handlers.GetAdminLanguages)
 		adminGroup.POST("/languages", handlers.CreateLanguage)
 		adminGroup.DELETE("/languages/:code", handlers.DeleteLanguage)
-		adminGroup.PUT("/languages/:code/retranslate", handlers.RetranslateLanguage)
 		adminGroup.GET("/users", handlers.GetUsers)
 		adminGroup.POST("/users", handlers.CreateUser)
 		adminGroup.PUT("/users/:id", handlers.UpdateUser)

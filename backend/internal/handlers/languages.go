@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"strings"
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
-	"upcycleconnect/backend/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,18 +52,6 @@ func CreateLanguage(c *gin.Context) {
 		}
 	}
 
-	var frTranslation models.Translation
-	if err := config.DB.Where("lang_code = ?", "fr").First(&frTranslation).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "traduction source (FR) introuvable"})
-		return
-	}
-
-	translated, err := services.TranslateJSON(frTranslation.Data, req.Code)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "traduction échouée: " + err.Error()})
-		return
-	}
-
 	lang := models.Language{
 		Code:      req.Code,
 		Name:      req.Name,
@@ -75,18 +61,16 @@ func CreateLanguage(c *gin.Context) {
 		Active:    true,
 	}
 	if err := config.DB.Create(&lang).Error; err != nil {
-		log.Printf("[CreateLanguage] DB error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "erreur création langue: " + err.Error()})
 		return
 	}
 
-	if err := config.DB.Create(&models.Translation{LangCode: req.Code, Data: translated}).Error; err != nil {
-		config.DB.Delete(&lang)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "erreur sauvegarde traduction"})
-		return
+	var frTranslation models.Translation
+	if config.DB.Where("lang_code = ?", "fr").First(&frTranslation).Error == nil {
+		config.DB.Create(&models.Translation{LangCode: req.Code, Data: frTranslation.Data})
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"language": lang, "message": "Langue créée et traduite avec succès"})
+	c.JSON(http.StatusCreated, gin.H{"language": lang, "message": "Langue créée avec succès"})
 }
 
 func DeleteLanguage(c *gin.Context) {
@@ -100,30 +84,6 @@ func DeleteLanguage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "langue supprimée"})
 }
 
-func RetranslateLanguage(c *gin.Context) {
-	code := strings.ToLower(c.Param("code"))
-
-	var lang models.Language
-	if err := config.DB.Where("code = ?", code).First(&lang).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "langue introuvable"})
-		return
-	}
-
-	var frTranslation models.Translation
-	if err := config.DB.Where("lang_code = ?", "fr").First(&frTranslation).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "traduction source (FR) introuvable"})
-		return
-	}
-
-	translated, err := services.TranslateJSON(frTranslation.Data, lang.Code)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "traduction échouée: " + err.Error()})
-		return
-	}
-
-	config.DB.Model(&models.Translation{}).Where("lang_code = ?", code).Update("data", translated)
-	c.JSON(http.StatusOK, gin.H{"message": "retraduction réussie"})
-}
 
 func GetAdminLanguages(c *gin.Context) {
 	var languages []models.Language

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Globe, Plus, Trash2, RefreshCw, Info } from 'lucide-react';
+import { Globe, Plus, Trash2, Info } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import api from '../../services/api';
 import { useTranslation } from 'react-i18next';
@@ -22,8 +22,6 @@ export default function AdminLanguages() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ code: '', name: '', label: '', flag: '' });
   const [error, setError] = useState('');
-  const [retranslating, setRetranslating] = useState<string | null>(null);
-
   const { data, isLoading } = useQuery({
     queryKey: ['admin-languages'],
     queryFn: () => api.get('/admin/languages').then(r => r.data as Language[]),
@@ -51,19 +49,6 @@ export default function AdminLanguages() {
       queryClient.invalidateQueries({ queryKey: ['languages'] });
     },
   });
-
-  const handleRetranslate = async (lang: Language) => {
-    if (!window.confirm(t('admin_languages.retranslate_confirm', { name: lang.name }))) return;
-    setRetranslating(lang.code);
-    try {
-      await api.put(`/admin/languages/${lang.code}/retranslate`);
-      alert(t('admin_languages.retranslated'));
-    } catch (e: any) {
-      alert(e?.response?.data?.error ?? t('common.error'));
-    } finally {
-      setRetranslating(null);
-    }
-  };
 
   const handleDelete = (lang: Language) => {
     if (!window.confirm(t('admin_languages.delete_confirm', { name: lang.name }))) return;
@@ -146,16 +131,6 @@ export default function AdminLanguages() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
-                          {!isDefault && (
-                            <button
-                              onClick={() => handleRetranslate(lang)}
-                              disabled={retranslating === lang.code}
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
-                              title={t('admin_languages.retranslate')}
-                            >
-                              <RefreshCw className={`w-4 h-4 ${retranslating === lang.code ? 'animate-spin' : ''}`} />
-                            </button>
-                          )}
                           {!isDefault && (
                             <button
                               onClick={() => handleDelete(lang)}
@@ -255,7 +230,7 @@ export default function AdminLanguages() {
                   disabled={createMutation.isPending}
                   className="btn-primary flex-1"
                 >
-                  {createMutation.isPending ? t('admin_languages.translating') : t('admin_languages.create_btn')}
+                  {createMutation.isPending ? t('common.loading') : t('admin_languages.create_btn')}
                 </button>
               </div>
             </div>
