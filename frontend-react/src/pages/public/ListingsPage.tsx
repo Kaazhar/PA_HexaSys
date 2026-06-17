@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, SlidersHorizontal, Package } from 'lucide-react';
+import { Search, SlidersHorizontal, Package, MapPin } from 'lucide-react';
 import PublicLayout from '../../components/layout/PublicLayout';
 import ListingCard from '../../components/common/ListingCard';
 import { useQuery } from '@tanstack/react-query';
@@ -16,14 +16,16 @@ export default function ListingsPage() {
   const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const [selectedType, setSelectedType] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
   const [page, setPage] = useState(1);
 
   const { data: listingsData, isLoading } = useQuery({
-    queryKey: ['listings', { search, type: selectedType, category: selectedCategory, page }],
+    queryKey: ['listings', { search, type: selectedType, category: selectedCategory, location: selectedLocation, page }],
     queryFn: () => listingService.getAll({
       search: search || undefined,
       type: selectedType || undefined,
       category: selectedCategory || undefined,
+      location: selectedLocation || undefined,
       status: 'active',
       page,
       limit: 12,
@@ -58,6 +60,20 @@ export default function ListingsPage() {
               </div>
 
               
+              <div className="mb-5">
+                <label className="label flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  {t('listings.filter_location')}
+                </label>
+                <input
+                  type="text"
+                  placeholder={t('listings.location_placeholder')}
+                  value={selectedLocation}
+                  onChange={(e) => { setSelectedLocation(e.target.value); setPage(1); }}
+                  className="input text-sm"
+                />
+              </div>
+
               <div className="mb-5">
                 <label className="label">{t('listings.filter_type')}</label>
                 <div className="space-y-2">
@@ -112,9 +128,9 @@ export default function ListingsPage() {
                 </div>
               </div>
 
-              {(selectedType || selectedCategory) && (
+              {(selectedType || selectedCategory || selectedLocation) && (
                 <button
-                  onClick={() => { setSelectedType(''); setSelectedCategory(''); setPage(1); }}
+                  onClick={() => { setSelectedType(''); setSelectedCategory(''); setSelectedLocation(''); setPage(1); }}
                   className="w-full text-sm text-red-500 hover:text-red-600 font-medium"
                 >
                   {t('listings.reset_filters')}

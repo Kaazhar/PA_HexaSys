@@ -96,6 +96,8 @@
     "reset_filters": "Reset filters",
     "filter_type": "Type",
     "filter_category": "Category",
+    "filter_location": "Location",
+    "location_placeholder": "City, district...",
     "filters": "Filters",
     "type": {
       "don": "Gift",

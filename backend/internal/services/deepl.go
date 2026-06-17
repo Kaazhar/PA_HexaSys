@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const googleTranslateURL = "https://translate.googleapis.com/translate_a/single"
+const myMemoryURL = "https://api.mymemory.translated.net/get"
 const translateWorkers = 6
 
 var i18nVarRegex = regexp.MustCompile(`\{\{[^}]+\}\}`)
@@ -42,22 +42,16 @@ var httpClient = &http.Client{Timeout: 10 * time.Second}
 func translateOne(text, targetLang string) (string, error) {
 	protected, vars := protectVars(text)
 
-	params := url.Values{}
-	params.Set("client", "gtx")
-	params.Set("sl", "fr")
-	params.Set("tl", strings.ToLower(targetLang))
-	params.Set("dt", "t")
-	params.Set("q", protected)
+	apiURL := myMemoryURL + "?q=" + url.QueryEscape(protected) + "&langpair=fr|" + strings.ToLower(targetLang)
 
-	req, err := http.NewRequest("GET", googleTranslateURL+"?"+params.Encode(), nil)
+	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("google translate injoignable: %w", err)
+		return "", fmt.Errorf("service de traduction injoignable: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -65,35 +59,26 @@ func translateOne(text, targetLang string) (string, error) {
 
 	if resp.StatusCode != 200 {
 		log.Printf("[translateOne] HTTP %d: %s", resp.StatusCode, string(body)[:min(200, len(body))])
-		return "", fmt.Errorf("google translate HTTP %d", resp.StatusCode)
+		return "", fmt.Errorf("service de traduction HTTP %d", resp.StatusCode)
 	}
 
-	var outerRaw []json.RawMessage
-	if err := json.Unmarshal(body, &outerRaw); err != nil || len(outerRaw) == 0 {
+	var result struct {
+		ResponseData struct {
+			TranslatedText string `json:"translatedText"`
+		} `json:"responseData"`
+		ResponseStatus int `json:"responseStatus"`
+	}
+	if err := json.Unmarshal(body, &result); err != nil {
 		log.Printf("[translateOne] parse error: %s | body: %s", err, string(body)[:min(200, len(body))])
-		return "", fmt.Errorf("réponse google translate invalide")
+		return "", fmt.Errorf("réponse de traduction invalide")
 	}
-
-	var chunks [][]interface{}
-	if err := json.Unmarshal(outerRaw[0], &chunks); err != nil || len(chunks) == 0 {
-		log.Printf("[translateOne] chunks error: %s", err)
-		return "", fmt.Errorf("chunks google translate invalides")
+	if result.ResponseStatus != 200 {
+		return "", fmt.Errorf("traduction échouée (status %d)", result.ResponseStatus)
 	}
-
-	var translated strings.Builder
-	for _, chunk := range chunks {
-		if len(chunk) > 0 {
-			if s, ok := chunk[0].(string); ok {
-				translated.WriteString(s)
-			}
-		}
+	if result.ResponseData.TranslatedText == "" {
+		return "", fmt.Errorf("traduction vide retournée")
 	}
-
-	result := translated.String()
-	if result == "" {
-		return "", fmt.Errorf("traduction vide retournée par google")
-	}
-	return restoreVars(result, vars), nil
+	return restoreVars(result.ResponseData.TranslatedText, vars), nil
 }
 
 func min(a, b int) int {

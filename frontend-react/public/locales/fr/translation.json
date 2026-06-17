@@ -96,6 +96,8 @@
     "reset_filters": "Réinitialiser les filtres",
     "filter_type": "Type",
     "filter_category": "Catégorie",
+    "filter_location": "Localisation",
+    "location_placeholder": "Ville, quartier...",
     "filters": "Filtres",
     "type": {
       "don": "Don",
