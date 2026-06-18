@@ -39,6 +39,9 @@ func GetListings(c *gin.Context) {
 	if search := c.Query("search"); search != "" {
 		query = query.Where("title LIKE ? OR description LIKE ?", "%"+search+"%", "%"+search+"%")
 	}
+	if location := c.Query("location"); location != "" {
+		query = query.Where("location LIKE ?", "%"+location+"%")
+	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))

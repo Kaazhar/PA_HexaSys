@@ -88,7 +88,7 @@ export const userService = {
 };
 
 export const listingService = {
-  getAll: (params?: { page?: number; limit?: number; status?: string; category?: string; type?: string; search?: string }) =>
+  getAll: (params?: { page?: number; limit?: number; status?: string; category?: string; type?: string; search?: string; location?: string }) =>
     api.get<{ listings: Listing[]; total: number; page: number; limit: number }>('/listings', { params }),
   getMine: (params?: { page?: number; limit?: number; status?: string }) =>
     api.get<{ listings: Listing[]; total: number; page: number; limit: number }>('/listings/mine', { params }),
