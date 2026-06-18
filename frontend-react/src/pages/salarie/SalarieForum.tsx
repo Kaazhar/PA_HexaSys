@@ -5,7 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { forumService } from '../../services/api';
-import { salarieSidebar } from '../../config/sidebars';
+import { salarieSidebar, adminSidebar } from '../../config/sidebars';
+import { useAuth } from '../../context/AuthContext';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
@@ -15,6 +16,8 @@ import { useTranslation } from 'react-i18next';
 
 export default function SalarieForum() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const sidebar = user?.role === 'admin' ? adminSidebar : salarieSidebar;
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState('');
@@ -60,7 +63,7 @@ export default function SalarieForum() {
   const canSubmit = title.trim().length >= 3 && content.trim().length >= 10;
 
   return (
-    <DashboardLayout sidebarItems={salarieSidebar} title={t('salarie_forum.title')}>
+    <DashboardLayout sidebarItems={sidebar} title={t('salarie_forum.title')}>
       <div className="max-w-4xl mx-auto">
 
         

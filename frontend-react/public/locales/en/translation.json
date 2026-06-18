@@ -1062,6 +1062,7 @@
     "col_slot": "Slot",
     "col_date": "Date",
     "col_status": "Status",
+    "col_access_code": "Access code",
     "col_actions": "Actions",
     "create_modal": "Create a container",
     "reject_modal": "Reject request",

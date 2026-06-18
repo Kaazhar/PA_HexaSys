@@ -287,6 +287,7 @@ export default function AdminContainers() {
                       <th className="table-header">{t('admin_containers.col_slot')}</th>
                       <th className="table-header">{t('admin_containers.col_date')}</th>
                       <th className="table-header">{t('admin_containers.col_status')}</th>
+                      <th className="table-header">{t('admin_containers.col_access_code')}</th>
                       <th className="table-header">{t('admin_containers.col_actions')}</th>
                     </tr>
                   </thead>
@@ -323,6 +324,13 @@ export default function AdminContainers() {
                           <StatusBadge status={req.status} config={containerRequestStatuses} />
                         </td>
                         <td className="table-cell">
+                          {req.status === 'approved' && req.access_code ? (
+                            <span className="text-xs text-green-600 font-mono font-bold">{req.access_code}</span>
+                          ) : (
+                            <span className="text-gray-300 text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="table-cell">
                           {req.status === 'pending' && (
                             <div className="flex items-center gap-1.5">
                               <button
@@ -341,9 +349,6 @@ export default function AdminContainers() {
                                 <XCircle className="w-4 h-4" />
                               </button>
                             </div>
-                          )}
-                          {req.status === 'approved' && req.access_code && (
-                            <span className="text-xs text-green-600 font-mono font-bold">{req.access_code}</span>
                           )}
                         </td>
                       </tr>

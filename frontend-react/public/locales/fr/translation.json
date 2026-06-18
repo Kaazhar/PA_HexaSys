@@ -925,6 +925,7 @@
     "col_slot": "Case",
     "col_date": "Date",
     "col_status": "Statut",
+    "col_access_code": "Code d'accès",
     "col_actions": "Actions",
     "create_modal": "Créer un conteneur",
     "reject_modal": "Refuser la demande",
