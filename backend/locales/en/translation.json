@@ -1,4 +1,13 @@
 {
+  "footer": {
+    "tagline": "The platform connecting upcycling stakeholders for a more sustainable and circular future.",
+    "nav": "Navigation",
+    "contact": "Contact",
+    "rights": "© 2026 UpcycleConnect. All rights reserved."
+  },
+  "dashboard": {
+    "unread": "{{count}} unread"
+  },
   "nav": {
     "home": "Home",
     "listings": "Listings",
@@ -87,6 +96,8 @@
     "reset_filters": "Reset filters",
     "filter_type": "Type",
     "filter_category": "Category",
+    "filter_location": "Location",
+    "location_placeholder": "City, district...",
     "filters": "Filters",
     "type": {
       "don": "Gift",
@@ -506,7 +517,7 @@
   },
   "admin_languages": {
     "title": "Language Management",
-    "subtitle": "Add languages via automatic translation — no code changes needed",
+    "subtitle": "Manage the languages available on the platform",
     "add": "Add a language",
     "col_lang": "Language",
     "col_code": "Code",
@@ -524,12 +535,12 @@
     "field_flag": "Flag emoji",
     "code_hint": "e.g.: es, de, it, pt",
     "label_hint": "Leave empty for auto (e.g.: ES)",
-    "create_btn": "Create and translate",
-    "translating": "Translating...",
+    "create_btn": "Create language",
+    "translating": "Creating...",
     "required_fields": "Code and name are required",
-    "libre_info_title": "Free automatic translation",
-    "libre_info_desc": "Uses Google Translate (no account, no API key needed). Translation takes 1 to 2 minutes depending on the language.",
-    "translation_warning": "Translation may take 1 to 2 minutes. Do not close the window."
+    "libre_info_title": "How to add a language?",
+    "libre_info_desc": "The translation file must be present in the repository (public/locales/[code]/translation.json) and declared in languages.json before activating the language.",
+    "translation_warning": "Make sure the translation file has been deployed before creating the language."
   },
   "create_listing": {
     "title": "Create a listing",
@@ -1053,6 +1064,7 @@
     "col_slot": "Slot",
     "col_date": "Date",
     "col_status": "Status",
+    "col_access_code": "Access code",
     "col_actions": "Actions",
     "create_modal": "Create a container",
     "reject_modal": "Reject request",
