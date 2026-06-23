@@ -71,12 +71,12 @@ function App() {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !user.is_verified) return;
     const key = `tutorial_done_${user.id}`;
     if (!localStorage.getItem(key)) {
       setShowTutorial(true);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.is_verified]);
 
   const handleCloseTutorial = () => {
     if (user) localStorage.setItem(`tutorial_done_${user.id}`, 'true');

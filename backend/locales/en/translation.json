@@ -887,7 +887,15 @@
     "status_active": "Active",
     "status_pending": "Pending",
     "status_cancelled": "Cancelled",
-    "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    "days": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ]
   },
   "salarie_forum": {
     "title": "Forum management",
@@ -1011,7 +1019,8 @@
     "condition_label": "Condition:",
     "location_label": "Location:",
     "author_label": "Author:",
-    "status_label": "Status:"
+    "status_label": "Status:",
+    "photos": "Photos"
   },
   "admin_workshops": {
     "title": "Workshop management",

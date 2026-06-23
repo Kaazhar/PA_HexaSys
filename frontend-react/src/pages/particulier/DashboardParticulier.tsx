@@ -109,7 +109,7 @@ export default function DashboardParticulier() {
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{t('dashboard_particulier.upcoming_workshops')}</h2>
-                <Link to="/annonces" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
+                <Link to="/formations" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
                   {t('dashboard_particulier.see_all')} <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>

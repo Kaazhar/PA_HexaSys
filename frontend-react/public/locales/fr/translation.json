@@ -576,7 +576,15 @@
     "confirm_btn": "Confirmer mon compte",
     "verifying": "Vérification...",
     "resend": "Renvoyer le code",
-    "resending": "Envoi en cours..."
+    "resending": "Envoi en cours...",
+    "subtitle": "Un code à 6 chiffres a été envoyé à",
+    "verify_btn": "Confirmer mon compte",
+    "code_error": "Le code doit contenir 6 chiffres",
+    "confirm_error": "Code incorrect ou expiré",
+    "email_error": "Email introuvable",
+    "resend_success": "Code renvoyé avec succès",
+    "resend_error": "Impossible de renvoyer le code",
+    "redirecting": "Redirection en cours..."
   },
   "containers_map": {
     "title": "Conteneurs de collecte",
@@ -750,7 +758,15 @@
     "status_active": "Actif",
     "status_pending": "En attente",
     "status_cancelled": "Annulé",
-    "days": ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+    "days": [
+      "Lun",
+      "Mar",
+      "Mer",
+      "Jeu",
+      "Ven",
+      "Sam",
+      "Dim"
+    ]
   },
   "salarie_forum": {
     "title": "Gestion du forum",
@@ -874,7 +890,8 @@
     "condition_label": "État :",
     "location_label": "Lieu :",
     "author_label": "Auteur :",
-    "status_label": "Statut :"
+    "status_label": "Statut :",
+    "photos": "Photos"
   },
   "admin_workshops": {
     "title": "Gestion des formations",

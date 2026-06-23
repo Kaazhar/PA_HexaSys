@@ -246,6 +246,16 @@ export default function AdminListings() {
                 <div><span className="text-gray-500">{t('admin_listings.author_label')}</span> <strong>{viewListing.user ? `${viewListing.user.firstname} ${viewListing.user.lastname}` : '-'}</strong></div>
                 <div><span className="text-gray-500">{t('admin_listings.status_label')}</span> <strong>{viewListing.status}</strong></div>
               </div>
+              {viewListing.images && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">{t('admin_listings.photos')}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {viewListing.images.split(',').filter(Boolean).map((url) => (
+                      <img key={url} src={url} alt="" className="w-24 h-24 object-cover rounded-lg border border-gray-200" />
+                    ))}
+                  </div>
+                </div>
+              )}
               {viewListing.reject_reason && (
                 <div className="p-3 bg-red-50 rounded-lg">
                   <p className="text-sm text-red-700"><strong>{t('admin_listings.reject_label')} :</strong> {viewListing.reject_reason}</p>

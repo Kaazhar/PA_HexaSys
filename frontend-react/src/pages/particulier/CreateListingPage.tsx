@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle, Upload, X, MapPin, Package, SkipForward } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { categoryService, listingService, uploadService, containerService } from '../../services/api';
@@ -11,6 +12,13 @@ import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { ContainerSlot } from '../../types';
 import { useTranslation } from 'react-i18next';
+
+function getCatIcon(name: string | undefined) {
+  if (!name) return null;
+  const key = name.charAt(0).toUpperCase() + name.slice(1);
+  const Icon = (LucideIcons as Record<string, any>)[key];
+  return Icon ? <Icon className="w-5 h-5 text-gray-500" /> : null;
+}
 
 export default function CreateListingPage() {
   const { user } = useAuth();
@@ -230,7 +238,7 @@ export default function CreateListingPage() {
                     <button key={cat.id} type="button" onClick={() => setCategoryId(cat.id)}
                       className={clsx('flex items-center gap-2 p-3 border-2 rounded-xl transition-all text-left',
                         categoryId === cat.id ? 'border-[#2D5016] bg-green-50' : 'border-gray-200 hover:border-gray-300')}>
-                      {cat.icon && <span className="text-lg">{cat.icon}</span>}
+                      {getCatIcon(cat.icon)}
                       <span className="text-sm font-medium text-gray-700 flex-1">{cat.name}</span>
                       {categoryId === cat.id && <CheckCircle className="w-4 h-4 text-[#2D5016] flex-shrink-0" />}
                     </button>

@@ -4,6 +4,7 @@ import { Globe, Plus, Trash2, Info } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import api from '../../services/api';
 import { useTranslation } from 'react-i18next';
+import { adminSidebar } from '../../config/sidebars';
 
 interface Language {
   id: number;
@@ -65,7 +66,7 @@ export default function AdminLanguages() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout sidebarItems={adminSidebar} title={t('admin_languages.title')}>
       <div className="p-6 max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
