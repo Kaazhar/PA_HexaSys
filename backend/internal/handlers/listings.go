@@ -120,8 +120,16 @@ func CreateListing(c *gin.Context) {
 		Action: "listing_created",
 	}
 	config.DB.Create(&scoreEntry)
-	config.DB.Model(&models.UpcyclingScore{}).Where("user_id = ?", userID).
-		UpdateColumn("total_points", gorm.Expr("total_points + ?", 10))
+	wasteKg := listing.Weight
+	if wasteKg <= 0 {
+		wasteKg = 1.0
+	}
+	config.DB.Model(&models.UpcyclingScore{}).Where("user_id = ?", userID).Updates(map[string]interface{}{
+		"total_points":       gorm.Expr("total_points + ?", 10),
+		"waste_avoided_kg":   gorm.Expr("waste_avoided_kg + ?", wasteKg),
+		"co2_saved_kg":       gorm.Expr("co2_saved_kg + ?", wasteKg*2.5),
+		"water_saved_liters": gorm.Expr("water_saved_liters + ?", wasteKg*50),
+	})
 
 	config.DB.Preload("Category").Preload("User").First(&listing, listing.ID)
 	c.JSON(http.StatusCreated, listing)
