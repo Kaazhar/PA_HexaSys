@@ -61,6 +61,25 @@ func GetAdminStats(c *gin.Context) {
 	})
 }
 
+func GetPublicStats(c *gin.Context) {
+	var totalUsers int64
+	var activeListings int64
+	var totalCO2 float64
+	var totalWaste float64
+
+	config.DB.Model(&models.User{}).Count(&totalUsers)
+	config.DB.Model(&models.Listing{}).Where("status = ?", "active").Count(&activeListings)
+	config.DB.Model(&models.UpcyclingScore{}).Select("COALESCE(SUM(co2_saved_kg), 0)").Scan(&totalCO2)
+	config.DB.Model(&models.UpcyclingScore{}).Select("COALESCE(SUM(waste_avoided_kg), 0)").Scan(&totalWaste)
+
+	c.JSON(http.StatusOK, gin.H{
+		"total_users":     totalUsers,
+		"active_listings": activeListings,
+		"co2_saved_kg":    totalCO2,
+		"waste_avoided_kg": totalWaste,
+	})
+}
+
 func GetParticularDashboard(c *gin.Context) {
 	userID, _ := c.Get("userID")
 
@@ -82,12 +101,30 @@ func GetParticularDashboard(c *gin.Context) {
 	config.DB.Preload("Category").Where("status = ? AND date > ?", "active", time.Now()).
 		Order("date ASC").Limit(3).Find(&upcomingWorkshops)
 
+	type MonthStat struct {
+		Month string `json:"month"`
+		Count int64  `json:"count"`
+	}
+	now := time.Now()
+	monthlyListings := []MonthStat{}
+	for i := 5; i >= 0; i-- {
+		m := now.AddDate(0, -i, 0)
+		start := time.Date(m.Year(), m.Month(), 1, 0, 0, 0, 0, now.Location())
+		end := start.AddDate(0, 1, 0)
+		var count int64
+		config.DB.Model(&models.Listing{}).
+			Where("user_id = ? AND created_at >= ? AND created_at < ?", userID, start, end).
+			Count(&count)
+		monthlyListings = append(monthlyListings, MonthStat{Month: m.Format("Jan"), Count: count})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"my_listings":        myListings,
 		"active_listings":    myListingsCount,
 		"bookings":           myBookings,
 		"score":              score,
 		"upcoming_workshops": upcomingWorkshops,
+		"monthly_listings":   monthlyListings,
 	})
 }
 

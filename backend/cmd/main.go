@@ -149,6 +149,8 @@ func main() {
 	api.GET("/search", handlers.GlobalSearch)
 	api.GET("/users/:id", handlers.GetPublicProfile)
 	api.GET("/projects", handlers.GetProjects)
+	api.GET("/stats/public", handlers.GetPublicStats)
+	api.GET("/score/leaderboard", handlers.GetLeaderboard)
 
 	api.GET("/listings/mine", middleware.AuthRequired(), handlers.GetMyListings)
 	api.GET("/listings", handlers.GetListings)

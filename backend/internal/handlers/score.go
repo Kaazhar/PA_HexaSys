@@ -27,6 +27,26 @@ func GetMyScore(c *gin.Context) {
 	})
 }
 
+func GetLeaderboard(c *gin.Context) {
+	type LeaderEntry struct {
+		UserID    uint    `json:"user_id"`
+		Firstname string  `json:"firstname"`
+		Lastname  string  `json:"lastname"`
+		Points    int     `json:"total_points"`
+		Level     string  `json:"level"`
+		Co2       float64 `json:"co2_saved_kg"`
+	}
+	var entries []LeaderEntry
+	config.DB.Table("upcycling_scores").
+		Select("upcycling_scores.user_id, users.firstname, users.lastname, upcycling_scores.total_points, upcycling_scores.level, upcycling_scores.co2_saved_kg").
+		Joins("JOIN users ON users.id = upcycling_scores.user_id").
+		Where("users.deleted_at IS NULL AND upcycling_scores.total_points > 0").
+		Order("upcycling_scores.total_points DESC").
+		Limit(10).
+		Scan(&entries)
+	c.JSON(http.StatusOK, entries)
+}
+
 func GetUserScore(c *gin.Context) {
 	id := c.Param("id")
 	var score models.UpcyclingScore

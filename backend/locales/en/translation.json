@@ -50,7 +50,11 @@
     "cta_subtitle": "Sign up for free and start upcycling today.",
     "cta_button": "Get started now",
     "free": "Free",
-    "enrolled": "enrolled"
+    "enrolled": "enrolled",
+    "stat_users": "Members",
+    "stat_listings": "Active listings",
+    "stat_waste": "Waste avoided",
+    "stat_co2": "CO₂ saved"
   },
   "forum": {
     "title": "Forum",
@@ -93,6 +97,8 @@
     "all_categories": "All categories",
     "free": "Free",
     "noListings": "No listings found",
+    "results": "results",
+    "see_listing": "View listing",
     "reset_filters": "Reset filters",
     "filter_type": "Type",
     "filter_category": "Category",
@@ -235,7 +241,8 @@
     "env_impact": "Environmental impact",
     "levels_title": "Levels",
     "current_badge": "Current",
-    "history_title": "Action history"
+    "history_title": "Action history",
+    "leaderboard_title": "Community leaderboard"
   },
   "common": {
     "save": "Save",
@@ -281,7 +288,8 @@
     "sale": "Sale",
     "deposit_request": "Deposit request",
     "my_score": "My score",
-    "training": "Workshops"
+    "training": "Workshops",
+    "activity_title": "My activity (last 6 months)"
   },
   "dashboard_pro": {
     "title": "Professional Space",

@@ -1,4 +1,4 @@
-import { Leaf, Droplets, Wind, CheckCircle } from 'lucide-react';
+import { Leaf, Droplets, Wind, CheckCircle, Trophy } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { scoreService } from '../../services/api';
@@ -25,6 +25,12 @@ export default function ScorePage() {
 
   const score = data?.data?.score;
   const entries = data?.data?.entries || [];
+
+  const { data: leaderData } = useQuery({
+    queryKey: ['score-leaderboard'],
+    queryFn: () => scoreService.getLeaderboard(),
+  });
+  const leaderboard = leaderData?.data || [];
 
   const currentLevel = levels.find(l => (score?.total_points || 0) >= l.min && (score?.total_points || 0) <= l.max) || levels[0];
   const nextLevel = levels[levels.indexOf(currentLevel) + 1];
@@ -100,7 +106,30 @@ export default function ScorePage() {
             </div>
           </div>
 
-          
+
+          {leaderboard.length > 0 && (
+            <div className="card">
+              <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-amber-500" />
+                {t('score.leaderboard_title')}
+              </h2>
+              <ol className="divide-y divide-gray-100">
+                {leaderboard.map((entry, i) => (
+                  <li key={entry.user_id} className="flex items-center gap-3 py-3">
+                    <span className={clsx(
+                      'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0',
+                      i === 0 ? 'bg-amber-400 text-white' : i === 1 ? 'bg-gray-300 text-white' : i === 2 ? 'bg-amber-700 text-white' : 'bg-gray-100 text-gray-500'
+                    )}>{i + 1}</span>
+                    <span className="flex-1 text-sm font-medium text-gray-800">{entry.firstname} {entry.lastname.charAt(0)}.</span>
+                    <span className="text-xs text-gray-400">{entry.level}</span>
+                    <span className="font-bold text-primary-600 text-sm">{entry.total_points} pts</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+
           {entries.length > 0 && (
             <div className="card">
               <h2 className="font-semibold text-gray-900 mb-4">{t('score.history_title')}</h2>

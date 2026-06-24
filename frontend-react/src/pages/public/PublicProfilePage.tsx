@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, BadgeCheck, Star, Package, Calendar } from 'lucide-react';
+import { ArrowLeft, BadgeCheck, Star, Package, Calendar, Leaf } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useQuery } from '@tanstack/react-query';
@@ -48,6 +48,7 @@ export default function PublicProfilePage() {
   const reviewCount = profile?.review_count ?? 0;
   const avgRating = profile?.avg_rating ?? 0;
   const reviews = reviewData?.data?.reviews ?? [];
+  const score = profile?.score;
 
   return (
     <PublicLayout>
@@ -97,6 +98,12 @@ export default function PublicProfilePage() {
                       <span className="flex items-center gap-1.5">
                         <Star className="w-4 h-4 text-amber-400" />
                         {avgRating.toFixed(1)} ({reviewCount} {t('public_profile.reviews')})
+                      </span>
+                    )}
+                    {score && score.total_points > 0 && (
+                      <span className="flex items-center gap-1.5">
+                        <Leaf className="w-4 h-4 text-green-500" />
+                        {score.total_points} pts — {score.level}
                       </span>
                     )}
                   </div>

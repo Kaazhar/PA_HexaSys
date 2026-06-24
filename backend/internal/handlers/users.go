@@ -63,11 +63,15 @@ func GetPublicProfile(c *gin.Context) {
 		config.DB.Model(&models.Review{}).Where("target_user_id = ?", id).Select("AVG(rating)").Scan(&avgRating)
 	}
 
+	var score models.UpcyclingScore
+	config.DB.Where("user_id = ?", id).First(&score)
+
 	c.JSON(http.StatusOK, gin.H{
 		"user":            user,
 		"active_listings": activeListings,
 		"review_count":    reviewCount,
 		"avg_rating":      avgRating,
+		"score":           score,
 	})
 }
 

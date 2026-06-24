@@ -141,7 +141,31 @@ export default function DashboardParticulier() {
             </div>
           </div>
 
-          
+          {dashboard?.monthly_listings && (
+            <div className="card">
+              <h2 className="font-semibold text-gray-900 mb-4">{t('dashboard_particulier.activity_title')}</h2>
+              <div className="flex items-end gap-2 h-24">
+                {dashboard.monthly_listings.map((m: { month: string; count: number }, i: number) => {
+                  const max = Math.max(...dashboard.monthly_listings.map((x: { count: number }) => x.count), 1);
+                  const pct = Math.round((m.count / max) * 100);
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <span className="text-xs text-gray-500 font-medium">{m.count > 0 ? m.count : ''}</span>
+                      <div className="w-full bg-gray-100 rounded-t-md relative" style={{ height: '72px' }}>
+                        <div
+                          className="absolute bottom-0 left-0 right-0 bg-primary-500 rounded-t-md transition-all"
+                          style={{ height: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-400">{m.month}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { labelKey: 'dashboard_particulier.create_listing', path: '/annonces/creer', icon: <PlusCircle className="w-5 h-5" />, color: 'text-primary-500 bg-primary-50' },

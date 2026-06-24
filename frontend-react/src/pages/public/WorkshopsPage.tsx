@@ -105,16 +105,24 @@ export default function WorkshopsPage() {
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-sm">
-                        <Users className="w-4 h-4 text-gray-400" />
-                        <span className={clsx('font-medium', full ? 'text-red-500' : 'text-gray-600')}>
-                          {full ? t('workshops.full') : `${spotsLeft} ${t('workshops.spots')}`}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-1.5 text-sm">
+                          <Users className="w-4 h-4 text-gray-400" />
+                          <span className={clsx('font-medium', full ? 'text-red-500' : spotsLeft <= 3 ? 'text-amber-600' : 'text-gray-600')}>
+                            {full ? t('workshops.full') : `${spotsLeft} ${t('workshops.spots')}`}
+                          </span>
+                        </div>
+                        <span className="font-semibold text-gray-900">
+                          {workshop.price === 0 ? t('workshops.free') : `${workshop.price}€`}
                         </span>
                       </div>
-                      <span className="font-semibold text-gray-900">
-                        {workshop.price === 0 ? t('workshops.free') : `${workshop.price}€`}
-                      </span>
+                      <div className="w-full bg-gray-100 rounded-full h-1.5">
+                        <div
+                          className={clsx('h-1.5 rounded-full transition-all', full ? 'bg-red-400' : spotsLeft <= 3 ? 'bg-amber-400' : 'bg-primary-500')}
+                          style={{ width: `${Math.min(100, Math.round((workshop.enrolled / workshop.max_spots) * 100))}%` }}
+                        />
+                      </div>
                     </div>
                   </Link>
                 );

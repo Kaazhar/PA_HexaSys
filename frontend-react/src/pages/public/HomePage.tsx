@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Package, Truck, Wrench, Calendar, MapPin, Users } from 'lucide-react';
+import { ArrowRight, Package, Truck, Wrench, Calendar, MapPin, Users, Leaf, Wind } from 'lucide-react';
 import PublicLayout from '../../components/layout/PublicLayout';
 import { useQuery } from '@tanstack/react-query';
-import { listingService, workshopService } from '../../services/api';
+import { listingService, workshopService, publicStatsService } from '../../services/api';
 import ListingCard from '../../components/common/ListingCard';
 import { format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
@@ -22,8 +22,15 @@ export default function HomePage() {
     queryFn: () => workshopService.getAll({ status: 'active', limit: 3 }),
   });
 
+  const { data: statsData } = useQuery({
+    queryKey: ['public-stats'],
+    queryFn: () => publicStatsService.get(),
+    staleTime: 5 * 60 * 1000,
+  });
+
   const listings = listingsData?.data?.listings || [];
   const workshops = workshopsData?.data?.workshops || [];
+  const stats = statsData?.data;
 
   return (
     <PublicLayout>
@@ -52,7 +59,27 @@ export default function HomePage() {
         </div>
       </section>
 
-      
+
+      <section className="py-12 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            {[
+              { icon: <Users className="w-6 h-6 text-primary-500" />, value: stats?.total_users ?? '…', label: t('home.stat_users') },
+              { icon: <Package className="w-6 h-6 text-blue-500" />, value: stats?.active_listings ?? '…', label: t('home.stat_listings') },
+              { icon: <Leaf className="w-6 h-6 text-green-500" />, value: stats ? `${Math.round(stats.waste_avoided_kg)} kg` : '…', label: t('home.stat_waste') },
+              { icon: <Wind className="w-6 h-6 text-cyan-500" />, value: stats ? `${Math.round(stats.co2_saved_kg)} kg` : '…', label: t('home.stat_co2') },
+            ].map((s, i) => (
+              <div key={i} className="flex flex-col items-center gap-2 py-4">
+                <div className="p-3 bg-gray-50 rounded-xl">{s.icon}</div>
+                <p className="text-3xl font-black text-gray-900">{s.value}</p>
+                <p className="text-sm text-gray-500">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
       <section className="py-20 bg-beige-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

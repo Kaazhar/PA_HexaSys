@@ -50,7 +50,11 @@
     "cta_subtitle": "Inscrivez-vous gratuitement et commencez à upcycler dès aujourd'hui.",
     "cta_button": "Commencer maintenant",
     "free": "Gratuit",
-    "enrolled": "inscrits"
+    "enrolled": "inscrits",
+    "stat_users": "Membres",
+    "stat_listings": "Annonces actives",
+    "stat_waste": "Déchets évités",
+    "stat_co2": "CO₂ économisé"
   },
   "forum": {
     "title": "Forum",
@@ -93,6 +97,8 @@
     "all_categories": "Toutes catégories",
     "free": "Gratuit",
     "noListings": "Aucune annonce trouvée",
+    "results": "résultats",
+    "see_listing": "Voir l'annonce",
     "reset_filters": "Réinitialiser les filtres",
     "filter_type": "Type",
     "filter_category": "Catégorie",
@@ -235,7 +241,8 @@
     "env_impact": "Impact environnemental",
     "levels_title": "Niveaux",
     "current_badge": "Actuel",
-    "history_title": "Historique des actions"
+    "history_title": "Historique des actions",
+    "leaderboard_title": "Classement de la communauté"
   },
   "common": {
     "save": "Enregistrer",
@@ -281,7 +288,8 @@
     "sale": "Vente",
     "deposit_request": "Demande de dépôt",
     "my_score": "Mon score",
-    "training": "Formations"
+    "training": "Formations",
+    "activity_title": "Mon activité (6 derniers mois)"
   },
   "dashboard_pro": {
     "title": "Espace Professionnel",

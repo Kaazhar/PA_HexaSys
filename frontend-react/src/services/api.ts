@@ -167,6 +167,11 @@ export const containerService = {
 
 export const scoreService = {
   getMyScore: () => api.get('/score/me'),
+  getLeaderboard: () => api.get<{ user_id: number; firstname: string; lastname: string; total_points: number; level: string; co2_saved_kg: number }[]>('/score/leaderboard'),
+};
+
+export const publicStatsService = {
+  get: () => api.get<{ total_users: number; active_listings: number; co2_saved_kg: number; waste_avoided_kg: number }>('/stats/public'),
 };
 
 export const notificationService = {

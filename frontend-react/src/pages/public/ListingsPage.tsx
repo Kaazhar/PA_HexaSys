@@ -1,14 +1,25 @@
 import { useState } from 'react';
-import { Search, SlidersHorizontal, Package, MapPin } from 'lucide-react';
+import { Search, SlidersHorizontal, Package, MapPin, LayoutGrid, Map } from 'lucide-react';
 import PublicLayout from '../../components/layout/PublicLayout';
 import ListingCard from '../../components/common/ListingCard';
 import { useQuery } from '@tanstack/react-query';
 import { listingService, categoryService } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import Pagination from '../../components/common/Pagination';
 import EmptyState from '../../components/common/EmptyState';
 import { useTranslation } from 'react-i18next';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import clsx from 'clsx';
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 export default function ListingsPage() {
   const { t } = useTranslation();
@@ -18,6 +29,7 @@ export default function ListingsPage() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [page, setPage] = useState(1);
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
 
   const { data: listingsData, isLoading } = useQuery({
     queryKey: ['listings', { search, type: selectedType, category: selectedCategory, location: selectedLocation, page }],
@@ -153,13 +165,48 @@ export default function ListingsPage() {
               />
             </div>
 
-            
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-500">{total} {t('listings.results')}</span>
+              <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+                <button onClick={() => setViewMode('grid')} className={clsx('p-1.5 rounded-md transition-colors', viewMode === 'grid' ? 'bg-white shadow text-primary-600' : 'text-gray-400 hover:text-gray-600')}>
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button onClick={() => setViewMode('map')} className={clsx('p-1.5 rounded-md transition-colors', viewMode === 'map' ? 'bg-white shadow text-primary-600' : 'text-gray-400 hover:text-gray-600')}>
+                  <Map className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+
             {isLoading ? (
               <div className="flex justify-center py-20">
                 <LoadingSpinner size="lg" />
               </div>
             ) : listings.length === 0 ? (
               <EmptyState icon={<Package className="w-10 h-10" />} message={t('listings.noListings')} />
+            ) : viewMode === 'map' ? (
+              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-[600px]">
+                <MapContainer center={[48.8566, 2.3522]} zoom={12} style={{ height: '100%', width: '100%' }}>
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  {listings.filter(l => l.latitude && l.longitude).map((listing) => (
+                    <Marker key={listing.id} position={[listing.latitude, listing.longitude]}>
+                      <Popup>
+                        <div className="min-w-[180px]">
+                          <p className="font-semibold text-gray-900 mb-1 text-sm">{listing.title}</p>
+                          <p className="text-xs text-gray-500 mb-2">{listing.location}</p>
+                          <p className="text-xs font-bold text-primary-600 mb-2">
+                            {listing.type === 'don' ? t('listings.type.don') : `${listing.price}€`}
+                          </p>
+                          <Link to={`/annonces/${listing.id}`} className="text-xs text-primary-500 hover:underline">{t('listings.see_listing')}</Link>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
+              </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
