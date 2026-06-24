@@ -74,6 +74,31 @@ func emailNewMessageTemplate(recipientFirstname, senderName, preview, appURL str
 </html>`, recipientFirstname, senderName, preview, appURL)
 }
 
+func email2FATemplate(firstname, code string) string {
+	return fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:sans-serif;background:#f9f9f9;padding:40px 0">
+<div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+  <div style="background:#2D5016;padding:32px;text-align:center">
+    <h1 style="color:#fff;margin:0;font-size:24px">UpcycleConnect</h1>
+  </div>
+  <div style="padding:32px">
+    <h2 style="color:#1a1a1a;margin-top:0">Code de connexion</h2>
+    <p style="color:#555;line-height:1.6">Bonjour %s,<br>Voici votre code de vérification à 6 chiffres :</p>
+    <div style="text-align:center;margin:32px 0">
+      <div style="display:inline-block;background:#f0f7eb;border:2px dashed #2D5016;border-radius:12px;padding:20px 40px">
+        <span style="font-size:40px;font-weight:900;letter-spacing:10px;color:#2D5016">%s</span>
+      </div>
+    </div>
+    <p style="color:#555;text-align:center">Entrez ce code pour finaliser votre connexion.</p>
+    <p style="color:#999;font-size:13px;text-align:center;margin-top:24px">Ce code expire dans 10 minutes. Si vous n'avez pas tenté de vous connecter, changez votre mot de passe immédiatement.</p>
+  </div>
+</div>
+</body>
+</html>`, firstname, code)
+}
+
 func emailNewsletterTemplate(subject, content string) string {
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html>

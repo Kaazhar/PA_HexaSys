@@ -70,6 +70,7 @@ type User struct {
 	NewsletterSubscribed bool       `gorm:"default:false" json:"newsletter_subscribed"`
 	PhoneVerified        bool       `gorm:"default:false" json:"phone_verified"`
 	TwoFAEnabled         bool       `gorm:"default:false" json:"two_fa_enabled"`
+	EmailTwoFAEnabled    bool       `gorm:"default:false" json:"email_two_fa_enabled"`
 	AvatarURL            string     `gorm:"size:500" json:"avatar_url,omitempty"`
 }
 

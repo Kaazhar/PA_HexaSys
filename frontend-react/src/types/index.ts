@@ -17,6 +17,7 @@ export interface User {
   siret_verified?: boolean;
   phone_verified?: boolean;
   two_fa_enabled?: boolean;
+  email_two_fa_enabled?: boolean;
   avatar_url?: string;
   created_at: string;
   updated_at: string;

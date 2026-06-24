@@ -154,6 +154,19 @@ func Login(c *gin.Context) {
 		user.FirstLogin = false
 	}
 
+	if user.EmailTwoFAEnabled {
+		if err := services.EnvoyerCodeEmail(user.ID, user.Email, "email_two_fa", config.SendEmail, email2FATemplate, user.Firstname); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible d'envoyer le code email"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"requires_2fa":  true,
+			"user_id":       user.ID,
+			"two_fa_method": "email",
+		})
+		return
+	}
+
 	if user.TwoFAEnabled {
 		err := services.EnvoyerCodeVerification(user.ID, user.Phone, "two_fa")
 		if err != nil {
@@ -162,8 +175,9 @@ func Login(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"requires_2fa": true,
-			"user_id":      user.ID,
+			"requires_2fa":  true,
+			"user_id":       user.ID,
+			"two_fa_method": "sms",
 		})
 		return
 	}
@@ -190,18 +204,22 @@ func Verify2FA(c *gin.Context) {
 		return
 	}
 
-	if err := services.ValiderCode(req.UserID, req.Code, "two_fa"); err != nil {
+	var userFor2FA models.User
+	if err := config.DB.First(&userFor2FA, req.UserID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
+		return
+	}
+	purpose := "two_fa"
+	if userFor2FA.EmailTwoFAEnabled {
+		purpose = "email_two_fa"
+	}
+
+	if err := services.ValiderCode(req.UserID, req.Code, purpose); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var user models.User
-	if err := config.DB.First(&user, req.UserID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
-		return
-	}
-
-	token, err := generateToken(user)
+	token, err := generateToken(userFor2FA)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la génération du token"})
 		return
@@ -209,8 +227,28 @@ func Verify2FA(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
-		"user":  user,
+		"user":  userFor2FA,
 	})
+}
+
+func ToggleEmailTwoFA(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	var req struct {
+		Enabled bool `json:"enabled"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var user models.User
+	config.DB.First(&user, userID)
+	config.DB.Model(&user).Update("email_two_fa_enabled", req.Enabled)
+	config.DB.First(&user, userID)
+	msg := "2FA email désactivée"
+	if req.Enabled {
+		msg = "2FA email activée"
+	}
+	c.JSON(http.StatusOK, gin.H{"message": msg, "user": user})
 }
 
 func Resend2FACode(c *gin.Context) {
@@ -225,6 +263,15 @@ func Resend2FACode(c *gin.Context) {
 	var user models.User
 	if err := config.DB.First(&user, req.UserID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
+		return
+	}
+
+	if user.EmailTwoFAEnabled {
+		if err := services.EnvoyerCodeEmail(user.ID, user.Email, "email_two_fa", config.SendEmail, email2FATemplate, user.Firstname); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Nouveau code envoyé par email"})
 		return
 	}
 

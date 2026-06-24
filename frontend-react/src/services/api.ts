@@ -54,6 +54,8 @@ export const authService = {
     api.post<{ token: string; user: User }>('/auth/verify-2fa', { user_id: userId, code }),
   resend2FA: (userId: number) =>
     api.post('/auth/resend-2fa', { user_id: userId }),
+  toggleEmail2FA: (enabled: boolean) =>
+    api.post<{ message: string; user: User }>('/auth/toggle-email-2fa', { enabled }),
   googleConfig: () => api.get<{ client_id: string }>('/auth/google-config'),
   googleLogin: (credential: string) =>
     api.post<{ token: string; user: User }>('/auth/google', { credential }),

@@ -114,6 +114,7 @@ func main() {
 		auth.POST("/resend-confirm", handlers.ResendConfirmEmail)
 		auth.POST("/verify-2fa", handlers.Verify2FA)
 		auth.POST("/resend-2fa", handlers.Resend2FACode)
+		auth.POST("/toggle-email-2fa", middleware.AuthRequired(), handlers.ToggleEmailTwoFA)
 		auth.GET("/google-config", handlers.GetGoogleConfig)
 		auth.POST("/google", handlers.GoogleLogin)
 	}

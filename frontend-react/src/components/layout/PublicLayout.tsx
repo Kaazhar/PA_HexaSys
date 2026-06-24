@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import Navbar from './Navbar';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import { useTranslation } from 'react-i18next';
@@ -33,8 +33,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             <div>
               <h3 className="font-semibold mb-4">{t('footer.contact')}</h3>
               <ul className="space-y-2 text-sm text-white/70">
-                <li className="flex items-center gap-2"><Mail className="w-4 h-4" /> contact@upcycleconnect.fr</li>
-                <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> +33 1 23 45 67 89</li>
+                <li className="flex items-center gap-2"><Mail className="w-4 h-4" /> upcycleconnectnewletter@gmail.com</li>
                 <li className="flex items-center gap-2"><MapPin className="w-4 h-4" /> Paris, France</li>
               </ul>
             </div>

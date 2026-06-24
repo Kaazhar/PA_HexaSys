@@ -85,6 +85,26 @@ func EnvoyerCodeVerification(userID uint, telephone, purpose string) error {
 	return nil
 }
 
+func EnvoyerCodeEmail(userID uint, email, purpose string, sendFn func(string, string, string) error, templateFn func(string, string) string, firstname string) error {
+	code := config.GenerateCode()
+	codeHash, err := bcrypt.GenerateFromPassword([]byte(code), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("erreur de chiffrement : %w", err)
+	}
+	verification := models.PhoneVerification{
+		UserID:    userID,
+		Phone:     "email",
+		CodeHash:  string(codeHash),
+		Purpose:   purpose,
+		ExpiresAt: time.Now().Add(10 * time.Minute),
+	}
+	if err := config.DB.Create(&verification).Error; err != nil {
+		return fmt.Errorf("erreur base de données : %w", err)
+	}
+	go sendFn(email, "Votre code de connexion - UpcycleConnect", templateFn(firstname, code))
+	return nil
+}
+
 func ValiderCode(userID uint, codeSaisi, purpose string) error {
 	var verification models.PhoneVerification
 	err := config.DB.

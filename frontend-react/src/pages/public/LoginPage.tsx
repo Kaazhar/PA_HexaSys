@@ -30,6 +30,7 @@ export default function LoginPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>();
 
   const [userId2FA, setUserId2FA] = useState<number | null>(null);
+  const [method2FA, setMethod2FA] = useState<'sms' | 'email'>('sms');
   const [googleClientId, setGoogleClientId] = useState<string>('');
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function LoginPage() {
 
       if (reponse.requires_2fa && reponse.user_id) {
         setUserId2FA(reponse.user_id);
+        setMethod2FA((reponse as any).two_fa_method === 'email' ? 'email' : 'sms');
         return;
       }
 
@@ -100,6 +102,7 @@ export default function LoginPage() {
     return (
       <Login2FAScreen
         userId={userId2FA}
+        method={method2FA}
         onSuccess={apresValidation2FA}
         onCancel={() => setUserId2FA(null)}
       />

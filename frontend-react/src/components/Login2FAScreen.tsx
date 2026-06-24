@@ -6,11 +6,12 @@ import toast from 'react-hot-toast';
 
 interface Props {
   userId: number;
+  method?: 'sms' | 'email';
   onSuccess: (token: string, user: User) => void;
   onCancel: () => void;
 }
 
-export default function Login2FAScreen({ userId, onSuccess, onCancel }: Props) {
+export default function Login2FAScreen({ userId, method = 'sms', onSuccess, onCancel }: Props) {
   const [chiffres, setChiffres] = useState<string[]>(['', '', '', '', '', '']);
   const [enChargement, setEnChargement] = useState(false);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
@@ -75,7 +76,9 @@ export default function Login2FAScreen({ userId, onSuccess, onCancel }: Props) {
           </div>
           <h1 className="text-xl font-bold text-gray-900">Vérification 2FA</h1>
           <p className="text-sm text-gray-500 text-center mt-1">
-            Saisissez le code à 6 chiffres envoyé par SMS
+            {method === 'email'
+              ? 'Saisissez le code à 6 chiffres envoyé par email'
+              : 'Saisissez le code à 6 chiffres envoyé par SMS'}
           </p>
         </div>
 

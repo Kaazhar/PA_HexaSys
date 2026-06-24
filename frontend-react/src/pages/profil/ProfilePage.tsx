@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { authService, newsletterService, uploadService } from '../../services/api';
 import PhoneVerification from '../../components/PhoneVerification';
 import TwoFAToggle from '../../components/TwoFAToggle';
+import EmailTwoFAToggle from '../../components/EmailTwoFAToggle';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import toast from 'react-hot-toast';
@@ -322,6 +323,11 @@ export default function ProfilePage() {
           <PhoneVerification
             currentPhone={user.phone}
             isVerified={user.phone_verified}
+            onSuccess={handleUserUpdated}
+          />
+
+          <EmailTwoFAToggle
+            isEnabled={(user as any).email_two_fa_enabled}
             onSuccess={handleUserUpdated}
           />
 
