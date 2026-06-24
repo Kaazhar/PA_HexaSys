@@ -8,7 +8,6 @@ export default function NotFoundPage() {
     <div className="min-h-screen bg-beige-50 flex items-center justify-center p-4">
       <div className="text-center max-w-md">
         <div className="text-8xl font-black text-primary-500 mb-2">404</div>
-        <div className="text-6xl mb-6">🌿</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('not_found_page.title')}</h1>
         <p className="text-gray-500 mb-8">{t('not_found_page.desc')}</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">

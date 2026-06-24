@@ -27,8 +27,8 @@
     "no_notifications": "Aucune notification"
   },
   "home": {
-    "hero_badge": "🌿 Plateforme d'upcycling collaborative",
-    "hero_title": "Donnez une seconde vie à vos objets",
+    "hero_badge": "Plateforme d'upcycling collaborative",
+    "hero_title": "Tes objets méritent une seconde chance",
     "hero_subtitle": "La plateforme qui connecte les particuliers, professionnels et formateurs autour de l'économie circulaire.",
     "hero_cta_primary": "Commencer gratuitement",
     "hero_cta_secondary": "Voir les annonces",
@@ -1019,7 +1019,7 @@
     "subtitle": "Envoyez un email à tous les abonnés à la newsletter.",
     "subject": "Sujet *",
     "content": "Contenu (HTML) *",
-    "warning": "⚠️ Cet email sera envoyé à tous les utilisateurs ayant activé la newsletter. Cette action est irréversible.",
+    "warning": "Cet email sera envoyé à tous les utilisateurs ayant activé la newsletter. Cette action est irréversible.",
     "send_btn": "Envoyer la newsletter",
     "sending": "Envoi en cours..."
   },

@@ -1,4 +1,4 @@
-import { Leaf, Droplets, Wind } from 'lucide-react';
+import { Leaf, Droplets, Wind, CheckCircle } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { scoreService } from '../../services/api';
@@ -10,10 +10,10 @@ import { particulierSidebar } from '../../config/sidebars';
 import { useTranslation } from 'react-i18next';
 
 const levels = [
-  { key: 'debutant', name: 'Débutant', min: 0, max: 99, emoji: '🌱' },
-  { key: 'intermediaire', name: 'Intermédiaire', min: 100, max: 299, emoji: '🌿' },
-  { key: 'avance', name: 'Avancé', min: 300, max: 699, emoji: '🌳' },
-  { key: 'expert', name: 'Expert', min: 700, max: Infinity, emoji: '🏆' },
+  { key: 'debutant', name: 'Débutant', min: 0, max: 99, color: 'bg-green-200' },
+  { key: 'intermediaire', name: 'Intermédiaire', min: 100, max: 299, color: 'bg-green-400' },
+  { key: 'avance', name: 'Avancé', min: 300, max: 699, color: 'bg-green-600' },
+  { key: 'expert', name: 'Expert', min: 700, max: Infinity, color: 'bg-primary-600' },
 ];
 
 export default function ScorePage() {
@@ -38,7 +38,7 @@ export default function ScorePage() {
         <div className="space-y-6 max-w-3xl">
           
           <div className="card text-center py-8">
-            <div className="text-4xl mb-2">{currentLevel.emoji}</div>
+            <div className={`w-10 h-10 rounded-full mx-auto mb-2 ${currentLevel.color}`} />
             <p className="text-sm text-gray-500 mb-1">{t('score.current_level')}</p>
             <h2 className="text-xl font-bold text-gray-900 mb-3">{score?.level || t(`score.levels.${currentLevel.key}`)}</h2>
             <div className="text-5xl font-black text-primary-600 mb-1">{score?.total_points || 0}</div>
@@ -89,11 +89,11 @@ export default function ScorePage() {
                 const isDone = (score?.total_points || 0) > level.max;
                 return (
                   <div key={level.name} className={clsx('flex items-center gap-3 py-3', isActive && 'font-semibold text-primary-700')}>
-                    <span>{level.emoji}</span>
+                    <div className={`w-3 h-3 rounded-full flex-shrink-0 ${level.color}`} />
                     <span className="flex-1 text-sm">{t(`score.levels.${level.key}`)}</span>
                     <span className="text-xs text-gray-400">{level.min} — {level.max === Infinity ? '∞' : level.max} pts</span>
                     {isActive && <span className="badge-green text-xs">{t('score.current_badge')}</span>}
-                    {isDone && <span className="text-xs text-gray-400">✓</span>}
+                    {isDone && <CheckCircle className="w-3.5 h-3.5 text-gray-400" />}
                   </div>
                 );
               })}

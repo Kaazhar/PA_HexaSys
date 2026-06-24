@@ -4,9 +4,8 @@ import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 import type { UserRole } from '../types';
 
 interface Step {
-  route?: string;       // navigate to this route before showing
-  target?: string;      // spotlight this element ID (optional)
-  emoji: string;
+  route?: string;
+  target?: string;
   title: string;
   description: string;
   placement?: 'top' | 'bottom' | 'left' | 'right';
@@ -23,57 +22,48 @@ const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 const stepsByRole: Record<UserRole, Step[]> = {
   particulier: [
     {
-      emoji: '🌱',
       title: 'Bienvenue sur UpcycleConnect !',
       description: 'En quelques étapes, on va vous faire découvrir toutes les fonctionnalités de votre espace personnel.',
     },
     {
       route: '/dashboard',
-      emoji: '🏠',
       title: 'Votre tableau de bord',
       description: "Vue globale de votre activité : dernières annonces, prochains ateliers et raccourcis rapides.",
     },
     {
       target: 'tour-stats',
-      emoji: '📊',
       title: 'Vos statistiques',
       description: "Annonces actives, ateliers suivis et score upcycling d'un coup d'oeil.",
       placement: 'bottom',
     },
     {
       route: '/mes-annonces',
-      emoji: '📋',
       title: 'Vos annonces',
       description: "Retrouvez toutes vos annonces publiées (dons ou ventes), leur statut de modération et les messages reçus.",
     },
     {
       route: '/annonces/creer',
-      emoji: '📢',
       title: 'Créer une annonce',
       description: "Proposez un objet en don ou à la vente. Ajoutez des photos, une description et localisez-le sur la carte. Chaque annonce est vérifiée avant publication.",
     },
     {
       route: '/conteneurs',
-      emoji: '📦',
       title: 'Les conteneurs',
       description: "Carte interactive de nos points de dépôt à Paris. Cliquez sur un conteneur pour faire une demande et recevoir votre code d'accès.",
     },
     {
       route: '/score',
-      emoji: '🏆',
       title: 'Votre score upcycling',
       description: "Chaque action sur la plateforme vous rapporte des points. Suivez votre niveau, vos badges et mesurez votre impact environnemental.",
     },
     {
       route: '/messages',
-      emoji: '💬',
       title: 'La messagerie',
       description: "Contactez les vendeurs directement depuis leurs annonces. Toutes vos conversations sont centralisées ici.",
     },
     {
       route: '/dashboard',
       target: 'tour-notifications',
-      emoji: '🔔',
       title: 'Notifications en temps réel',
       description: "Validations d'annonces, nouveaux messages, ateliers à venir… tout apparaît ici. Activez aussi les notifications push !",
       placement: 'bottom',
@@ -81,50 +71,42 @@ const stepsByRole: Record<UserRole, Step[]> = {
   ],
   professionnel: [
     {
-      emoji: '🏭',
       title: 'Bienvenue sur votre espace Pro !',
       description: "Accédez aux matériaux à recycler, gérez vos projets et développez votre activité grâce à UpcycleConnect.",
     },
     {
       route: '/pro',
-      emoji: '🏠',
       title: 'Tableau de bord Pro',
       description: "Vue d'ensemble de votre activité : annonces disponibles, projets en cours et indicateurs clés.",
     },
     {
       route: '/mes-annonces',
-      emoji: '🔍',
       title: 'Annonces disponibles',
       description: "Parcourez les dépôts de particuliers et achetez directement les matériaux dont vous avez besoin.",
     },
     {
       route: '/annonces/creer',
-      emoji: '📢',
       title: 'Créer une annonce',
       description: "Mettez en vente vos créations ou proposez des services. Gérez votre catalogue depuis ici.",
     },
     {
       route: '/pro/projets',
-      emoji: '🛠️',
       title: 'Projets upcycling',
       description: "Documentez et partagez vos transformations. Mettez en avant votre savoir-faire pour attirer de nouveaux clients.",
     },
     {
       route: '/abonnement',
-      emoji: '⭐',
       title: 'Abonnement premium',
       description: "Passez au Pro pour débloquer les tableaux de bord avancés, les statistiques détaillées et les alertes prioritaires.",
     },
     {
       route: '/messages',
-      emoji: '💬',
       title: 'Messagerie',
       description: "Contactez les particuliers, négociez les achats et gérez tous vos échanges professionnels.",
     },
     {
       route: '/pro',
       target: 'tour-notifications',
-      emoji: '🔔',
       title: 'Notifications',
       description: "Alertes pour les nouveaux dépôts dans les conteneurs, messages entrants et mises à jour.",
       placement: 'bottom',
@@ -132,38 +114,32 @@ const stepsByRole: Record<UserRole, Step[]> = {
   ],
   salarie: [
     {
-      emoji: '🎯',
       title: 'Bienvenue animateur !',
       description: "Créez et gérez les formations, articles et événements de la communauté UpcycleConnect.",
     },
     {
       route: '/salarie',
-      emoji: '🏠',
       title: 'Tableau de bord',
       description: "Vue d'ensemble de vos activités : formations planifiées, articles publiés et agenda d'interventions.",
     },
     {
       route: '/salarie/formations',
-      emoji: '🎓',
       title: 'Formations',
       description: "Créez des ateliers, formations et conférences. Chaque événement est soumis à validation par un responsable avant publication.",
     },
     {
       route: '/salarie/articles',
-      emoji: '📝',
       title: 'Articles',
       description: "Publiez des conseils, tutoriels et actualités. Sensibilisez la communauté aux bonnes pratiques de l'upcycling.",
     },
     {
       route: '/salarie/planning',
-      emoji: '📅',
       title: 'Planning',
       description: "Consultez et organisez votre agenda d'interventions. Gardez une vue claire de toutes vos missions.",
     },
     {
       route: '/salarie',
       target: 'tour-notifications',
-      emoji: '🔔',
       title: 'Notifications',
       description: "Validations de formations, nouveaux inscrits et messages de la plateforme en temps réel.",
       placement: 'bottom',
@@ -171,56 +147,47 @@ const stepsByRole: Record<UserRole, Step[]> = {
   ],
   admin: [
     {
-      emoji: '⚙️',
       title: 'Bienvenue sur le Back-Office !',
       description: "Accès complet à la gestion de la plateforme UpcycleConnect. Voici un tour rapide des fonctionnalités clés.",
     },
     {
       route: '/admin',
-      emoji: '📊',
       title: 'Dashboard Admin',
       description: "Vue globale : utilisateurs actifs, annonces en attente de modération, revenus et activité récente.",
     },
     {
       route: '/admin/utilisateurs',
-      emoji: '👥',
       title: 'Gestion des utilisateurs',
       description: "Consultez, modifiez ou supprimez les comptes. Gérez les rôles et bannissez les utilisateurs problématiques.",
     },
     {
       route: '/admin/annonces',
-      emoji: '📋',
       title: 'Modération des annonces',
       description: "Validez ou rejetez les annonces soumises par les particuliers et professionnels avant leur mise en ligne.",
     },
     {
       route: '/admin/conteneurs',
-      emoji: '📦',
       title: 'Gestion des conteneurs',
       description: "Ajoutez des conteneurs, suivez leur taux de remplissage et validez les demandes de dépôt.",
     },
     {
       route: '/admin/finance',
-      emoji: '💰',
       title: 'Suivi financier',
       description: "Revenus, abonnements actifs et factures générées. Vue complète de l'activité économique de la plateforme.",
     },
     {
       route: '/admin/signalements',
-      emoji: '🚩',
       title: 'Signalements',
       description: "Traitez les contenus signalés par la communauté. Gérez les abus et protégez la plateforme.",
     },
     {
       route: '/admin/newsletter',
-      emoji: '📧',
       title: 'Newsletter',
       description: "Envoyez des newsletters ciblées à vos abonnés directement depuis le back-office.",
     },
     {
       route: '/admin',
       target: 'tour-notifications',
-      emoji: '🔔',
       title: 'Notifications',
       description: "Toutes les activités de la plateforme remontées en temps réel.",
       placement: 'bottom',
@@ -380,7 +347,6 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
           <div className="px-4 pt-4 pb-3" style={{ background: 'linear-gradient(135deg, #2D5016 0%, #4a7c28 100%)' }}>
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-xl">{step.emoji}</span>
                 <h3 className="text-sm font-bold text-white leading-snug">{step.title}</h3>
               </div>
               <button onClick={onClose} className="text-white/60 hover:text-white transition-colors flex-shrink-0 mt-0.5">
@@ -414,7 +380,6 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
           <div className="px-6 pt-5 pb-4" style={{ background: 'linear-gradient(135deg, #2D5016 0%, #4a7c28 100%)' }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-3xl">{step.emoji}</span>
                 <div>
                   <h3 className="text-base font-bold text-white">{step.title}</h3>
                   <p className="text-white/55 text-xs mt-0.5">Étape {current + 1} sur {steps.length}</p>
@@ -453,7 +418,6 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
           <button onClick={onClose} className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors">
             <X size={20} />
           </button>
-          <div className="text-5xl mb-3">{step.emoji}</div>
           <h2 className="text-xl font-bold text-white">{step.title}</h2>
           <p className="text-white/60 text-sm mt-1">{current + 1} / {steps.length}</p>
         </div>

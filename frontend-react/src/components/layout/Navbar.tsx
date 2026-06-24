@@ -309,7 +309,7 @@ export default function Navbar() {
                 }`}
                 title={lang.label}
               >
-                {lang.flag} {lang.label}
+                {lang.label}
               </button>
             ))}
           </div>

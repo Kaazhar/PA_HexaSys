@@ -74,7 +74,7 @@ export default function DashboardLayout({ children, sidebarItems = [], title, no
                       : 'border-gray-200 text-gray-500 hover:bg-gray-50'
                   }`}
                 >
-                  {lang.flag} {lang.label}
+                  {lang.label}
                 </button>
               ))}
             </div>

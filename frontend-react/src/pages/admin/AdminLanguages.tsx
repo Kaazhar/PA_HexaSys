@@ -114,7 +114,6 @@ export default function AdminLanguages() {
                     <tr key={lang.code} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">{lang.flag}</span>
                           <div>
                             <p className="font-medium text-gray-900">{lang.name}</p>
                             <p className="text-xs text-gray-400">{lang.label}</p>
@@ -203,20 +202,8 @@ export default function AdminLanguages() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin_languages.field_flag')}
-                  </label>
-                  <input
-                    value={form.flag}
-                    onChange={e => setForm(f => ({ ...f, flag: e.target.value }))}
-                    placeholder="🇪🇸"
-                    className="input-field"
-                    maxLength={4}
-                  />
-                </div>
 
-              </div>
+</div>
 
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-4 text-xs text-amber-800">
                 {t('admin_languages.translation_warning')}

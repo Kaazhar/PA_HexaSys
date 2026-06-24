@@ -27,8 +27,8 @@
     "no_notifications": "No notifications"
   },
   "home": {
-    "hero_badge": "🌿 Collaborative upcycling platform",
-    "hero_title": "Give your objects a second life",
+    "hero_badge": "Collaborative upcycling platform",
+    "hero_title": "Your stuff deserves a second shot",
     "hero_subtitle": "The platform connecting individuals, professionals and trainers around the circular economy.",
     "hero_cta_primary": "Get started for free",
     "hero_cta_secondary": "Browse listings",
@@ -1148,7 +1148,7 @@
     "subtitle": "Send an email to all newsletter subscribers.",
     "subject": "Subject *",
     "content": "Content (HTML) *",
-    "warning": "⚠️ This email will be sent to all users who have enabled the newsletter. This action is irreversible.",
+    "warning": "This email will be sent to all users who have enabled the newsletter. This action is irreversible.",
     "send_btn": "Send newsletter",
     "sending": "Sending..."
   },

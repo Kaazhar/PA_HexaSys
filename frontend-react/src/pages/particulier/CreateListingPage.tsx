@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, Upload, X, MapPin, Package, SkipForward } from 'lucide-react';
+import { CheckCircle, Upload, X, MapPin, Package, SkipForward, Gift, Tag } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -217,13 +217,13 @@ export default function CreateListingPage() {
                 <h2 className="text-lg font-bold text-gray-900 mb-4">{t('create_listing.type_title')}</h2>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { value: 'don' as const, label: t('create_listing.don_label'), desc: t('create_listing.don_desc'), icon: '🎁', sel: 'border-green-500 bg-green-50' },
-                    { value: 'vente' as const, label: t('create_listing.vente_label'), desc: t('create_listing.vente_desc'), icon: '💰', sel: 'border-orange-400 bg-orange-50' },
+                    { value: 'don' as const, label: t('create_listing.don_label'), desc: t('create_listing.don_desc'), Icon: Gift, sel: 'border-green-500 bg-green-50' },
+                    { value: 'vente' as const, label: t('create_listing.vente_label'), desc: t('create_listing.vente_desc'), Icon: Tag, sel: 'border-orange-400 bg-orange-50' },
                   ].map((opt) => (
                     <button key={opt.value} type="button" onClick={() => setType(opt.value)}
                       className={clsx('flex flex-col items-center gap-2 p-5 border-2 rounded-xl transition-all',
                         type === opt.value ? opt.sel : 'border-gray-200 hover:border-gray-300')}>
-                      <span className="text-3xl">{opt.icon}</span>
+                      <opt.Icon className="w-8 h-8 text-gray-600" />
                       <span className="font-bold text-gray-900">{opt.label}</span>
                       <span className="text-xs text-gray-500">{opt.desc}</span>
                     </button>
@@ -516,7 +516,7 @@ export default function CreateListingPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium',
                     type === 'don' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700')}>
-                    {type === 'don' ? `🎁 ${t('create_listing.don_label')}` : `💰 ${t('create_listing.vente_label')}`}
+                    {type === 'don' ? t('create_listing.don_label') : t('create_listing.vente_label')}
                   </span>
                   {selectedCategory && (
                     <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700">
