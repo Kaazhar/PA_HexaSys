@@ -8,6 +8,23 @@ import { Bell, MessageCircle } from 'lucide-react';
 import type { Notification } from '../../types';
 import PushNotificationButton from '../PushNotificationButton';
 import { useTranslation } from 'react-i18next';
+import { adminSidebar, particulierSidebar, proSidebar, salarieSidebar } from '../../config/sidebars';
+
+type AdminView = 'admin' | 'particulier' | 'professionnel' | 'salarie';
+
+const ADMIN_VIEWS: { key: AdminView; label: string }[] = [
+  { key: 'admin',         label: 'Admin' },
+  { key: 'particulier',   label: 'Particulier' },
+  { key: 'professionnel', label: 'Pro' },
+  { key: 'salarie',       label: 'Salarié' },
+];
+
+const ADMIN_VIEW_SIDEBARS: Record<AdminView, typeof adminSidebar> = {
+  admin:         adminSidebar,
+  particulier:   particulierSidebar,
+  professionnel: proSidebar,
+  salarie:       salarieSidebar,
+};
 
 interface NavItem {
   label: string;
@@ -35,6 +52,19 @@ export default function DashboardLayout({ children, sidebarItems = [], title, no
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
+  const isAdmin = user?.role === 'admin';
+  const [adminView, setAdminViewState] = useState<AdminView>(() => {
+    if (user?.role !== 'admin') return 'admin';
+    return (localStorage.getItem(`admin_view_${user.id}`) as AdminView) ?? 'admin';
+  });
+
+  const setAdminView = (view: AdminView) => {
+    setAdminViewState(view);
+    if (user) localStorage.setItem(`admin_view_${user.id}`, view);
+  };
+
+  const effectiveSidebarItems = isAdmin ? ADMIN_VIEW_SIDEBARS[adminView] : sidebarItems;
+
   const { data: notifData } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => notificationService.getAll(),
@@ -52,13 +82,31 @@ export default function DashboardLayout({ children, sidebarItems = [], title, no
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar items={sidebarItems} />
+      <Sidebar items={effectiveSidebarItems} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
-          <div>
+          <div className="flex items-center gap-3">
             {title && <h1 className="text-base font-semibold text-gray-800">{title}</h1>}
+            {isAdmin && (
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+                {ADMIN_VIEWS.map(v => (
+                  <button
+                    key={v.key}
+                    type="button"
+                    onClick={() => setAdminView(v.key)}
+                    className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
+                      adminView === v.key
+                        ? 'bg-white text-primary-700 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             
