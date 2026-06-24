@@ -65,7 +65,7 @@ export default function ProfilePage() {
     confirm_password: '',
   });
 
-  const [newsletter, setNewsletter] = useState((user as any)?.newsletter_subscribed || false);
+  const [newsletter, setNewsletter] = useState(user?.newsletter_subscribed || false);
 
   const handleUserUpdated = (updatedUser: UserType) => {
     updateUser(updatedUser);
@@ -310,7 +310,7 @@ export default function ProfilePage() {
                   setNewsletter(next);
                   newsletterService.toggle(next).then(() => {
                     toast.success(next ? t('profile.subscribed_newsletter') : t('profile.unsubscribed_newsletter'));
-                    updateUser({ ...(user as any), newsletter_subscribed: next });
+                    updateUser({ ...user, newsletter_subscribed: next });
                   });
                 }}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${newsletter ? 'bg-primary-500' : 'bg-gray-200'}`}
@@ -327,7 +327,7 @@ export default function ProfilePage() {
           />
 
           <EmailTwoFAToggle
-            isEnabled={(user as any).email_two_fa_enabled}
+            isEnabled={user.email_two_fa_enabled}
             onSuccess={handleUserUpdated}
           />
 
