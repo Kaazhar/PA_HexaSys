@@ -220,7 +220,7 @@ export default function ContainersPage() {
       </div>
 
       {selectedContainer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setSelectedContainer(null)}>
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/40" onClick={() => setSelectedContainer(null)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between p-5 border-b border-gray-100">
               <div>
