@@ -130,22 +130,22 @@ function App() {
       <Route path="/admin/newsletter" element={<ProtectedRoute roles={['admin']}><AdminNewsletter /></ProtectedRoute>} />
       <Route path="/admin/langues" element={<ProtectedRoute roles={['admin']}><AdminLanguages /></ProtectedRoute>} />
 
-      <Route path="/dashboard" element={<ProtectedRoute roles={['particulier']}><DashboardParticulier /></ProtectedRoute>} />
-      <Route path="/annonces/creer" element={<ProtectedRoute roles={['particulier', 'professionnel']}><CreateListingPage /></ProtectedRoute>} />
-      <Route path="/mes-annonces" element={<ProtectedRoute roles={['particulier', 'professionnel']}><MesAnnoncesPage /></ProtectedRoute>} />
-      <Route path="/mes-annonces/:id/modifier" element={<ProtectedRoute roles={['particulier', 'professionnel']}><EditListingPage /></ProtectedRoute>} />
-      <Route path="/score" element={<ProtectedRoute roles={['particulier', 'professionnel', 'salarie']}><ScorePage /></ProtectedRoute>} />
-      <Route path="/mes-depots" element={<ProtectedRoute roles={['particulier']}><MesDepotsPage /></ProtectedRoute>} />
-      <Route path="/abonnement" element={<ProtectedRoute roles={['professionnel']}><AbonnementPage /></ProtectedRoute>} />
-      <Route path="/planning" element={<ProtectedRoute roles={['particulier']}><MonPlanningPage /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute roles={['particulier', 'admin']}><DashboardParticulier /></ProtectedRoute>} />
+      <Route path="/annonces/creer" element={<ProtectedRoute roles={['particulier', 'professionnel', 'admin']}><CreateListingPage /></ProtectedRoute>} />
+      <Route path="/mes-annonces" element={<ProtectedRoute roles={['particulier', 'professionnel', 'admin']}><MesAnnoncesPage /></ProtectedRoute>} />
+      <Route path="/mes-annonces/:id/modifier" element={<ProtectedRoute roles={['particulier', 'professionnel', 'admin']}><EditListingPage /></ProtectedRoute>} />
+      <Route path="/score" element={<ProtectedRoute roles={['particulier', 'professionnel', 'salarie', 'admin']}><ScorePage /></ProtectedRoute>} />
+      <Route path="/mes-depots" element={<ProtectedRoute roles={['particulier', 'admin']}><MesDepotsPage /></ProtectedRoute>} />
+      <Route path="/abonnement" element={<ProtectedRoute roles={['professionnel', 'admin']}><AbonnementPage /></ProtectedRoute>} />
+      <Route path="/planning" element={<ProtectedRoute roles={['particulier', 'admin']}><MonPlanningPage /></ProtectedRoute>} />
 
-      <Route path="/pro" element={<ProtectedRoute roles={['professionnel']}><DashboardPro /></ProtectedRoute>} />
-      <Route path="/pro/projets" element={<ProtectedRoute roles={['professionnel']}><ProjetsPro /></ProtectedRoute>} />
+      <Route path="/pro" element={<ProtectedRoute roles={['professionnel', 'admin']}><DashboardPro /></ProtectedRoute>} />
+      <Route path="/pro/projets" element={<ProtectedRoute roles={['professionnel', 'admin']}><ProjetsPro /></ProtectedRoute>} />
 
-      <Route path="/salarie" element={<ProtectedRoute roles={['salarie']}><DashboardSalarie /></ProtectedRoute>} />
-      <Route path="/salarie/articles" element={<ProtectedRoute roles={['salarie']}><SalarieArticles /></ProtectedRoute>} />
-      <Route path="/salarie/planning" element={<ProtectedRoute roles={['salarie']}><SalariePlanning /></ProtectedRoute>} />
-      <Route path="/salarie/formations" element={<ProtectedRoute roles={['salarie']}><SalarieFormations /></ProtectedRoute>} />
+      <Route path="/salarie" element={<ProtectedRoute roles={['salarie', 'admin']}><DashboardSalarie /></ProtectedRoute>} />
+      <Route path="/salarie/articles" element={<ProtectedRoute roles={['salarie', 'admin']}><SalarieArticles /></ProtectedRoute>} />
+      <Route path="/salarie/planning" element={<ProtectedRoute roles={['salarie', 'admin']}><SalariePlanning /></ProtectedRoute>} />
+      <Route path="/salarie/formations" element={<ProtectedRoute roles={['salarie', 'admin']}><SalarieFormations /></ProtectedRoute>} />
       <Route path="/salarie/forum" element={<ProtectedRoute roles={['salarie', 'admin']}><SalarieForum /></ProtectedRoute>} />
 
       <Route path="/forum" element={<ForumPage />} />
