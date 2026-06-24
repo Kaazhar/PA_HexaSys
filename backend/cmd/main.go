@@ -237,6 +237,7 @@ func main() {
 		adminGroup.POST("/users", handlers.CreateUser)
 		adminGroup.PUT("/users/:id", handlers.UpdateUser)
 		adminGroup.DELETE("/users/:id", handlers.DeleteUser)
+		adminGroup.PUT("/users/:id/reset-email-2fa", handlers.ResetEmailTwoFA)
 		adminGroup.POST("/users/:id/ban", handlers.BanUser)
 		adminGroup.POST("/users/:id/unban", handlers.UnbanUser)
 		adminGroup.GET("/users/:id/bans", handlers.GetBanHistory)

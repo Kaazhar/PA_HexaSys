@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Search, Plus, Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, ShieldOff, ShieldCheck } from 'lucide-react';
+import { Users, Search, Plus, Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, ShieldOff, ShieldCheck, MailX } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -196,6 +196,15 @@ export default function AdminUsers() {
     onError: () => toast.error(t('common.error')),
   });
 
+  const resetEmail2FAMutation = useMutation({
+    mutationFn: (id: number) => userService.resetEmail2FA(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      toast.success('2FA email réinitialisée');
+    },
+    onError: () => toast.error(t('common.error')),
+  });
+
   return (
     <DashboardLayout sidebarItems={adminSidebar} title={t('admin_users.title')}>
       <div className="space-y-5">
@@ -321,6 +330,15 @@ export default function AdminUsers() {
                               title="Bannir"
                             >
                               <ShieldOff className="w-4 h-4" />
+                            </button>
+                          )}
+                          {(user as any).email_two_fa_enabled && (
+                            <button
+                              onClick={() => resetEmail2FAMutation.mutate(user.id)}
+                              className="p-1.5 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                              title="Réinitialiser la 2FA email"
+                            >
+                              <MailX className="w-4 h-4" />
                             </button>
                           )}
                           <button

@@ -197,3 +197,18 @@ func CreateUser(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, user)
 }
+
+func ResetEmailTwoFA(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID invalide"})
+		return
+	}
+	var user models.User
+	if err := config.DB.First(&user, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
+		return
+	}
+	config.DB.Model(&user).Update("email_two_fa_enabled", false)
+	c.JSON(http.StatusOK, gin.H{"message": "2FA email réinitialisée"})
+}

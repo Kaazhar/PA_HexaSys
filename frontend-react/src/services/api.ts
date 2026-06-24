@@ -87,6 +87,7 @@ export const userService = {
     api.post(`/admin/users/${id}/ban`, data),
   unban: (id: number) => api.post(`/admin/users/${id}/unban`),
   getBanHistory: (id: number) => api.get(`/admin/users/${id}/bans`),
+  resetEmail2FA: (id: number) => api.put(`/admin/users/${id}/reset-email-2fa`),
 };
 
 export const listingService = {
