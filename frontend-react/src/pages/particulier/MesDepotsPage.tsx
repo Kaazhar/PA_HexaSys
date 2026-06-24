@@ -7,7 +7,8 @@ import { containerService } from '../../services/api';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import EmptyState from '../../components/common/EmptyState';
-import { particulierSidebar } from '../../config/sidebars';
+import { particulierSidebar, adminSidebar } from '../../config/sidebars';
+import { useAuth } from '../../context/AuthContext';
 import type { ContainerRequest } from '../../types';
 
 const STATUS_META: Record<string, { label: string; className: string; icon: ReactNode }> = {
@@ -39,6 +40,8 @@ function BarcodeImage({ requestId }: { requestId: number }) {
 }
 
 export default function MesDepotsPage() {
+  const { user } = useAuth();
+  const sidebar = user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -59,7 +62,7 @@ export default function MesDepotsPage() {
   });
 
   return (
-    <DashboardLayout sidebarItems={particulierSidebar} title="Mes demandes de dépôt">
+    <DashboardLayout sidebarItems={sidebar} title="Mes demandes de dépôt">
       <div className="max-w-2xl mx-auto">
         {isLoading ? (
           <div className="flex justify-center py-12"><LoadingSpinner size="lg" /></div>

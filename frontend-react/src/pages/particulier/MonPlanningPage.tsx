@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock, BookOpen, ExternalL
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { bookingService } from '../../services/api';
-import { particulierSidebar } from '../../config/sidebars';
+import { particulierSidebar, adminSidebar } from '../../config/sidebars';
+import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { format, isSameDay, isSameMonth, isToday, isPast, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -20,6 +21,8 @@ const TYPE_COLORS: Record<string, string> = {
 
 export default function MonPlanningPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const sidebar = user?.role === 'admin' ? adminSidebar : particulierSidebar;
 
   const TYPE_LABELS: Record<string, string> = {
     atelier: t('planning.type_atelier'),
@@ -65,7 +68,7 @@ export default function MonPlanningPage() {
     .sort((a, b) => new Date(b.workshop!.date).getTime() - new Date(a.workshop!.date).getTime());
 
   return (
-    <DashboardLayout sidebarItems={particulierSidebar} title={t('planning.title')}>
+    <DashboardLayout sidebarItems={sidebar} title={t('planning.title')}>
       {isLoading ? (
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : bookings.length === 0 ? (

@@ -6,7 +6,8 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
-import { particulierSidebar } from '../../config/sidebars';
+import { particulierSidebar, proSidebar, salarieSidebar, adminSidebar } from '../../config/sidebars';
+import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 const levels = [
@@ -18,6 +19,8 @@ const levels = [
 
 export default function ScorePage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const sidebar = user?.role === 'professionnel' ? proSidebar : user?.role === 'salarie' ? salarieSidebar : user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const { data, isLoading } = useQuery({
     queryKey: ['score', 'me'],
     queryFn: () => scoreService.getMyScore(),
@@ -37,7 +40,7 @@ export default function ScorePage() {
   const progress = nextLevel ? Math.round(((score?.total_points || 0) - currentLevel.min) / (nextLevel.min - currentLevel.min) * 100) : 100;
 
   return (
-    <DashboardLayout sidebarItems={particulierSidebar} title="Mon score upcycling">
+    <DashboardLayout sidebarItems={sidebar} title="Mon score upcycling">
       {isLoading ? (
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (

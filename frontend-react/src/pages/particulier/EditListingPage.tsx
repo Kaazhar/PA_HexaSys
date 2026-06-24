@@ -8,7 +8,8 @@ import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { particulierSidebar } from '../../config/sidebars';
+import { particulierSidebar, proSidebar, adminSidebar } from '../../config/sidebars';
+import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 interface ListingForm {
@@ -23,6 +24,8 @@ interface ListingForm {
 
 export default function EditListingPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const sidebar = user?.role === 'professionnel' ? proSidebar : user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [images, setImages] = useState<string[]>([]);
@@ -107,14 +110,14 @@ export default function EditListingPage() {
 
   if (listingLoading) {
     return (
-      <DashboardLayout sidebarItems={particulierSidebar} title={t('edit_listing.title')}>
+      <DashboardLayout sidebarItems={sidebar} title={t('edit_listing.title')}>
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout sidebarItems={particulierSidebar} title={t('edit_listing.title')}>
+    <DashboardLayout sidebarItems={sidebar} title={t('edit_listing.title')}>
       <div className="max-w-2xl mx-auto">
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="card space-y-5">

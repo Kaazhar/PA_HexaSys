@@ -7,7 +7,7 @@ import { categoryService, listingService, uploadService, containerService } from
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
-import { particulierSidebar, proSidebar } from '../../config/sidebars';
+import { particulierSidebar, proSidebar, adminSidebar } from '../../config/sidebars';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { ContainerSlot } from '../../types';
@@ -23,7 +23,7 @@ function getCatIcon(name: string | undefined) {
 export default function CreateListingPage() {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const sidebar = user?.role === 'professionnel' ? proSidebar : particulierSidebar;
+  const sidebar = user?.role === 'professionnel' ? proSidebar : user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const navigate = useNavigate();
 
   const SIZE_OPTIONS = [
