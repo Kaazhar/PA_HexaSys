@@ -207,7 +207,13 @@
     "fill": "Remplissage",
     "objects": "objets",
     "no_coords": "Coordonnées GPS non disponibles",
-    "none": "Aucun conteneur disponible"
+    "none": "Aucun conteneur disponible",
+    "see_slots": "Voir les emplacements →",
+    "free": "libre(s)",
+    "total": "au total",
+    "size_s": "Petit",
+    "size_m": "Moyen",
+    "size_l": "Grand"
   },
   "score": {
     "title": "Mon score upcycling",

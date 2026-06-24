@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, Package, Box } from 'lucide-react';
+import { MapPin, Package, Box, X, Layers } from 'lucide-react';
 import PublicLayout from '../../components/layout/PublicLayout';
 import { useQuery } from '@tanstack/react-query';
 import { containerService } from '../../services/api';
@@ -10,6 +10,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import type { Container, ContainerSlot } from '../../types';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -28,6 +29,7 @@ export default function ContainersPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isPro = user?.role === 'professionnel';
+  const [selectedContainer, setSelectedContainer] = useState<Container | null>(null);
 
   const statusLabel: Record<string, string> = {
     operational: t('containers.available'),
@@ -48,6 +50,13 @@ export default function ContainersPage() {
   const containers = data?.data || [];
   const withCoords = containers.filter(c => c.latitude !== 0 && c.longitude !== 0);
   const availableObjects = availableData?.data || [];
+
+  const { data: slotsData } = useQuery({
+    queryKey: ['container-slots', selectedContainer?.id],
+    queryFn: () => containerService.getSlots(selectedContainer!.id),
+    enabled: !!selectedContainer,
+  });
+  const slots: ContainerSlot[] = slotsData?.data || [];
 
   return (
     <PublicLayout>
@@ -125,7 +134,11 @@ export default function ContainersPage() {
                 containers.map((container) => {
                   const fill = Math.round((container.current_count / container.capacity) * 100);
                   return (
-                    <div key={container.id} className="card">
+                    <div
+                      key={container.id}
+                      className="card cursor-pointer hover:shadow-md hover:border-primary-300 border border-transparent transition-all"
+                      onClick={() => setSelectedContainer(container)}
+                    >
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h3 className="font-semibold text-gray-900">{container.name}</h3>
@@ -153,6 +166,7 @@ export default function ContainersPage() {
                           />
                         </div>
                       </div>
+                      <p className="text-xs text-primary-600 mt-3 font-medium">{t('containers.see_slots')}</p>
                     </div>
                   );
                 })
@@ -204,6 +218,75 @@ export default function ContainersPage() {
           </div>
         )}
       </div>
+
+      {selectedContainer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setSelectedContainer(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between p-5 border-b border-gray-100">
+              <div>
+                <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-primary-600" />
+                  {selectedContainer.name}
+                </h2>
+                <p className="text-sm text-gray-400 mt-0.5">{selectedContainer.address}, {selectedContainer.district}</p>
+              </div>
+              <button onClick={() => setSelectedContainer(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5">
+              {slots.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-4">{t('common.noData')}</p>
+              ) : (
+                <div className="space-y-4">
+                  {(['S', 'M', 'L'] as const).map(size => {
+                    const sizeSlots = slots.filter(s => s.size === size);
+                    if (sizeSlots.length === 0) return null;
+                    const free = sizeSlots.filter(s => s.status === 'free').length;
+                    const occupied = sizeSlots.length - free;
+                    return (
+                      <div key={size}>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className={clsx(
+                              'text-xs font-bold w-7 h-7 rounded-full flex items-center justify-center',
+                              size === 'S' ? 'bg-blue-100 text-blue-700' :
+                              size === 'M' ? 'bg-amber-100 text-amber-700' :
+                              'bg-purple-100 text-purple-700'
+                            )}>{size}</span>
+                            <span className="text-sm font-medium text-gray-700">{t(`containers.size_${size.toLowerCase()}`)}</span>
+                          </div>
+                          <span className="text-xs text-gray-400">{free} {t('containers.free')} / {sizeSlots.length} {t('containers.total')}</span>
+                        </div>
+                        <div className="flex gap-1 flex-wrap">
+                          {sizeSlots.map(slot => (
+                            <span
+                              key={slot.id}
+                              title={slot.slot_code}
+                              className={clsx(
+                                'text-xs px-2 py-0.5 rounded font-mono',
+                                slot.status === 'free' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-500 line-through'
+                              )}
+                            >
+                              {slot.slot_code}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="pt-3 border-t border-gray-100 flex justify-between text-sm">
+                    <span className="text-gray-500">{t('containers.fill')}</span>
+                    <span className="font-semibold text-gray-900">
+                      {slots.filter(s => s.status !== 'free').length}/{slots.length} {t('containers.objects')}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </PublicLayout>
   );
 }

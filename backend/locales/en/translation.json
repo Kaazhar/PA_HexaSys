@@ -207,7 +207,13 @@
     "fill": "Fill level",
     "objects": "items",
     "no_coords": "GPS coordinates unavailable",
-    "none": "No containers available"
+    "none": "No containers available",
+    "see_slots": "See slots →",
+    "free": "free",
+    "total": "total",
+    "size_s": "Small",
+    "size_m": "Medium",
+    "size_l": "Large"
   },
   "score": {
     "title": "My upcycling score",
