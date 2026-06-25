@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
 )
@@ -35,7 +36,7 @@ func GetForumTopic(c *gin.Context) {
 		return
 	}
 
-	config.DB.Model(&topic).UpdateColumn("views", topic.Views+1)
+	config.DB.Model(&topic).UpdateColumn("views", gorm.Expr("views + 1"))
 
 	var posts []models.ForumPost
 	config.DB.Preload("Author").Where("topic_id = ?", id).Order("created_at ASC").Find(&posts)
@@ -209,7 +210,7 @@ func DeleteForumPost(c *gin.Context) {
 
 	config.DB.Delete(&post)
 	config.DB.Model(&models.ForumTopic{}).Where("id = ?", post.TopicID).
-		UpdateColumn("replies_count", config.DB.Model(&models.ForumPost{}).Where("topic_id = ?", post.TopicID))
+		UpdateColumn("replies_count", gorm.Expr("replies_count - 1"))
 
 	c.JSON(http.StatusOK, gin.H{"message": "Réponse supprimée"})
 }

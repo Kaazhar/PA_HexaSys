@@ -214,6 +214,11 @@ func BookWorkshop(c *gin.Context) {
 		return
 	}
 
+	if workshop.Price > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cette formation est payante, veuillez passer par le paiement"})
+		return
+	}
+
 	if workshop.Enrolled >= workshop.MaxSpots {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Workshop is full"})
 		return
