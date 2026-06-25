@@ -47,16 +47,6 @@ func GetLeaderboard(c *gin.Context) {
 	c.JSON(http.StatusOK, entries)
 }
 
-func GetUserScore(c *gin.Context) {
-	id := c.Param("id")
-	var score models.UpcyclingScore
-	if err := config.DB.Where("user_id = ?", id).First(&score).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Score not found"})
-		return
-	}
-	c.JSON(http.StatusOK, score)
-}
-
 func GetNotifications(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	var notifications []models.Notification

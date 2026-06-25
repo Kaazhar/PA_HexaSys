@@ -219,7 +219,10 @@
     "total": "au total",
     "size_s": "Petit",
     "size_m": "Moyen",
-    "size_l": "Grand"
+    "size_l": "Grand",
+    "available_objects_title": "Objets disponibles à récupérer",
+    "no_available_objects": "Aucun objet disponible pour le moment.",
+    "slot_label": "Emplacement"
   },
   "score": {
     "title": "Mon score upcycling",

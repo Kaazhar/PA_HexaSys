@@ -46,16 +46,6 @@ func GetContainers(c *gin.Context) {
 	c.JSON(http.StatusOK, containers)
 }
 
-func GetContainer(c *gin.Context) {
-	id := c.Param("id")
-	var container models.Container
-	if err := config.DB.First(&container, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Container not found"})
-		return
-	}
-	c.JSON(http.StatusOK, container)
-}
-
 type CreateContainerRequest struct {
 	Name      string  `json:"name" binding:"required"`
 	Address   string  `json:"address"`
@@ -258,10 +248,6 @@ func ValidateContainerRequest(c *gin.Context) {
 		"barcode":     barcode,
 	})
 
-
-	config.DB.Model(&models.Container{}).Where("id = ?", request.ContainerID).
-		UpdateColumn("current_count", gorm.Expr("current_count + 1"))
-
 	notif := models.Notification{
 		UserID:  request.UserID,
 		Message: fmt.Sprintf("Votre demande de dépôt a été approuvée ! Code d'accès : %s — Case : %s", accessCode, request.SlotCode),
@@ -298,9 +284,6 @@ func ConfirmDeposit(c *gin.Context) {
 		config.DB.Model(&models.ContainerSlot{}).Where("id = ?", *request.SlotID).
 			Update("status", "occupied")
 	}
-
-	config.DB.Model(&models.Container{}).Where("id = ?", request.ContainerID).
-		UpdateColumn("current_count", gorm.Expr("current_count + 1"))
 
 	config.DB.Create(&models.Notification{
 		UserID:  request.UserID,

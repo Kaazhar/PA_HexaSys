@@ -179,12 +179,12 @@ export default function ContainersPage() {
           <div className="mt-10">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <Box className="w-5 h-5 text-primary-600" />
-              Objets disponibles à récupérer
+              {t('containers.available_objects_title')}
             </h2>
             {availableObjects.length === 0 ? (
               <div className="text-center py-12 text-gray-400">
                 <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>Aucun objet disponible pour le moment.</p>
+                <p>{t('containers.no_available_objects')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -209,7 +209,7 @@ export default function ContainersPage() {
                       <span>{obj.container_name} — {obj.address}, {obj.district}</span>
                     </div>
                     <div className="mt-2 text-xs text-gray-400">
-                      Emplacement : <span className="font-mono font-semibold text-gray-600">{obj.slot_code}</span>
+                      {t('containers.slot_label')} : <span className="font-mono font-semibold text-gray-600">{obj.slot_code}</span>
                     </div>
                   </div>
                 ))}

@@ -68,6 +68,7 @@ export interface Workshop {
   location: string;
   price: number;
   max_spots: number;
+  min_spots?: number;
   enrolled: number;
   image?: string;
   category_id: number;
