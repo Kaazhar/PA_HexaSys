@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
 )
@@ -35,7 +36,7 @@ func GetPublicArticle(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Article introuvable"})
 		return
 	}
-	config.DB.Model(&article).UpdateColumn("views", article.Views+1)
+	config.DB.Model(&article).UpdateColumn("views", gorm.Expr("views + 1"))
 	c.JSON(http.StatusOK, article)
 }
 

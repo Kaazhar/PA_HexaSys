@@ -10,13 +10,7 @@ import EmptyState from '../../components/common/EmptyState';
 import { particulierSidebar, adminSidebar } from '../../config/sidebars';
 import { useAuth } from '../../context/AuthContext';
 import type { ContainerRequest } from '../../types';
-
-const STATUS_META: Record<string, { label: string; className: string; icon: ReactNode }> = {
-  pending: { label: 'En attente de validation', className: 'bg-amber-100 text-amber-700', icon: <Clock className="w-3.5 h-3.5" /> },
-  approved: { label: 'Approuvée', className: 'bg-green-100 text-green-700', icon: <CheckCircle className="w-3.5 h-3.5" /> },
-  rejected: { label: 'Refusée', className: 'bg-red-100 text-red-700', icon: <XCircle className="w-3.5 h-3.5" /> },
-  deposited: { label: 'Déposé', className: 'bg-blue-100 text-blue-700', icon: <Package className="w-3.5 h-3.5" /> },
-};
+import { useTranslation } from 'react-i18next';
 
 function BarcodeImage({ requestId }: { requestId: number }) {
   const [url, setUrl] = useState<string | null>(null);
@@ -40,9 +34,17 @@ function BarcodeImage({ requestId }: { requestId: number }) {
 }
 
 export default function MesDepotsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const sidebar = user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const queryClient = useQueryClient();
+
+  const STATUS_META: Record<string, { label: string; className: string; icon: ReactNode }> = {
+    pending:   { label: t('depots.status_pending'),   className: 'bg-amber-100 text-amber-700', icon: <Clock className="w-3.5 h-3.5" /> },
+    approved:  { label: t('depots.status_approved'),  className: 'bg-green-100 text-green-700', icon: <CheckCircle className="w-3.5 h-3.5" /> },
+    rejected:  { label: t('depots.status_rejected'),  className: 'bg-red-100 text-red-700',    icon: <XCircle className="w-3.5 h-3.5" /> },
+    deposited: { label: t('depots.status_deposited'), className: 'bg-blue-100 text-blue-700',  icon: <Package className="w-3.5 h-3.5" /> },
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['my-container-requests'],
@@ -53,23 +55,23 @@ export default function MesDepotsPage() {
   const confirmMutation = useMutation({
     mutationFn: (id: number) => containerService.confirmDeposit(id),
     onSuccess: () => {
-      toast.success('Dépôt confirmé !');
+      toast.success(t('depots.deposit_confirmed'));
       queryClient.invalidateQueries({ queryKey: ['my-container-requests'] });
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.error || 'Erreur lors de la confirmation');
+      toast.error(err?.response?.data?.error || t('depots.confirm_error'));
     },
   });
 
   return (
-    <DashboardLayout sidebarItems={sidebar} title="Mes demandes de dépôt">
+    <DashboardLayout sidebarItems={sidebar} title={t('depots.title')}>
       <div className="max-w-2xl mx-auto">
         {isLoading ? (
           <div className="flex justify-center py-12"><LoadingSpinner size="lg" /></div>
         ) : requests.length === 0 ? (
           <EmptyState
             icon={<Package className="w-12 h-12" />}
-            message="Aucune demande de dépôt pour le moment. Vos codes d'accès et codes-barres apparaîtront ici une fois vos demandes approuvées."
+            message={t('depots.empty')}
           />
         ) : (
           <div className="space-y-4">
@@ -82,7 +84,7 @@ export default function MesDepotsPage() {
                       <h3 className="font-bold text-gray-900">{req.object_title}</h3>
                       <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
                         <MapPin className="w-3 h-3" />
-                        <span>{req.container?.name}{req.slot_code ? ` · Case ${req.slot_code}` : ''}</span>
+                        <span>{req.container?.name}{req.slot_code ? ` · ${t('depots.slot')} ${req.slot_code}` : ''}</span>
                       </div>
                     </div>
                     <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${meta.className}`}>
@@ -92,7 +94,7 @@ export default function MesDepotsPage() {
 
                   {req.status === 'rejected' && req.reject_reason && (
                     <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700">
-                      Motif : {req.reject_reason}
+                      {t('depots.reject_reason')} : {req.reject_reason}
                     </div>
                   )}
 
@@ -101,7 +103,7 @@ export default function MesDepotsPage() {
                       <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
                         <KeyRound className="w-5 h-5 text-green-600 flex-shrink-0" />
                         <div>
-                          <p className="text-xs text-gray-500">Code d'accès au conteneur</p>
+                          <p className="text-xs text-gray-500">{t('depots.access_code')}</p>
                           <p className="font-mono font-bold text-lg text-[#2D5016] tracking-widest">{req.access_code}</p>
                         </div>
                       </div>
@@ -109,7 +111,7 @@ export default function MesDepotsPage() {
                       <div className="p-4 border border-gray-200 rounded-xl">
                         <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
                           <ScanBarcode className="w-3.5 h-3.5" />
-                          Code-barres de récupération (à scanner par le professionnel)
+                          {t('depots.barcode_label')}
                         </div>
                         <BarcodeImage requestId={req.id} />
                         <p className="text-center font-mono text-sm text-gray-600 mt-1">{req.barcode}</p>
@@ -122,7 +124,7 @@ export default function MesDepotsPage() {
                           disabled={confirmMutation.isPending}
                           className="btn-primary w-full"
                         >
-                          {confirmMutation.isPending ? 'Confirmation...' : "J'ai déposé l'objet"}
+                          {confirmMutation.isPending ? t('depots.confirming') : t('depots.confirm_deposit')}
                         </button>
                       )}
                     </div>

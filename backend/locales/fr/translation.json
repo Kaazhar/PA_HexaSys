@@ -247,6 +247,22 @@
     "history_title": "Historique des actions",
     "leaderboard_title": "Classement de la communauté"
   },
+  "depots": {
+    "title": "Mes demandes de dépôt",
+    "empty": "Aucune demande de dépôt pour le moment. Vos codes d'accès et codes-barres apparaîtront ici une fois vos demandes approuvées.",
+    "status_pending": "En attente de validation",
+    "status_approved": "Approuvée",
+    "status_rejected": "Refusée",
+    "status_deposited": "Déposé",
+    "slot": "Case",
+    "reject_reason": "Motif",
+    "access_code": "Code d'accès au conteneur",
+    "barcode_label": "Code-barres de récupération (à scanner par le professionnel)",
+    "confirming": "Confirmation...",
+    "confirm_deposit": "J'ai déposé l'objet",
+    "deposit_confirmed": "Dépôt confirmé !",
+    "confirm_error": "Erreur lors de la confirmation"
+  },
   "common": {
     "save": "Enregistrer",
     "cancel": "Annuler",

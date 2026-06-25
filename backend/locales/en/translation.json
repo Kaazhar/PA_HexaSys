@@ -247,6 +247,22 @@
     "history_title": "Action history",
     "leaderboard_title": "Community leaderboard"
   },
+  "depots": {
+    "title": "My deposit requests",
+    "empty": "No deposit requests yet. Your access codes and barcodes will appear here once your requests are approved.",
+    "status_pending": "Pending validation",
+    "status_approved": "Approved",
+    "status_rejected": "Rejected",
+    "status_deposited": "Deposited",
+    "slot": "Slot",
+    "reject_reason": "Reason",
+    "access_code": "Container access code",
+    "barcode_label": "Pickup barcode (to be scanned by the professional)",
+    "confirming": "Confirming...",
+    "confirm_deposit": "I've deposited the item",
+    "deposit_confirmed": "Deposit confirmed!",
+    "confirm_error": "Error during confirmation"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
