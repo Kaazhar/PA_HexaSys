@@ -3,6 +3,7 @@ import { ShieldCheck, ShieldOff } from 'lucide-react';
 import { authService } from '../services/api';
 import type { User } from '../types';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   isEnabled?: boolean;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function EmailTwoFAToggle({ isEnabled, onSuccess }: Props) {
+  const { t } = useTranslation();
   const [active, setActive] = useState(isEnabled ?? false);
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +25,7 @@ export default function EmailTwoFAToggle({ isEnabled, onSuccess }: Props) {
       onSuccess(res.data.user);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
-      toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour');
+      toast.error(error.response?.data?.error || t('email_twofa.update_error'));
     } finally {
       setLoading(false);
     }
@@ -37,18 +39,16 @@ export default function EmailTwoFAToggle({ isEnabled, onSuccess }: Props) {
         ) : (
           <ShieldOff className="w-4 h-4 text-gray-400" />
         )}
-        <h2 className="font-semibold text-gray-900">Authentification par email (2FA)</h2>
+        <h2 className="font-semibold text-gray-900">{t('email_twofa.title')}</h2>
       </div>
 
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-700">
-            {active ? '2FA email activée' : '2FA email désactivée'}
+            {active ? t('email_twofa.enabled') : t('email_twofa.disabled')}
           </p>
           <p className="text-xs text-gray-400 mt-0.5">
-            {active
-              ? 'Un code sera envoyé à votre adresse email à chaque connexion'
-              : 'Activez pour recevoir un code par email à chaque connexion'}
+            {active ? t('email_twofa.active_desc') : t('email_twofa.inactive_desc')}
           </p>
         </div>
 

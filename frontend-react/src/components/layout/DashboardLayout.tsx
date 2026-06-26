@@ -12,12 +12,7 @@ import { adminSidebar, particulierSidebar, proSidebar, salarieSidebar } from '..
 
 type AdminView = 'admin' | 'particulier' | 'professionnel' | 'salarie';
 
-const ADMIN_VIEWS: { key: AdminView; label: string }[] = [
-  { key: 'admin',         label: 'Admin' },
-  { key: 'particulier',   label: 'Particulier' },
-  { key: 'professionnel', label: 'Pro' },
-  { key: 'salarie',       label: 'Salarié' },
-];
+const ADMIN_VIEWS: AdminView[] = ['admin', 'particulier', 'professionnel', 'salarie'];
 
 const ADMIN_VIEW_SIDEBARS: Record<AdminView, typeof adminSidebar> = {
   admin:         adminSidebar,
@@ -93,16 +88,16 @@ export default function DashboardLayout({ children, sidebarItems = [], title, no
               <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
                 {ADMIN_VIEWS.map(v => (
                   <button
-                    key={v.key}
+                    key={v}
                     type="button"
-                    onClick={() => setAdminView(v.key)}
+                    onClick={() => setAdminView(v)}
                     className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
-                      adminView === v.key
+                      adminView === v
                         ? 'bg-white text-primary-700 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                     }`}
                   >
-                    {v.label}
+                    {t(`nav.admin_view_${v}`)}
                   </button>
                 ))}
               </div>

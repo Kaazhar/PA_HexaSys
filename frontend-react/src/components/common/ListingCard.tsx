@@ -4,6 +4,7 @@ import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import type { Listing } from '../../types';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 
 interface ListingCardProps {
   listing: Listing;
@@ -12,11 +13,12 @@ interface ListingCardProps {
 
 export default function ListingCard({ listing, onClick }: ListingCardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const conditionLabels: Record<string, string> = {
-    neuf: 'Neuf',
-    bon_etat: 'Bon état',
-    use: 'Usé',
-    pieces: 'Pour pièces',
+    neuf: t('listings.condition.neuf'),
+    bon_etat: t('listings.condition.bon_etat'),
+    use: t('listings.condition.use'),
+    pieces: t('listings.condition.pieces'),
   };
 
   return (
@@ -44,18 +46,18 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
             'badge text-xs font-semibold',
             listing.type === 'don' ? 'bg-green-500 text-white' : 'bg-coral-500 text-white'
           )}>
-            {listing.type === 'don' ? 'Don' : 'Vente'}
+            {listing.type === 'don' ? t('listings.type.don') : t('listings.type.vente')}
           </span>
           {listing.is_sponsored && (
             <span className="flex items-center gap-1 badge bg-amber-400 text-white text-xs font-semibold">
-              <Star className="w-3 h-3" /> Sponsorisé
+              <Star className="w-3 h-3" /> {t('listing_card.sponsored')}
             </span>
           )}
         </div>
         {listing.status !== 'active' && (
           <div className="absolute top-3 right-3">
             <span className="badge bg-gray-800/70 text-white text-xs">
-              {listing.status === 'pending' ? 'En attente' : listing.status === 'rejected' ? 'Rejeté' : 'Vendu'}
+              {listing.status === 'pending' ? t('listings.status.pending') : listing.status === 'rejected' ? t('listings.status.rejected') : t('listings.status.sold')}
             </span>
           </div>
         )}
@@ -71,7 +73,7 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
         <div className="flex items-center justify-between mt-3">
           <div className="flex items-center gap-1 text-xs text-gray-500">
             <MapPin className="w-3 h-3" />
-            <span>{listing.location || 'Non précisé'}</span>
+            <span>{listing.location || t('listing_card.no_location')}</span>
           </div>
           {listing.condition && (
             <span className="badge-gray text-xs">
@@ -89,7 +91,7 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
             {listing.type === 'vente' && listing.price ? (
               <span className="font-bold text-primary-500">{listing.price}€</span>
             ) : (
-              <span className="font-bold text-green-600">Gratuit</span>
+              <span className="font-bold text-green-600">{t('listings.free')}</span>
             )}
           </div>
         </div>

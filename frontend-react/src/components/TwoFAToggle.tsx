@@ -3,6 +3,7 @@ import { ShieldCheck, ShieldOff } from 'lucide-react';
 import { phoneService } from '../services/api';
 import type { User } from '../types';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   isEnabled?: boolean;
@@ -11,12 +12,13 @@ interface Props {
 }
 
 export default function TwoFAToggle({ isEnabled, isPhoneVerified, onSuccess }: Props) {
+  const { t } = useTranslation();
   const [active, setActive] = useState(isEnabled ?? false);
   const [enChargement, setEnChargement] = useState(false);
 
   const basculer = async () => {
     if (!isPhoneVerified && !active) {
-      toast.error('Vérifiez d\'abord votre numéro de téléphone');
+      toast.error(t('twofa.phone_required_error'));
       return;
     }
 
@@ -29,7 +31,7 @@ export default function TwoFAToggle({ isEnabled, isPhoneVerified, onSuccess }: P
       onSuccess(res.data.user);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
-      toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour');
+      toast.error(error.response?.data?.error || t('twofa.update_error'));
     } finally {
       setEnChargement(false);
     }
@@ -43,20 +45,20 @@ export default function TwoFAToggle({ isEnabled, isPhoneVerified, onSuccess }: P
         ) : (
           <ShieldOff className="w-4 h-4 text-gray-400" />
         )}
-        <h2 className="font-semibold text-gray-900">Authentification à deux facteurs (2FA)</h2>
+        <h2 className="font-semibold text-gray-900">{t('twofa.title')}</h2>
       </div>
 
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-700">
-            {active ? '2FA activée' : '2FA désactivée'}
+            {active ? t('twofa.enabled') : t('twofa.disabled')}
           </p>
           <p className="text-xs text-gray-400 mt-0.5">
             {!isPhoneVerified
-              ? 'Vérifiez votre téléphone ci-dessus pour pouvoir activer la 2FA'
+              ? t('twofa.phone_required_desc')
               : active
-                ? 'Un code SMS sera demandé à chaque connexion'
-                : 'Activez pour sécuriser votre compte avec un code SMS à chaque connexion'}
+                ? t('twofa.sms_active_desc')
+                : t('twofa.sms_inactive_desc')}
           </p>
         </div>
 
@@ -64,7 +66,7 @@ export default function TwoFAToggle({ isEnabled, isPhoneVerified, onSuccess }: P
           type="button"
           onClick={basculer}
           disabled={enChargement || (!isPhoneVerified && !active)}
-          title={!isPhoneVerified ? 'Vérifiez votre téléphone d\'abord' : ''}
+          title={!isPhoneVerified ? t('twofa.phone_required_tooltip') : ''}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors
             ${active ? 'bg-green-500' : 'bg-gray-200'}
             ${(!isPhoneVerified && !active) ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}

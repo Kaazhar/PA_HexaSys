@@ -1,8 +1,10 @@
 import { Bell, BellOff } from 'lucide-react';
 import { usePushNotifications } from '../hooks/usePushNotifications';
+import { useTranslation } from 'react-i18next';
 
 export default function PushNotificationButton() {
   const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } = usePushNotifications();
+  const { t } = useTranslation();
 
   if (!isSupported) return null;
 
@@ -10,7 +12,7 @@ export default function PushNotificationButton() {
     <button
       onClick={isSubscribed ? unsubscribe : subscribe}
       disabled={isLoading}
-      title={isSubscribed ? 'Désactiver les notifications push' : 'Activer les notifications push'}
+      title={isSubscribed ? t('push.disable_tooltip') : t('push.enable_tooltip')}
       className={`p-2 rounded-lg transition-colors ${
         isSubscribed
           ? 'text-green-600 bg-green-50 hover:bg-green-100'

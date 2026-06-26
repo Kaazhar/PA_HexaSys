@@ -23,8 +23,14 @@
     "logout": "Déconnexion",
     "messages": "Messages",
     "search_placeholder": "Rechercher...",
+    "search_loading": "Recherche...",
+    "no_results": "Aucun résultat",
     "notifications": "Notifications",
-    "no_notifications": "Aucune notification"
+    "no_notifications": "Aucune notification",
+    "admin_view_admin": "Admin",
+    "admin_view_particulier": "Particulier",
+    "admin_view_professionnel": "Pro",
+    "admin_view_salarie": "Salarié"
   },
   "home": {
     "hero_badge": "Plateforme d'upcycling collaborative",
@@ -135,6 +141,8 @@
     "pay_and_book": "Payer et réserver",
     "booked": "Inscrit",
     "spots": "places disponibles",
+    "spots_left": "{{count}} place disponible",
+    "spots_left_plural": "{{count}} places disponibles",
     "full": "Complet",
     "free": "Gratuit",
     "enrolled": "inscrits",
@@ -1255,5 +1263,70 @@
       "use": "Usé",
       "pieces": "Pour pièces"
     }
+  },
+  "listing_card": {
+    "sponsored": "Sponsorisé",
+    "no_location": "Non précisé"
+  },
+  "phone": {
+    "title": "Vérification du téléphone",
+    "verified_badge": "Vérifié",
+    "description": "Vérifiez votre numéro pour activer la 2FA et obtenir le badge « téléphone vérifié ».",
+    "phone_label": "Numéro de téléphone",
+    "send_btn": "Envoyer le code",
+    "code_sent_prefix": "Un code à 6 chiffres a été envoyé au",
+    "code_sent_suffix": "Il est valable 10 minutes.",
+    "code_label": "Code reçu par SMS",
+    "change_number": "Changer de numéro",
+    "resend_btn": "Renvoyer",
+    "verify_btn": "Vérifier",
+    "required_error": "Saisissez votre numéro de téléphone",
+    "code_length_error": "Le code doit contenir 6 chiffres",
+    "code_sent_success": "Code envoyé par SMS !",
+    "verified_success": "Téléphone vérifié !",
+    "code_error": "Code incorrect",
+    "send_error": "Erreur lors de l'envoi du SMS"
+  },
+  "twofa": {
+    "title": "Authentification à deux facteurs (2FA)",
+    "enabled": "2FA activée",
+    "disabled": "2FA désactivée",
+    "phone_required_desc": "Vérifiez votre téléphone ci-dessus pour pouvoir activer la 2FA",
+    "sms_active_desc": "Un code SMS sera demandé à chaque connexion",
+    "sms_inactive_desc": "Activez pour sécuriser votre compte avec un code SMS à chaque connexion",
+    "phone_required_tooltip": "Vérifiez votre téléphone d'abord",
+    "phone_required_error": "Vérifiez d'abord votre numéro de téléphone",
+    "update_error": "Erreur lors de la mise à jour"
+  },
+  "email_twofa": {
+    "title": "Authentification par email (2FA)",
+    "enabled": "2FA email activée",
+    "disabled": "2FA email désactivée",
+    "active_desc": "Un code sera envoyé à votre adresse email à chaque connexion",
+    "inactive_desc": "Activez pour recevoir un code par email à chaque connexion",
+    "update_error": "Erreur lors de la mise à jour"
+  },
+  "push": {
+    "enable_tooltip": "Activer les notifications push",
+    "disable_tooltip": "Désactiver les notifications push"
+  },
+  "login2fa": {
+    "title": "Vérification 2FA",
+    "desc_email": "Saisissez le code à 6 chiffres envoyé par email",
+    "desc_sms": "Saisissez le code à 6 chiffres envoyé par SMS",
+    "back": "← Retour",
+    "resend_btn": "Renvoyer le code",
+    "success": "Connexion réussie !",
+    "code_error": "Code incorrect",
+    "resent_success": "Nouveau code envoyé par SMS",
+    "resend_error": "Erreur lors de l'envoi"
+  },
+  "tutorial": {
+    "prev": "Précédent",
+    "prev_short": "Préc.",
+    "skip": "Passer",
+    "next": "Suivant",
+    "finish": "Terminer !",
+    "step_counter": "Étape {{current}} sur {{total}}"
   }
 }

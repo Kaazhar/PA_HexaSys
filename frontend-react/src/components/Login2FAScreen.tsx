@@ -3,6 +3,7 @@ import { Loader2, ShieldCheck } from 'lucide-react';
 import { authService } from '../services/api';
 import type { User } from '../types';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   userId: number;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function Login2FAScreen({ userId, method = 'sms', onSuccess, onCancel }: Props) {
+  const { t } = useTranslation();
   const [chiffres, setChiffres] = useState<string[]>(['', '', '', '', '', '']);
   const [enChargement, setEnChargement] = useState(false);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
@@ -44,11 +46,11 @@ export default function Login2FAScreen({ userId, method = 'sms', onSuccess, onCa
     try {
       const res = await authService.verify2FA(userId, code);
       const { token, user } = res.data;
-      toast.success('Connexion réussie !');
+      toast.success(t('login2fa.success'));
       onSuccess(token, user);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
-      toast.error(error.response?.data?.error || 'Code incorrect');
+      toast.error(error.response?.data?.error || t('login2fa.code_error'));
       setChiffres(['', '', '', '', '', '']);
       refs.current[0]?.focus();
     } finally {
@@ -59,10 +61,10 @@ export default function Login2FAScreen({ userId, method = 'sms', onSuccess, onCa
   const renvoyerCode = async () => {
     try {
       await authService.resend2FA(userId);
-      toast.success('Nouveau code envoyé par SMS');
+      toast.success(t('login2fa.resent_success'));
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
-      toast.error(error.response?.data?.error || 'Erreur lors de l\'envoi');
+      toast.error(error.response?.data?.error || t('login2fa.resend_error'));
     }
   };
 
@@ -74,11 +76,9 @@ export default function Login2FAScreen({ userId, method = 'sms', onSuccess, onCa
           <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3">
             <ShieldCheck className="w-6 h-6 text-green-600" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900">Vérification 2FA</h1>
+          <h1 className="text-xl font-bold text-gray-900">{t('login2fa.title')}</h1>
           <p className="text-sm text-gray-500 text-center mt-1">
-            {method === 'email'
-              ? 'Saisissez le code à 6 chiffres envoyé par email'
-              : 'Saisissez le code à 6 chiffres envoyé par SMS'}
+            {method === 'email' ? t('login2fa.desc_email') : t('login2fa.desc_sms')}
           </p>
         </div>
 
@@ -112,13 +112,13 @@ export default function Login2FAScreen({ userId, method = 'sms', onSuccess, onCa
             onClick={onCancel}
             className="text-gray-500 hover:underline"
           >
-            ← Retour
+            {t('login2fa.back')}
           </button>
           <button
             onClick={renvoyerCode}
             className="text-primary-500 hover:underline"
           >
-            Renvoyer le code
+            {t('login2fa.resend_btn')}
           </button>
         </div>
       </div>

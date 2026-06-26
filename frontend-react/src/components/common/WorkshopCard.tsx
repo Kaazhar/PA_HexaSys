@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { Workshop } from '../../types';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 
 interface WorkshopCardProps {
   workshop: Workshop;
@@ -10,10 +11,11 @@ interface WorkshopCardProps {
 }
 
 export default function WorkshopCard({ workshop, onBook }: WorkshopCardProps) {
+  const { t } = useTranslation();
   const typeLabels: Record<string, string> = {
-    atelier: 'Atelier',
-    formation: 'Formation',
-    conference: 'Conférence',
+    atelier: t('workshops.type.atelier'),
+    formation: t('workshops.type.formation'),
+    conference: t('workshops.type.conference'),
   };
 
   const typeColors: Record<string, string> = {
@@ -38,7 +40,7 @@ export default function WorkshopCard({ workshop, onBook }: WorkshopCardProps) {
         </div>
         {isFull && (
           <div className="absolute top-3 right-3">
-            <span className="badge bg-red-500 text-white">Complet</span>
+            <span className="badge bg-red-500 text-white">{t('workshops.full')}</span>
           </div>
         )}
       </div>
@@ -62,13 +64,13 @@ export default function WorkshopCard({ workshop, onBook }: WorkshopCardProps) {
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <Users className="w-3.5 h-3.5 text-primary-400" />
-            <span>{isFull ? 'Complet' : `${spotsLeft} place${spotsLeft > 1 ? 's' : ''} disponible${spotsLeft > 1 ? 's' : ''}`}</span>
+            <span>{isFull ? t('workshops.full') : t('workshops.spots_left', { count: spotsLeft })}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
           <span className="font-bold text-primary-500 text-lg">
-            {workshop.price === 0 ? 'Gratuit' : `${workshop.price}€`}
+            {workshop.price === 0 ? t('workshops.free') : `${workshop.price}€`}
           </span>
           {onBook && (
             <button
@@ -76,7 +78,7 @@ export default function WorkshopCard({ workshop, onBook }: WorkshopCardProps) {
               disabled={isFull}
               className={clsx('btn-primary text-sm py-1.5 px-3', isFull && 'opacity-50 cursor-not-allowed')}
             >
-              Réserver
+              {t('workshops.book')}
             </button>
           )}
         </div>

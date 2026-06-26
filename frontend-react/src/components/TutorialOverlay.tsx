@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 import type { UserRole } from '../types';
+import { useTranslation } from 'react-i18next';
 
 interface Step {
   route?: string;
@@ -201,6 +202,7 @@ interface TutorialOverlayProps {
 }
 
 export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps) {
+  const { t } = useTranslation();
   const steps = stepsByRole[role] ?? stepsByRole.particulier;
   const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
@@ -274,11 +276,11 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
           onClick={prev}
           className={`flex items-center gap-1 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-gray-600 ${compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 text-sm'}`}
         >
-          <ChevronLeft size={compact ? 13 : 16} /> {compact ? 'Préc.' : 'Précédent'}
+          <ChevronLeft size={compact ? 13 : 16} /> {compact ? t('tutorial.prev_short') : t('tutorial.prev')}
         </button>
       ) : (
         <button onClick={onClose} className={`text-gray-400 hover:text-gray-600 transition-colors ${compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 text-sm'}`}>
-          Passer
+          {t('tutorial.skip')}
         </button>
       )}
       <button
@@ -288,7 +290,7 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
         onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#3d6b1e')}
         onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#2D5016')}
       >
-        {isLast ? 'Terminer !' : <>Suivant <ChevronRight size={compact ? 13 : 16} /></>}
+        {isLast ? t('tutorial.finish') : <>{t('tutorial.next')} <ChevronRight size={compact ? 13 : 16} /></>}
       </button>
     </div>
   );
@@ -382,7 +384,7 @@ export default function TutorialOverlay({ role, onClose }: TutorialOverlayProps)
               <div className="flex items-center gap-3">
                 <div>
                   <h3 className="text-base font-bold text-white">{step.title}</h3>
-                  <p className="text-white/55 text-xs mt-0.5">Étape {current + 1} sur {steps.length}</p>
+                  <p className="text-white/55 text-xs mt-0.5">{t('tutorial.step_counter', { current: current + 1, total: steps.length })}</p>
                 </div>
               </div>
               <button onClick={onClose} className="text-white/60 hover:text-white transition-colors">

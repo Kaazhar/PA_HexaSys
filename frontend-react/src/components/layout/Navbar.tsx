@@ -140,14 +140,14 @@ export default function Navbar() {
             {searchOpen && debouncedSearch.length >= 2 && (
               <div className="absolute top-full mt-1 left-0 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 max-h-80 overflow-y-auto">
                 {!searchResults ? (
-                  <p className="text-sm text-gray-400 px-4 py-2">Recherche...</p>
+                  <p className="text-sm text-gray-400 px-4 py-2">{t('nav.search_loading')}</p>
                 ) : totalResults === 0 ? (
-                  <p className="text-sm text-gray-400 px-4 py-2">Aucun résultat</p>
+                  <p className="text-sm text-gray-400 px-4 py-2">{t('nav.no_results')}</p>
                 ) : (
                   <>
                     {(searchResults.listings?.length > 0) && (
                       <div>
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 py-1.5">Annonces</p>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 py-1.5">{t('nav.listings')}</p>
                         {searchResults.listings.slice(0, 4).map((l: any) => (
                           <Link
                             key={l.id}
@@ -162,7 +162,7 @@ export default function Navbar() {
                     )}
                     {(searchResults.workshops?.length > 0) && (
                       <div>
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 py-1.5">Formations</p>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 py-1.5">{t('nav.workshops')}</p>
                         {searchResults.workshops.slice(0, 3).map((w: any) => (
                           <Link
                             key={w.id}
