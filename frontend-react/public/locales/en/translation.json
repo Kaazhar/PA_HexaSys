@@ -493,7 +493,10 @@
     "reason": "Reason:",
     "delete_title": "Delete this listing?",
     "irreversible": "This action is irreversible.",
-    "deleting": "Deleting..."
+    "deleting": "Deleting...",
+    "no_listings": "No listings",
+    "count": "{{count}} listing in total",
+    "count_plural": "{{count}} listings in total"
   },
   "subscription": {
     "title": "My subscription",
@@ -668,6 +671,7 @@
     "price_eur": "Price (€)",
     "slot_reserved_abbr": "Res.",
     "slot_occupied_abbr": "Occ.",
+    "size_field": "Size",
     "condition_select": {
       "neuf": "New",
       "bon_etat": "Good condition",

@@ -50,12 +50,12 @@ export default function MesAnnoncesPage() {
   });
 
   return (
-    <DashboardLayout sidebarItems={sidebar} title="Mes annonces">
+    <DashboardLayout sidebarItems={sidebar} title={t('my_listings.title')}>
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">{t('my_listings.title')}</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{total} annonce{total > 1 ? 's' : ''} au total</p>
+            <p className="text-sm text-gray-500 mt-0.5">{t('my_listings.count', { count: total })}</p>
           </div>
           <Link to="/annonces/creer" className="btn-primary flex items-center gap-2">
             <Plus className="w-4 h-4" />
@@ -84,7 +84,7 @@ export default function MesAnnoncesPage() {
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner /></div>
         ) : listings.length === 0 ? (
-          <EmptyState icon={<Tag className="w-10 h-10" />} message="Aucune annonce" />
+          <EmptyState icon={<Tag className="w-10 h-10" />} message={t('my_listings.no_listings')} />
         ) : (
           <div className="space-y-3">
             {listings.map((listing) => {

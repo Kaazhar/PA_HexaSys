@@ -101,7 +101,7 @@ export default function CreateListingPage() {
         setImages(prev => [...prev, res.data.url]);
       }
     } catch {
-      toast.error("Erreur lors du chargement de l'image");
+      toast.error(t('common.error'));
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -532,7 +532,7 @@ export default function CreateListingPage() {
                   {type === 'vente' && price && <div><span className="text-gray-500">{t('create_listing.price')} :</span> <strong>{price} €</strong></div>}
                   {weight && <div><span className="text-gray-500">{t('create_listing.weight')} :</span> <strong>{weight} kg</strong></div>}
                   {sizeCategory && (
-                    <div><span className="text-gray-500">Taille :</span>{' '}
+                    <div><span className="text-gray-500">{t('create_listing.size_field')} :</span>{' '}
                       <strong className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs">{sizeCategory}</strong>
                     </div>
                   )}

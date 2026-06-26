@@ -493,7 +493,10 @@
     "reason": "Raison :",
     "delete_title": "Supprimer l'annonce ?",
     "irreversible": "Cette action est irréversible.",
-    "deleting": "Suppression..."
+    "deleting": "Suppression...",
+    "no_listings": "Aucune annonce",
+    "count": "{{count}} annonce au total",
+    "count_plural": "{{count}} annonces au total"
   },
   "subscription": {
     "title": "Mon abonnement",
@@ -1228,6 +1231,7 @@
     "price_eur": "Prix (€)",
     "slot_reserved_abbr": "Rés.",
     "slot_occupied_abbr": "Occ.",
+    "size_field": "Taille",
     "condition_select": {
       "neuf": "Neuf",
       "bon_etat": "Bon état",
