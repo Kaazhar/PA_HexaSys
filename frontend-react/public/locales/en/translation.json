@@ -930,7 +930,14 @@
     "delete_title": "Delete this article?",
     "delete_msg": "This action is irreversible.",
     "delete_btn": "Delete",
-    "no_content": "No content."
+    "no_content": "No content.",
+    "create_success": "Article created",
+    "update_success": "Article updated",
+    "delete_success": "Article deleted",
+    "preview_tooltip": "Preview",
+    "edit_tooltip": "Edit",
+    "delete_tooltip": "Delete",
+    "content_placeholder": "Write your article..."
   },
   "salarie_planning": {
     "title": "My schedule",

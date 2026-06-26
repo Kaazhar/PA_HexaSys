@@ -801,7 +801,14 @@
     "delete_title": "Supprimer l'article ?",
     "delete_msg": "Cette action est irréversible.",
     "delete_btn": "Supprimer",
-    "no_content": "Aucun contenu."
+    "no_content": "Aucun contenu.",
+    "create_success": "Article créé",
+    "update_success": "Article mis à jour",
+    "delete_success": "Article supprimé",
+    "preview_tooltip": "Aperçu",
+    "edit_tooltip": "Modifier",
+    "delete_tooltip": "Supprimer",
+    "content_placeholder": "Rédigez votre article..."
   },
   "salarie_planning": {
     "title": "Mon planning",

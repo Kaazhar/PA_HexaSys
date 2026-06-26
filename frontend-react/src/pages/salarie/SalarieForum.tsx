@@ -196,7 +196,7 @@ function TopicRow({ topic, onPin, onLock, onDelete }: {
           </Link>
         </div>
         <p className="text-xs text-gray-400">
-          Par <strong className="text-gray-600">{topic.author?.firstname} {topic.author?.lastname}</strong>
+          {t('forum.by')} <strong className="text-gray-600">{topic.author?.firstname} {topic.author?.lastname}</strong>
           {' · '}{format(new Date(topic.created_at), 'dd MMM yyyy', { locale: fr })}
         </p>
       </div>

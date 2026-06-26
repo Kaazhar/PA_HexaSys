@@ -53,9 +53,9 @@ export default function SalarieArticles() {
       queryClient.invalidateQueries({ queryKey: ['salarie', 'articles'] });
       setShowForm(false);
       setForm(defaultForm);
-      toast.success('Article créé');
+      toast.success(t('salarie_articles.create_success'));
     },
-    onError: () => toast.error('Erreur lors de la création'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const updateMutation = useMutation({
@@ -65,9 +65,9 @@ export default function SalarieArticles() {
       queryClient.invalidateQueries({ queryKey: ['salarie', 'articles'] });
       setEditArticle(null);
       setForm(defaultForm);
-      toast.success('Article mis à jour');
+      toast.success(t('salarie_articles.update_success'));
     },
-    onError: () => toast.error('Erreur lors de la mise à jour'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const deleteMutation = useMutation({
@@ -75,9 +75,9 @@ export default function SalarieArticles() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['salarie', 'articles'] });
       setDeleteId(null);
-      toast.success('Article supprimé');
+      toast.success(t('salarie_articles.delete_success'));
     },
-    onError: () => toast.error('Erreur lors de la suppression'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const openEdit = (article: Article) => {
@@ -144,21 +144,21 @@ export default function SalarieArticles() {
                     <button
                       onClick={() => setPreview(article)}
                       className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                      title="Aperçu"
+                      title={t('salarie_articles.preview_tooltip')}
                     >
                       <Eye className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => openEdit(article)}
                       className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="Modifier"
+                      title={t('salarie_articles.edit_tooltip')}
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setDeleteId(article.id)}
                       className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Supprimer"
+                      title={t('salarie_articles.delete_tooltip')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -193,7 +193,7 @@ export default function SalarieArticles() {
                   className="input min-h-[200px] resize-y font-normal"
                   value={form.content}
                   onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-                  placeholder="Rédigez votre article..."
+                  placeholder={t('salarie_articles.content_placeholder')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
