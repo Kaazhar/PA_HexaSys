@@ -10,41 +10,28 @@ import clsx from 'clsx';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const plans = [
-  {
-    id: 'decouverte',
-    name: 'Découverte',
-    price: 0,
-    icon: <Zap className="w-6 h-6" />,
-    color: 'border-gray-200',
-    features: [
-      'Annonces illimitées',
-      'Vérification SIRET',
-      'Accès aux formations',
-      'Score upcycling',
-      'Messagerie',
-    ],
-  },
-  {
-    id: 'pro',
-    name: 'Premium',
-    price: 29,
-    icon: <Star className="w-6 h-6 text-amber-500" />,
-    color: 'border-primary-400 ring-2 ring-primary-200',
-    popular: true,
-    features: [
-      'Tout le plan Découverte',
-      'Tableau de bord avancé',
-      'Analyse d\'impact écologique (CO₂, poids)',
-      'Statistiques matériaux disponibles',
-      'Alertes prioritaires de collecte',
-      'Projets upcycling',
-    ],
-  },
-];
-
 export default function AbonnementPage() {
   const { t } = useTranslation();
+
+  const plans = [
+    {
+      id: 'decouverte',
+      name: t('subscription.plan_decouverte'),
+      price: 0,
+      icon: <Zap className="w-6 h-6" />,
+      color: 'border-gray-200',
+      features: t('subscription.features_decouverte', { returnObjects: true }) as string[],
+    },
+    {
+      id: 'pro',
+      name: t('subscription.plan_premium'),
+      price: 29,
+      icon: <Star className="w-6 h-6 text-amber-500" />,
+      color: 'border-primary-400 ring-2 ring-primary-200',
+      popular: true,
+      features: t('subscription.features_pro', { returnObjects: true }) as string[],
+    },
+  ];
   const { user } = useAuth();
   const sidebar = user?.role === 'admin' ? adminSidebar : proSidebar;
   const queryClient = useQueryClient();
@@ -80,14 +67,14 @@ export default function AbonnementPage() {
         const res = await stripeService.createSubscriptionCheckout(plan);
         window.location.href = res.data.checkout_url;
       } catch (err: any) {
-        toast.error(err?.response?.data?.error || 'Erreur lors du paiement');
+        toast.error(err?.response?.data?.error || t('subscription.payment_error'));
         setStripeLoading(false);
       }
     }
   };
 
   return (
-    <DashboardLayout sidebarItems={sidebar} title="Abonnement">
+    <DashboardLayout sidebarItems={sidebar} title={t('subscription.title')}>
       <div className="space-y-6">
         <div>
           <h1 className="text-xl font-bold text-gray-900">{t('subscription.title')}</h1>

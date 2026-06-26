@@ -496,7 +496,12 @@
     "downgrade_msg": "Vous passerez sur le plan gratuit.",
     "upgrade_msg": "Vous serez facturé {{price}}€/mois.",
     "confirm": "Confirmer",
-    "pay_monthly": "Payer {{price}}€/mois"
+    "pay_monthly": "Payer {{price}}€/mois",
+    "payment_error": "Erreur lors du paiement",
+    "plan_decouverte": "Découverte",
+    "plan_premium": "Premium",
+    "features_decouverte": ["Annonces illimitées", "Vérification SIRET", "Accès aux formations", "Score upcycling", "Messagerie"],
+    "features_pro": ["Tout le plan Découverte", "Tableau de bord avancé", "Analyse d'impact écologique (CO₂, poids)", "Statistiques matériaux disponibles", "Alertes prioritaires de collecte", "Projets upcycling"]
   },
   "dashboard_salarie": {
     "title": "Espace Salarié",

@@ -40,7 +40,7 @@ export default function ScorePage() {
   const progress = nextLevel ? Math.round(((score?.total_points || 0) - currentLevel.min) / (nextLevel.min - currentLevel.min) * 100) : 100;
 
   return (
-    <DashboardLayout sidebarItems={sidebar} title="Mon score upcycling">
+    <DashboardLayout sidebarItems={sidebar} title={t('score.title')}>
       {isLoading ? (
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : (

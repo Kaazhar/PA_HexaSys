@@ -496,7 +496,12 @@
     "downgrade_msg": "You will switch to the free plan.",
     "upgrade_msg": "You will be charged {{price}}€/month.",
     "confirm": "Confirm",
-    "pay_monthly": "Pay {{price}}€/month"
+    "pay_monthly": "Pay {{price}}€/month",
+    "payment_error": "Payment error",
+    "plan_decouverte": "Discovery",
+    "plan_premium": "Premium",
+    "features_decouverte": ["Unlimited listings", "SIRET verification", "Access to workshops", "Upcycling score", "Messaging"],
+    "features_pro": ["Everything in Discovery", "Advanced dashboard", "Ecological impact analysis (CO₂, weight)", "Available materials statistics", "Priority collection alerts", "Upcycling projects"]
   },
   "dashboard_salarie": {
     "title": "Employee Space",
