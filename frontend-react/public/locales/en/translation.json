@@ -1032,7 +1032,8 @@
     "option_inactive": "Inactive",
     "deleting": "Deleting...",
     "ban_placeholder": "Inappropriate behavior, spam, terms violation...",
-    "ban_title": "Ban {{name}}"
+    "ban_title": "Ban {{name}}",
+    "reset_2fa_success": "Email 2FA reset"
   },
   "admin_listings": {
     "title": "Listing management",

@@ -200,7 +200,7 @@ export default function AdminUsers() {
     mutationFn: (id: number) => userService.resetEmail2FA(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      toast.success('2FA email réinitialisée');
+      toast.success(t('admin_users.reset_2fa_success'));
     },
     onError: () => toast.error(t('common.error')),
   });
@@ -332,7 +332,7 @@ export default function AdminUsers() {
                               <ShieldOff className="w-4 h-4" />
                             </button>
                           )}
-                          {(user as any).email_two_fa_enabled && (
+                          {user.email_two_fa_enabled && (
                             <button
                               onClick={() => resetEmail2FAMutation.mutate(user.id)}
                               className="p-1.5 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"

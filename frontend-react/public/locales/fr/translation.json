@@ -903,7 +903,8 @@
     "option_inactive": "Inactif",
     "deleting": "Suppression...",
     "ban_placeholder": "Comportement inapproprié, spam, violation des CGU...",
-    "ban_title": "Bannir {{name}}"
+    "ban_title": "Bannir {{name}}",
+    "reset_2fa_success": "2FA email réinitialisée"
   },
   "admin_listings": {
     "title": "Gestion des annonces",

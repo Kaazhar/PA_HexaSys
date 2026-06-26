@@ -21,13 +21,6 @@ const roleColors: Record<string, string> = {
   admin: 'bg-red-50 text-red-700',
 };
 
-const roleLabels: Record<string, string> = {
-  particulier: 'Particulier',
-  professionnel: 'Professionnel',
-  salarie: 'Salarié',
-  admin: 'Administrateur',
-};
-
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
   const { t } = useTranslation();
@@ -151,7 +144,7 @@ export default function ProfilePage() {
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-bold text-gray-900">{user.firstname} {user.lastname}</h1>
               <span className={clsx('text-xs font-medium px-2 py-0.5 rounded', roleColors[user.role] || 'bg-gray-100 text-gray-700')}>
-                {roleLabels[user.role] || user.role}
+                {t(`auth.role_labels.${user.role}`, { defaultValue: user.role })}
               </span>
               {user.siret_verified && (
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded">
