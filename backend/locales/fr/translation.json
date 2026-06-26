@@ -954,7 +954,10 @@
     "location_label": "Lieu :",
     "author_label": "Auteur :",
     "status_label": "Statut :",
-    "photos": "Photos"
+    "photos": "Photos",
+    "view_tooltip": "Voir",
+    "sponsor_tooltip": "Mettre en avant",
+    "unsponsor_tooltip": "Retirer la mise en avant"
   },
   "admin_workshops": {
     "title": "Gestion des formations",
@@ -1029,7 +1032,8 @@
     "slots_added": "Cases ajoutées !",
     "slots_error": "Erreur lors de la création des cases",
     "slots_free_count": "{{free}}/{{total}} libres",
-    "containers_count": "Conteneurs ({{count}})"
+    "containers_count": "Conteneurs ({{count}})",
+    "approve_tooltip": "Approuver"
   },
   "admin_finance": {
     "title": "Finance",

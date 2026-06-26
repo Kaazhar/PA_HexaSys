@@ -1083,7 +1083,10 @@
     "location_label": "Location:",
     "author_label": "Author:",
     "status_label": "Status:",
-    "photos": "Photos"
+    "photos": "Photos",
+    "view_tooltip": "View",
+    "sponsor_tooltip": "Sponsor",
+    "unsponsor_tooltip": "Remove sponsoring"
   },
   "admin_workshops": {
     "title": "Workshop management",
@@ -1158,7 +1161,8 @@
     "slots_added": "Slots added!",
     "slots_error": "Error creating slots",
     "slots_free_count": "{{free}}/{{total}} free",
-    "containers_count": "Containers ({{count}})"
+    "containers_count": "Containers ({{count}})",
+    "approve_tooltip": "Approve"
   },
   "admin_finance": {
     "title": "Finance",

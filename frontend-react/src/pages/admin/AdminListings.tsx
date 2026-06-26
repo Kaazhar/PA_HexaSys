@@ -160,7 +160,7 @@ export default function AdminListings() {
                           <button
                             onClick={() => setViewListing(listing)}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
-                            title="Voir"
+                            title={t('admin_listings.view_tooltip')}
                           >
                             <Eye className="w-4 h-4" />
                           </button>
@@ -168,7 +168,7 @@ export default function AdminListings() {
                             <button
                               onClick={() => sponsorMutation.mutate({ id: listing.id, isSponsored: !listing.is_sponsored })}
                               className={`p-1.5 rounded-lg transition-colors ${listing.is_sponsored ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50'}`}
-                              title={listing.is_sponsored ? 'Retirer la mise en avant' : 'Mettre en avant'}
+                              title={listing.is_sponsored ? t('admin_listings.unsponsor_tooltip') : t('admin_listings.sponsor_tooltip')}
                             >
                               <Star className="w-4 h-4" />
                             </button>
@@ -179,14 +179,14 @@ export default function AdminListings() {
                                 onClick={() => validateMutation.mutate(listing.id)}
                                 disabled={validateMutation.isPending}
                                 className="p-1.5 rounded-lg text-gray-400 hover:text-green-500 hover:bg-green-50 transition-colors"
-                                title="Valider"
+                                title={t('admin_listings.validate_btn')}
                               >
                                 <CheckCircle className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => setRejectListing(listing)}
                                 className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                title="Rejeter"
+                                title={t('admin_listings.reject_btn')}
                               >
                                 <XCircle className="w-4 h-4" />
                               </button>

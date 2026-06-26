@@ -337,14 +337,14 @@ export default function AdminContainers() {
                                 onClick={() => validateMutation.mutate(req.id)}
                                 disabled={validateMutation.isPending}
                                 className="p-1.5 rounded-lg text-gray-400 hover:text-green-500 hover:bg-green-50 transition-colors"
-                                title="Approuver"
+                                title={t('admin_containers.approve_tooltip')}
                               >
                                 <CheckCircle className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => setRejectRequest(req)}
                                 className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                title="Refuser"
+                                title={t('admin_containers.refuse_btn')}
                               >
                                 <XCircle className="w-4 h-4" />
                               </button>
