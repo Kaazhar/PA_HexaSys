@@ -1122,7 +1122,9 @@
     "delete_confirm": "Supprimer \"{{name}}\" ?",
     "name_required": "Le nom est requis",
     "create_error": "Erreur lors de la création",
-    "update_error": "Erreur lors de la modification"
+    "update_error": "Erreur lors de la modification",
+    "no_categories": "Aucune catégorie",
+    "icon_placeholder": "sofa, cpu, shirt..."
   },
   "admin_languages": {
     "title": "Gestion des langues",

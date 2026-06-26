@@ -1251,6 +1251,8 @@
     "delete_confirm": "Delete \"{{name}}\"?",
     "name_required": "Name is required",
     "create_error": "Error creating category",
-    "update_error": "Error updating category"
+    "update_error": "Error updating category",
+    "no_categories": "No categories",
+    "icon_placeholder": "sofa, cpu, shirt..."
   }
 }

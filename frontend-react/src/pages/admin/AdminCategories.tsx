@@ -109,7 +109,7 @@ export default function AdminCategories() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_categories.label_icon')}</label>
-                <input className="input" value={form.icon} onChange={e => setForm(f => ({ ...f, icon: e.target.value }))} placeholder="sofa, cpu, shirt..." />
+                <input className="input" value={form.icon} onChange={e => setForm(f => ({ ...f, icon: e.target.value }))} placeholder={t('admin_categories.icon_placeholder')} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_categories.label_color')}</label>
@@ -137,7 +137,7 @@ export default function AdminCategories() {
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : categories.length === 0 ? (
-          <EmptyState icon={<FolderOpen className="w-10 h-10" />} message="Aucune catégorie" />
+          <EmptyState icon={<FolderOpen className="w-10 h-10" />} message={t('admin_categories.no_categories')} />
         ) : (
           <div className="card overflow-hidden p-0">
             <table className="w-full text-sm">
