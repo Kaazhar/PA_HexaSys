@@ -86,7 +86,12 @@
     "reply_deleted": "Réponse supprimée",
     "topic_deleted": "Sujet supprimé",
     "delete_confirm": "Supprimer ce sujet ?",
-    "staff": "Équipe"
+    "staff": "Équipe",
+    "role_admin": "Admin",
+    "pin_tooltip": "Épingler",
+    "unpin_tooltip": "Désépingler",
+    "lock_tooltip": "Verrouiller",
+    "unlock_tooltip": "Déverrouiller"
   },
   "conseils": {
     "title": "Espace Conseils",
@@ -307,7 +312,9 @@
     "no": "Non",
     "close": "Fermer",
     "back": "Retour",
+    "prev": "Précédent",
     "next": "Suivant",
+    "page_of": "Page {{page}} / {{total}}",
     "submit": "Soumettre",
     "see_all": "Voir tout",
     "free": "Gratuit",

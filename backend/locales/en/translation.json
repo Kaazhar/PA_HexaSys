@@ -86,7 +86,12 @@
     "reply_deleted": "Reply deleted",
     "topic_deleted": "Topic deleted",
     "delete_confirm": "Delete this topic?",
-    "staff": "Team"
+    "staff": "Team",
+    "role_admin": "Admin",
+    "pin_tooltip": "Pin",
+    "unpin_tooltip": "Unpin",
+    "lock_tooltip": "Lock",
+    "unlock_tooltip": "Unlock"
   },
   "conseils": {
     "title": "Tips & Advice",
@@ -307,7 +312,9 @@
     "no": "No",
     "close": "Close",
     "back": "Back",
+    "prev": "Previous",
     "next": "Next",
+    "page_of": "Page {{page}} / {{total}}",
     "submit": "Submit",
     "see_all": "See all",
     "free": "Free",

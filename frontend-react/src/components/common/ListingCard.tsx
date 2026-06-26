@@ -1,6 +1,6 @@
 import { MapPin, Clock, Star } from 'lucide-react';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import type { Listing } from '../../types';
 import clsx from 'clsx';
@@ -13,7 +13,8 @@ interface ListingCardProps {
 
 export default function ListingCard({ listing, onClick }: ListingCardProps) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('en') ? enUS : fr;
   const conditionLabels: Record<string, string> = {
     neuf: t('listings.condition.neuf'),
     bon_etat: t('listings.condition.bon_etat'),
@@ -85,7 +86,7 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
           <div className="flex items-center gap-1 text-xs text-gray-400">
             <Clock className="w-3 h-3" />
-            <span>{listing.created_at ? format(new Date(listing.created_at), 'dd MMM yyyy', { locale: fr }) : ''}</span>
+            <span>{listing.created_at ? format(new Date(listing.created_at), 'dd MMM yyyy', { locale: dateLocale }) : ''}</span>
           </div>
           <div>
             {listing.type === 'vente' && listing.price ? (

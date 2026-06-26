@@ -136,7 +136,7 @@ export default function ForumTopicPage() {
                   className={clsx('p-2 rounded-lg transition-colors text-sm flex items-center gap-1',
                     topic.is_pinned ? 'bg-amber-100 text-amber-600 hover:bg-amber-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                   )}
-                  title={topic.is_pinned ? 'Désépingler' : 'Épingler'}
+                  title={topic.is_pinned ? t('forum.unpin_tooltip') : t('forum.pin_tooltip')}
                 >
                   <Pin className="w-4 h-4" />
                 </button>
@@ -146,7 +146,7 @@ export default function ForumTopicPage() {
                   className={clsx('p-2 rounded-lg transition-colors',
                     topic.is_locked ? 'bg-orange-100 text-orange-600 hover:bg-orange-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                   )}
-                  title={topic.is_locked ? 'Déverrouiller' : 'Verrouiller'}
+                  title={topic.is_locked ? t('forum.unlock_tooltip') : t('forum.lock_tooltip')}
                 >
                   <Lock className="w-4 h-4" />
                 </button>
@@ -154,7 +154,7 @@ export default function ForumTopicPage() {
                   type="button"
                   onClick={() => { if (confirm(t('forum.delete_confirm'))) deleteTopicMutation.mutate(); }}
                   className="p-2 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 transition-colors"
-                  title="Supprimer"
+                  title={t('common.delete')}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -170,7 +170,7 @@ export default function ForumTopicPage() {
                 {topic.author?.firstname} {topic.author?.lastname}
                 {(topic.author?.role === 'salarie' || topic.author?.role === 'admin') && (
                   <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-[#2D5016] text-white font-medium">
-                    {topic.author.role === 'admin' ? 'Admin' : t('forum.staff')}
+                    {topic.author.role === 'admin' ? t('forum.role_admin') : t('forum.staff')}
                   </span>
                 )}
               </p>
@@ -266,7 +266,7 @@ function PostCard({ post, index, canDelete, onDelete }: {
             <span className="font-semibold text-sm text-gray-900">{authorName}</span>
             {isStaff && (
               <span className="text-xs px-2 py-0.5 rounded-full bg-[#2D5016] text-white font-medium">
-                {post.author?.role === 'admin' ? 'Admin' : t('forum.staff')}
+                {post.author?.role === 'admin' ? t('forum.role_admin') : t('forum.staff')}
               </span>
             )}
           </div>

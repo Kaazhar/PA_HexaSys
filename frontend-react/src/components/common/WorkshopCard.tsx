@@ -1,6 +1,6 @@
 import { MapPin, Clock, Users, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import type { Workshop } from '../../types';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,9 @@ interface WorkshopCardProps {
 }
 
 export default function WorkshopCard({ workshop, onBook }: WorkshopCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('en') ? enUS : fr;
+  const dateAtFormat = i18n.language?.startsWith('en') ? "MMMM dd, yyyy 'at' HH:mm" : "dd MMMM yyyy 'à' HH:mm";
   const typeLabels: Record<string, string> = {
     atelier: t('workshops.type.atelier'),
     formation: t('workshops.type.formation'),
@@ -52,7 +54,7 @@ export default function WorkshopCard({ workshop, onBook }: WorkshopCardProps) {
         <div className="mt-3 space-y-1.5">
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <Calendar className="w-3.5 h-3.5 text-primary-400" />
-            <span>{workshop.date ? format(new Date(workshop.date), 'dd MMMM yyyy à HH:mm', { locale: fr }) : ''}</span>
+            <span>{workshop.date ? format(new Date(workshop.date), dateAtFormat, { locale: dateLocale }) : ''}</span>
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <MapPin className="w-3.5 h-3.5 text-primary-400" />

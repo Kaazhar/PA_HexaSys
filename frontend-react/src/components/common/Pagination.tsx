@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 interface PaginationProps {
   page: number;
   totalPages: number;
@@ -6,6 +8,7 @@ interface PaginationProps {
 }
 
 export default function Pagination({ page, totalPages, onPageChange, className = '' }: PaginationProps) {
+  const { t } = useTranslation();
   if (totalPages <= 1) return null;
   return (
     <div className={`flex items-center justify-center gap-2 ${className}`}>
@@ -14,17 +17,17 @@ export default function Pagination({ page, totalPages, onPageChange, className =
         disabled={page === 1}
         className="btn-secondary py-1.5 px-3 disabled:opacity-50 text-sm"
       >
-        Précédent
+        {t('common.prev')}
       </button>
       <span className="px-3 py-1.5 text-sm text-gray-600">
-        Page {page} / {totalPages}
+        {t('common.page_of', { page, total: totalPages })}
       </span>
       <button
         onClick={() => onPageChange(Math.min(totalPages, page + 1))}
         disabled={page === totalPages}
         className="btn-secondary py-1.5 px-3 disabled:opacity-50 text-sm"
       >
-        Suivant
+        {t('common.next')}
       </button>
     </div>
   );

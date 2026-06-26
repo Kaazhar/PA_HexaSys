@@ -4,6 +4,7 @@ import logo from '../../assets/logo.png';
 import { useAuth } from '../../context/AuthContext';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface NavItem {
   label: string;
@@ -20,6 +21,7 @@ export default function Sidebar({ items, collapsed = false }: SidebarProps) {
   const location = useLocation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logout();
@@ -74,18 +76,18 @@ export default function Sidebar({ items, collapsed = false }: SidebarProps) {
             'flex items-center gap-2.5 px-2.5 py-2 rounded text-gray-400 hover:text-white hover:bg-gray-800 w-full text-sm',
             location.pathname === '/profil' && 'bg-gray-800 text-white'
           )}
-          title={collapsed ? 'Mon profil' : undefined}
+          title={collapsed ? t('nav.profile') : undefined}
         >
           <UserCircle className="w-4 h-4 flex-shrink-0" />
-          {!collapsed && <span>Mon profil</span>}
+          {!collapsed && <span>{t('nav.profile')}</span>}
         </Link>
         <button
           onClick={handleLogout}
           className="flex items-center gap-2.5 px-2.5 py-2 rounded text-gray-400 hover:text-white hover:bg-gray-800 w-full text-sm"
-          title={collapsed ? 'Déconnexion' : undefined}
+          title={collapsed ? t('nav.logout') : undefined}
         >
           <LogOut className="w-4 h-4 flex-shrink-0" />
-          {!collapsed && <span>Déconnexion</span>}
+          {!collapsed && <span>{t('nav.logout')}</span>}
         </button>
       </div>
     </aside>
