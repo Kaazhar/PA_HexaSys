@@ -74,7 +74,8 @@
     "login_to_reply": "Connectez-vous pour participer à la discussion.",
     "login_btn": "Se connecter",
     "locked_msg": "Ce sujet est verrouillé — les nouvelles réponses sont désactivées.",
-    "not_found": "Sujet introuvable"
+    "not_found": "Sujet introuvable",
+    "by": "Par"
   },
   "conseils": {
     "title": "Espace Conseils",
@@ -466,7 +467,9 @@
     "min_participants": "Minimum {{min}} participants requis",
     "host": "Animateur",
     "employee": "Salarié UpcycleConnect",
-    "spots_taken": "Places occupées"
+    "spots_taken": "Places occupées",
+    "book_error": "Erreur lors de l'inscription",
+    "payment_error": "Erreur lors du paiement"
   },
   "public_profile": {
     "back": "Retour",

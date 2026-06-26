@@ -74,7 +74,8 @@
     "login_to_reply": "Log in to participate in the discussion.",
     "login_btn": "Log in",
     "locked_msg": "This topic is locked — new replies are disabled.",
-    "not_found": "Topic not found"
+    "not_found": "Topic not found",
+    "by": "By"
   },
   "conseils": {
     "title": "Tips & Advice",
@@ -466,7 +467,9 @@
     "min_participants": "Minimum {{min}} participants required",
     "host": "Instructor",
     "employee": "UpcycleConnect employee",
-    "spots_taken": "Spots taken"
+    "spots_taken": "Spots taken",
+    "book_error": "Error registering for workshop",
+    "payment_error": "Payment error"
   },
   "public_profile": {
     "back": "Back",

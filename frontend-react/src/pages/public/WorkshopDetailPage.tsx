@@ -41,7 +41,7 @@ export default function WorkshopDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['workshop', id] });
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.error || 'Erreur lors de l\'inscription');
+      toast.error(err?.response?.data?.error || t('workshop_detail.book_error'));
     },
   });
 
@@ -53,7 +53,7 @@ export default function WorkshopDetailPage() {
         const res = await stripeService.createWorkshopCheckout(workshop.id);
         window.location.href = res.data.checkout_url;
       } catch (err: any) {
-        toast.error(err?.response?.data?.error || 'Erreur lors du paiement');
+        toast.error(err?.response?.data?.error || t('workshop_detail.payment_error'));
         setStripeLoading(false);
       }
     } else {
