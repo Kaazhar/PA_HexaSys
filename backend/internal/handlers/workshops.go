@@ -115,10 +115,13 @@ func CreateWorkshop(c *gin.Context) {
 
 	date, err := time.Parse("2006-01-02T15:04:05Z07:00", req.Date)
 	if err != nil {
-		date, err = time.Parse("2006-01-02", req.Date)
+		date, err = time.Parse("2006-01-02T15:04", req.Date)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
-			return
+			date, err = time.Parse("2006-01-02", req.Date)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
+				return
+			}
 		}
 	}
 
