@@ -8,8 +8,9 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
-import { salarieSidebar } from '../../config/sidebars';
+import { salarieSidebar, adminSidebar } from '../../config/sidebars';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
 
 interface Article {
   id: number;
@@ -20,6 +21,7 @@ interface Article {
   views: number;
   created_at: string;
   updated_at: string;
+  author?: { firstname: string; lastname: string };
 }
 
 interface ArticleForm {
@@ -33,6 +35,9 @@ const defaultForm: ArticleForm = { title: '', content: '', tags: '', status: 'dr
 
 export default function SalarieArticles() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const sidebar = isAdmin ? adminSidebar : salarieSidebar;
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editArticle, setEditArticle] = useState<Article | null>(null);
@@ -99,7 +104,7 @@ export default function SalarieArticles() {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <DashboardLayout sidebarItems={salarieSidebar} title={t('salarie_articles.title')}>
+    <DashboardLayout sidebarItems={sidebar} title={t('salarie_articles.title')}>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -137,6 +142,7 @@ export default function SalarieArticles() {
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
                       <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {article.views} {t('salarie_articles.views')}</span>
                       <span>{format(new Date(article.created_at), 'dd MMM yyyy', { locale: fr })}</span>
+                      {isAdmin && article.author && <span className="text-gray-500 font-medium">{article.author.firstname} {article.author.lastname}</span>}
                       {article.tags && <span className="text-primary-400">{article.tags}</span>}
                     </div>
                   </div>

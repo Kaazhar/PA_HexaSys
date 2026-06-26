@@ -42,8 +42,13 @@ func GetPublicArticle(c *gin.Context) {
 
 func GetMyArticles(c *gin.Context) {
 	userID, _ := c.Get("userID")
+	userRole, _ := c.Get("userRole")
 	var articles []models.Article
-	config.DB.Where("author_id = ?", userID).Order("created_at DESC").Find(&articles)
+	q := config.DB.Preload("Author")
+	if userRole.(models.UserRole) != models.RoleAdmin {
+		q = q.Where("author_id = ?", userID)
+	}
+	q.Order("created_at DESC").Find(&articles)
 	c.JSON(http.StatusOK, articles)
 }
 
