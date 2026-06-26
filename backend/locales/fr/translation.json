@@ -444,7 +444,11 @@
       "fake": "Annonce frauduleuse ou fausse",
       "prohibited": "Objet interdit ou illégal",
       "other": "Autre"
-    }
+    },
+    "contact_error": "Impossible de contacter le vendeur",
+    "payment_error": "Impossible de lancer le paiement",
+    "report_sent": "Signalement envoyé, merci",
+    "report_error": "Erreur lors du signalement"
   },
   "workshop_detail": {
     "back": "Retour aux formations",

@@ -444,7 +444,11 @@
       "fake": "Fraudulent or fake listing",
       "prohibited": "Prohibited or illegal item",
       "other": "Other"
-    }
+    },
+    "contact_error": "Unable to contact the seller",
+    "payment_error": "Unable to start payment",
+    "report_sent": "Report sent, thank you",
+    "report_error": "Error submitting report"
   },
   "workshop_detail": {
     "back": "Back to workshops",

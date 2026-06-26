@@ -106,7 +106,7 @@ export default function ListingDetailPage() {
     onSuccess: (res) => {
       navigate('/messages', { state: { conversationId: res.data.id } });
     },
-    onError: (err: any) => toast.error(err?.response?.data?.error || `Erreur ${err?.response?.status || ''}: Impossible de contacter le vendeur.`),
+    onError: (err: any) => toast.error(err?.response?.data?.error || t('listing_detail.contact_error')),
   });
 
   const buyMutation = useMutation({
@@ -114,18 +114,18 @@ export default function ListingDetailPage() {
     onSuccess: (res) => {
       window.location.href = res.data.checkout_url;
     },
-    onError: (err: any) => toast.error(err?.response?.data?.error || 'Impossible de lancer le paiement.'),
+    onError: (err: any) => toast.error(err?.response?.data?.error || t('listing_detail.payment_error')),
   });
 
   const reportMutation = useMutation({
     mutationFn: () => reportService.create(Number(id), { reason: reportReason, details: reportDetails }),
     onSuccess: () => {
-      toast.success('Signalement envoyé, merci.');
+      toast.success(t('listing_detail.report_sent'));
       setShowReportModal(false);
       setReportReason('');
       setReportDetails('');
     },
-    onError: (err: any) => toast.error(err?.response?.data?.error || 'Erreur lors du signalement.'),
+    onError: (err: any) => toast.error(err?.response?.data?.error || t('listing_detail.report_error')),
   });
 
   const company = companyData?.data;
