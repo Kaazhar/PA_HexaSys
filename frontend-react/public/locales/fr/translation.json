@@ -177,6 +177,18 @@
     "newsletter_label": "Je souhaite recevoir la newsletter UpcycleConnect (actus, nouveaux ateliers, conseils upcycling)",
     "logging_in": "Connexion...",
     "registering": "Inscription...",
+    "login_success": "Connexion réussie",
+    "invalid_credentials": "Identifiants invalides",
+    "google_cancelled": "Connexion Google annulée",
+    "google_error": "Échec de la connexion Google",
+    "email_required": "Email requis",
+    "email_invalid": "Email invalide",
+    "password_required": "Mot de passe requis",
+    "or": "ou",
+    "register_success": "Compte créé ! Vérifiez votre email.",
+    "required": "Requis",
+    "password_min": "Minimum 6 caractères",
+    "password_mismatch": "Les mots de passe ne correspondent pas",
     "role_labels": {
       "particulier": "Particulier",
       "professionnel": "Professionnel",
@@ -267,7 +279,9 @@
     "confirming": "Confirmation...",
     "confirm_deposit": "J'ai déposé l'objet",
     "deposit_confirmed": "Dépôt confirmé !",
-    "confirm_error": "Erreur lors de la confirmation"
+    "confirm_error": "Erreur lors de la confirmation",
+    "barcode_unavailable": "Code-barres indisponible",
+    "barcode_alt": "Code-barres de récupération"
   },
   "common": {
     "save": "Enregistrer",
@@ -928,7 +942,10 @@
     "deleting": "Suppression...",
     "ban_placeholder": "Comportement inapproprié, spam, violation des CGU...",
     "ban_title": "Bannir {{name}}",
-    "reset_2fa_success": "2FA email réinitialisée"
+    "reset_2fa_success": "2FA email réinitialisée",
+    "deactivate_tooltip": "Désactiver",
+    "activate_tooltip": "Activer",
+    "reset_2fa_tooltip": "Réinitialiser la 2FA email"
   },
   "admin_listings": {
     "title": "Gestion des annonces",

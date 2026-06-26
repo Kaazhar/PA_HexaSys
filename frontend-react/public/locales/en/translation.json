@@ -177,6 +177,18 @@
     "newsletter_label": "I'd like to receive the UpcycleConnect newsletter (news, new workshops, upcycling tips)",
     "logging_in": "Logging in...",
     "registering": "Creating account...",
+    "login_success": "Successfully logged in",
+    "invalid_credentials": "Invalid credentials",
+    "google_cancelled": "Google login cancelled",
+    "google_error": "Google login failed",
+    "email_required": "Email required",
+    "email_invalid": "Invalid email",
+    "password_required": "Password required",
+    "or": "or",
+    "register_success": "Account created! Check your email.",
+    "required": "Required",
+    "password_min": "Minimum 6 characters",
+    "password_mismatch": "Passwords do not match",
     "role_labels": {
       "particulier": "Individual",
       "professionnel": "Professional",
@@ -267,7 +279,9 @@
     "confirming": "Confirming...",
     "confirm_deposit": "I've deposited the item",
     "deposit_confirmed": "Deposit confirmed!",
-    "confirm_error": "Error during confirmation"
+    "confirm_error": "Error during confirmation",
+    "barcode_unavailable": "Barcode unavailable",
+    "barcode_alt": "Pickup barcode"
   },
   "common": {
     "save": "Save",
@@ -1058,7 +1072,10 @@
     "deleting": "Deleting...",
     "ban_placeholder": "Inappropriate behavior, spam, terms violation...",
     "ban_title": "Ban {{name}}",
-    "reset_2fa_success": "Email 2FA reset"
+    "reset_2fa_success": "Email 2FA reset",
+    "deactivate_tooltip": "Deactivate",
+    "activate_tooltip": "Activate",
+    "reset_2fa_tooltip": "Reset email 2FA"
   },
   "admin_listings": {
     "title": "Listing management",

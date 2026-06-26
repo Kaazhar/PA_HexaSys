@@ -63,7 +63,7 @@ export default function LoginPage() {
 
       if (reponse.token && reponse.user) {
         setSession(reponse.token, reponse.user);
-        toast.success('Connexion réussie');
+        toast.success(t('auth.login_success'));
         redirectApresLogin(reponse.user);
       }
     } catch (err: unknown) {
@@ -72,7 +72,7 @@ export default function LoginPage() {
         navigate('/compte-bloque');
         return;
       }
-      toast.error(error.response?.data?.error || 'Identifiants invalides');
+      toast.error(error.response?.data?.error || t('auth.invalid_credentials'));
     }
   };
 
@@ -82,11 +82,11 @@ export default function LoginPage() {
   };
 
   const onGoogleSuccess = async (credential?: string) => {
-    if (!credential) { toast.error('Connexion Google annulée'); return; }
+    if (!credential) { toast.error(t('auth.google_cancelled')); return; }
     try {
       const res = await authService.googleLogin(credential);
       setSession(res.data.token, res.data.user);
-      toast.success('Connexion réussie');
+      toast.success(t('auth.login_success'));
       redirectApresLogin(res.data.user);
     } catch (err: unknown) {
       const error = err as { response?: { status?: number; data?: { error?: string } } };
@@ -94,7 +94,7 @@ export default function LoginPage() {
         navigate('/compte-bloque');
         return;
       }
-      toast.error(error.response?.data?.error || 'Échec de la connexion Google');
+      toast.error(error.response?.data?.error || t('auth.google_error'));
     }
   };
 
@@ -124,7 +124,7 @@ export default function LoginPage() {
           <div>
             <label className="label">{t('auth.email')}</label>
             <input
-              {...register('email', { required: 'Email requis', pattern: { value: /^\S+@\S+$/, message: 'Email invalide' } })}
+              {...register('email', { required: t('auth.email_required'), pattern: { value: /^\S+@\S+$/, message: t('auth.email_invalid') } })}
               type="email"
               className="input"
               placeholder="vous@exemple.com"
@@ -135,7 +135,7 @@ export default function LoginPage() {
           <div>
             <label className="label">{t('auth.password')}</label>
             <input
-              {...register('password', { required: 'Mot de passe requis' })}
+              {...register('password', { required: t('auth.password_required') })}
               type="password"
               className="input"
               placeholder="••••••••"
@@ -162,14 +162,14 @@ export default function LoginPage() {
           <>
             <div className="flex items-center gap-3 my-5">
               <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-xs text-gray-400">ou</span>
+              <span className="text-xs text-gray-400">{t('auth.or')}</span>
               <div className="flex-1 h-px bg-gray-200" />
             </div>
             <div className="flex justify-center">
               <GoogleOAuthProvider clientId={googleClientId}>
                 <GoogleLogin
                   onSuccess={(cred) => onGoogleSuccess(cred.credential)}
-                  onError={() => toast.error('Échec de la connexion Google')}
+                  onError={() => toast.error(t('auth.google_error'))}
                   text="signin_with"
                   shape="rectangular"
                   locale="fr"

@@ -36,11 +36,11 @@ export default function RegisterPage() {
         role: data.role,
         newsletter: data.newsletter,
       });
-      toast.success('Compte créé ! Vérifiez votre email.');
+      toast.success(t('auth.register_success'));
       navigate(`/confirmer-email?email=${encodeURIComponent(data.email)}`);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
-      toast.error(error.response?.data?.error || 'Une erreur est survenue');
+      toast.error(error.response?.data?.error || t('common.error'));
     }
   };
 
@@ -82,7 +82,7 @@ export default function RegisterPage() {
               <div>
                 <label className="label">{t('auth.firstname')}</label>
                 <input
-                  {...register('firstname', { required: 'Requis' })}
+                  {...register('firstname', { required: t('auth.required') })}
                   className="input"
                   placeholder="Marie"
                 />
@@ -91,7 +91,7 @@ export default function RegisterPage() {
               <div>
                 <label className="label">{t('auth.lastname')}</label>
                 <input
-                  {...register('lastname', { required: 'Requis' })}
+                  {...register('lastname', { required: t('auth.required') })}
                   className="input"
                   placeholder="Dupont"
                 />
@@ -102,7 +102,7 @@ export default function RegisterPage() {
             <div>
               <label className="label">{t('auth.email')}</label>
               <input
-                {...register('email', { required: 'Email requis', pattern: { value: /^\S+@\S+$/, message: 'Email invalide' } })}
+                {...register('email', { required: t('auth.email_required'), pattern: { value: /^\S+@\S+$/, message: t('auth.email_invalid') } })}
                 type="email"
                 className="input"
                 placeholder="marie@exemple.com"
@@ -113,7 +113,7 @@ export default function RegisterPage() {
             <div>
               <label className="label">{t('auth.password')}</label>
               <input
-                {...register('password', { required: 'Requis', minLength: { value: 6, message: 'Minimum 6 caractères' } })}
+                {...register('password', { required: t('auth.required'), minLength: { value: 6, message: t('auth.password_min') } })}
                 type="password"
                 className="input"
                 placeholder="••••••••"
@@ -125,8 +125,8 @@ export default function RegisterPage() {
               <label className="label">{t('auth.confirm_password')}</label>
               <input
                 {...register('confirmPassword', {
-                  required: 'Requis',
-                  validate: (v) => v === password || 'Les mots de passe ne correspondent pas',
+                  required: t('auth.required'),
+                  validate: (v) => v === password || t('auth.password_mismatch'),
                 })}
                 type="password"
                 className="input"

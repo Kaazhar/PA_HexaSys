@@ -13,6 +13,7 @@ import type { ContainerRequest } from '../../types';
 import { useTranslation } from 'react-i18next';
 
 function BarcodeImage({ requestId }: { requestId: number }) {
+  const { t } = useTranslation();
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
@@ -28,9 +29,9 @@ function BarcodeImage({ requestId }: { requestId: number }) {
     };
   }, [requestId]);
 
-  if (error) return <p className="text-xs text-red-500">Code-barres indisponible</p>;
+  if (error) return <p className="text-xs text-red-500">{t('depots.barcode_unavailable')}</p>;
   if (!url) return <div className="h-[90px] flex items-center justify-center"><LoadingSpinner /></div>;
-  return <img src={url} alt="Code-barres de récupération" className="h-[90px] w-full object-contain" />;
+  return <img src={url} alt={t('depots.barcode_alt')} className="h-[90px] w-full object-contain" />;
 }
 
 export default function MesDepotsPage() {

@@ -304,14 +304,14 @@ export default function AdminUsers() {
                           <button
                             onClick={() => setEditUser(user)}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
-                            title="Modifier"
+                            title={t('common.edit')}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => toggleActiveMutation.mutate({ id: user.id, is_active: !user.is_active })}
                             className={clsx('p-1.5 rounded-lg transition-colors', user.is_active ? 'text-green-500 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-50')}
-                            title={user.is_active ? 'Désactiver' : 'Activer'}
+                            title={user.is_active ? t('admin_users.deactivate_tooltip') : t('admin_users.activate_tooltip')}
                           >
                             {user.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                           </button>
@@ -319,7 +319,7 @@ export default function AdminUsers() {
                             <button
                               onClick={() => setUnbanUserId(user.id)}
                               className="p-1.5 rounded-lg text-orange-400 hover:text-orange-600 hover:bg-orange-50 transition-colors"
-                              title="Débannir"
+                              title={t('admin_users.unban_btn')}
                             >
                               <ShieldCheck className="w-4 h-4" />
                             </button>
@@ -327,7 +327,7 @@ export default function AdminUsers() {
                             <button
                               onClick={() => setBanUser(user)}
                               className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                              title="Bannir"
+                              title={t('admin_users.ban_btn')}
                             >
                               <ShieldOff className="w-4 h-4" />
                             </button>
@@ -336,7 +336,7 @@ export default function AdminUsers() {
                             <button
                               onClick={() => resetEmail2FAMutation.mutate(user.id)}
                               className="p-1.5 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                              title="Réinitialiser la 2FA email"
+                              title={t('admin_users.reset_2fa_tooltip')}
                             >
                               <MailX className="w-4 h-4" />
                             </button>
@@ -344,7 +344,7 @@ export default function AdminUsers() {
                           <button
                             onClick={() => setDeleteUserId(user.id)}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                            title="Supprimer"
+                            title={t('common.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
