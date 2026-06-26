@@ -361,7 +361,10 @@
     "plan_pro": "Premium",
     "plan_enterprise": "Enterprise",
     "new_listings_count": "{{count}} new listings",
-    "new_deposits_count": "{{count}} container deposits"
+    "new_deposits_count": "{{count}} container deposits",
+    "siret_success": "SIRET verified successfully!",
+    "siret_error": "Invalid or not found SIRET",
+    "verified_company": "Verified company"
   },
   "profile": {
     "title": "My profile",

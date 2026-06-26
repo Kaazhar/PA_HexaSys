@@ -52,10 +52,10 @@ export default function DashboardPro() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
       refetchCompany();
-      toast.success('SIRET vérifié avec succès !');
+      toast.success(t('dashboard_pro.siret_success'));
     },
     onError: (err: { response?: { data?: { error?: string } } }) => {
-      toast.error(err.response?.data?.error || 'SIRET invalide ou introuvable');
+      toast.error(err.response?.data?.error || t('dashboard_pro.siret_error'));
     },
   });
 
@@ -113,7 +113,7 @@ export default function DashboardPro() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-semibold text-gray-900">{companyInfo?.company_name || 'Entreprise vérifiée'}</p>
+                      <p className="font-semibold text-gray-900">{companyInfo?.company_name || t('dashboard_pro.verified_company')}</p>
                       <span className="flex items-center gap-1 text-xs text-green-600 font-medium bg-green-100 px-2 py-0.5 rounded-full">
                         <BadgeCheck className="w-3 h-3" /> {t('dashboard_pro.verified_badge')}
                       </span>
