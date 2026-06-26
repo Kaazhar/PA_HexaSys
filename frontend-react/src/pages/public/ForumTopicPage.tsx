@@ -49,16 +49,16 @@ export default function ForumTopicPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['forum-topic', id] });
       setReplyContent('');
-      toast.success('Réponse publiée');
+      toast.success(t('forum.reply_published'));
     },
-    onError: (err: any) => toast.error(err?.response?.data?.error || 'Erreur'),
+    onError: (err: any) => toast.error(err?.response?.data?.error || t('common.error')),
   });
 
   const deletePostMutation = useMutation({
     mutationFn: (postId: number) => forumService.deletePost(postId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['forum-topic', id] });
-      toast.success('Réponse supprimée');
+      toast.success(t('forum.reply_deleted'));
     },
   });
 
@@ -75,7 +75,7 @@ export default function ForumTopicPage() {
   const deleteTopicMutation = useMutation({
     mutationFn: () => forumService.deleteTopic(Number(id)),
     onSuccess: () => {
-      toast.success('Sujet supprimé');
+      toast.success(t('forum.topic_deleted'));
       navigate('/forum');
     },
   });
@@ -152,7 +152,7 @@ export default function ForumTopicPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { if (confirm('Supprimer ce sujet ?')) deleteTopicMutation.mutate(); }}
+                  onClick={() => { if (confirm(t('forum.delete_confirm'))) deleteTopicMutation.mutate(); }}
                   className="p-2 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 transition-colors"
                   title="Supprimer"
                 >
@@ -170,7 +170,7 @@ export default function ForumTopicPage() {
                 {topic.author?.firstname} {topic.author?.lastname}
                 {(topic.author?.role === 'salarie' || topic.author?.role === 'admin') && (
                   <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-[#2D5016] text-white font-medium">
-                    {topic.author.role === 'admin' ? 'Admin' : 'Équipe'}
+                    {topic.author.role === 'admin' ? 'Admin' : t('forum.staff')}
                   </span>
                 )}
               </p>
@@ -249,7 +249,7 @@ function PostCard({ post, index, canDelete, onDelete }: {
   canDelete: boolean;
   onDelete: () => void;
 }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dateLocale = i18n.language?.startsWith('en') ? enUS : fr;
   const authorName = `${post.author?.firstname ?? '?'} ${post.author?.lastname ?? ''}`;
   const isStaff = post.author?.role === 'salarie' || post.author?.role === 'admin';
@@ -266,7 +266,7 @@ function PostCard({ post, index, canDelete, onDelete }: {
             <span className="font-semibold text-sm text-gray-900">{authorName}</span>
             {isStaff && (
               <span className="text-xs px-2 py-0.5 rounded-full bg-[#2D5016] text-white font-medium">
-                {post.author?.role === 'admin' ? 'Admin' : 'Équipe'}
+                {post.author?.role === 'admin' ? 'Admin' : t('forum.staff')}
               </span>
             )}
           </div>

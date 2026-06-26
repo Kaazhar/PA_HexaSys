@@ -71,7 +71,7 @@ export default function SalarieFormations() {
       queryClient.invalidateQueries({ queryKey: ['salarie', 'workshops'] });
       setShowForm(false);
       setForm(defaultForm);
-      toast.success(t('salarie_formations.create_btn'));
+      toast.success(t('salarie_formations.create_success'));
     },
     onError: () => toast.error(t('common.error')),
   });
@@ -82,7 +82,7 @@ export default function SalarieFormations() {
       queryClient.invalidateQueries({ queryKey: ['salarie', 'workshops'] });
       setCancelId(null);
       setCancelReason('');
-      toast.success(t('salarie_formations.cancel_modal_title'));
+      toast.success(t('salarie_formations.cancel_success'));
     },
     onError: () => toast.error(t('common.error')),
   });
@@ -154,7 +154,7 @@ export default function SalarieFormations() {
                       )}
                       <span className="flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5" />
-                        {ws.enrolled}/{ws.max_spots} inscrits
+                        {ws.enrolled}/{ws.max_spots} {t('salarie_formations.enrolled')}
                         {ws.enrolled < ws.min_spots && (
                           <span className="text-amber-500 text-xs">(min {ws.min_spots})</span>
                         )}

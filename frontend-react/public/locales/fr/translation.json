@@ -75,7 +75,12 @@
     "login_btn": "Se connecter",
     "locked_msg": "Ce sujet est verrouillé — les nouvelles réponses sont désactivées.",
     "not_found": "Sujet introuvable",
-    "by": "Par"
+    "by": "Par",
+    "reply_published": "Réponse publiée",
+    "reply_deleted": "Réponse supprimée",
+    "topic_deleted": "Sujet supprimé",
+    "delete_confirm": "Supprimer ce sujet ?",
+    "staff": "Équipe"
   },
   "conseils": {
     "title": "Espace Conseils",
@@ -770,7 +775,9 @@
     "cancel_modal_desc": "Les participants inscrits seront notifiés automatiquement.",
     "cancel_reason_placeholder": "Raison de l'annulation...",
     "back": "Retour",
-    "confirm_cancel": "Confirmer l'annulation"
+    "confirm_cancel": "Confirmer l'annulation",
+    "create_success": "Formation créée",
+    "cancel_success": "Formation annulée"
   },
   "salarie_articles": {
     "title": "Mes articles",

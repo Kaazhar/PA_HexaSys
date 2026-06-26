@@ -75,7 +75,12 @@
     "login_btn": "Log in",
     "locked_msg": "This topic is locked — new replies are disabled.",
     "not_found": "Topic not found",
-    "by": "By"
+    "by": "By",
+    "reply_published": "Reply published",
+    "reply_deleted": "Reply deleted",
+    "topic_deleted": "Topic deleted",
+    "delete_confirm": "Delete this topic?",
+    "staff": "Team"
   },
   "conseils": {
     "title": "Tips & Advice",
@@ -899,7 +904,9 @@
     "cancel_modal_desc": "Registered participants will be notified automatically.",
     "cancel_reason_placeholder": "Reason for cancellation...",
     "back": "Back",
-    "confirm_cancel": "Confirm cancellation"
+    "confirm_cancel": "Confirm cancellation",
+    "create_success": "Workshop created",
+    "cancel_success": "Workshop cancelled"
   },
   "salarie_articles": {
     "title": "My articles",
