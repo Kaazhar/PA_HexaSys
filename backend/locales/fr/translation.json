@@ -995,7 +995,8 @@
     "label_category": "Catégorie",
     "select_category": "Sélectionner une catégorie",
     "creating": "Création...",
-    "create_btn": "Créer"
+    "create_btn": "Créer",
+    "delete_tooltip": "Supprimer définitivement"
   },
   "admin_containers": {
     "title": "Gestion des conteneurs",
@@ -1078,7 +1079,10 @@
       "pending": "En attente",
       "resolved": "Résolu",
       "dismissed": "Ignoré"
-    }
+    },
+    "no_reports": "Aucun signalement",
+    "resolved_success": "Annonce retirée",
+    "dismissed_success": "Signalement ignoré"
   },
   "admin_newsletter": {
     "title": "Newsletter",
@@ -1088,7 +1092,10 @@
     "content": "Contenu (HTML) *",
     "warning": "Cet email sera envoyé à tous les utilisateurs ayant activé la newsletter. Cette action est irréversible.",
     "send_btn": "Envoyer la newsletter",
-    "sending": "Envoi en cours..."
+    "sending": "Envoi en cours...",
+    "sent_success": "Newsletter envoyée à {{count}} abonné(s)",
+    "subject_placeholder": "Ex: Nouveautés de la plateforme - Mars 2026",
+    "content_placeholder": "<h1>Bonjour !</h1><p>Voici les dernières nouvelles...</p>"
   },
   "admin_categories": {
     "title": "Gestion des catégories",

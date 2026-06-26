@@ -18,10 +18,10 @@ export default function AdminNewsletter() {
   const onSubmit = async (data: NewsletterForm) => {
     try {
       const res = await newsletterService.send(data.subject, data.content);
-      toast.success(`Newsletter envoyée à ${res.data?.count ?? 0} abonné(s)`);
+      toast.success(t('admin_newsletter.sent_success', { count: res.data?.count ?? 0 }));
       reset();
     } catch {
-      toast.error("Erreur lors de l'envoi de la newsletter");
+      toast.error(t('common.error'));
     }
   };
 
@@ -45,7 +45,7 @@ export default function AdminNewsletter() {
               <input
                 {...register('subject', { required: true })}
                 className="input"
-                placeholder="Ex: Nouveautés de la plateforme - Mars 2026"
+                placeholder={t('admin_newsletter.subject_placeholder')}
               />
               {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject.message}</p>}
             </div>
@@ -55,7 +55,7 @@ export default function AdminNewsletter() {
               <textarea
                 {...register('content', { required: true })}
                 className="input min-h-[300px] font-mono text-sm resize-y"
-                placeholder="<h1>Bonjour !</h1><p>Voici les dernières nouvelles...</p>"
+                placeholder={t('admin_newsletter.content_placeholder')}
               />
               {errors.content && <p className="text-red-500 text-xs mt-1">{errors.content.message}</p>}
             </div>

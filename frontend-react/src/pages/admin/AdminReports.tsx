@@ -48,7 +48,7 @@ export default function AdminReports() {
     mutationFn: ({ id, status, note }: { id: number; status: string; note: string }) =>
       reportService.resolve(id, { status, admin_note: note }),
     onSuccess: (_, vars) => {
-      toast.success(vars.status === 'resolved' ? t('admin_reports.confirm_remove') : t('admin_reports.ignore'));
+      toast.success(vars.status === 'resolved' ? t('admin_reports.resolved_success') : t('admin_reports.dismissed_success'));
       setResolving(null);
       setAdminNote('');
       queryClient.invalidateQueries({ queryKey: ['admin-reports'] });
@@ -87,7 +87,7 @@ export default function AdminReports() {
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner /></div>
         ) : reports.length === 0 ? (
-          <EmptyState icon={<Flag className="w-10 h-10" />} message="Aucun signalement" />
+          <EmptyState icon={<Flag className="w-10 h-10" />} message={t('admin_reports.no_reports')} />
         ) : (
           <div className="space-y-3">
             {reports.map((report: any) => {

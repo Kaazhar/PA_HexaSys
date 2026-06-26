@@ -1124,7 +1124,8 @@
     "label_category": "Category",
     "select_category": "Select a category",
     "creating": "Creating...",
-    "create_btn": "Create"
+    "create_btn": "Create",
+    "delete_tooltip": "Delete permanently"
   },
   "admin_containers": {
     "title": "Container management",
@@ -1207,7 +1208,10 @@
       "pending": "Pending",
       "resolved": "Resolved",
       "dismissed": "Dismissed"
-    }
+    },
+    "no_reports": "No reports",
+    "resolved_success": "Listing removed",
+    "dismissed_success": "Report dismissed"
   },
   "admin_newsletter": {
     "title": "Newsletter",
@@ -1217,7 +1221,10 @@
     "content": "Content (HTML) *",
     "warning": "This email will be sent to all users who have enabled the newsletter. This action is irreversible.",
     "send_btn": "Send newsletter",
-    "sending": "Sending..."
+    "sending": "Sending...",
+    "sent_success": "Newsletter sent to {{count}} subscriber(s)",
+    "subject_placeholder": "Ex: Platform updates - March 2026",
+    "content_placeholder": "<h1>Hello!</h1><p>Here are the latest news...</p>"
   },
   "admin_categories": {
     "title": "Category management",

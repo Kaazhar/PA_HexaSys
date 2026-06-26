@@ -247,7 +247,7 @@ export default function AdminWorkshops() {
                           <button
                             onClick={() => setDeleteWorkshopId(workshop.id)}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                            title="Supprimer définitivement"
+                            title={t('admin_workshops.delete_tooltip')}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
