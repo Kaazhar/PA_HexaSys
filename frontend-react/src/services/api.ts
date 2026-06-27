@@ -113,14 +113,39 @@ export const workshopService = {
   getAdminAll: (params?: { page?: number; limit?: number; status?: string }) =>
     api.get<{ workshops: Workshop[]; total: number; page: number; limit: number }>('/admin/workshops', { params }),
   getOne: (id: number) => api.get<Workshop>(`/workshops/${id}`),
-  create: (data: Partial<Workshop>) => api.post<Workshop>('/workshops', data),
+  create: (data: WorkshopCreatePayload) => api.post<Workshop>('/workshops', data),
   update: (id: number, data: Partial<Workshop>) => api.put<Workshop>(`/workshops/${id}`, data),
   validate: (id: number) => api.put(`/workshops/${id}/validate`),
   cancel: (id: number, reason: string) => api.put(`/workshops/${id}/cancel`, { reason }),
   delete: (id: number) => api.delete(`/workshops/${id}`),
   book: (id: number) => api.post(`/workshops/${id}/book`),
+  getBookings: (id: number) =>
+    api.get<{ participants: WorkshopParticipant[]; count: number; max_spots: number }>(`/workshops/${id}/bookings`),
   checkEnrollment: () => api.post('/workshops/check-enrollment'),
 };
+
+export interface WorkshopParticipant {
+  firstname: string;
+  lastname: string;
+  booked_at: string;
+}
+
+export interface WorkshopCreatePayload {
+  title: string;
+  description?: string;
+  objective?: string;
+  date?: string;
+  duration?: number;
+  location?: string;
+  price?: number;
+  max_spots?: number;
+  min_spots?: number;
+  category_id?: number;
+  type?: string;
+  image?: string;
+  sessions?: { date: string; duration: number }[];
+  chapters?: { title: string; content: string }[];
+}
 
 export const siretService = {
   verify: (siret: string) => api.post('/pro/verify-siret', { siret }),

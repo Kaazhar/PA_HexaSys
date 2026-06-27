@@ -77,7 +77,24 @@ export interface Workshop {
   instructor_id: number;
   instructor?: User;
   type: 'atelier' | 'formation' | 'conference';
+  objective?: string;
+  sessions?: WorkshopSession[];
+  chapters?: WorkshopChapter[];
   created_at: string;
+}
+
+export interface WorkshopSession {
+  id: number;
+  date: string;
+  duration: number;
+  order: number;
+}
+
+export interface WorkshopChapter {
+  id: number;
+  title: string;
+  content: string;
+  order: number;
 }
 
 export interface WorkshopBooking {

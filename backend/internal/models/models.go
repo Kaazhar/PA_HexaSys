@@ -149,6 +149,26 @@ type Workshop struct {
 	InstructorID uint      `json:"instructor_id"`
 	Instructor   User      `json:"instructor,omitempty"`
 	Type         string    `gorm:"type:varchar(20);default:'atelier'" json:"type"`
+	Objective    string    `gorm:"type:text" json:"objective,omitempty"`
+
+	Sessions []WorkshopSession `gorm:"foreignKey:WorkshopID;constraint:OnDelete:CASCADE" json:"sessions,omitempty"`
+	Chapters []WorkshopChapter `gorm:"foreignKey:WorkshopID;constraint:OnDelete:CASCADE" json:"chapters,omitempty"`
+}
+
+type WorkshopSession struct {
+	Base
+	WorkshopID uint      `gorm:"index" json:"workshop_id"`
+	Date       time.Time `json:"date"`
+	Duration   int       `json:"duration"`
+	Order      int       `gorm:"default:0" json:"order"`
+}
+
+type WorkshopChapter struct {
+	Base
+	WorkshopID uint   `gorm:"index" json:"workshop_id"`
+	Title      string `json:"title"`
+	Content    string `gorm:"type:text" json:"content"`
+	Order      int    `gorm:"default:0" json:"order"`
 }
 
 type WorkshopBooking struct {

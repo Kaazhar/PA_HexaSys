@@ -426,7 +426,10 @@
     "min_participants": "Se requieren mínimo {{min}} participantes",
     "host": "Instructor",
     "employee": "Empleado de UpcycleConnect",
-    "spots_taken": "Plazas ocupadas"
+    "spots_taken": "Plazas ocupadas",
+    "objective": "Objetivo principal",
+    "sessions": "Fechas y horarios",
+    "program": "Programa"
   },
   "public_profile": {
     "back": "Volver",
@@ -847,7 +850,26 @@
     "cancel_modal_desc": "Los participantes inscritos serán notificados automáticamente.",
     "cancel_reason_placeholder": "Motivo de cancelación...",
     "back": "Volver",
-    "confirm_cancel": "Confirmar cancelación"
+    "confirm_cancel": "Confirmar cancelación",
+    "create_success": "Taller creado",
+    "cancel_success": "Taller cancelado",
+    "label_objective": "Objetivo principal",
+    "objective_placeholder": "¿Cuál es el objetivo principal de este taller?",
+    "label_sessions": "Fechas y horarios *",
+    "sessions_hint": "Añade una línea por día. La primera fecha es la fecha principal.",
+    "add_session": "Añadir una fecha",
+    "session_date": "Fecha y hora",
+    "session_duration": "Duración (min)",
+    "need_session": "Añade al menos una fecha",
+    "label_chapters": "Capítulos",
+    "add_chapter": "Añadir un capítulo",
+    "no_chapter": "Aún no hay capítulos.",
+    "chapter_title": "Título del capítulo",
+    "chapter_content": "Contenido del capítulo...",
+    "remove": "Eliminar",
+    "detail_title": "Detalle del taller",
+    "enrolled_list": "Personas inscritas",
+    "no_enrolled": "Nadie inscrito por el momento"
   },
   "salarie_articles": {
     "title": "Mis artículos",

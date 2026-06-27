@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
@@ -83,25 +84,54 @@ func GetAdminWorkshops(c *gin.Context) {
 func GetWorkshop(c *gin.Context) {
 	id := c.Param("id")
 	var workshop models.Workshop
-	if err := config.DB.Preload("Category").Preload("Instructor").First(&workshop, id).Error; err != nil {
+	if err := config.DB.
+		Preload("Category").
+		Preload("Instructor").
+		Preload("Sessions", func(db *gorm.DB) *gorm.DB { return db.Order("`order` ASC, date ASC") }).
+		Preload("Chapters", func(db *gorm.DB) *gorm.DB { return db.Order("`order` ASC") }).
+		First(&workshop, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Workshop not found"})
 		return
 	}
 	c.JSON(http.StatusOK, workshop)
 }
 
+type SessionInput struct {
+	Date     string `json:"date"`
+	Duration int    `json:"duration"`
+}
+
+type ChapterInput struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}
+
 type CreateWorkshopRequest struct {
-	Title       string  `json:"title" binding:"required"`
-	Description string  `json:"description"`
-	Date        string  `json:"date" binding:"required"`
-	Duration    int     `json:"duration"`
-	Location    string  `json:"location"`
-	Price       float64 `json:"price"`
-	MaxSpots    int     `json:"max_spots"`
-	MinSpots    int     `json:"min_spots"`
-	CategoryID  uint    `json:"category_id"`
-	Type        string  `json:"type"`
-	Image       string  `json:"image"`
+	Title       string         `json:"title" binding:"required"`
+	Description string         `json:"description"`
+	Objective   string         `json:"objective"`
+	Date        string         `json:"date"`
+	Duration    int            `json:"duration"`
+	Location    string         `json:"location"`
+	Price       float64        `json:"price"`
+	MaxSpots    int            `json:"max_spots"`
+	MinSpots    int            `json:"min_spots"`
+	CategoryID  uint           `json:"category_id"`
+	Type        string         `json:"type"`
+	Image       string         `json:"image"`
+	Sessions    []SessionInput `json:"sessions"`
+	Chapters    []ChapterInput `json:"chapters"`
+}
+
+// parseWorkshopDate accepte plusieurs formats (RFC3339, datetime-local, date seule).
+func parseWorkshopDate(s string) (time.Time, error) {
+	if t, err := time.Parse("2006-01-02T15:04:05Z07:00", s); err == nil {
+		return t, nil
+	}
+	if t, err := time.Parse("2006-01-02T15:04", s); err == nil {
+		return t, nil
+	}
+	return time.Parse("2006-01-02", s)
 }
 
 func CreateWorkshop(c *gin.Context) {
@@ -113,16 +143,34 @@ func CreateWorkshop(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 
-	date, err := time.Parse("2006-01-02T15:04:05Z07:00", req.Date)
-	if err != nil {
-		date, err = time.Parse("2006-01-02T15:04", req.Date)
-		if err != nil {
-			date, err = time.Parse("2006-01-02", req.Date)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
-				return
-			}
+	// Parse les séances (si fournies), triées par date.
+	var sessions []models.WorkshopSession
+	for _, s := range req.Sessions {
+		if s.Date == "" {
+			continue
 		}
+		d, err := parseWorkshopDate(s.Date)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid session date format"})
+			return
+		}
+		sessions = append(sessions, models.WorkshopSession{Date: d, Duration: s.Duration})
+	}
+	sort.Slice(sessions, func(i, j int) bool { return sessions[i].Date.Before(sessions[j].Date) })
+
+	// Date/durée principales : 1ère séance si dispo, sinon champs hérités.
+	var date time.Time
+	duration := req.Duration
+	if len(sessions) > 0 {
+		date = sessions[0].Date
+		duration = sessions[0].Duration
+	} else {
+		d, err := parseWorkshopDate(req.Date)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
+			return
+		}
+		date = d
 	}
 
 	maxSpots := req.MaxSpots
@@ -142,8 +190,9 @@ func CreateWorkshop(c *gin.Context) {
 	workshop := models.Workshop{
 		Title:        req.Title,
 		Description:  req.Description,
+		Objective:    req.Objective,
 		Date:         date,
-		Duration:     req.Duration,
+		Duration:     duration,
 		Location:     req.Location,
 		Price:        req.Price,
 		MaxSpots:     maxSpots,
@@ -160,7 +209,34 @@ func CreateWorkshop(c *gin.Context) {
 		return
 	}
 
-	config.DB.Preload("Category").Preload("Instructor").First(&workshop, workshop.ID)
+	// Séances rattachées (Order = position chronologique).
+	for i := range sessions {
+		sessions[i].WorkshopID = workshop.ID
+		sessions[i].Order = i
+	}
+	if len(sessions) > 0 {
+		config.DB.Create(&sessions)
+	}
+
+	// Chapitres rattachés (Order = position dans le formulaire).
+	for i, ch := range req.Chapters {
+		if ch.Title == "" && ch.Content == "" {
+			continue
+		}
+		config.DB.Create(&models.WorkshopChapter{
+			WorkshopID: workshop.ID,
+			Title:      ch.Title,
+			Content:    ch.Content,
+			Order:      i,
+		})
+	}
+
+	config.DB.
+		Preload("Category").
+		Preload("Instructor").
+		Preload("Sessions", func(db *gorm.DB) *gorm.DB { return db.Order("`order` ASC, date ASC") }).
+		Preload("Chapters", func(db *gorm.DB) *gorm.DB { return db.Order("`order` ASC") }).
+		First(&workshop, workshop.ID)
 	c.JSON(http.StatusCreated, workshop)
 }
 
@@ -320,6 +396,50 @@ func DeleteWorkshop(c *gin.Context) {
 
 	config.DB.Delete(&workshop)
 	c.JSON(http.StatusOK, gin.H{"message": "Événement supprimé, participants notifiés"})
+}
+
+// GetWorkshopBookings renvoie la liste des inscrits d'une formation.
+// Réservé à l'instructeur propriétaire ou à un admin. N'expose pas l'email.
+func GetWorkshopBookings(c *gin.Context) {
+	id := c.Param("id")
+	var workshop models.Workshop
+	if err := config.DB.First(&workshop, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Workshop not found"})
+		return
+	}
+
+	userID, _ := c.Get("userID")
+	userRole, _ := c.Get("userRole")
+	role, _ := userRole.(models.UserRole)
+	if role != models.RoleAdmin && workshop.InstructorID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
+		return
+	}
+
+	var bookings []models.WorkshopBooking
+	config.DB.Preload("User").
+		Where("workshop_id = ? AND status = ?", workshop.ID, "confirmed").
+		Order("created_at ASC").Find(&bookings)
+
+	type participant struct {
+		Firstname string `json:"firstname"`
+		Lastname  string `json:"lastname"`
+		BookedAt  string `json:"booked_at"`
+	}
+	participants := make([]participant, 0, len(bookings))
+	for _, b := range bookings {
+		participants = append(participants, participant{
+			Firstname: b.User.Firstname,
+			Lastname:  b.User.Lastname,
+			BookedAt:  b.CreatedAt.Format(time.RFC3339),
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"participants": participants,
+		"count":        len(participants),
+		"max_spots":    workshop.MaxSpots,
+	})
 }
 
 func GetMyBookings(c *gin.Context) {

@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Users, ArrowLeft, User as UserIcon, Tag, CheckCircle } from 'lucide-react';
+import { Calendar, MapPin, Clock, Users, ArrowLeft, User as UserIcon, Tag, CheckCircle, Target, ListChecks } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -118,10 +118,55 @@ export default function WorkshopDetailPage() {
                   )}
                 </div>
 
+                {workshop.objective && (
+                  <div className="bg-primary-50/50 border border-primary-100 rounded-xl p-4">
+                    <div className="flex items-center gap-1.5 text-sm font-semibold text-primary-700 mb-1">
+                      <Target className="w-4 h-4" /> {t('workshop_detail.objective')}
+                    </div>
+                    <p className="text-sm text-gray-700 whitespace-pre-line">{workshop.objective}</p>
+                  </div>
+                )}
+
                 {workshop.description && (
                   <div>
                     <h2 className="font-semibold text-gray-900 mb-2">{t('workshop_detail.description')}</h2>
                     <p className="text-gray-600 whitespace-pre-line leading-relaxed">{workshop.description}</p>
+                  </div>
+                )}
+
+                {workshop.sessions && workshop.sessions.length > 1 && (
+                  <div>
+                    <h2 className="font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-primary-500" /> {t('workshop_detail.sessions')}
+                    </h2>
+                    <div className="space-y-1.5">
+                      {workshop.sessions.map((s, i) => (
+                        <div key={s.id || i} className="flex items-center gap-3 text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
+                          <span className="font-medium text-gray-400">{i + 1}.</span>
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5" />
+                            {s.date ? format(new Date(s.date), 'dd MMMM yyyy à HH:mm', { locale: fr }) : '-'}
+                          </span>
+                          <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{s.duration} min</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {workshop.chapters && workshop.chapters.length > 0 && (
+                  <div>
+                    <h2 className="font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
+                      <ListChecks className="w-4 h-4 text-primary-500" /> {t('workshop_detail.program')}
+                    </h2>
+                    <div className="space-y-2">
+                      {workshop.chapters.map((ch, i) => (
+                        <div key={ch.id || i} className="border border-gray-100 rounded-xl p-3">
+                          <p className="font-medium text-gray-900 text-sm">{i + 1}. {ch.title}</p>
+                          {ch.content && <p className="text-sm text-gray-600 mt-1 whitespace-pre-line">{ch.content}</p>}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

@@ -32,6 +32,8 @@ func main() {
 		&models.Category{},
 		&models.Listing{},
 		&models.Workshop{},
+		&models.WorkshopSession{},
+		&models.WorkshopChapter{},
 		&models.WorkshopBooking{},
 		&models.Container{},
 		&models.ContainerRequest{},
@@ -176,6 +178,7 @@ func main() {
 	api.PUT("/workshops/:id/validate", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ValidateWorkshop)
 	api.PUT("/workshops/:id/cancel", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.CancelWorkshop)
 	api.DELETE("/workshops/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.DeleteWorkshop)
+	api.GET("/workshops/:id/bookings", middleware.AuthRequired(), handlers.GetWorkshopBookings)
 	api.POST("/workshops/:id/book", middleware.AuthRequired(), handlers.BookWorkshop)
 	api.POST("/workshops/check-enrollment", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.CheckLowEnrollment)
 

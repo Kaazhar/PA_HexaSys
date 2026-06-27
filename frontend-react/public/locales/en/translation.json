@@ -503,7 +503,10 @@
     "employee": "UpcycleConnect employee",
     "spots_taken": "Spots taken",
     "book_error": "Error registering for workshop",
-    "payment_error": "Payment error"
+    "payment_error": "Payment error",
+    "objective": "Main objective",
+    "sessions": "Dates and times",
+    "program": "Program"
   },
   "public_profile": {
     "back": "Back",
@@ -939,7 +942,24 @@
     "back": "Back",
     "confirm_cancel": "Confirm cancellation",
     "create_success": "Workshop created",
-    "cancel_success": "Workshop cancelled"
+    "cancel_success": "Workshop cancelled",
+    "label_objective": "Main objective",
+    "objective_placeholder": "What is the main goal of this workshop?",
+    "label_sessions": "Dates and times *",
+    "sessions_hint": "Add one row per day. The first date is used as the main date.",
+    "add_session": "Add a date",
+    "session_date": "Date and time",
+    "session_duration": "Duration (min)",
+    "need_session": "Add at least one date",
+    "label_chapters": "Chapters",
+    "add_chapter": "Add a chapter",
+    "no_chapter": "No chapters yet.",
+    "chapter_title": "Chapter title",
+    "chapter_content": "Chapter content...",
+    "remove": "Remove",
+    "detail_title": "Workshop details",
+    "enrolled_list": "Registered people",
+    "no_enrolled": "No one registered yet"
   },
   "salarie_articles": {
     "title": "My articles",
