@@ -270,16 +270,6 @@ func main() {
 		adminGroup.DELETE("/subscription-plans/:id", handlers.AdminDeletePlan)
 		adminGroup.GET("/user-subscriptions", handlers.AdminGetUserSubscriptions)
 		adminGroup.DELETE("/user-subscriptions/:id", handlers.AdminCancelSubscription)
-		adminGroup.DELETE("/listings/:id", handlers.DeleteListing)
-		adminGroup.PUT("/listings/:id", handlers.UpdateListing)
-		adminGroup.GET("/articles", handlers.GetMyArticles)
-		adminGroup.POST("/articles", handlers.CreateArticle)
-		adminGroup.PUT("/articles/:id", handlers.UpdateArticle)
-		adminGroup.DELETE("/articles/:id", handlers.DeleteArticle)
-		adminGroup.GET("/projects", handlers.GetProjects)
-		adminGroup.POST("/projects", handlers.CreateProject)
-		adminGroup.PUT("/projects/:id", handlers.UpdateProject)
-		adminGroup.DELETE("/projects/:id", handlers.DeleteProject)
 	}
 
 	salarieGroup := api.Group("/salarie")
