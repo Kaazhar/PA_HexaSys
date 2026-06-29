@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Tag, Search, CheckCircle, XCircle, Eye, Star } from 'lucide-react';
+import { Tag, Search, CheckCircle, XCircle, Eye, Star, Trash2 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { listingService } from '../../services/api';
+import { listingService, adminService } from '../../services/api';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import type { Listing } from '../../types';
@@ -63,6 +63,15 @@ export default function AdminListings() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'listings'] });
       setRejectListing(null);
       reset();
+      toast.success(t('common.success'));
+    },
+    onError: () => toast.error(t('common.error')),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => adminService.deleteListing(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'listings'] });
       toast.success(t('common.success'));
     },
     onError: () => toast.error(t('common.error')),
@@ -192,6 +201,13 @@ export default function AdminListings() {
                               </button>
                             </>
                           )}
+                          <button
+                            onClick={() => { if (confirm(`Supprimer "${listing.title}" ?`)) deleteMutation.mutate(listing.id); }}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>

@@ -209,6 +209,18 @@ export const adminService = {
   getStats: () => api.get<AdminStats>('/admin/stats'),
   getFinance: () => api.get('/admin/finance'),
   getInvoices: (params?: { status?: string }) => api.get<Invoice[]>('/admin/invoices', { params }),
+  getArticles: () => api.get<Article[]>('/admin/articles'),
+  createArticle: (data: Partial<Article>) => api.post<Article>('/admin/articles', data),
+  updateArticle: (id: number, data: Partial<Article>) => api.put<Article>(`/admin/articles/${id}`, data),
+  deleteArticle: (id: number) => api.delete(`/admin/articles/${id}`),
+  getProjects: () => api.get<Project[]>('/admin/projects'),
+  createProject: (data: Partial<Project>) => api.post<Project>('/admin/projects', data),
+  updateProject: (id: number, data: Partial<Project>) => api.put<Project>(`/admin/projects/${id}`, data),
+  deleteProject: (id: number) => api.delete(`/admin/projects/${id}`),
+  getUserSubscriptions: () => api.get<Subscription[]>('/admin/user-subscriptions'),
+  cancelSubscription: (id: number) => api.delete(`/admin/user-subscriptions/${id}`),
+  deleteListing: (id: number) => api.delete(`/admin/listings/${id}`),
+  updateListing: (id: number, data: Partial<Listing>) => api.put<Listing>(`/admin/listings/${id}`, data),
 };
 
 export const dashboardService = {

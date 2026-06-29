@@ -288,6 +288,7 @@ func GetAdminListings(c *gin.Context) {
 func UpdateListing(c *gin.Context) {
 	id := c.Param("id")
 	userID, _ := c.Get("userID")
+	userRole, _ := c.Get("userRole")
 
 	var listing models.Listing
 	if err := config.DB.First(&listing, id).Error; err != nil {
@@ -295,7 +296,8 @@ func UpdateListing(c *gin.Context) {
 		return
 	}
 
-	if listing.UserID != userID.(uint) {
+	role := userRole.(models.UserRole)
+	if role != models.RoleAdmin && listing.UserID != userID.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}

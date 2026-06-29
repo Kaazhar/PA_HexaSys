@@ -5,18 +5,20 @@ import {
 } from 'lucide-react';
 
 export const adminSidebar = [
-  { label: 'Dashboard',      path: '/admin',                icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: 'Utilisateurs',   path: '/admin/utilisateurs',   icon: <Users className="w-4 h-4" /> },
   { label: 'Annonces',       path: '/admin/annonces',       icon: <Tag className="w-4 h-4" /> },
   { label: 'Formations',     path: '/admin/formations',     icon: <BookOpen className="w-4 h-4" /> },
+  { label: 'Conseils',       path: '/admin/conseils',       icon: <Lightbulb className="w-4 h-4" /> },
+  { label: 'Forum',          path: '/admin/forum',          icon: <MessageSquare className="w-4 h-4" /> },
+  { label: 'Projets',        path: '/admin/projets',        icon: <Image className="w-4 h-4" /> },
+  { label: 'Abonnements',    path: '/admin/abonnements',    icon: <Briefcase className="w-4 h-4" /> },
   { label: 'Catégories',     path: '/admin/categories',     icon: <FolderOpen className="w-4 h-4" /> },
   { label: 'Conteneurs',     path: '/admin/conteneurs',     icon: <Package className="w-4 h-4" /> },
   { label: 'Finance',        path: '/admin/finance',        icon: <DollarSign className="w-4 h-4" /> },
   { label: 'Signalements',   path: '/admin/signalements',   icon: <Flag className="w-4 h-4" /> },
   { label: 'Newsletter',     path: '/admin/newsletter',     icon: <Send className="w-4 h-4" /> },
   { label: 'Langues',        path: '/admin/langues',        icon: <Globe className="w-4 h-4" /> },
-  { label: 'Forum',          path: '/salarie/forum',        icon: <MessageSquare className="w-4 h-4" /> },
-  { label: 'Abonnements',   path: '/admin/abonnements',    icon: <Briefcase className="w-4 h-4" /> },
+  { label: 'Vue d\'ensemble', path: '/admin',               icon: <LayoutDashboard className="w-4 h-4" /> },
 ];
 
 export const particulierSidebar = [

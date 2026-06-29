@@ -32,6 +32,9 @@ import AdminReports from './pages/admin/AdminReports';
 import AdminNewsletter from './pages/admin/AdminNewsletter';
 import AdminLanguages from './pages/admin/AdminLanguages';
 import AdminSubscriptionPlans from './pages/admin/AdminSubscriptionPlans';
+import AdminArticles from './pages/admin/AdminArticles';
+import AdminForum from './pages/admin/AdminForum';
+import AdminProjects from './pages/admin/AdminProjects';
 
 import DashboardParticulier from './pages/particulier/DashboardParticulier';
 import CreateListingPage from './pages/particulier/CreateListingPage';
@@ -133,6 +136,9 @@ function App() {
       <Route path="/admin/newsletter" element={<ProtectedRoute roles={['admin']}><AdminNewsletter /></ProtectedRoute>} />
       <Route path="/admin/langues" element={<ProtectedRoute roles={['admin']}><AdminLanguages /></ProtectedRoute>} />
       <Route path="/admin/abonnements" element={<ProtectedRoute roles={['admin']}><AdminSubscriptionPlans /></ProtectedRoute>} />
+      <Route path="/admin/conseils" element={<ProtectedRoute roles={['admin']}><AdminArticles /></ProtectedRoute>} />
+      <Route path="/admin/forum" element={<ProtectedRoute roles={['admin']}><AdminForum /></ProtectedRoute>} />
+      <Route path="/admin/projets" element={<ProtectedRoute roles={['admin']}><AdminProjects /></ProtectedRoute>} />
 
       <Route path="/dashboard" element={<ProtectedRoute roles={['particulier', 'admin']}><DashboardParticulier /></ProtectedRoute>} />
       <Route path="/annonces/creer" element={<ProtectedRoute roles={['particulier', 'professionnel', 'admin']}><CreateListingPage /></ProtectedRoute>} />

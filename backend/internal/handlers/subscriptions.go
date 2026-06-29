@@ -158,3 +158,15 @@ func AdminDeletePlan(c *gin.Context) {
 	config.DB.Delete(&models.SubscriptionPlan{}, id)
 	c.JSON(http.StatusOK, gin.H{"message": "Plan supprimé"})
 }
+
+func AdminGetUserSubscriptions(c *gin.Context) {
+	var subs []models.Subscription
+	config.DB.Preload("User").Order("created_at DESC").Find(&subs)
+	c.JSON(http.StatusOK, subs)
+}
+
+func AdminCancelSubscription(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	config.DB.Model(&models.Subscription{}).Where("id = ?", id).Update("status", "cancelled")
+	c.JSON(http.StatusOK, gin.H{"message": "Abonnement annulé"})
+}
