@@ -56,6 +56,7 @@ export default function PaymentSuccessPage() {
     if (!result) return t('payment_success.msg_default');
     if (result.type === 'workshop') return t('payment_success.msg_workshop', { title: result.title });
     if (result.type === 'subscription') return t('payment_success.msg_subscription', { plan: result.plan });
+    if (result.type === 'boost') return t('payment_success.msg_boost', { title: result.title });
     return t('payment_success.msg_default');
   };
 

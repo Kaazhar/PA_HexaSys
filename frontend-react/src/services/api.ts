@@ -104,6 +104,7 @@ export const listingService = {
   reject: (id: number, reason: string) => api.put(`/listings/${id}/reject`, { reason }),
   markSold: (id: number) => api.put(`/listings/${id}/sold`),
   sponsor: (id: number, isSponsored: boolean) => api.put(`/listings/${id}/sponsor`, { is_sponsored: isSponsored }),
+  boost: (id: number) => api.post<{ free?: boolean; sponsored_until?: string; checkout_url?: string }>(`/listings/${id}/boost`),
   delete: (id: number) => api.delete(`/listings/${id}`),
 };
 

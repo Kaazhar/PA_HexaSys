@@ -163,6 +163,7 @@ func main() {
 	api.PUT("/listings/:id/validate", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ValidateListing)
 	api.PUT("/listings/:id/reject", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.RejectListing)
 	api.PUT("/listings/:id/sponsor", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.SponsorListing)
+	api.POST("/listings/:id/boost", middleware.AuthRequired(), handlers.BoostListing)
 	api.PUT("/listings/:id/sold", middleware.AuthRequired(), handlers.MarkListingSold)
 	api.PUT("/listings/:id", middleware.AuthRequired(), handlers.UpdateListing)
 	api.DELETE("/listings/:id", middleware.AuthRequired(), handlers.DeleteListing)

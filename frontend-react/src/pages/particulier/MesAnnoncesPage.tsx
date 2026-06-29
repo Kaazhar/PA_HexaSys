@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, CheckCircle, Clock, XCircle, Tag, MapPin, Pencil } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Clock, XCircle, Tag, MapPin, Pencil, Zap } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePaginatedQuery } from '../../hooks/usePaginatedQuery';
 import { Link } from 'react-router-dom';
@@ -27,6 +27,7 @@ export default function MesAnnoncesPage() {
   const sidebar = user?.role === 'professionnel' ? proSidebar : user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const [statusFilter, setStatusFilter] = useState('');
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [boostId, setBoostId] = useState<number | null>(null);
   const queryClient = useQueryClient();
 
   const { items: listings, total, totalPages, isLoading, page, setPage } = usePaginatedQuery({
@@ -46,6 +47,18 @@ export default function MesAnnoncesPage() {
     onSuccess: () => {
       setDeleteId(null);
       queryClient.invalidateQueries({ queryKey: ['my-listings'] });
+    },
+  });
+
+  const boostMutation = useMutation({
+    mutationFn: (id: number) => listingService.boost(id),
+    onSuccess: (res) => {
+      setBoostId(null);
+      if (res.data.checkout_url) {
+        window.location.href = res.data.checkout_url;
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['my-listings'] });
+      }
     },
   });
 
@@ -124,6 +137,21 @@ export default function MesAnnoncesPage() {
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    {listing.status === 'active' && listing.is_sponsored && (
+                      <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md bg-amber-100 text-amber-700 font-medium">
+                        <Zap className="w-3 h-3" />
+                        {t('my_listings.boosted')}
+                      </span>
+                    )}
+                    {listing.status === 'active' && !listing.is_sponsored && (
+                      <button
+                        onClick={() => setBoostId(listing.id)}
+                        className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors font-medium border border-amber-200"
+                      >
+                        <Zap className="w-3 h-3" />
+                        {t('my_listings.boost_btn')}
+                      </button>
+                    )}
                     {listing.status === 'active' && (
                       <button
                         onClick={() => soldMutation.mutate(listing.id)}
@@ -157,7 +185,32 @@ export default function MesAnnoncesPage() {
         <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
 
-      
+      {boostId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <Zap className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">{t('my_listings.boost_modal_title')}</h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-5">
+              {user?.has_used_free_boost ? t('my_listings.boost_modal_paid') : t('my_listings.boost_modal_free')}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setBoostId(null)} className="btn-secondary">{t('common.cancel')}</button>
+              <button
+                onClick={() => boostMutation.mutate(boostId)}
+                disabled={boostMutation.isPending}
+                className="bg-amber-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-amber-600 transition-colors"
+              >
+                {t('my_listings.boost_confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">

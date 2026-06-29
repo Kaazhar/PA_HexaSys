@@ -528,7 +528,13 @@
     "deleting": "Deleting...",
     "no_listings": "No listings",
     "count": "{{count}} listing in total",
-    "count_plural": "{{count}} listings in total"
+    "count_plural": "{{count}} listings in total",
+    "boost_btn": "Boost",
+    "boosted": "Boosted",
+    "boost_modal_title": "Boost your listing",
+    "boost_modal_free": "You have a free boost! Your listing will be highlighted for 24 hours.",
+    "boost_modal_paid": "Boost your listing for €5. It will be highlighted for 24 hours.",
+    "boost_confirm": "Confirm"
   },
   "subscription": {
     "title": "My subscription",
@@ -734,6 +740,7 @@
     "msg_workshop": "Your registration for \"{{title}}\" is confirmed!",
     "msg_subscription": "{{plan}} subscription activated!",
     "msg_default": "Your payment has been confirmed.",
+    "msg_boost": "Your listing \"{{title}}\" is now boosted for 24 hours!",
     "downloading": "Downloading..."
   },
   "payment_cancel": {

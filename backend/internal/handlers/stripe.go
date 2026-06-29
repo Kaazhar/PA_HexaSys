@@ -365,9 +365,80 @@ func ConfirmSession(c *gin.Context) {
 		})
 		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "subscription", "plan": plan, "invoice_id": inv.ID})
 
+	case "boost":
+		listingIDStr := s.Metadata["listing_id"]
+		listingID64, _ := strconv.ParseUint(listingIDStr, 10, 64)
+		listingID := uint(listingID64)
+
+		var listing models.Listing
+		if err := config.DB.First(&listing, listingID).Error; err != nil {
+			c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "boost"})
+			return
+		}
+
+		if listing.IsSponsored && listing.SponsoredUntil != nil && listing.SponsoredUntil.After(time.Now()) {
+			inv := ensureInvoice(fmt.Sprintf("INV-BOOST-%d-%d", listingID, userID), userID, "boost", "Boost annonce: "+listing.Title, 5.0)
+			c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "boost", "title": listing.Title, "invoice_id": inv.ID})
+			return
+		}
+
+		until := time.Now().Add(24 * time.Hour)
+		config.DB.Model(&listing).Updates(map[string]interface{}{
+			"is_sponsored":    true,
+			"sponsored_until": until,
+		})
+		config.DB.Create(&models.Notification{
+			UserID:  userID,
+			Message: fmt.Sprintf("Votre annonce \"%s\" est maintenant boostée pendant 24h !", listing.Title),
+			Type:    "success",
+		})
+		inv := ensureInvoice(fmt.Sprintf("INV-BOOST-%d-%d", listingID, userID), userID, "boost", "Boost annonce: "+listing.Title, 5.0)
+		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "boost", "title": listing.Title, "invoice_id": inv.ID})
+
 	default:
 		c.JSON(http.StatusOK, gin.H{"status": "confirmed"})
 	}
+}
+
+func createBoostCheckoutSession(listingID, userID uint) (string, error) {
+	stripe.Key = getStripeKey()
+	frontendURL := getFrontendURL()
+
+	var listing models.Listing
+	if err := config.DB.First(&listing, listingID).Error; err != nil {
+		return "", err
+	}
+
+	params := &stripe.CheckoutSessionParams{
+		PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
+		LineItems: []*stripe.CheckoutSessionLineItemParams{
+			{
+				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+					Currency: stripe.String("eur"),
+					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+						Name:        stripe.String("Boost d'annonce 24h"),
+						Description: stripe.String(fmt.Sprintf("Mise en avant de \"%s\" pendant 24 heures", listing.Title)),
+					},
+					UnitAmount: stripe.Int64(500),
+				},
+				Quantity: stripe.Int64(1),
+			},
+		},
+		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
+		SuccessURL: stripe.String(frontendURL + "/payment/success?session_id={CHECKOUT_SESSION_ID}"),
+		CancelURL:  stripe.String(frontendURL + "/payment/cancel"),
+		Metadata: map[string]string{
+			"type":       "boost",
+			"listing_id": strconv.Itoa(int(listingID)),
+			"user_id":    strconv.Itoa(int(userID)),
+		},
+	}
+
+	s, err := session.New(params)
+	if err != nil {
+		return "", err
+	}
+	return s.URL, nil
 }
 
 func StripeWebhook(c *gin.Context) {
@@ -495,6 +566,30 @@ func StripeWebhook(c *gin.Context) {
 			config.DB.Create(&models.Notification{
 				UserID:  userID,
 				Message: fmt.Sprintf("🎉 Abonnement %s activé ! Merci pour votre confiance.", plan),
+				Type:    "success",
+			})
+
+		case "boost":
+			listingIDStr := s.Metadata["listing_id"]
+			listingID64, _ := strconv.ParseUint(listingIDStr, 10, 64)
+			listingID := uint(listingID64)
+
+			var listing models.Listing
+			if err := config.DB.First(&listing, listingID).Error; err != nil {
+				break
+			}
+			if listing.IsSponsored && listing.SponsoredUntil != nil && listing.SponsoredUntil.After(time.Now()) {
+				break
+			}
+			until := time.Now().Add(24 * time.Hour)
+			config.DB.Model(&listing).Updates(map[string]interface{}{
+				"is_sponsored":    true,
+				"sponsored_until": until,
+			})
+			ensureInvoice(fmt.Sprintf("INV-BOOST-%d-%d", listingID, userID), userID, "boost", "Boost annonce: "+listing.Title, 5.0)
+			config.DB.Create(&models.Notification{
+				UserID:  userID,
+				Message: fmt.Sprintf("Votre annonce \"%s\" est maintenant boostée pendant 24h !", listing.Title),
 				Type:    "success",
 			})
 		}

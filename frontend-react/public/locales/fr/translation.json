@@ -528,7 +528,13 @@
     "deleting": "Suppression...",
     "no_listings": "Aucune annonce",
     "count": "{{count}} annonce au total",
-    "count_plural": "{{count}} annonces au total"
+    "count_plural": "{{count}} annonces au total",
+    "boost_btn": "Booster",
+    "boosted": "Boosté",
+    "boost_modal_title": "Booster votre annonce",
+    "boost_modal_free": "Vous avez un boost gratuit ! Votre annonce sera mise en avant pendant 24h.",
+    "boost_modal_paid": "Booster votre annonce pour 5€. Elle sera mise en avant pendant 24h.",
+    "boost_confirm": "Confirmer"
   },
   "subscription": {
     "title": "Mon abonnement",
@@ -626,7 +632,8 @@
     "download_invoice": "Télécharger ma facture (PDF)",
     "downloading": "Téléchargement...",
     "go_dashboard": "Aller au tableau de bord",
-    "see_workshops": "Voir les formations"
+    "see_workshops": "Voir les formations",
+    "msg_boost": "Votre annonce \"{{title}}\" est maintenant boostée pendant 24h !"
   },
   "payment_cancel": {
     "title": "Paiement annulé",

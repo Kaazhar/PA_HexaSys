@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
@@ -13,6 +14,8 @@ import (
 )
 
 func GetListings(c *gin.Context) {
+	config.DB.Model(&models.Listing{}).Where("is_sponsored = true AND sponsored_until < ?", time.Now()).Updates(map[string]interface{}{"is_sponsored": false, "sponsored_until": nil})
+
 	var listings []models.Listing
 	query := config.DB.Preload("Category").Preload("User")
 
@@ -313,6 +316,50 @@ func UpdateListing(c *gin.Context) {
 
 	config.DB.Preload("Category").Preload("User").First(&listing, listing.ID)
 	c.JSON(http.StatusOK, listing)
+}
+
+func BoostListing(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	id := c.Param("id")
+
+	var listing models.Listing
+	if err := config.DB.First(&listing, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
+		return
+	}
+	if listing.UserID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
+		return
+	}
+	if listing.Status != "active" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "L'annonce doit être active pour être boostée"})
+		return
+	}
+	if listing.IsSponsored && listing.SponsoredUntil != nil && listing.SponsoredUntil.After(time.Now()) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cette annonce est déjà boostée"})
+		return
+	}
+
+	var user models.User
+	config.DB.First(&user, userID)
+
+	if !user.HasUsedFreeBoost {
+		until := time.Now().Add(24 * time.Hour)
+		config.DB.Model(&listing).Updates(map[string]interface{}{
+			"is_sponsored":    true,
+			"sponsored_until": until,
+		})
+		config.DB.Model(&user).Update("has_used_free_boost", true)
+		c.JSON(http.StatusOK, gin.H{"free": true, "sponsored_until": until})
+		return
+	}
+
+	checkoutURL, err := createBoostCheckoutSession(listing.ID, userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur Stripe : " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"checkout_url": checkoutURL})
 }
 
 func SponsorListing(c *gin.Context) {
