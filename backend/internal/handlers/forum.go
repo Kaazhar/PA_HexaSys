@@ -10,6 +10,28 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
+// canSeeProjectTopic indique si l'utilisateur courant peut voir/écrire dans un topic lié à un projet.
+// Accès = suiveur du projet, OU créateur du projet, OU admin.
+func canSeeProjectTopic(c *gin.Context, topic *models.ForumTopic) bool {
+	if topic.ProjectID == nil {
+		return true
+	}
+	userID, ok := c.Get("userID")
+	if !ok {
+		return false
+	}
+	if role, ok := c.Get("userRole"); ok && role.(models.UserRole) == models.RoleAdmin {
+		return true
+	}
+	var project models.Project
+	if err := config.DB.First(&project, *topic.ProjectID).Error; err == nil && project.UserID == userID.(uint) {
+		return true
+	}
+	var count int64
+	config.DB.Model(&models.ProjectFollower{}).Where("project_id = ? AND user_id = ?", *topic.ProjectID, userID).Count(&count)
+	return count > 0
+}
+
 func GetForumTopics(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
@@ -18,8 +40,22 @@ func GetForumTopics(c *gin.Context) {
 	var topics []models.ForumTopic
 	var total int64
 
-	config.DB.Model(&models.ForumTopic{}).Count(&total)
-	config.DB.Preload("Author").
+	// Visibilité des topics de projet : seulement ceux suivis par l'utilisateur (+ ses propres projets).
+	q := config.DB.Model(&models.ForumTopic{})
+	if userID, ok := c.Get("userID"); ok {
+		if role, isRole := c.Get("userRole"); !isRole || role.(models.UserRole) != models.RoleAdmin {
+			q = q.Where(
+				"project_id IS NULL OR project_id IN (?) OR project_id IN (?)",
+				config.DB.Model(&models.ProjectFollower{}).Select("project_id").Where("user_id = ?", userID),
+				config.DB.Model(&models.Project{}).Select("id").Where("user_id = ?", userID),
+			)
+		}
+	} else {
+		q = q.Where("project_id IS NULL")
+	}
+
+	q.Count(&total)
+	q.Preload("Author").
 		Order("is_pinned DESC, created_at DESC").
 		Offset(offset).Limit(limit).
 		Find(&topics)
@@ -33,6 +69,11 @@ func GetForumTopic(c *gin.Context) {
 	var topic models.ForumTopic
 	if err := config.DB.Preload("Author").First(&topic, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Sujet introuvable"})
+		return
+	}
+
+	if !canSeeProjectTopic(c, &topic) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Abonnez-vous au projet pour accéder à cet espace"})
 		return
 	}
 
@@ -163,6 +204,11 @@ func CreateForumPost(c *gin.Context) {
 
 	if topic.IsLocked {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Ce sujet est verrouillé"})
+		return
+	}
+
+	if !canSeeProjectTopic(c, &topic) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Abonnez-vous au projet pour participer à cet espace"})
 		return
 	}
 

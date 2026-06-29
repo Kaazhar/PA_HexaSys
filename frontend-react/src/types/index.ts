@@ -231,6 +231,39 @@ export interface Article {
   updated_at: string;
 }
 
+export interface Project {
+  id: number;
+  title: string;
+  description: string;
+  before_images: string;
+  after_images: string;
+  tags?: string;
+  user_id: number;
+  user?: User;
+  views: number;
+  likes: number;
+  is_featured: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectUpdate {
+  id: number;
+  project_id: number;
+  image_url: string;
+  comment: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectDetail {
+  project: Project;
+  updates: ProjectUpdate[];
+  followers_count: number;
+  is_following: boolean;
+  forum_topic_id: number;
+}
+
 export interface ForumTopic {
   id: number;
   title: string;
@@ -241,6 +274,7 @@ export interface ForumTopic {
   is_locked: boolean;
   views: number;
   replies_count: number;
+  project_id?: number | null;
   created_at: string;
   updated_at: string;
 }

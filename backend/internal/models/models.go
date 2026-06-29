@@ -306,6 +306,21 @@ type Project struct {
 	IsFeatured   bool   `gorm:"default:false" json:"is_featured"`
 }
 
+// ProjectUpdate : une avancée d'un projet (image + commentaire).
+type ProjectUpdate struct {
+	Base
+	ProjectID uint   `gorm:"index" json:"project_id"`
+	ImageURL  string `json:"image_url"`
+	Comment   string `gorm:"type:text" json:"comment"`
+}
+
+// ProjectFollower : un utilisateur qui suit un projet.
+type ProjectFollower struct {
+	Base
+	ProjectID uint `gorm:"index" json:"project_id"`
+	UserID    uint `gorm:"index" json:"user_id"`
+}
+
 type ForumTopic struct {
 	Base
 	Title        string `gorm:"not null" json:"title"`
@@ -316,6 +331,7 @@ type ForumTopic struct {
 	IsLocked     bool   `gorm:"default:false" json:"is_locked"`
 	Views        int    `gorm:"default:0" json:"views"`
 	RepliesCount int    `gorm:"default:0" json:"replies_count"`
+	ProjectID    *uint  `gorm:"index" json:"project_id,omitempty"` // si défini : espace communautaire d'un projet (visible suiveurs seulement)
 }
 
 type ForumPost struct {

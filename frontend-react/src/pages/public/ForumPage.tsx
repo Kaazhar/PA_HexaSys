@@ -97,6 +97,11 @@ function TopicRow({ topic }: { topic: ForumTopic }) {
               <Lock className="w-3 h-3" /> {t('forum.locked')}
             </span>
           )}
+          {topic.project_id && (
+            <span className="flex items-center gap-1 text-xs font-semibold text-[#2D5016] bg-green-100 px-2 py-0.5 rounded-full">
+              {t('forum.project_tag')}
+            </span>
+          )}
           <h3 className="font-semibold text-gray-900 group-hover:text-[#2D5016] transition-colors truncate">
             {topic.title}
           </h3>

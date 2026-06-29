@@ -74,6 +74,29 @@ func AuthRequired() gin.HandlerFunc {
 	}
 }
 
+// OptionalAuth renseigne userID/userRole si un token valide est présent, sans bloquer sinon.
+func OptionalAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.Next()
+			return
+		}
+
+		claims := &Claims{}
+		token, err := jwt.ParseWithClaims(parts[1], claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
+		if err == nil && token.Valid {
+			c.Set("userID", claims.UserID)
+			c.Set("userEmail", claims.Email)
+			c.Set("userRole", claims.Role)
+		}
+		c.Next()
+	}
+}
+
 func RequireRole(roles ...models.UserRole) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("userRole")

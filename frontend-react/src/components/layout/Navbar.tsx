@@ -119,6 +119,7 @@ export default function Navbar() {
               <Map className="w-3.5 h-3.5" />{t('nav.containers')}
             </Link>
             <Link to="/conseils" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.conseils')}</Link>
+            <Link to="/projets" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.projets')}</Link>
             <Link to="/forum" className="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">{t('nav.forum')}</Link>
           </div>
 
@@ -332,6 +333,7 @@ export default function Navbar() {
           <Link to="/formations" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.workshops')}</Link>
           <Link to="/conteneurs" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.containers')}</Link>
           <Link to="/conseils" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.conseils')}</Link>
+          <Link to="/projets" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.projets')}</Link>
           <Link to="/forum" className="block py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>{t('nav.forum')}</Link>
           {isAuthenticated ? (
             <>

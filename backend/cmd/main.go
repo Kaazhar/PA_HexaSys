@@ -44,6 +44,8 @@ func main() {
 		&models.Notification{},
 		&models.Article{},
 		&models.Project{},
+		&models.ProjectUpdate{},
+		&models.ProjectFollower{},
 		&models.Conversation{},
 		&models.Message{},
 		&models.Review{},
@@ -151,6 +153,9 @@ func main() {
 	api.GET("/search", handlers.GlobalSearch)
 	api.GET("/users/:id", handlers.GetPublicProfile)
 	api.GET("/projects", handlers.GetProjects)
+	api.GET("/projects/:id", middleware.OptionalAuth(), handlers.GetProject)
+	api.POST("/projects/:id/follow", middleware.AuthRequired(), handlers.FollowProject)
+	api.DELETE("/projects/:id/follow", middleware.AuthRequired(), handlers.UnfollowProject)
 	api.GET("/stats/public", handlers.GetPublicStats)
 	api.GET("/score/leaderboard", handlers.GetLeaderboard)
 
@@ -207,8 +212,8 @@ func main() {
 	api.GET("/articles", handlers.GetPublicArticles)
 	api.GET("/articles/:id", handlers.GetPublicArticle)
 
-	api.GET("/forum/topics", handlers.GetForumTopics)
-	api.GET("/forum/topics/:id", handlers.GetForumTopic)
+	api.GET("/forum/topics", middleware.OptionalAuth(), handlers.GetForumTopics)
+	api.GET("/forum/topics/:id", middleware.OptionalAuth(), handlers.GetForumTopic)
 	api.POST("/forum/topics", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.CreateForumTopic)
 	api.PUT("/forum/topics/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.UpdateForumTopic)
 	api.DELETE("/forum/topics/:id", middleware.AuthRequired(), middleware.RequireRole(models.RoleSalarie, models.RoleAdmin), handlers.DeleteForumTopic)
@@ -277,6 +282,8 @@ func main() {
 		proGroup.POST("/projects", handlers.CreateProject)
 		proGroup.PUT("/projects/:id", handlers.UpdateProject)
 		proGroup.DELETE("/projects/:id", handlers.DeleteProject)
+		proGroup.POST("/projects/:id/updates", handlers.AddProjectUpdate)
+		proGroup.DELETE("/projects/:id/updates/:updateId", handlers.DeleteProjectUpdate)
 	}
 
 	api.GET("/particulier/dashboard", middleware.AuthRequired(), middleware.RequireRole(models.RoleParticulier, models.RoleAdmin), handlers.GetParticularDashboard)

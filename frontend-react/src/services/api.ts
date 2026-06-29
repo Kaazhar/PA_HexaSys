@@ -2,7 +2,7 @@ import axios from 'axios';
 import type {
   User, Listing, Workshop, WorkshopBooking, Container, ContainerRequest, ContainerSlot,
   Category, Notification, Invoice, AdminStats, AuthResponse, AvailableObject,
-  Subscription, Project, Conversation, Message, Review, SearchResults,
+  Subscription, Project, ProjectUpdate, ProjectDetail, Conversation, Message, Review, SearchResults,
   ForumTopic, ForumPost, Article
 } from '../types';
 
@@ -238,6 +238,13 @@ export const projectService = {
   create: (data: Partial<Project>) => api.post<Project>('/pro/projects', data),
   update: (id: number, data: Partial<Project>) => api.put<Project>(`/pro/projects/${id}`, data),
   delete: (id: number) => api.delete(`/pro/projects/${id}`),
+  getOne: (id: number) => api.get<ProjectDetail>(`/projects/${id}`),
+  follow: (id: number) => api.post(`/projects/${id}/follow`),
+  unfollow: (id: number) => api.delete(`/projects/${id}/follow`),
+  addUpdate: (id: number, data: { image_url: string; comment: string }) =>
+    api.post<ProjectUpdate>(`/pro/projects/${id}/updates`, data),
+  deleteUpdate: (id: number, updateId: number) =>
+    api.delete(`/pro/projects/${id}/updates/${updateId}`),
 };
 
 export const messageService = {

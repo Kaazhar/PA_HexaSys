@@ -53,6 +53,8 @@ import ForumPage from './pages/public/ForumPage';
 import ForumTopicPage from './pages/public/ForumTopicPage';
 import ConseilsPage from './pages/public/ConseilsPage';
 import ConseilDetailPage from './pages/public/ConseilDetailPage';
+import ProjetsPage from './pages/public/ProjetsPage';
+import ProjetDetailPage from './pages/public/ProjetDetailPage';
 
 import MessagesPage from './pages/messages/MessagesPage';
 import ProfilePage from './pages/profil/ProfilePage';
@@ -152,6 +154,8 @@ function App() {
       <Route path="/forum/:id" element={<ForumTopicPage />} />
       <Route path="/conseils" element={<ConseilsPage />} />
       <Route path="/conseils/:id" element={<ConseilDetailPage />} />
+      <Route path="/projets" element={<ProjetsPage />} />
+      <Route path="/projets/:id" element={<ProjetDetailPage />} />
 
       <Route path="/messages" element={<ProtectedRoute roles={['particulier', 'professionnel', 'salarie', 'admin']}><MessagesPage /></ProtectedRoute>} />
       <Route path="/profil" element={<ProtectedRoute roles={['particulier', 'professionnel', 'salarie', 'admin']}><ProfilePage /></ProtectedRoute>} />

@@ -52,7 +52,160 @@ func CreateProject(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur création"})
 		return
 	}
+	ensureProjectForumTopic(&project)
 	c.JSON(http.StatusCreated, project)
+}
+
+// ensureProjectForumTopic crée le topic forum de l'espace communautaire si absent.
+func ensureProjectForumTopic(project *models.Project) uint {
+	var topic models.ForumTopic
+	if err := config.DB.Where("project_id = ?", project.ID).First(&topic).Error; err == nil {
+		return topic.ID
+	}
+	topic = models.ForumTopic{
+		Title:     "Projet : " + project.Title,
+		Content:   "Espace communautaire du projet \"" + project.Title + "\". Réservé aux abonnés.",
+		AuthorID:  project.UserID,
+		ProjectID: &project.ID,
+	}
+	config.DB.Create(&topic)
+	return topic.ID
+}
+
+// notifyProjectFollowers envoie une notification à tous les suiveurs d'un projet.
+func notifyProjectFollowers(projectID uint, message string) {
+	var followers []models.ProjectFollower
+	config.DB.Where("project_id = ?", projectID).Find(&followers)
+	for _, f := range followers {
+		config.DB.Create(&models.Notification{
+			UserID:  f.UserID,
+			Message: message,
+			Type:    "info",
+		})
+	}
+}
+
+// GetProject renvoie un projet, ses avancées, l'état de suivi et l'espace communautaire.
+func GetProject(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var project models.Project
+	if err := config.DB.Preload("User").First(&project, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Projet introuvable"})
+		return
+	}
+
+	var updates []models.ProjectUpdate
+	config.DB.Where("project_id = ?", id).Order("created_at DESC").Find(&updates)
+
+	var followersCount int64
+	config.DB.Model(&models.ProjectFollower{}).Where("project_id = ?", id).Count(&followersCount)
+
+	isFollowing := false
+	if userID, ok := c.Get("userID"); ok {
+		var count int64
+		config.DB.Model(&models.ProjectFollower{}).Where("project_id = ? AND user_id = ?", id, userID).Count(&count)
+		isFollowing = count > 0
+	}
+
+	forumTopicID := ensureProjectForumTopic(&project)
+
+	c.JSON(http.StatusOK, gin.H{
+		"project":         project,
+		"updates":         updates,
+		"followers_count": followersCount,
+		"is_following":    isFollowing,
+		"forum_topic_id":  forumTopicID,
+	})
+}
+
+// FollowProject : un utilisateur s'abonne au projet.
+func FollowProject(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	userID, _ := c.Get("userID")
+
+	var project models.Project
+	if err := config.DB.First(&project, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Projet introuvable"})
+		return
+	}
+
+	var existing models.ProjectFollower
+	if err := config.DB.Where("project_id = ? AND user_id = ?", id, userID).First(&existing).Error; err == nil {
+		c.JSON(http.StatusOK, gin.H{"message": "Déjà abonné"})
+		return
+	}
+
+	config.DB.Create(&models.ProjectFollower{ProjectID: uint(id), UserID: userID.(uint)})
+	c.JSON(http.StatusOK, gin.H{"message": "Abonné au projet"})
+}
+
+// UnfollowProject : se désabonner.
+func UnfollowProject(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	userID, _ := c.Get("userID")
+	config.DB.Where("project_id = ? AND user_id = ?", id, userID).Delete(&models.ProjectFollower{})
+	c.JSON(http.StatusOK, gin.H{"message": "Désabonné du projet"})
+}
+
+// AddProjectUpdate : le créateur ajoute une avancée (image + commentaire) et notifie les suiveurs.
+func AddProjectUpdate(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	userID, _ := c.Get("userID")
+	userRole, _ := c.Get("userRole")
+
+	var project models.Project
+	if err := config.DB.First(&project, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Projet introuvable"})
+		return
+	}
+	if userRole.(models.UserRole) != models.RoleAdmin && project.UserID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
+		return
+	}
+
+	var req struct {
+		ImageURL string `json:"image_url"`
+		Comment  string `json:"comment"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if req.ImageURL == "" && req.Comment == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ajoutez une image ou un commentaire"})
+		return
+	}
+
+	update := models.ProjectUpdate{
+		ProjectID: uint(id),
+		ImageURL:  req.ImageURL,
+		Comment:   req.Comment,
+	}
+	config.DB.Create(&update)
+
+	notifyProjectFollowers(uint(id), "Nouvelle avancée sur le projet \""+project.Title+"\"")
+	c.JSON(http.StatusCreated, update)
+}
+
+// DeleteProjectUpdate : le créateur supprime une avancée.
+func DeleteProjectUpdate(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	updateID, _ := strconv.Atoi(c.Param("updateId"))
+	userID, _ := c.Get("userID")
+	userRole, _ := c.Get("userRole")
+
+	var project models.Project
+	if err := config.DB.First(&project, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Projet introuvable"})
+		return
+	}
+	if userRole.(models.UserRole) != models.RoleAdmin && project.UserID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
+		return
+	}
+
+	config.DB.Where("id = ? AND project_id = ?", updateID, id).Delete(&models.ProjectUpdate{})
+	c.JSON(http.StatusOK, gin.H{"message": "Avancée supprimée"})
 }
 
 func UpdateProject(c *gin.Context) {
