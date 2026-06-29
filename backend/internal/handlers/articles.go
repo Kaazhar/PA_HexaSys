@@ -3,12 +3,31 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"upcycleconnect/backend/config"
 	"upcycleconnect/backend/internal/models"
 )
+
+// parseArticleExpiry accepte une date (YYYY-MM-DD) ou un datetime-local.
+func parseArticleExpiry(s string) (*time.Time, error) {
+	if s == "" {
+		return nil, nil
+	}
+	if t, err := time.Parse("2006-01-02T15:04:05Z07:00", s); err == nil {
+		return &t, nil
+	}
+	if t, err := time.Parse("2006-01-02T15:04", s); err == nil {
+		return &t, nil
+	}
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
 
 func GetPublicArticles(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -19,7 +38,8 @@ func GetPublicArticles(c *gin.Context) {
 	var articles []models.Article
 	var total int64
 
-	q := config.DB.Model(&models.Article{}).Where("status = ?", "published")
+	q := config.DB.Model(&models.Article{}).Where("status = ?", "published").
+		Where("expires_at IS NULL OR expires_at > ?", time.Now())
 	if tag != "" {
 		q = q.Where("tags LIKE ?", "%"+tag+"%")
 	}
@@ -32,7 +52,8 @@ func GetPublicArticles(c *gin.Context) {
 func GetPublicArticle(c *gin.Context) {
 	id := c.Param("id")
 	var article models.Article
-	if err := config.DB.Preload("Author").Where("status = ?", "published").First(&article, id).Error; err != nil {
+	if err := config.DB.Preload("Author").Where("status = ?", "published").
+		Where("expires_at IS NULL OR expires_at > ?", time.Now()).First(&article, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Article introuvable"})
 		return
 	}
@@ -64,10 +85,11 @@ func GetMyWorkshops(c *gin.Context) {
 }
 
 type ArticleRequest struct {
-	Title   string `json:"title" binding:"required"`
-	Content string `json:"content"`
-	Tags    string `json:"tags"`
-	Status  string `json:"status"`
+	Title     string `json:"title" binding:"required"`
+	Content   string `json:"content"`
+	Tags      string `json:"tags"`
+	Status    string `json:"status"`
+	ExpiresAt string `json:"expires_at"`
 }
 
 func CreateArticle(c *gin.Context) {
@@ -83,12 +105,19 @@ func CreateArticle(c *gin.Context) {
 		status = "draft"
 	}
 
+	expiresAt, err := parseArticleExpiry(req.ExpiresAt)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Date de péremption invalide"})
+		return
+	}
+
 	article := models.Article{
-		Title:    req.Title,
-		Content:  req.Content,
-		Tags:     req.Tags,
-		Status:   status,
-		AuthorID: userID.(uint),
+		Title:     req.Title,
+		Content:   req.Content,
+		Tags:      req.Tags,
+		Status:    status,
+		AuthorID:  userID.(uint),
+		ExpiresAt: expiresAt,
 	}
 
 	if err := config.DB.Create(&article).Error; err != nil {
@@ -120,6 +149,17 @@ func UpdateArticle(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	// expires_at arrive en chaîne (YYYY-MM-DD) : on le convertit en date ou null.
+	if raw, ok := req["expires_at"]; ok {
+		s, _ := raw.(string)
+		expiresAt, err := parseArticleExpiry(s)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Date de péremption invalide"})
+			return
+		}
+		req["expires_at"] = expiresAt
 	}
 
 	config.DB.Model(&article).Updates(req)

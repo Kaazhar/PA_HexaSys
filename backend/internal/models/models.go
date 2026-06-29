@@ -286,9 +286,10 @@ type Article struct {
 	Content  string `gorm:"type:longtext" json:"content"`
 	AuthorID uint   `json:"author_id"`
 	Author   User   `json:"author,omitempty"`
-	Status   string `gorm:"type:varchar(20);default:'draft'" json:"status"`
-	Views    int    `gorm:"default:0" json:"views"`
-	Tags     string `json:"tags,omitempty"`
+	Status    string     `gorm:"type:varchar(20);default:'draft'" json:"status"`
+	Views     int        `gorm:"default:0" json:"views"`
+	Tags      string     `json:"tags,omitempty"`
+	ExpiresAt *time.Time `json:"expires_at,omitempty"`
 }
 
 type Project struct {

@@ -21,6 +21,7 @@ interface Article {
   views: number;
   created_at: string;
   updated_at: string;
+  expires_at?: string | null;
   author?: { firstname: string; lastname: string };
 }
 
@@ -29,9 +30,10 @@ interface ArticleForm {
   content: string;
   tags: string;
   status: string;
+  expires_at: string;
 }
 
-const defaultForm: ArticleForm = { title: '', content: '', tags: '', status: 'draft' };
+const defaultForm: ArticleForm = { title: '', content: '', tags: '', status: 'draft', expires_at: '' };
 
 export default function SalarieArticles() {
   const { t } = useTranslation();
@@ -87,7 +89,7 @@ export default function SalarieArticles() {
 
   const openEdit = (article: Article) => {
     setEditArticle(article);
-    setForm({ title: article.title, content: article.content, tags: article.tags || '', status: article.status });
+    setForm({ title: article.title, content: article.content, tags: article.tags || '', status: article.status, expires_at: article.expires_at ? article.expires_at.slice(0, 10) : '' });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -135,6 +137,9 @@ export default function SalarieArticles() {
                       <span className={clsx('badge text-xs', article.status === 'published' ? 'badge-green' : 'badge-gray')}>
                         {article.status === 'published' ? t('salarie_articles.published') : t('salarie_articles.draft')}
                       </span>
+                      {article.expires_at && new Date(article.expires_at) < new Date() && (
+                        <span className="badge badge-red text-xs">{t('salarie_articles.expired')}</span>
+                      )}
                     </div>
                     {article.content && (
                       <p className="text-sm text-gray-500 line-clamp-2 mt-1">{article.content}</p>
@@ -142,6 +147,9 @@ export default function SalarieArticles() {
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
                       <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {article.views} {t('salarie_articles.views')}</span>
                       <span>{format(new Date(article.created_at), 'dd MMM yyyy', { locale: fr })}</span>
+                      {article.expires_at && (
+                        <span>{t('salarie_articles.expires_on')} {format(new Date(article.expires_at), 'dd MMM yyyy', { locale: fr })}</span>
+                      )}
                       {isAdmin && article.author && <span className="text-gray-500 font-medium">{article.author.firstname} {article.author.lastname}</span>}
                       {article.tags && <span className="text-primary-400">{article.tags}</span>}
                     </div>
@@ -214,6 +222,11 @@ export default function SalarieArticles() {
                     <option value="published">{t('salarie_articles.status_publish')}</option>
                   </select>
                 </div>
+              </div>
+              <div>
+                <label className="label">{t('salarie_articles.label_expires')}</label>
+                <input type="date" className="input" value={form.expires_at} onChange={e => setForm(f => ({ ...f, expires_at: e.target.value }))} />
+                <p className="text-xs text-gray-400 mt-1">{t('salarie_articles.expires_hint')}</p>
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => { setShowForm(false); setEditArticle(null); }} className="btn-secondary">{t('salarie_articles.cancel')}</button>
