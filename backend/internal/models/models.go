@@ -239,15 +239,30 @@ type ScoreEntry struct {
 	Action string `json:"action"`
 }
 
+type SubscriptionPlan struct {
+	Base
+	Name             string  `gorm:"not null" json:"name"`
+	Slug             string  `gorm:"uniqueIndex;not null" json:"slug"`
+	Price            float64 `json:"price"`
+	MaxListingsBonus int     `gorm:"default:0" json:"max_listings_bonus"`
+	Features         string  `gorm:"type:text" json:"features"`
+	IsActive         bool    `gorm:"default:true" json:"is_active"`
+	SortOrder        int     `gorm:"default:0" json:"sort_order"`
+	DurationDays     int     `gorm:"default:30" json:"duration_days"`
+}
+
 type Subscription struct {
 	Base
-	UserID      uint      `json:"user_id"`
-	User        User      `json:"user,omitempty"`
-	Plan        string    `gorm:"type:varchar(20);default:'decouverte'" json:"plan"`
-	Price       float64   `json:"price"`
-	Status      string    `gorm:"type:varchar(20);default:'active'" json:"status"`
-	RenewalDate time.Time `json:"renewal_date"`
-	StripeID    string    `json:"stripe_id,omitempty"`
+	UserID           uint       `gorm:"index" json:"user_id"`
+	User             User       `json:"user,omitempty"`
+	Plan             string     `gorm:"type:varchar(50);default:'decouverte'" json:"plan"`
+	Price            float64    `json:"price"`
+	Status           string     `gorm:"type:varchar(20);default:'active'" json:"status"`
+	RenewalDate      time.Time  `json:"renewal_date"`
+	ExpiresAt        *time.Time `json:"expires_at,omitempty"`
+	MaxListingsBonus int        `gorm:"default:0" json:"max_listings_bonus"`
+	NotifiedExpiry   bool       `gorm:"default:false" json:"notified_expiry"`
+	StripeID         string     `json:"stripe_id,omitempty"`
 }
 
 type Invoice struct {

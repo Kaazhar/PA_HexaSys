@@ -2,7 +2,7 @@ import axios from 'axios';
 import type {
   User, Listing, Workshop, WorkshopBooking, Container, ContainerRequest, ContainerSlot,
   Category, Notification, Invoice, AdminStats, AuthResponse, AvailableObject,
-  Subscription, Project, ProjectUpdate, ProjectDetail, Conversation, Message, Review, SearchResults,
+  Subscription, SubscriptionPlan, Project, ProjectUpdate, ProjectDetail, Conversation, Message, Review, SearchResults,
   ForumTopic, ForumPost, Article
 } from '../types';
 
@@ -228,17 +228,25 @@ export const salarieService = {
 };
 
 export const subscriptionService = {
-  getMy: () => api.get<Subscription>('/subscription'),
-  upgrade: (plan: string) => api.post<Subscription>('/subscription/upgrade', { plan }),
+  getPlans: () => api.get<SubscriptionPlan[]>('/subscription-plans'),
+  getMy: () => api.get<{ subscriptions: Subscription[]; listing_limit: number; base_limit: number }>('/subscriptions/my'),
+  subscribeFree: (slug: string) => api.post<Subscription>('/subscriptions/subscribe-free', { slug }),
+};
+
+export const adminPlanService = {
+  getAll: () => api.get<SubscriptionPlan[]>('/admin/subscription-plans'),
+  create: (data: Partial<SubscriptionPlan>) => api.post<SubscriptionPlan>('/admin/subscription-plans', data),
+  update: (id: number, data: Partial<SubscriptionPlan>) => api.put<SubscriptionPlan>(`/admin/subscription-plans/${id}`, data),
+  delete: (id: number) => api.delete(`/admin/subscription-plans/${id}`),
 };
 
 export const projectService = {
   getAll: (params?: { search?: string }) => api.get<Project[]>('/projects', { params }),
+  getOne: (id: number) => api.get<ProjectDetail>(`/projects/${id}`),
   getMine: () => api.get<Project[]>('/pro/projects'),
   create: (data: Partial<Project>) => api.post<Project>('/pro/projects', data),
   update: (id: number, data: Partial<Project>) => api.put<Project>(`/pro/projects/${id}`, data),
   delete: (id: number) => api.delete(`/pro/projects/${id}`),
-  getOne: (id: number) => api.get<ProjectDetail>(`/projects/${id}`),
   follow: (id: number) => api.post(`/projects/${id}/follow`),
   unfollow: (id: number) => api.delete(`/projects/${id}/follow`),
   addUpdate: (id: number, data: { image_url: string; comment: string }) =>

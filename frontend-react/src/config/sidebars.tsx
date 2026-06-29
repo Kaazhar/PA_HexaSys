@@ -16,6 +16,7 @@ export const adminSidebar = [
   { label: 'Newsletter',     path: '/admin/newsletter',     icon: <Send className="w-4 h-4" /> },
   { label: 'Langues',        path: '/admin/langues',        icon: <Globe className="w-4 h-4" /> },
   { label: 'Forum',          path: '/salarie/forum',        icon: <MessageSquare className="w-4 h-4" /> },
+  { label: 'Abonnements',   path: '/admin/abonnements',    icon: <Briefcase className="w-4 h-4" /> },
 ];
 
 export const particulierSidebar = [

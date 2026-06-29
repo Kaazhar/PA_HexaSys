@@ -289,6 +289,33 @@ export interface ForumPost {
   updated_at: string;
 }
 
+export interface SubscriptionPlan {
+  id: number;
+  name: string;
+  slug: string;
+  price: number;
+  max_listings_bonus: number;
+  features: string;
+  is_active: boolean;
+  sort_order: number;
+  duration_days: number;
+  created_at: string;
+}
+
+export interface Subscription {
+  id: number;
+  user_id: number;
+  plan: string;
+  price: number;
+  status: string;
+  renewal_date: string;
+  expires_at?: string;
+  max_listings_bonus: number;
+  notified_expiry: boolean;
+  stripe_id?: string;
+  created_at: string;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;

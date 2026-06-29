@@ -173,29 +173,25 @@ func CreateSubscriptionCheckout(c *gin.Context) {
 	userID, _ := c.Get("userID")
 
 	var req struct {
-		Plan string `json:"plan" binding:"required"`
+		Slug string `json:"slug" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	stripePrices := map[string]int64{
-		"pro":        2900,
-		"enterprise": 9900,
+	var plan models.SubscriptionPlan
+	if err := config.DB.Where("slug = ? AND is_active = true", req.Slug).First(&plan).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Plan introuvable"})
+		return
 	}
-	planLabels := map[string]string{
-		"pro":        "Abonnement Pro — 29€/mois",
-		"enterprise": "Abonnement Entreprise — 99€/mois",
-	}
-
-	priceAmount, ok := stripePrices[req.Plan]
-	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Plan invalide ou gratuit"})
+	if plan.Price <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ce plan est gratuit, pas besoin de paiement"})
 		return
 	}
 
 	frontendURL := getFrontendURL()
+	priceAmount := int64(plan.Price * 100)
 	params := &stripe.CheckoutSessionParams{
 		PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
@@ -203,22 +199,20 @@ func CreateSubscriptionCheckout(c *gin.Context) {
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 					Currency: stripe.String("eur"),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-						Name: stripe.String(planLabels[req.Plan]),
+						Name:        stripe.String(plan.Name),
+						Description: stripe.String(fmt.Sprintf("Abonnement %d jours — +%d annonces", plan.DurationDays, plan.MaxListingsBonus)),
 					},
 					UnitAmount: stripe.Int64(priceAmount),
-					Recurring: &stripe.CheckoutSessionLineItemPriceDataRecurringParams{
-						Interval: stripe.String("month"),
-					},
 				},
 				Quantity: stripe.Int64(1),
 			},
 		},
-		Mode:       stripe.String(string(stripe.CheckoutSessionModeSubscription)),
+		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
 		SuccessURL: stripe.String(frontendURL + "/payment/success?session_id={CHECKOUT_SESSION_ID}"),
 		CancelURL:  stripe.String(frontendURL + "/payment/cancel"),
 		Metadata: map[string]string{
 			"type":    "subscription",
-			"plan":    req.Plan,
+			"plan":    plan.Slug,
 			"user_id": strconv.Itoa(int(userID.(uint))),
 		},
 	}
@@ -334,36 +328,34 @@ func ConfirmSession(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "listing", "title": listing.Title, "invoice_id": inv.ID})
 
 	case "subscription":
-		plan := s.Metadata["plan"]
-		price := planPrices[plan]
+		planSlug := s.Metadata["plan"]
+		var planData models.SubscriptionPlan
+		if err := config.DB.Where("slug = ?", planSlug).First(&planData).Error; err != nil {
+			c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "subscription", "plan": planSlug})
+			return
+		}
 
-		var sub models.Subscription
-		err := config.DB.Where("user_id = ?", userID).First(&sub).Error
-		if err != nil {
-			sub = models.Subscription{
-				UserID:      userID,
-				Plan:        plan,
-				Price:       price,
-				Status:      "active",
-				RenewalDate: time.Now().AddDate(0, 1, 0),
-			}
-			config.DB.Create(&sub)
-		} else {
-			config.DB.Model(&sub).Updates(map[string]interface{}{
-				"plan":         plan,
-				"price":        price,
-				"status":       "active",
-				"renewal_date": time.Now().AddDate(0, 1, 0),
+		subInvoiceNumber := fmt.Sprintf("INV-SUB-%d-%s-%s", userID, planSlug, time.Now().Format("20060102150405"))
+		var existing models.Invoice
+		if config.DB.Where("number = ?", subInvoiceNumber).First(&existing).Error != nil {
+			expiresAt := time.Now().AddDate(0, 0, planData.DurationDays)
+			config.DB.Create(&models.Subscription{
+				UserID:           userID,
+				Plan:             planSlug,
+				Price:            planData.Price,
+				Status:           "active",
+				RenewalDate:      expiresAt,
+				ExpiresAt:        &expiresAt,
+				MaxListingsBonus: planData.MaxListingsBonus,
 			})
 		}
-		subInvoiceNumber := fmt.Sprintf("INV-SUB-%d-%s", userID, time.Now().Format("200601"))
-		inv := ensureInvoice(subInvoiceNumber, userID, "subscription", "Abonnement "+planLabel(plan), price)
+		inv := ensureInvoice(subInvoiceNumber, userID, "subscription", "Abonnement "+planData.Name, planData.Price)
 		config.DB.Create(&models.Notification{
 			UserID:  userID,
-			Message: fmt.Sprintf("🎉 Abonnement %s activé ! Merci pour votre confiance.", plan),
+			Message: fmt.Sprintf("🎉 Abonnement \"%s\" activé ! +%d annonces disponibles pendant %d jours.", planData.Name, planData.MaxListingsBonus, planData.DurationDays),
 			Type:    "success",
 		})
-		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "subscription", "plan": plan, "invoice_id": inv.ID})
+		c.JSON(http.StatusOK, gin.H{"status": "confirmed", "type": "subscription", "plan": planSlug, "invoice_id": inv.ID})
 
 	case "boost":
 		listingIDStr := s.Metadata["listing_id"]
@@ -539,35 +531,31 @@ func StripeWebhook(c *gin.Context) {
 			})
 
 		case "subscription":
-			plan := s.Metadata["plan"]
-			price := planPrices[plan]
-
-			var sub models.Subscription
-			err := config.DB.Where("user_id = ?", userID).First(&sub).Error
-			if err != nil {
-				sub = models.Subscription{
-					UserID:      userID,
-					Plan:        plan,
-					Price:       price,
-					Status:      "active",
-					RenewalDate: time.Now().AddDate(0, 1, 0),
-				}
-				config.DB.Create(&sub)
-			} else {
-				config.DB.Model(&sub).Updates(map[string]interface{}{
-					"plan":         plan,
-					"price":        price,
-					"status":       "active",
-					"renewal_date": time.Now().AddDate(0, 1, 0),
+			planSlug := s.Metadata["plan"]
+			var planData models.SubscriptionPlan
+			if err := config.DB.Where("slug = ?", planSlug).First(&planData).Error; err != nil {
+				break
+			}
+			invNum := fmt.Sprintf("INV-SUB-%d-%s-%s", userID, planSlug, time.Now().Format("20060102150405"))
+			var existingInv models.Invoice
+			if config.DB.Where("number = ?", invNum).First(&existingInv).Error != nil {
+				expiresAt := time.Now().AddDate(0, 0, planData.DurationDays)
+				config.DB.Create(&models.Subscription{
+					UserID:           userID,
+					Plan:             planSlug,
+					Price:            planData.Price,
+					Status:           "active",
+					RenewalDate:      expiresAt,
+					ExpiresAt:        &expiresAt,
+					MaxListingsBonus: planData.MaxListingsBonus,
+				})
+				ensureInvoice(invNum, userID, "subscription", "Abonnement "+planData.Name, planData.Price)
+				config.DB.Create(&models.Notification{
+					UserID:  userID,
+					Message: fmt.Sprintf("🎉 Abonnement \"%s\" activé ! +%d annonces disponibles.", planData.Name, planData.MaxListingsBonus),
+					Type:    "success",
 				})
 			}
-			ensureInvoice(fmt.Sprintf("INV-SUB-%d-%s", userID, time.Now().Format("200601")), userID, "subscription", "Abonnement "+planLabel(plan), price)
-
-			config.DB.Create(&models.Notification{
-				UserID:  userID,
-				Message: fmt.Sprintf("🎉 Abonnement %s activé ! Merci pour votre confiance.", plan),
-				Type:    "success",
-			})
 
 		case "boost":
 			listingIDStr := s.Metadata["listing_id"]

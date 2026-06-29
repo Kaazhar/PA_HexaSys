@@ -1,70 +1,69 @@
-import { CheckCircle, Zap, Star } from 'lucide-react';
+import { CheckCircle, Zap, Star, Crown, Package } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { proSidebar, adminSidebar } from '../../config/sidebars';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { subscriptionService, stripeService } from '../../services/api';
+import type { SubscriptionPlan } from '../../types';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+const planIcon = (slug: string) => {
+  if (slug === 'decouverte') return <Zap className="w-6 h-6 text-gray-500" />;
+  if (slug === 'pro') return <Star className="w-6 h-6 text-amber-500" />;
+  return <Crown className="w-6 h-6 text-purple-500" />;
+};
+
+const planFeatures = (features: string): string[] => {
+  if (!features) return [];
+  try { return JSON.parse(features); } catch { return features.split(',').map(f => f.trim()).filter(Boolean); }
+};
+
 export default function AbonnementPage() {
   const { t } = useTranslation();
-
-  const plans = [
-    {
-      id: 'decouverte',
-      name: t('subscription.plan_decouverte'),
-      price: 0,
-      icon: <Zap className="w-6 h-6" />,
-      color: 'border-gray-200',
-      features: t('subscription.features_decouverte', { returnObjects: true }) as string[],
-    },
-    {
-      id: 'pro',
-      name: t('subscription.plan_premium'),
-      price: 29,
-      icon: <Star className="w-6 h-6 text-amber-500" />,
-      color: 'border-primary-400 ring-2 ring-primary-200',
-      popular: true,
-      features: t('subscription.features_pro', { returnObjects: true }) as string[],
-    },
-  ];
   const { user } = useAuth();
   const sidebar = user?.role === 'admin' ? adminSidebar : proSidebar;
   const queryClient = useQueryClient();
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [confirmed, setConfirmed] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+  const [stripeLoading, setStripeLoading] = useState(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['subscription'],
+  const { data: plansData, isLoading: plansLoading } = useQuery({
+    queryKey: ['subscription-plans'],
+    queryFn: () => subscriptionService.getPlans(),
+  });
+
+  const { data: myData, isLoading: myLoading } = useQuery({
+    queryKey: ['my-subscriptions'],
     queryFn: () => subscriptionService.getMy(),
   });
 
-  const sub = data?.data;
+  const plans = plansData?.data ?? [];
+  const activeSubs = myData?.data?.subscriptions ?? [];
+  const listingLimit = myData?.data?.listing_limit ?? 5;
+  const baseLimit = myData?.data?.base_limit ?? 5;
 
-  const [stripeLoading, setStripeLoading] = useState(false);
-
-  const upgradeMutation = useMutation({
-    mutationFn: (plan: string) => subscriptionService.upgrade(plan),
+  const freeSubMutation = useMutation({
+    mutationFn: (slug: string) => subscriptionService.subscribeFree(slug),
     onSuccess: () => {
-      setConfirmed(true);
+      toast.success(t('subscription.updated'));
       setSelectedPlan(null);
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['my-subscriptions'] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || t('common.error'));
     },
   });
 
-  const handleConfirmPlan = async (plan: string) => {
-    const planData = plans.find(p => p.id === plan);
-    if (!planData) return;
-    if (planData.price === 0) {
-      upgradeMutation.mutate(plan);
+  const handleConfirmPlan = async (plan: SubscriptionPlan) => {
+    if (plan.price === 0) {
+      freeSubMutation.mutate(plan.slug);
     } else {
       setStripeLoading(true);
       try {
-        const res = await stripeService.createSubscriptionCheckout(plan);
+        const res = await stripeService.createSubscriptionCheckout(plan.slug);
         window.location.href = res.data.checkout_url;
       } catch (err: any) {
         toast.error(err?.response?.data?.error || t('subscription.payment_error'));
@@ -72,6 +71,8 @@ export default function AbonnementPage() {
       }
     }
   };
+
+  const isLoading = plansLoading || myLoading;
 
   return (
     <DashboardLayout sidebarItems={sidebar} title={t('subscription.title')}>
@@ -85,36 +86,55 @@ export default function AbonnementPage() {
           <div className="flex justify-center py-12"><LoadingSpinner /></div>
         ) : (
           <>
-            
-            {sub && (
-              <div className="card bg-primary-50 border-primary-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">{t('subscription.current_plan')}</p>
-                    <p className="text-lg font-semibold text-primary-700 capitalize mt-0.5">{sub.plan}</p>
-                    {sub.renewal_date && (
-                      <p className="text-xs text-gray-500 mt-1">{t('subscription.renewal')} {new Date(sub.renewal_date).toLocaleDateString('fr-FR')}</p>
-                    )}
-                  </div>
-                  <CheckCircle className="w-8 h-8 text-primary-500" />
+            <div className="card bg-primary-50 border-primary-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">{t('subscription.listing_limit')}</p>
+                  <p className="text-2xl font-bold text-primary-700 mt-0.5">{listingLimit} <span className="text-sm font-normal text-gray-500">{t('subscription.listings_total')}</span></p>
+                  {listingLimit > baseLimit && (
+                    <p className="text-xs text-primary-600 mt-1">
+                      {baseLimit} {t('subscription.base')} + {listingLimit - baseLimit} {t('subscription.bonus_from_subs')}
+                    </p>
+                  )}
+                </div>
+                <Package className="w-8 h-8 text-primary-400" />
+              </div>
+            </div>
+
+            {activeSubs.length > 0 && (
+              <div>
+                <h2 className="text-sm font-semibold text-gray-700 mb-2">{t('subscription.active_subs')}</h2>
+                <div className="space-y-2">
+                  {activeSubs.map((sub) => (
+                    <div key={sub.id} className="card flex items-center justify-between py-3">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 capitalize">{sub.plan}</p>
+                          {sub.expires_at && (
+                            <p className="text-xs text-gray-500">{t('subscription.expires')} {new Date(sub.expires_at).toLocaleDateString('fr-FR')}</p>
+                          )}
+                        </div>
+                      </div>
+                      {sub.max_listings_bonus > 0 && (
+                        <span className="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full font-medium">
+                          +{sub.max_listings_bonus} {t('subscription.listings')}
+                        </span>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
 
-            {confirmed && (
-              <div className="card bg-green-50 border-green-100 flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500" />
-                <p className="text-sm text-green-700 font-medium">{t('subscription.updated')}</p>
-              </div>
-            )}
-
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl">
-              {plans.map((plan) => {
-                const isCurrent = sub?.plan === plan.id;
-                return (
-                  <div key={plan.id} className={clsx('card relative border-2 transition-all', plan.color)}>
-                    {plan.popular && (
+            <div>
+              <h2 className="text-sm font-semibold text-gray-700 mb-3">{t('subscription.available_plans')}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {plans.map((plan, idx) => (
+                  <div key={plan.id} className={clsx('card relative border-2 transition-all',
+                    idx === 1 ? 'border-primary-400 ring-2 ring-primary-100' : 'border-gray-200'
+                  )}>
+                    {idx === 1 && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                         <span className="bg-primary-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
                           {t('subscription.popular')}
@@ -124,18 +144,25 @@ export default function AbonnementPage() {
 
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
-                        {plan.icon}
+                        {planIcon(plan.slug)}
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">{plan.name}</p>
                         <p className="text-lg font-bold text-gray-900">
-                          {plan.price === 0 ? t('subscription.free') : `${plan.price}${t('subscription.monthly')}`}
+                          {plan.price === 0 ? t('subscription.free') : `${plan.price}€${t('subscription.monthly')}`}
                         </p>
                       </div>
                     </div>
 
+                    {plan.max_listings_bonus > 0 && (
+                      <div className="mb-3 flex items-center gap-1.5 text-sm text-primary-700 font-medium">
+                        <Package className="w-4 h-4" />
+                        +{plan.max_listings_bonus} {t('subscription.listings')}
+                      </div>
+                    )}
+
                     <ul className="space-y-2 mb-5">
-                      {plan.features.map((f, i) => (
+                      {planFeatures(plan.features).map((f, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
                           <CheckCircle className="w-4 h-4 text-primary-500 flex-shrink-0 mt-0.5" />
                           {f}
@@ -143,56 +170,53 @@ export default function AbonnementPage() {
                       ))}
                     </ul>
 
-                    {isCurrent ? (
-                      <button disabled className="btn-primary w-full opacity-60 cursor-not-allowed">
-                        {t('subscription.current')}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setSelectedPlan(plan.id)}
-                        className={clsx('w-full py-2 rounded-md text-sm font-medium transition-colors',
-                          plan.popular
-                            ? 'bg-primary-500 text-white hover:bg-primary-600'
-                            : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
-                        )}
-                      >
-                        {plan.price === 0 ? t('subscription.choose') : t('subscription.subscribe')}
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setSelectedPlan(plan)}
+                      className={clsx('w-full py-2 rounded-md text-sm font-medium transition-colors',
+                        idx === 1
+                          ? 'bg-primary-500 text-white hover:bg-primary-600'
+                          : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                      )}
+                    >
+                      {plan.price === 0 ? t('subscription.choose') : t('subscription.subscribe')}
+                    </button>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </>
         )}
       </div>
 
-      
       {selectedPlan && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {t('subscription.change_to', { name: plans.find(p => p.id === selectedPlan)?.name })}
+              {t('subscription.change_to', { name: selectedPlan.name })}
             </h3>
             <p className="text-sm text-gray-500 mb-5">
-              {plans.find(p => p.id === selectedPlan)?.price === 0
+              {selectedPlan.price === 0
                 ? t('subscription.downgrade_msg')
-                : t('subscription.upgrade_msg', { price: plans.find(p => p.id === selectedPlan)?.price })}
+                : t('subscription.upgrade_msg', { price: selectedPlan.price })}
             </p>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setSelectedPlan(null)} className="btn-secondary" disabled={stripeLoading || upgradeMutation.isPending}>
+              <button
+                onClick={() => setSelectedPlan(null)}
+                className="btn-secondary"
+                disabled={stripeLoading || freeSubMutation.isPending}
+              >
                 {t('common.cancel')}
               </button>
               <button
                 onClick={() => handleConfirmPlan(selectedPlan)}
-                disabled={upgradeMutation.isPending || stripeLoading}
+                disabled={freeSubMutation.isPending || stripeLoading}
                 className="btn-primary"
               >
-                {(upgradeMutation.isPending || stripeLoading)
+                {(freeSubMutation.isPending || stripeLoading)
                   ? t('common.loading')
-                  : plans.find(p => p.id === selectedPlan)?.price === 0
+                  : selectedPlan.price === 0
                     ? t('subscription.confirm')
-                    : t('subscription.pay_monthly', { price: plans.find(p => p.id === selectedPlan)?.price })}
+                    : t('subscription.pay_monthly', { price: selectedPlan.price })}
               </button>
             </div>
           </div>

@@ -559,7 +559,15 @@
     "plan_decouverte": "Discovery",
     "plan_premium": "Premium",
     "features_decouverte": ["Unlimited listings", "SIRET verification", "Access to workshops", "Upcycling score", "Messaging"],
-    "features_pro": ["Everything in Discovery", "Advanced dashboard", "Ecological impact analysis (CO₂, weight)", "Available materials statistics", "Priority collection alerts", "Upcycling projects"]
+    "features_pro": ["Everything in Discovery", "Advanced dashboard", "Ecological impact analysis (CO₂, weight)", "Available materials statistics", "Priority collection alerts", "Upcycling projects"],
+    "listing_limit": "Listing quota",
+    "listings_total": "listings available",
+    "base": "base",
+    "bonus_from_subs": "subscription bonus",
+    "active_subs": "Active subscriptions",
+    "expires": "Expires on",
+    "available_plans": "Available plans",
+    "listings": "bonus listings"
   },
   "dashboard_salarie": {
     "title": "Employee Space",

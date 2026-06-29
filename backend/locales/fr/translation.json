@@ -559,7 +559,15 @@
     "plan_decouverte": "Découverte",
     "plan_premium": "Premium",
     "features_decouverte": ["Annonces illimitées", "Vérification SIRET", "Accès aux formations", "Score upcycling", "Messagerie"],
-    "features_pro": ["Tout le plan Découverte", "Tableau de bord avancé", "Analyse d'impact écologique (CO₂, poids)", "Statistiques matériaux disponibles", "Alertes prioritaires de collecte", "Projets upcycling"]
+    "features_pro": ["Tout le plan Découverte", "Tableau de bord avancé", "Analyse d'impact écologique (CO₂, poids)", "Statistiques matériaux disponibles", "Alertes prioritaires de collecte", "Projets upcycling"],
+    "listing_limit": "Quota d'annonces",
+    "listings_total": "annonces disponibles",
+    "base": "de base",
+    "bonus_from_subs": "bonus abonnements",
+    "active_subs": "Abonnements actifs",
+    "expires": "Expire le",
+    "available_plans": "Plans disponibles",
+    "listings": "annonces bonus"
   },
   "dashboard_salarie": {
     "title": "Espace Salarié",

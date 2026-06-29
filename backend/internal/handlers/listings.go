@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -97,6 +98,14 @@ func CreateListing(c *gin.Context) {
 	}
 
 	userID, _ := c.Get("userID")
+
+	var activeCount int64
+	config.DB.Model(&models.Listing{}).Where("user_id = ? AND status IN ('active', 'pending')", userID).Count(&activeCount)
+	limit := GetUserListingLimit(userID.(uint))
+	if int(activeCount) >= limit {
+		c.JSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("Limite d'annonces atteinte (%d/%d). Souscrivez un abonnement pour publier plus d'annonces.", activeCount, limit)})
+		return
+	}
 
 	listing := models.Listing{
 		Title:       req.Title,

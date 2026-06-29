@@ -251,3 +251,4 @@ func DeleteProject(c *gin.Context) {
 	config.DB.Delete(&project)
 	c.JSON(http.StatusOK, gin.H{"message": "Projet supprimé"})
 }
+

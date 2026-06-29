@@ -39,6 +39,7 @@ func main() {
 		&models.ContainerRequest{},
 		&models.UpcyclingScore{},
 		&models.ScoreEntry{},
+		&models.SubscriptionPlan{},
 		&models.Subscription{},
 		&models.Invoice{},
 		&models.Notification{},
@@ -62,6 +63,7 @@ func main() {
 	}
 
 	seedData()
+	seedSubscriptionPlans()
 	seedSlots()
 	cleanCorruptedTranslations()
 	seedTranslations()
@@ -203,8 +205,10 @@ func main() {
 	api.DELETE("/containers/:id/slots", middleware.AuthRequired(), middleware.RequireRole(models.RoleAdmin), handlers.ClearContainerSlots)
 	api.GET("/containers/available-objects", middleware.AuthRequired(), middleware.RequireRole(models.RoleProfessionnel, models.RoleAdmin), handlers.GetAvailableObjects)
 
-	api.GET("/subscription", middleware.AuthRequired(), handlers.GetMySubscription)
-	api.POST("/subscription/upgrade", middleware.AuthRequired(), handlers.UpgradeSubscription)
+	api.GET("/subscription-plans", handlers.GetSubscriptionPlans)
+	api.GET("/subscriptions/my", middleware.AuthRequired(), handlers.GetMySubscriptions)
+	api.POST("/subscriptions/subscribe-free", middleware.AuthRequired(), handlers.SubscribeToFreePlan)
+	api.GET("/subscription", middleware.AuthRequired(), handlers.GetMySubscriptions)
 
 	api.GET("/invoices/mine", middleware.AuthRequired(), handlers.GetMyInvoices)
 	api.GET("/invoices/:id/pdf", middleware.AuthRequired(), handlers.DownloadInvoicePDF)
@@ -260,6 +264,10 @@ func main() {
 		adminGroup.GET("/reports", handlers.GetReports)
 		adminGroup.PUT("/reports/:id/resolve", handlers.ResolveReport)
 		adminGroup.POST("/newsletter", handlers.SendNewsletter)
+		adminGroup.GET("/subscription-plans", handlers.AdminGetPlans)
+		adminGroup.POST("/subscription-plans", handlers.AdminCreatePlan)
+		adminGroup.PUT("/subscription-plans/:id", handlers.AdminUpdatePlan)
+		adminGroup.DELETE("/subscription-plans/:id", handlers.AdminDeletePlan)
 	}
 
 	salarieGroup := api.Group("/salarie")
@@ -447,6 +455,50 @@ func seedTranslations() {
 		}
 		log.Printf("Traduction %s synchronisée", s.code)
 	}
+}
+
+func seedSubscriptionPlans() {
+	var count int64
+	config.DB.Model(&models.SubscriptionPlan{}).Count(&count)
+	if count > 0 {
+		return
+	}
+	plans := []models.SubscriptionPlan{
+		{
+			Name:             "Découverte",
+			Slug:             "decouverte",
+			Price:            0,
+			MaxListingsBonus: 5,
+			Features:         `["Annonces illimitées (10 total)","Vérification SIRET","Accès aux formations","Score upcycling","Messagerie"]`,
+			IsActive:         true,
+			SortOrder:        0,
+			DurationDays:     30,
+		},
+		{
+			Name:             "Pro",
+			Slug:             "pro",
+			Price:            29,
+			MaxListingsBonus: 15,
+			Features:         `["Tout Découverte (20 annonces total)","Tableau de bord avancé","Analyse CO₂ et impact","Alertes prioritaires de collecte","Projets upcycling"]`,
+			IsActive:         true,
+			SortOrder:        1,
+			DurationDays:     30,
+		},
+		{
+			Name:             "Entreprise",
+			Slug:             "enterprise",
+			Price:            99,
+			MaxListingsBonus: 100,
+			Features:         `["Annonces illimitées (105 total)","Tout Pro","Support prioritaire","Badge entreprise partenaire","Statistiques avancées"]`,
+			IsActive:         true,
+			SortOrder:        2,
+			DurationDays:     30,
+		},
+	}
+	for i := range plans {
+		config.DB.Create(&plans[i])
+	}
+	log.Println("Subscription plans seeded")
 }
 
 func seedSlots() {
