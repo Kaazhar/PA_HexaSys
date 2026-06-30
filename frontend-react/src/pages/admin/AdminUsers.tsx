@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Search, Plus, Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, ShieldOff, ShieldCheck, MailX } from 'lucide-react';
+import { Edit, Trash2, ToggleLeft, ToggleRight, ShieldOff, ShieldCheck, MailX } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -211,14 +211,13 @@ export default function AdminUsers() {
         
         <div className="flex flex-col sm:flex-row gap-3 justify-between">
           <div className="flex flex-col sm:flex-row gap-3 flex-1">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="flex-1 max-w-sm">
               <input
                 type="text"
                 placeholder={t('admin_users.search')}
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="input pl-9"
+                className="input"
               />
             </div>
             <select value={roleFilter} onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }} className="input w-auto">
@@ -236,9 +235,8 @@ export default function AdminUsers() {
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="btn-primary flex items-center gap-2 whitespace-nowrap"
+            className="btn-primary whitespace-nowrap"
           >
-            <Plus className="w-4 h-4" />
             {t('admin_users.new_user')}
           </button>
         </div>
@@ -355,7 +353,7 @@ export default function AdminUsers() {
                 </tbody>
               </table>
               {users.length === 0 && (
-                <EmptyState icon={<Users className="w-10 h-10" />} message={t('common.noData')} />
+                <EmptyState message={t('common.noData')} />
               )}
             </div>
           )}

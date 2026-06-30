@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Phone, CheckCircle, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { phoneService } from '../services/api';
 import type { User } from '../types';
 import toast from 'react-hot-toast';
@@ -58,11 +58,10 @@ export default function PhoneVerification({ currentPhone, isVerified, onSuccess 
   return (
     <div className="card">
       <div className="flex items-center gap-2 mb-5">
-        <Phone className="w-4 h-4 text-gray-400" />
         <h2 className="font-semibold text-gray-900">{t('phone.title')}</h2>
         {isVerified && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded ml-auto">
-            <CheckCircle className="w-3 h-3" /> {t('phone.verified_badge')}
+          <span className="text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded ml-auto">
+            {t('phone.verified_badge')}
           </span>
         )}
       </div>

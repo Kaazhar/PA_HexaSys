@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, Upload, X, MapPin, Package, SkipForward, Gift, Tag } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { categoryService, listingService, uploadService, containerService } from '../../services/api';
@@ -12,13 +11,6 @@ import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { ContainerSlot } from '../../types';
 import { useTranslation } from 'react-i18next';
-
-function getCatIcon(name: string | undefined) {
-  if (!name) return null;
-  const key = name.charAt(0).toUpperCase() + name.slice(1);
-  const Icon = (LucideIcons as Record<string, any>)[key];
-  return Icon ? <Icon className="w-5 h-5 text-gray-500" /> : null;
-}
 
 export default function CreateListingPage() {
   const { user } = useAuth();
@@ -194,7 +186,7 @@ export default function CreateListingPage() {
                 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all',
                 i < step ? 'bg-green-500 text-white' : i === step ? 'bg-[#2D5016] text-white' : 'bg-gray-200 text-gray-500'
               )}>
-                {i < step ? <CheckCircle className="w-5 h-5" /> : i + 1}
+                {i + 1}
               </div>
               <span className={clsx('text-xs font-medium hidden sm:block whitespace-nowrap',
                 i === step ? 'text-[#2D5016]' : i < step ? 'text-green-600' : 'text-gray-400'
@@ -217,13 +209,12 @@ export default function CreateListingPage() {
                 <h2 className="text-lg font-bold text-gray-900 mb-4">{t('create_listing.type_title')}</h2>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { value: 'don' as const, label: t('create_listing.don_label'), desc: t('create_listing.don_desc'), Icon: Gift, sel: 'border-green-500 bg-green-50' },
-                    { value: 'vente' as const, label: t('create_listing.vente_label'), desc: t('create_listing.vente_desc'), Icon: Tag, sel: 'border-orange-400 bg-orange-50' },
+                    { value: 'don' as const, label: t('create_listing.don_label'), desc: t('create_listing.don_desc'), sel: 'border-green-500 bg-green-50' },
+                    { value: 'vente' as const, label: t('create_listing.vente_label'), desc: t('create_listing.vente_desc'), sel: 'border-orange-400 bg-orange-50' },
                   ].map((opt) => (
                     <button key={opt.value} type="button" onClick={() => setType(opt.value)}
                       className={clsx('flex flex-col items-center gap-2 p-5 border-2 rounded-xl transition-all',
                         type === opt.value ? opt.sel : 'border-gray-200 hover:border-gray-300')}>
-                      <opt.Icon className="w-8 h-8 text-gray-600" />
                       <span className="font-bold text-gray-900">{opt.label}</span>
                       <span className="text-xs text-gray-500">{opt.desc}</span>
                     </button>
@@ -238,9 +229,7 @@ export default function CreateListingPage() {
                     <button key={cat.id} type="button" onClick={() => setCategoryId(cat.id)}
                       className={clsx('flex items-center gap-2 p-3 border-2 rounded-xl transition-all text-left',
                         categoryId === cat.id ? 'border-[#2D5016] bg-green-50' : 'border-gray-200 hover:border-gray-300')}>
-                      {getCatIcon(cat.icon)}
                       <span className="text-sm font-medium text-gray-700 flex-1">{cat.name}</span>
-                      {categoryId === cat.id && <CheckCircle className="w-4 h-4 text-[#2D5016] flex-shrink-0" />}
                     </button>
                   ))}
                 </div>
@@ -319,7 +308,6 @@ export default function CreateListingPage() {
                         <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
                         <p className="text-xs text-gray-400 italic">{opt.example}</p>
                       </div>
-                      {sizeCategory === opt.value && <CheckCircle className="w-5 h-5 text-[#2D5016] flex-shrink-0 mt-0.5" />}
                     </button>
                   ))}
                 </div>
@@ -365,8 +353,7 @@ export default function CreateListingPage() {
 
               
               <button type="button" onClick={() => { setSkipContainer(true); setContainerId(null); setSlotId(null); setSlotCode(''); setStep(3); }}
-                className="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-gray-300 hover:text-gray-500 transition-all">
-                <SkipForward className="w-4 h-4" />
+                className="w-full p-3 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-gray-300 hover:text-gray-500 transition-all">
                 {t('create_listing.skip_container')}
               </button>
 
@@ -400,9 +387,7 @@ export default function CreateListingPage() {
                               {isFull ? t('create_listing.full') : t('create_listing.available')}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                            <MapPin className="w-3 h-3" /><span>{c.address}, {c.district}</span>
-                          </div>
+                          <p className="text-xs text-gray-500 mt-1">{c.address}, {c.district}</p>
                           <div className="mt-2">
                             <div className="flex justify-between text-xs text-gray-400 mb-1">
                               <span>{t('create_listing.fill')}</span><span>{c.current_count}/{c.capacity}</span>
@@ -431,12 +416,10 @@ export default function CreateListingPage() {
                     <div className="flex justify-center py-6"><LoadingSpinner /></div>
                   ) : allSlots.length === 0 ? (
                     <div className="text-center py-6 text-gray-400">
-                      <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
                       <p className="text-sm">{t('create_listing.no_slots')}</p>
                     </div>
                   ) : sizeSlots.length === 0 ? (
                     <div className="text-center py-6 text-gray-400">
-                      <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
                       <p className="text-sm">{t('create_listing.no_size_slots', { size: sizeCategory })}</p>
                     </div>
                   ) : (
@@ -494,8 +477,7 @@ export default function CreateListingPage() {
                       </div>
 
                       {slotId && (
-                        <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
-                          <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-xl">
                           <p className="text-sm text-green-800">
                             {t('create_listing.slot_chosen', { code: slotCode, name: selectedContainer?.name })}
                           </p>
@@ -541,8 +523,7 @@ export default function CreateListingPage() {
 
               
               {!skipContainer && containerId && slotId ? (
-                <div className="p-4 bg-green-50 rounded-xl border border-green-200 flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className="p-4 bg-green-50 rounded-xl border border-green-200">
                   <div>
                     <p className="text-sm font-semibold text-green-800">{t('create_listing.slot_reserved')} <span className="font-mono">{slotCode}</span></p>
                     <p className="text-xs text-green-700 mt-0.5">{selectedContainer?.name} — {selectedContainer?.address}</p>
@@ -550,8 +531,7 @@ export default function CreateListingPage() {
                   </div>
                 </div>
               ) : (
-                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-2 text-sm text-gray-400">
-                  <SkipForward className="w-4 h-4 flex-shrink-0" />
+                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 text-sm text-gray-400">
                   {t('create_listing.no_container')}
                 </div>
               )}

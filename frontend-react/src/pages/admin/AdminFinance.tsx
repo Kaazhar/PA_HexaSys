@@ -1,4 +1,3 @@
-import { DollarSign, FileText, Percent } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
@@ -38,43 +37,36 @@ export default function AdminFinance() {
             <StatCard
               title={t('admin_finance.monthly_revenue')}
               value={`${stats?.monthly_revenue?.toFixed(0) || 0}€`}
-              icon={<DollarSign className="w-5 h-5" />}
               color="green"
             />
             <StatCard
               title={t('admin_finance.annual_revenue')}
               value={`${stats?.annual_revenue?.toFixed(0) || 0}€`}
-              icon={<DollarSign className="w-5 h-5" />}
               color="blue"
             />
             <StatCard
               title={t('admin_finance.total_invoices')}
               value={stats?.total_invoices || 0}
-              icon={<FileText className="w-5 h-5" />}
               color="purple"
             />
             <StatCard
               title={t('admin_finance.pending_amount')}
               value={`${stats?.pending_amount?.toFixed(0) || 0}€`}
-              icon={<DollarSign className="w-5 h-5" />}
               color="coral"
             />
             <StatCard
               title={t('admin_finance.monthly_commissions')}
               value={`${stats?.monthly_commissions?.toFixed(2) || '0.00'}€`}
-              icon={<Percent className="w-5 h-5" />}
               color="green"
             />
             <StatCard
               title={t('admin_finance.total_commissions')}
               value={`${stats?.total_commissions?.toFixed(2) || '0.00'}€`}
-              icon={<Percent className="w-5 h-5" />}
               color="blue"
             />
             <StatCard
               title={t('admin_finance.sold_listings')}
               value={stats?.total_sold_listings || 0}
-              icon={<FileText className="w-5 h-5" />}
               color="purple"
             />
           </div>
@@ -88,7 +80,7 @@ export default function AdminFinance() {
           {invoicesLoading ? (
             <div className="flex justify-center py-10"><LoadingSpinner /></div>
           ) : invoices.length === 0 ? (
-            <EmptyState icon={<FileText className="w-10 h-10" />} message={t('common.noData')} />
+            <EmptyState message={t('common.noData')} />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">

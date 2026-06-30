@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Eye, Heart, Image, Users, ImagePlus, X, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -146,7 +146,6 @@ export default function ProjetsPro() {
           <div className="flex justify-center py-20"><LoadingSpinner /></div>
         ) : projects.length === 0 ? (
           <div className="card text-center py-12">
-            <Image className="w-10 h-10 text-gray-200 mx-auto mb-3" />
             <p className="text-gray-400 font-medium">{t('projects_pro.empty')}</p>
             <p className="text-sm text-gray-400 mb-4">{t('projects_pro.empty_sub')}</p>
             <button onClick={openCreate} className="btn-primary inline-flex items-center gap-2">
@@ -161,8 +160,8 @@ export default function ProjetsPro() {
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="font-semibold text-gray-900 line-clamp-1 flex-1">{p.title}</h3>
                   <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                    <button onClick={() => { setManageProject(p); setUpdateComment(''); setUpdateImageUrls(['']); }} className="p-1.5 text-gray-400 hover:text-primary-500 hover:bg-primary-50 rounded-md transition-colors" title={t('projects_pro.manage_follow')}>
-                      <Users className="w-4 h-4" />
+                    <button onClick={() => { setManageProject(p); setUpdateComment(''); setUpdateImageUrls(['']); }} className="p-1.5 text-xs text-gray-400 hover:text-primary-500 hover:bg-primary-50 rounded-md transition-colors" title={t('projects_pro.manage_follow')}>
+                      ···
                     </button>
                     <button onClick={() => openEdit(p)} className="p-1.5 text-gray-400 hover:text-primary-500 hover:bg-primary-50 rounded-md transition-colors">
                       <Pencil className="w-4 h-4" />
@@ -188,14 +187,8 @@ export default function ProjetsPro() {
                 <div className="flex items-center justify-between text-xs text-gray-400 border-t border-gray-50 pt-3">
                   <span>{format(new Date(p.created_at), 'dd MMM yyyy', { locale: fr })}</span>
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-3.5 h-3.5" />
-                      {p.views}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-3.5 h-3.5" />
-                      {p.likes}
-                    </span>
+                    <span>{p.views} vues</span>
+                    <span>{p.likes} ♡</span>
                   </div>
                 </div>
               </div>
@@ -277,8 +270,7 @@ export default function ProjetsPro() {
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">{manageProject.title}</h3>
-                <p className="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
-                  <Users className="w-3.5 h-3.5" />
+                <p className="text-sm text-gray-500 mt-0.5">
                   {detail?.followers_count ?? 0} {t('projects_pro.followers')}
                 </p>
               </div>
@@ -314,8 +306,8 @@ export default function ProjetsPro() {
                       )}
                     </div>
                   ))}
-                  <button type="button" onClick={() => setUpdateImageUrls(arr => [...arr, ''])} className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700">
-                    <ImagePlus className="w-4 h-4" /> {t('projects_pro.add_image_url')}
+                  <button type="button" onClick={() => setUpdateImageUrls(arr => [...arr, ''])} className="text-sm text-primary-600 hover:text-primary-700">
+                    {t('projects_pro.add_image_url')}
                   </button>
                 </div>
                 <button onClick={submitUpdate} disabled={addUpdateMutation.isPending} className="btn-primary flex items-center gap-2">

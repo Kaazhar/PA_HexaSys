@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { Lock, CheckCircle, XCircle } from 'lucide-react';
 import PublicLayout from '../../components/layout/PublicLayout';
 import { authService } from '../../services/api';
 import { useForm } from 'react-hook-form';
@@ -37,7 +36,6 @@ export default function ResetPasswordPage() {
       <PublicLayout>
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center">
-            <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('reset_password.invalid_title')}</h1>
             <Link to="/mot-de-passe-oublie" className="btn-primary mt-4 inline-block">{t('reset_password.request_new')}</Link>
           </div>
@@ -52,16 +50,12 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-md mx-auto px-4">
           {success ? (
             <div className="text-center">
-              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('reset_password.success_title')}</h1>
               <p className="text-gray-500">{t('reset_password.success_sub')}</p>
             </div>
           ) : (
             <div className="card">
               <div className="mb-6">
-                <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mb-4">
-                  <Lock className="w-6 h-6 text-primary-600" />
-                </div>
                 <h1 className="text-2xl font-bold text-gray-900">{t('reset_password.title')}</h1>
                 <p className="text-gray-500 mt-1">{t('reset_password.subtitle')}</p>
               </div>

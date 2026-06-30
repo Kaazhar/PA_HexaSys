@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, X, Upload, Image, Gift, Tag } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { categoryService, listingService, uploadService } from '../../services/api';
@@ -128,15 +128,14 @@ export default function EditListingPage() {
               <label className="label">{t('edit_listing.type_label')}</label>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { value: 'don', label: t('edit_listing.don'), Icon: Gift, color: 'border-green-500 bg-green-50' },
-                  { value: 'vente', label: t('edit_listing.sale'), Icon: Tag, color: 'border-coral-500 bg-coral-400/10' },
+                  { value: 'don', label: t('edit_listing.don'), color: 'border-green-500 bg-green-50' },
+                  { value: 'vente', label: t('edit_listing.sale'), color: 'border-coral-500 bg-coral-400/10' },
                 ].map((opt) => (
                   <label key={opt.value} className={clsx(
                     'flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all',
                     formValues.type === opt.value ? opt.color : 'border-gray-200 hover:border-gray-300'
                   )}>
                     <input {...register('type')} type="radio" value={opt.value} className="sr-only" />
-                    <opt.Icon className="w-6 h-6 text-gray-600" />
                     <span className="font-bold text-gray-900">{opt.label}</span>
                   </label>
                 ))}
@@ -236,10 +235,8 @@ export default function EditListingPage() {
               <button type="button" onClick={() => navigate('/mes-annonces')} className="btn-secondary flex-1">
                 {t('edit_listing.cancel')}
               </button>
-              <button type="submit" disabled={updateMutation.isPending} className="btn-primary flex-1 flex items-center justify-center gap-2">
-                {updateMutation.isPending ? t('edit_listing.saving') : (
-                  <><CheckCircle className="w-4 h-4" /> {t('edit_listing.save')}</>
-                )}
+              <button type="submit" disabled={updateMutation.isPending} className="btn-primary flex-1">
+                {updateMutation.isPending ? t('edit_listing.saving') : t('edit_listing.save')}
               </button>
             </div>
           </div>

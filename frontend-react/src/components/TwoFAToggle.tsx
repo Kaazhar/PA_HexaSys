@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ShieldCheck, ShieldOff } from 'lucide-react';
 import { phoneService } from '../services/api';
 import type { User } from '../types';
 import toast from 'react-hot-toast';
@@ -40,11 +39,6 @@ export default function TwoFAToggle({ isEnabled, isPhoneVerified, onSuccess }: P
   return (
     <div className="card">
       <div className="flex items-center gap-2 mb-4">
-        {active ? (
-          <ShieldCheck className="w-4 h-4 text-green-500" />
-        ) : (
-          <ShieldOff className="w-4 h-4 text-gray-400" />
-        )}
         <h2 className="font-semibold text-gray-900">{t('twofa.title')}</h2>
       </div>
 

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Eye, ChevronRight, Tag } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import PublicLayout from '../../components/layout/PublicLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -70,7 +69,6 @@ export default function ConseilsPage() {
                   activeTag === tag ? 'bg-[#2D5016] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 )}
               >
-                <Tag className="w-3 h-3" />
                 {tag}
               </button>
             ))}
@@ -82,7 +80,6 @@ export default function ConseilsPage() {
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : articles.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
-            <BookOpen className="w-16 h-16 mx-auto mb-4 opacity-20" />
             <p className="text-lg font-medium text-gray-600">{t('conseils.no_articles')}</p>
             <p className="text-sm mt-1">{t('conseils.no_articles_sub')}</p>
           </div>
@@ -141,8 +138,7 @@ function ArticleCard({ article }: { article: Article }) {
           {' · '}{format(new Date(article.created_at), 'dd MMM yyyy', { locale: dateLocale })}
         </div>
         <div className="flex items-center gap-3 text-xs text-gray-400">
-          <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" />{article.views}</span>
-          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#2D5016] transition-colors" />
+          <span>{article.views} vues</span>
         </div>
       </div>
     </Link>

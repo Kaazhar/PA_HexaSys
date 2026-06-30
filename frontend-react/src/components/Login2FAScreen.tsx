@@ -1,5 +1,5 @@
 import { useState, useRef, KeyboardEvent } from 'react';
-import { Loader2, ShieldCheck } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { authService } from '../services/api';
 import type { User } from '../types';
 import toast from 'react-hot-toast';
@@ -73,10 +73,7 @@ export default function Login2FAScreen({ userId, method = 'sms', onSuccess, onCa
       <div className="w-full max-w-sm bg-white rounded-lg border border-gray-200 p-8">
 
         <div className="flex flex-col items-center mb-6">
-          <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3">
-            <ShieldCheck className="w-6 h-6 text-green-600" />
-          </div>
-          <h1 className="text-xl font-bold text-gray-900">{t('login2fa.title')}</h1>
+          <h1 className="text-xl font-bold text-gray-900 mb-1">{t('login2fa.title')}</h1>
           <p className="text-sm text-gray-500 text-center mt-1">
             {method === 'email' ? t('login2fa.desc_email') : t('login2fa.desc_sms')}
           </p>

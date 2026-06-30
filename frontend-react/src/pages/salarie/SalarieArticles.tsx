@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, Plus, X, Loader2, Eye, Edit2, Trash2 } from 'lucide-react';
+import { X, Loader2, Eye, Edit2, Trash2 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { salarieService } from '../../services/api';
@@ -113,8 +113,8 @@ export default function SalarieArticles() {
             <h2 className="text-xl font-bold text-gray-900">{t('salarie_articles.title')}</h2>
             <p className="text-gray-500 text-sm mt-0.5">{articles.length}</p>
           </div>
-          <button onClick={() => { setShowForm(true); setEditArticle(null); setForm(defaultForm); }} className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> {t('salarie_articles.write')}
+          <button onClick={() => { setShowForm(true); setEditArticle(null); setForm(defaultForm); }} className="btn-primary">
+            {t('salarie_articles.write')}
           </button>
         </div>
 
@@ -122,7 +122,6 @@ export default function SalarieArticles() {
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : articles.length === 0 ? (
           <div className="card text-center py-16 text-gray-400">
-            <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p className="font-medium">{t('salarie_articles.no_articles')}</p>
             <p className="text-sm mt-1">{t('salarie_articles.no_articles_sub')}</p>
           </div>
@@ -145,7 +144,7 @@ export default function SalarieArticles() {
                       <p className="text-sm text-gray-500 line-clamp-2 mt-1">{article.content}</p>
                     )}
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-                      <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {article.views} {t('salarie_articles.views')}</span>
+                      <span>{article.views} {t('salarie_articles.views')}</span>
                       <span>{format(new Date(article.created_at), 'dd MMM yyyy', { locale: fr })}</span>
                       {article.expires_at && (
                         <span>{t('salarie_articles.expires_on')} {format(new Date(article.expires_at), 'dd MMM yyyy', { locale: fr })}</span>

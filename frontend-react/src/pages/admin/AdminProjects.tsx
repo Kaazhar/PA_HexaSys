@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, Plus, Pencil, Trash2, Eye, X, Check, Search } from 'lucide-react';
+import { Pencil, Trash2, Eye, X, Check } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { adminSidebar } from '../../config/sidebars';
@@ -69,19 +69,18 @@ export default function AdminProjects() {
             <h1 className="text-xl font-bold text-gray-900">Projets upcycling</h1>
             <p className="text-sm text-gray-500 mt-0.5">{projects.length} projets</p>
           </div>
-          <button onClick={openCreate} className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Nouveau projet
+          <button onClick={openCreate} className="btn-primary">
+            Nouveau projet
           </button>
         </div>
 
-        <div className="relative max-w-sm">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="max-w-sm">
           <input
             type="text"
             placeholder="Rechercher..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="input pl-9 w-full"
+            className="input w-full"
           />
         </div>
 
@@ -132,7 +131,7 @@ export default function AdminProjects() {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={6} className="py-12 text-center text-gray-400"><Image className="w-8 h-8 mx-auto mb-2 opacity-30" />Aucun projet</td></tr>
+                  <tr><td colSpan={6} className="py-12 text-center text-gray-400">Aucun projet</td></tr>
                 )}
               </tbody>
             </table>

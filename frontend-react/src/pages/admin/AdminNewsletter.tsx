@@ -1,4 +1,3 @@
-import { Send, Mail } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { adminSidebar } from '../../config/sidebars';
 import { newsletterService } from '../../services/api';
@@ -29,14 +28,9 @@ export default function AdminNewsletter() {
     <DashboardLayout sidebarItems={adminSidebar} title={t('admin_newsletter.title')}>
       <div className="max-w-2xl">
         <div className="card">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-              <Mail className="w-5 h-5 text-primary-600" />
-            </div>
-            <div>
-              <h2 className="font-bold text-gray-900">{t('admin_newsletter.heading')}</h2>
-              <p className="text-sm text-gray-500">{t('admin_newsletter.subtitle')}</p>
-            </div>
+          <div className="mb-6">
+            <h2 className="font-bold text-gray-900">{t('admin_newsletter.heading')}</h2>
+            <p className="text-sm text-gray-500">{t('admin_newsletter.subtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -67,9 +61,8 @@ export default function AdminNewsletter() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary flex items-center gap-2"
+              className="btn-primary"
             >
-              <Send className="w-4 h-4" />
               {isSubmitting ? t('admin_newsletter.sending') : t('admin_newsletter.send_btn')}
             </button>
           </form>

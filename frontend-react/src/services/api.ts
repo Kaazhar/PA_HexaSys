@@ -46,6 +46,8 @@ export const authService = {
     api.put('/auth/password', data),
   updateAvatar: (avatarUrl: string) =>
     api.put<User>('/auth/avatar', { avatar_url: avatarUrl }),
+  updateBanner: (data: { banner_url?: string; banner_color?: string }) =>
+    api.put<User>('/auth/banner', data),
   confirmEmail: (email: string, code: string) => api.post('/auth/confirm-email', { email, code }),
   resendConfirmEmail: (email: string) => api.post('/auth/resend-confirm', { email }),
   forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),

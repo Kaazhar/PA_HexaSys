@@ -1,4 +1,3 @@
-import { ShieldX } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 
@@ -9,9 +8,6 @@ export default function BannedPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center">
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <ShieldX className="w-8 h-8 text-red-500" />
-        </div>
         <h1 className="text-xl font-bold text-gray-900 mb-2">{t('banned_page.title')}</h1>
         <p className="text-gray-500 text-sm mb-6">
           {t('banned_page.desc')}

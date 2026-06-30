@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Users, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
 import { usePaginatedQuery } from '../../hooks/usePaginatedQuery';
@@ -64,7 +63,7 @@ export default function WorkshopsPage() {
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : workshops.length === 0 ? (
-          <EmptyState icon={<Calendar className="w-10 h-10" />} message={t('workshops.no_workshops')} />
+          <EmptyState message={t('workshops.no_workshops')} />
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -77,11 +76,10 @@ export default function WorkshopsPage() {
                     to={`/formations/${workshop.id}`}
                     className="card hover:shadow-md transition-shadow group"
                   >
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="mb-3">
                       <span className={clsx('badge text-xs font-medium', typeColors[workshop.type] || 'bg-gray-100 text-gray-600')}>
                         {typeLabels[workshop.type] || workshop.type}
                       </span>
-                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
                     </div>
 
                     <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
@@ -90,29 +88,17 @@ export default function WorkshopsPage() {
 
                     <p className="text-sm text-gray-500 line-clamp-2 mb-4">{workshop.description}</p>
 
-                    <div className="space-y-1.5 text-sm text-gray-500">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>{format(new Date(workshop.date), 'dd MMMM yyyy à HH:mm', { locale: dateLocale })}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span className="truncate">{workshop.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>{workshop.duration} min</span>
-                      </div>
+                    <div className="space-y-1 text-sm text-gray-500">
+                      <p>{format(new Date(workshop.date), 'dd MMMM yyyy à HH:mm', { locale: dateLocale })}</p>
+                      <p className="truncate">{workshop.location}</p>
+                      <p>{workshop.duration} min</p>
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-1.5 text-sm">
-                          <Users className="w-4 h-4 text-gray-400" />
-                          <span className={clsx('font-medium', full ? 'text-red-500' : spotsLeft <= 3 ? 'text-amber-600' : 'text-gray-600')}>
-                            {full ? t('workshops.full') : `${spotsLeft} ${t('workshops.spots')}`}
-                          </span>
-                        </div>
+                        <span className={clsx('text-sm font-medium', full ? 'text-red-500' : spotsLeft <= 3 ? 'text-amber-600' : 'text-gray-600')}>
+                          {full ? t('workshops.full') : `${spotsLeft} ${t('workshops.spots')}`}
+                        </span>
                         <span className="font-semibold text-gray-900">
                           {workshop.price === 0 ? t('workshops.free') : `${workshop.price}€`}
                         </span>

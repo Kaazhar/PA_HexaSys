@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, Package, Box, X, Layers } from 'lucide-react';
+import { X } from 'lucide-react';
 import PublicLayout from '../../components/layout/PublicLayout';
 import { useQuery } from '@tanstack/react-query';
 import { containerService } from '../../services/api';
@@ -116,7 +116,6 @@ export default function ContainersPage() {
               ) : (
                 <div className="h-full flex items-center justify-center text-gray-400 bg-gray-50">
                   <div className="text-center">
-                    <MapPin className="w-12 h-12 mx-auto mb-3 opacity-30" />
                     <p>{t('containers.no_coords')}</p>
                   </div>
                 </div>
@@ -127,7 +126,6 @@ export default function ContainersPage() {
             <div className="space-y-4 overflow-y-auto max-h-[500px] pr-1">
               {containers.length === 0 ? (
                 <div className="text-center py-20 text-gray-400">
-                  <Package className="w-16 h-16 mx-auto mb-4 opacity-30" />
                   <p className="text-lg font-medium">{t('containers.none')}</p>
                 </div>
               ) : (
@@ -142,10 +140,7 @@ export default function ContainersPage() {
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h3 className="font-semibold text-gray-900">{container.name}</h3>
-                          <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                            <MapPin className="w-3.5 h-3.5" />
-                            <span>{container.address}, {container.district}</span>
-                          </div>
+                          <p className="text-sm text-gray-500 mt-0.5">{container.address}, {container.district}</p>
                         </div>
                         <span className={clsx('badge', statusClass[container.status] || 'badge-gray')}>
                           {statusLabel[container.status] || container.status}
@@ -177,13 +172,9 @@ export default function ContainersPage() {
         
         {isPro && (
           <div className="mt-10">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Box className="w-5 h-5 text-primary-600" />
-              {t('containers.available_objects_title')}
-            </h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('containers.available_objects_title')}</h2>
             {availableObjects.length === 0 ? (
               <div className="text-center py-12 text-gray-400">
-                <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
                 <p>{t('containers.no_available_objects')}</p>
               </div>
             ) : (
@@ -204,10 +195,7 @@ export default function ContainersPage() {
                     {obj.object_description && (
                       <p className="text-sm text-gray-500 mb-3 line-clamp-2">{obj.object_description}</p>
                     )}
-                    <div className="flex items-center gap-1 text-xs text-gray-400">
-                      <MapPin className="w-3 h-3" />
-                      <span>{obj.container_name} — {obj.address}, {obj.district}</span>
-                    </div>
+                    <p className="text-xs text-gray-400">{obj.container_name} — {obj.address}, {obj.district}</p>
                     <div className="mt-2 text-xs text-gray-400">
                       {t('containers.slot_label')} : <span className="font-mono font-semibold text-gray-600">{obj.slot_code}</span>
                     </div>
@@ -224,10 +212,7 @@ export default function ContainersPage() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between p-5 border-b border-gray-100">
               <div>
-                <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-primary-600" />
-                  {selectedContainer.name}
-                </h2>
+                <h2 className="font-bold text-gray-900 text-lg">{selectedContainer.name}</h2>
                 <p className="text-sm text-gray-400 mt-0.5">{selectedContainer.address}, {selectedContainer.district}</p>
               </div>
               <button onClick={() => setSelectedContainer(null)} className="text-gray-400 hover:text-gray-600 p-1">

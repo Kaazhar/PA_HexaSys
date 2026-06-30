@@ -1,5 +1,4 @@
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Users, ArrowLeft, User as UserIcon, Tag, CheckCircle, Target, ListChecks } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -64,8 +63,7 @@ export default function WorkshopDetailPage() {
   return (
     <PublicLayout>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link to="/formations" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
-          <ArrowLeft className="w-4 h-4" />
+        <Link to="/formations" className="text-sm text-gray-500 hover:text-gray-700 mb-6 inline-block">
           {t('workshop_detail.back')}
         </Link>
 
@@ -94,35 +92,16 @@ export default function WorkshopDetailPage() {
                 <h1 className="text-2xl font-bold text-gray-900">{workshop.title}</h1>
 
                 <div className="grid grid-cols-2 gap-3 text-sm text-gray-500">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-primary-500" />
-                    {format(new Date(workshop.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-primary-500" />
-                    {t('workshop_detail.duration')} : {workshop.duration} min
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary-500" />
-                    {workshop.location}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary-500" />
-                    {workshop.enrolled} / {workshop.max_spots} {t('workshop_detail.enrolled')}
-                  </div>
-                  {workshop.category && (
-                    <div className="flex items-center gap-2">
-                      <Tag className="w-4 h-4 text-primary-500" />
-                      {workshop.category.name}
-                    </div>
-                  )}
+                  <div>{format(new Date(workshop.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}</div>
+                  <div>{t('workshop_detail.duration')} : {workshop.duration} min</div>
+                  <div>{workshop.location}</div>
+                  <div>{workshop.enrolled} / {workshop.max_spots} {t('workshop_detail.enrolled')}</div>
+                  {workshop.category && <div>{workshop.category.name}</div>}
                 </div>
 
                 {workshop.objective && (
                   <div className="bg-primary-50/50 border border-primary-100 rounded-xl p-4">
-                    <div className="flex items-center gap-1.5 text-sm font-semibold text-primary-700 mb-1">
-                      <Target className="w-4 h-4" /> {t('workshop_detail.objective')}
-                    </div>
+                    <p className="text-sm font-semibold text-primary-700 mb-1">{t('workshop_detail.objective')}</p>
                     <p className="text-sm text-gray-700 whitespace-pre-line">{workshop.objective}</p>
                   </div>
                 )}
@@ -136,18 +115,13 @@ export default function WorkshopDetailPage() {
 
                 {workshop.sessions && workshop.sessions.length > 1 && (
                   <div>
-                    <h2 className="font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4 text-primary-500" /> {t('workshop_detail.sessions')}
-                    </h2>
+                    <h2 className="font-semibold text-gray-900 mb-2">{t('workshop_detail.sessions')}</h2>
                     <div className="space-y-1.5">
                       {workshop.sessions.map((s, i) => (
                         <div key={s.id || i} className="flex items-center gap-3 text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
                           <span className="font-medium text-gray-400">{i + 1}.</span>
-                          <span className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {s.date ? format(new Date(s.date), 'dd MMMM yyyy à HH:mm', { locale: fr }) : '-'}
-                          </span>
-                          <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{s.duration} min</span>
+                          <span>{s.date ? format(new Date(s.date), 'dd MMMM yyyy à HH:mm', { locale: fr }) : '-'}</span>
+                          <span>{s.duration} min</span>
                         </div>
                       ))}
                     </div>
@@ -156,9 +130,7 @@ export default function WorkshopDetailPage() {
 
                 {workshop.chapters && workshop.chapters.length > 0 && (
                   <div>
-                    <h2 className="font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
-                      <ListChecks className="w-4 h-4 text-primary-500" /> {t('workshop_detail.program')}
-                    </h2>
+                    <h2 className="font-semibold text-gray-900 mb-2">{t('workshop_detail.program')}</h2>
                     <div className="space-y-2">
                       {workshop.chapters.map((ch, i) => (
                         <div key={ch.id || i} className="border border-gray-100 rounded-xl p-3">
@@ -184,8 +156,7 @@ export default function WorkshopDetailPage() {
                 </div>
 
                 {booked ? (
-                  <div className="flex items-center gap-2 justify-center text-green-600 bg-green-50 rounded-lg py-3">
-                    <CheckCircle className="w-5 h-5" />
+                  <div className="flex items-center justify-center text-green-600 bg-green-50 rounded-lg py-3">
                     <span className="font-medium">{t('workshop_detail.confirmed')}</span>
                   </div>
                 ) : workshop.enrolled >= workshop.max_spots ? (
@@ -220,9 +191,6 @@ export default function WorkshopDetailPage() {
                 <div className="card">
                   <h2 className="font-semibold text-gray-900 mb-3">{t('workshop_detail.host')}</h2>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                      <UserIcon className="w-5 h-5 text-primary-600" />
-                    </div>
                     <div>
                       <p className="font-medium text-gray-900">
                         {workshop.instructor.firstname} {workshop.instructor.lastname}

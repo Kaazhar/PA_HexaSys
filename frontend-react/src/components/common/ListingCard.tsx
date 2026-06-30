@@ -1,4 +1,3 @@
-import { MapPin, Clock, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -50,9 +49,7 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
             {listing.type === 'don' ? t('listings.type.don') : t('listings.type.vente')}
           </span>
           {listing.is_sponsored && (
-            <span className="flex items-center gap-1 badge bg-amber-400 text-white text-xs font-semibold">
-              <Star className="w-3 h-3" /> {t('listing_card.sponsored')}
-            </span>
+            <span className="badge bg-amber-400 text-white text-xs font-semibold">{t('listing_card.sponsored')}</span>
           )}
         </div>
         {listing.status !== 'active' && (
@@ -72,10 +69,7 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
         <p className="text-sm text-gray-500 mt-1 line-clamp-2">{listing.description}</p>
 
         <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center gap-1 text-xs text-gray-500">
-            <MapPin className="w-3 h-3" />
-            <span>{listing.location || t('listing_card.no_location')}</span>
-          </div>
+          <div className="text-xs text-gray-500">{listing.location || t('listing_card.no_location')}</div>
           {listing.condition && (
             <span className="badge-gray text-xs">
               {conditionLabels[listing.condition] || listing.condition}
@@ -84,10 +78,7 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
         </div>
 
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
-          <div className="flex items-center gap-1 text-xs text-gray-400">
-            <Clock className="w-3 h-3" />
-            <span>{listing.created_at ? format(new Date(listing.created_at), 'dd MMM yyyy', { locale: dateLocale }) : ''}</span>
-          </div>
+          <div className="text-xs text-gray-400">{listing.created_at ? format(new Date(listing.created_at), 'dd MMM yyyy', { locale: dateLocale }) : ''}</div>
           <div>
             {listing.type === 'vente' && listing.price ? (
               <span className="font-bold text-primary-500">{listing.price}€</span>

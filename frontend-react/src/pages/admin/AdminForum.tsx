@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MessageSquare, Pin, Lock, Trash2, Eye, Search, Plus, X, Check } from 'lucide-react';
+import { Pin, Lock, Trash2, Eye, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { adminSidebar } from '../../config/sidebars';
@@ -66,19 +66,18 @@ export default function AdminForum() {
             <h1 className="text-xl font-bold text-gray-900">Forum</h1>
             <p className="text-sm text-gray-500 mt-0.5">{total} sujets au total</p>
           </div>
-          <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Nouveau sujet
+          <button onClick={() => setShowCreate(true)} className="btn-primary">
+            Nouveau sujet
           </button>
         </div>
 
-        <div className="relative max-w-sm">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="max-w-sm">
           <input
             type="text"
             placeholder="Rechercher un sujet..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="input pl-9 w-full"
+            className="input w-full"
           />
         </div>
 
@@ -154,7 +153,7 @@ export default function AdminForum() {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={7} className="py-12 text-center text-gray-400"><MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-30" />Aucun sujet</td></tr>
+                  <tr><td colSpan={7} className="py-12 text-center text-gray-400">Aucun sujet</td></tr>
                 )}
               </tbody>
             </table>
@@ -192,9 +191,9 @@ export default function AdminForum() {
               <button
                 onClick={() => { if (newTopic.title && newTopic.content) createMutation.mutate(newTopic); }}
                 disabled={createMutation.isPending}
-                className="btn-primary flex items-center gap-2"
+                className="btn-primary"
               >
-                <Check className="w-4 h-4" /> Créer
+                Créer
               </button>
             </div>
           </div>

@@ -1,4 +1,3 @@
-import { MapPin, Clock, Users, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
 import type { Workshop } from '../../types';
@@ -51,23 +50,11 @@ export default function WorkshopCard({ workshop, onBook }: WorkshopCardProps) {
         <h3 className="font-semibold text-gray-900 line-clamp-1">{workshop.title}</h3>
         <p className="text-sm text-gray-500 mt-1 line-clamp-2">{workshop.description}</p>
 
-        <div className="mt-3 space-y-1.5">
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <Calendar className="w-3.5 h-3.5 text-primary-400" />
-            <span>{workshop.date ? format(new Date(workshop.date), dateAtFormat, { locale: dateLocale }) : ''}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <MapPin className="w-3.5 h-3.5 text-primary-400" />
-            <span>{workshop.location}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <Clock className="w-3.5 h-3.5 text-primary-400" />
-            <span>{workshop.duration} min</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <Users className="w-3.5 h-3.5 text-primary-400" />
-            <span>{isFull ? t('workshops.full') : t('workshops.spots_left', { count: spotsLeft })}</span>
-          </div>
+        <div className="mt-3 space-y-1 text-xs text-gray-500">
+          <p>{workshop.date ? format(new Date(workshop.date), dateAtFormat, { locale: dateLocale }) : ''}</p>
+          <p>{workshop.location}</p>
+          <p>{workshop.duration} min</p>
+          <p>{isFull ? t('workshops.full') : t('workshops.spots_left', { count: spotsLeft })}</p>
         </div>
 
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">

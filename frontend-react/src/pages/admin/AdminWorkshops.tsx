@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, Plus, CheckCircle, Calendar, MapPin, XCircle, Trash2, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, RefreshCw } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -147,8 +147,8 @@ export default function AdminWorkshops() {
               <RefreshCw className={clsx('w-4 h-4', checkEnrollmentMutation.isPending && 'animate-spin')} />
               {t('admin_workshops.check_enrollments')}
             </button>
-            <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-2 whitespace-nowrap">
-              <Plus className="w-4 h-4" /> {t('admin_workshops.new')}
+            <button onClick={() => setShowCreate(true)} className="btn-primary whitespace-nowrap">
+              {t('admin_workshops.new')}
             </button>
           </div>
         </div>
@@ -188,17 +188,9 @@ export default function AdminWorkshops() {
                         <span className="badge-blue">{typeLabels[workshop.type] || workshop.type}</span>
                       </td>
                       <td className="table-cell text-gray-500 text-xs">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {workshop.date ? format(new Date(workshop.date), 'dd MMM yyyy', { locale: fr }) : '-'}
-                        </div>
+                        {workshop.date ? format(new Date(workshop.date), 'dd MMM yyyy', { locale: fr }) : '-'}
                       </td>
-                      <td className="table-cell text-gray-500 text-xs">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {workshop.location}
-                        </div>
-                      </td>
+                      <td className="table-cell text-gray-500 text-xs">{workshop.location}</td>
                       <td className="table-cell text-gray-700">
                         <span className={clsx('text-sm', workshop.enrolled >= workshop.max_spots ? 'text-red-500 font-medium' : '')}>
                           {workshop.enrolled}/{workshop.max_spots}
@@ -258,7 +250,7 @@ export default function AdminWorkshops() {
                 </tbody>
               </table>
               {workshops.length === 0 && (
-                <EmptyState icon={<BookOpen className="w-10 h-10" />} message={t('common.noData')} />
+                <EmptyState message={t('common.noData')} />
               )}
             </div>
           )}

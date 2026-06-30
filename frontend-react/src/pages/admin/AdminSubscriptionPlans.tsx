@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, X, Check } from 'lucide-react';
+import { Pencil, Trash2, X, Check } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { adminSidebar } from '../../config/sidebars';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -65,9 +65,9 @@ export default function AdminSubscriptionPlans() {
           <h1 className="text-xl font-bold text-gray-900">Plans d'abonnement</h1>
           <button
             onClick={() => { setEditing({ ...emptyPlan }); setIsNew(true); }}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary"
           >
-            <Plus className="w-4 h-4" /> Nouveau plan
+            Nouveau plan
           </button>
         </div>
 

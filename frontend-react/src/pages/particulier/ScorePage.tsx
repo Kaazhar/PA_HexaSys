@@ -1,4 +1,3 @@
-import { Leaf, Droplets, Wind, CheckCircle, Trophy } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { scoreService } from '../../services/api';
@@ -72,17 +71,14 @@ export default function ScorePage() {
             <h2 className="font-semibold text-gray-900 mb-4">{t('score.env_impact')}</h2>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <Leaf className="w-6 h-6 text-green-500 mx-auto mb-1" />
                 <p className="text-xl font-bold text-gray-900">{score?.waste_avoided_kg || 0} kg</p>
                 <p className="text-xs text-gray-500">{t('score.wasteAvoided')}</p>
               </div>
               <div>
-                <Wind className="w-6 h-6 text-blue-500 mx-auto mb-1" />
                 <p className="text-xl font-bold text-gray-900">{score?.co2_saved_kg || 0} kg</p>
                 <p className="text-xs text-gray-500">{t('score.co2Saved')}</p>
               </div>
               <div>
-                <Droplets className="w-6 h-6 text-cyan-500 mx-auto mb-1" />
                 <p className="text-xl font-bold text-gray-900">{score?.water_saved_liters || 0} L</p>
                 <p className="text-xs text-gray-500">{t('score.waterSaved')}</p>
               </div>
@@ -102,7 +98,6 @@ export default function ScorePage() {
                     <span className="flex-1 text-sm">{t(`score.levels.${level.key}`)}</span>
                     <span className="text-xs text-gray-400">{level.min} — {level.max === Infinity ? '∞' : level.max} pts</span>
                     {isActive && <span className="badge-green text-xs">{t('score.current_badge')}</span>}
-                    {isDone && <CheckCircle className="w-3.5 h-3.5 text-gray-400" />}
                   </div>
                 );
               })}
@@ -112,10 +107,7 @@ export default function ScorePage() {
 
           {leaderboard.length > 0 && (
             <div className="card">
-              <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-amber-500" />
-                {t('score.leaderboard_title')}
-              </h2>
+              <h2 className="font-semibold text-gray-900 mb-4">{t('score.leaderboard_title')}</h2>
               <ol className="divide-y divide-gray-100">
                 {leaderboard.map((entry, i) => (
                   <li key={entry.user_id} className="flex items-center gap-3 py-3">

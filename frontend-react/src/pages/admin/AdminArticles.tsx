@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Lightbulb, Plus, Pencil, Trash2, Eye, X, Check } from 'lucide-react';
+import { Pencil, Trash2, Eye, X, Check } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { adminSidebar } from '../../config/sidebars';
@@ -62,8 +62,8 @@ export default function AdminArticles() {
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">Conseils & articles</h1>
-          <button onClick={openCreate} className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Nouvel article
+          <button onClick={openCreate} className="btn-primary">
+            Nouvel article
           </button>
         </div>
 
@@ -118,7 +118,7 @@ export default function AdminArticles() {
                   </tr>
                 ))}
                 {articles.length === 0 && (
-                  <tr><td colSpan={7} className="py-12 text-center text-gray-400"><Lightbulb className="w-8 h-8 mx-auto mb-2 opacity-30" />Aucun article</td></tr>
+                  <tr><td colSpan={7} className="py-12 text-center text-gray-400">Aucun article</td></tr>
                 )}
               </tbody>
             </table>

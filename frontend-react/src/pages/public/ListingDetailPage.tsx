@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { MapPin, Clock, ArrowLeft, Tag, BadgeCheck, User as UserIcon, Briefcase, Building2, Users, Calendar, TrendingUp, Star, MessageCircle, Send, Flag, ShoppingCart, EyeOff } from 'lucide-react';
+import { Star, MessageCircle, Send, Flag, ShoppingCart } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -133,8 +133,7 @@ export default function ListingDetailPage() {
   return (
     <PublicLayout>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link to="/annonces" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
-          <ArrowLeft className="w-4 h-4" />
+        <Link to="/annonces" className="text-sm text-gray-500 hover:text-gray-700 mb-6 inline-block">
           {t('listing_detail.back')}
         </Link>
 
@@ -147,12 +146,9 @@ export default function ListingDetailPage() {
         ) : (
           <>
           {listing.is_moderated && (
-            <div className="mb-6 flex items-start gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-4">
-              <EyeOff className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-orange-700">Cette annonce a été masquée par la modération</p>
-                {listing.moderation_note && <p className="text-sm text-orange-600 mt-0.5">{listing.moderation_note}</p>}
-              </div>
+            <div className="mb-6 bg-orange-50 border border-orange-200 rounded-xl px-4 py-4">
+              <p className="text-sm font-semibold text-orange-700">Cette annonce a été masquée par la modération</p>
+              {listing.moderation_note && <p className="text-sm text-orange-600 mt-0.5">{listing.moderation_note}</p>}
             </div>
           )}
           <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${listing.is_moderated ? 'blur-sm pointer-events-none select-none' : ''}`}>
@@ -209,22 +205,9 @@ export default function ListingDetailPage() {
                 <h1 className="text-2xl font-bold text-gray-900">{listing.title}</h1>
 
                 <div className="flex flex-wrap gap-3 text-sm text-gray-500">
-                  {listing.location && (
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4" />
-                      {listing.location}
-                    </span>
-                  )}
-                  {listing.category && (
-                    <span className="flex items-center gap-1.5">
-                      <Tag className="w-4 h-4" />
-                      {listing.category.name}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4" />
-                    {format(new Date(listing.created_at), 'dd MMMM yyyy', { locale: fr })}
-                  </span>
+                  {listing.location && <span>{listing.location}</span>}
+                  {listing.category && <span>{listing.category.name}</span>}
+                  <span>{format(new Date(listing.created_at), 'dd MMMM yyyy', { locale: fr })}</span>
                 </div>
 
                 {listing.description && (
@@ -259,17 +242,11 @@ export default function ListingDetailPage() {
                           {seller.firstname} {seller.lastname}
                         </p>
                         <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                          <span className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                            {seller.role === 'professionnel' ? (
-                              <Briefcase className="w-3 h-3" />
-                            ) : (
-                              <UserIcon className="w-3 h-3" />
-                            )}
+                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                             {roleLabels[seller.role] || seller.role}
                           </span>
                           {seller.siret_verified && (
-                            <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">
-                              <BadgeCheck className="w-3 h-3" />
+                            <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">
                               {t('listing_detail.pro_verified')}
                             </span>
                           )}
@@ -287,44 +264,27 @@ export default function ListingDetailPage() {
                     
                     {company && (
                       <div className="border-t border-gray-50 pt-3 space-y-2">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Building2 className="w-4 h-4 text-primary-500" />
-                          <p className="text-sm font-semibold text-gray-900">{company.company_name}</p>
-                        </div>
+                        <p className="text-sm font-semibold text-gray-900 mb-2">{company.company_name}</p>
                         {company.category && (
                           <p className="text-xs text-gray-500">{company.category}</p>
                         )}
-                        <div className="grid grid-cols-1 gap-2 mt-2">
+                        <div className="grid grid-cols-1 gap-1.5 mt-2">
                           {company.address && (
-                            <div className="flex items-start gap-2">
-                              <MapPin className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
-                              <div className="text-xs text-gray-600">
-                                <p>{company.address}</p>
-                                {company.city && <p className="text-gray-400">{company.postal_code} {company.city}</p>}
-                              </div>
+                            <div className="text-xs text-gray-600">
+                              <p>{company.address}</p>
+                              {company.city && <p className="text-gray-400">{company.postal_code} {company.city}</p>}
                             </div>
                           )}
-                          {company.employees && (
-                            <div className="flex items-center gap-2">
-                              <Users className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                              <p className="text-xs text-gray-600">{company.employees}</p>
-                            </div>
-                          )}
+                          {company.employees && <p className="text-xs text-gray-600">{company.employees}</p>}
                           {company.date_creation && (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                              <p className="text-xs text-gray-600">
-                                {t('listing_detail.company_founded')} {format(new Date(company.date_creation), 'dd MMMM yyyy', { locale: fr })}
-                              </p>
-                            </div>
+                            <p className="text-xs text-gray-600">
+                              {t('listing_detail.company_founded')} {format(new Date(company.date_creation), 'dd MMMM yyyy', { locale: fr })}
+                            </p>
                           )}
                           {company.turnover && (
-                            <div className="flex items-center gap-2">
-                              <TrendingUp className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                              <p className="text-xs text-gray-600">
-                                CA {company.turnover_year} : {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(company.turnover)}
-                              </p>
-                            </div>
+                            <p className="text-xs text-gray-600">
+                              CA {company.turnover_year} : {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(company.turnover)}
+                            </p>
                           )}
                         </div>
                         <p className="text-xs text-gray-400 font-mono pt-1">
@@ -403,8 +363,7 @@ export default function ListingDetailPage() {
 
           
           <div className="mt-8 space-y-5">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Star className="w-5 h-5 text-amber-400" />
+            <h2 className="text-lg font-semibold text-gray-900">
               {t('listing_detail.reviews')} ({reviews.length})
             </h2>
 
@@ -472,10 +431,7 @@ export default function ListingDetailPage() {
       {showReportModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
-            <div className="flex items-center gap-2 mb-4">
-              <Flag className="w-5 h-5 text-red-500" />
-              <h3 className="text-lg font-semibold text-gray-900">{t('listing_detail.report')}</h3>
-            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('listing_detail.report')}</h3>
 
             <div className="space-y-4">
               <div>

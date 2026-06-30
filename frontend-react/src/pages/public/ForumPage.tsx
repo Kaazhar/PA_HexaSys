@@ -1,4 +1,3 @@
-import { MessageSquare, Pin, Lock, Eye, ChevronRight, PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import PublicLayout from '../../components/layout/PublicLayout';
@@ -35,10 +34,7 @@ export default function ForumPage() {
             <p className="text-gray-500 mt-1">{t('forum.subtitle')}</p>
           </div>
           {canModerate && (
-            <Link to="/salarie/forum" className="btn-primary flex items-center gap-2">
-              <PlusCircle className="w-4 h-4" />
-              {t('forum.new_topic')}
-            </Link>
+            <Link to="/salarie/forum" className="btn-primary">{t('forum.new_topic')}</Link>
           )}
         </div>
 
@@ -46,7 +42,6 @@ export default function ForumPage() {
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : topics.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
-            <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-20" />
             <p className="text-lg font-medium text-gray-600">{t('forum.no_topics')}</p>
             <p className="text-sm mt-1">{t('forum.no_topics_sub')}</p>
           </div>
@@ -73,29 +68,13 @@ function TopicRow({ topic }: { topic: ForumTopic }) {
         topic.is_pinned ? 'border-amber-200 bg-amber-50/30' : 'border-gray-100'
       )}
     >
-      
-      <div className={clsx(
-        'w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0',
-        topic.is_locked ? 'bg-gray-100' : topic.is_pinned ? 'bg-amber-100' : 'bg-green-50'
-      )}>
-        {topic.is_locked
-          ? <Lock className="w-5 h-5 text-gray-400" />
-          : <MessageSquare className={clsx('w-5 h-5', topic.is_pinned ? 'text-amber-500' : 'text-[#2D5016]')} />
-        }
-      </div>
-
-      
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-0.5">
           {topic.is_pinned && (
-            <span className="flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
-              <Pin className="w-3 h-3" /> {t('forum.pinned')}
-            </span>
+            <span className="text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">{t('forum.pinned')}</span>
           )}
           {topic.is_locked && (
-            <span className="flex items-center gap-1 text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-              <Lock className="w-3 h-3" /> {t('forum.locked')}
-            </span>
+            <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{t('forum.locked')}</span>
           )}
           {topic.project_id && (
             <span className="flex items-center gap-1 text-xs font-semibold text-[#2D5016] bg-green-100 px-2 py-0.5 rounded-full">
@@ -113,16 +92,9 @@ function TopicRow({ topic }: { topic: ForumTopic }) {
       </div>
 
       
-      <div className="flex items-center gap-5 flex-shrink-0 text-xs text-gray-400">
-        <span className="flex items-center gap-1">
-          <MessageSquare className="w-3.5 h-3.5" />
-          {topic.replies_count}
-        </span>
-        <span className="flex items-center gap-1">
-          <Eye className="w-3.5 h-3.5" />
-          {topic.views}
-        </span>
-        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#2D5016] transition-colors" />
+      <div className="flex items-center gap-4 flex-shrink-0 text-xs text-gray-400">
+        <span>{topic.replies_count} rép.</span>
+        <span>{topic.views} vues</span>
       </div>
     </Link>
   );

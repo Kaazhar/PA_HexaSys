@@ -1,4 +1,3 @@
-import { BookOpen, FileText, Calendar, MapPin, Users, Clock, ArrowRight } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/common/StatCard';
 import { useQuery } from '@tanstack/react-query';
@@ -54,19 +53,16 @@ export default function DashboardSalarie() {
             <StatCard
               title={t('dashboard_salarie.my_workshops')}
               value={dashboard?.my_workshops?.length || 0}
-              icon={<BookOpen className="w-5 h-5" />}
               color="blue"
             />
             <StatCard
               title={t('dashboard_salarie.my_articles')}
               value={dashboard?.my_articles?.length || 0}
-              icon={<FileText className="w-5 h-5" />}
               color="purple"
             />
             <StatCard
               title={t('dashboard_salarie.upcoming')}
               value={dashboard?.upcoming_workshops?.length || 0}
-              icon={<Calendar className="w-5 h-5" />}
               color="green"
             />
           </div>
@@ -77,12 +73,10 @@ export default function DashboardSalarie() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{t('dashboard_salarie.my_workshops')}</h2>
                 <Link to="/salarie/formations" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  {t('dashboard_salarie.see_all')} <ArrowRight className="w-3 h-3" />
-                </Link>
+                  {t('dashboard_salarie.see_all')}                </Link>
               </div>
               {(dashboard?.my_workshops || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
-                  <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">{t('dashboard_salarie.no_workshops')}</p>
                 </div>
               ) : (
@@ -92,19 +86,10 @@ export default function DashboardSalarie() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">{ws.title}</p>
-                          <div className="flex flex-wrap gap-3 mt-1.5">
-                            <span className="flex items-center gap-1 text-xs text-gray-500">
-                              <Calendar className="w-3 h-3" />
-                              {ws.date ? format(new Date(ws.date), 'dd MMM yyyy', { locale: fr }) : '-'}
-                            </span>
-                            <span className="flex items-center gap-1 text-xs text-gray-500">
-                              <MapPin className="w-3 h-3" />
-                              {ws.location}
-                            </span>
-                            <span className="flex items-center gap-1 text-xs text-gray-500">
-                              <Users className="w-3 h-3" />
-                              {ws.enrolled}/{ws.max_spots}
-                            </span>
+                          <div className="flex flex-wrap gap-3 mt-1.5 text-xs text-gray-500">
+                            <span>{ws.date ? format(new Date(ws.date), 'dd MMM yyyy', { locale: fr }) : '-'}</span>
+                            <span>{ws.location}</span>
+                            <span>{ws.enrolled}/{ws.max_spots}</span>
                           </div>
                         </div>
                         <span className={clsx('badge text-xs flex-shrink-0', statusConfig[ws.status] || 'badge-gray')}>
@@ -124,7 +109,6 @@ export default function DashboardSalarie() {
               </div>
               {(dashboard?.upcoming_workshops || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
-                  <Calendar className="w-8 h-8 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">{t('dashboard_salarie.no_upcoming')}</p>
                 </div>
               ) : (
@@ -132,20 +116,11 @@ export default function DashboardSalarie() {
                   {(dashboard?.upcoming_workshops || []).map((ws: { id: number; title: string; date: string; duration: number; location: string; price: number }) => (
                     <li key={ws.id} className="p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <BookOpen className="w-4 h-4 text-amber-500" />
-                        </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">{ws.title}</p>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            <span className="flex items-center gap-1 text-xs text-gray-500">
-                              <Calendar className="w-3 h-3" />
-                              {ws.date ? format(new Date(ws.date), 'dd MMM', { locale: fr }) : '-'}
-                            </span>
-                            <span className="flex items-center gap-1 text-xs text-gray-500">
-                              <Clock className="w-3 h-3" />
-                              {ws.duration} min
-                            </span>
+                          <div className="flex flex-wrap gap-2 mt-1 text-xs text-gray-500">
+                            <span>{ws.date ? format(new Date(ws.date), 'dd MMM', { locale: fr }) : '-'}</span>
+                            <span>{ws.duration} min</span>
                           </div>
                         </div>
                         <span className="text-sm font-bold text-primary-500 flex-shrink-0">
@@ -165,8 +140,7 @@ export default function DashboardSalarie() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{t('dashboard_salarie.recent_articles')}</h2>
                 <Link to="/salarie/articles" className="text-sm text-primary-500 font-medium hover:text-primary-600 flex items-center gap-1">
-                  {t('dashboard_salarie.see_all')} <ArrowRight className="w-3 h-3" />
-                </Link>
+                  {t('dashboard_salarie.see_all')}                </Link>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {(dashboard?.my_articles || []).map((article: { id: number; title: string; status: string; views: number; created_at: string }) => (
@@ -191,14 +165,12 @@ export default function DashboardSalarie() {
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { label: t('dashboard_salarie.action_create_workshop'), path: '/salarie/formations', icon: <BookOpen className="w-5 h-5" />, color: 'text-blue-500 bg-blue-50' },
-              { label: t('dashboard_salarie.action_write_article'), path: '/salarie/articles', icon: <FileText className="w-5 h-5" />, color: 'text-purple-500 bg-purple-50' },
-              { label: t('dashboard_salarie.action_planning'), path: '/salarie/planning', icon: <Calendar className="w-5 h-5" />, color: 'text-amber-500 bg-amber-50' },
+              { label: t('dashboard_salarie.action_create_workshop'), path: '/salarie/formations' },
+              { label: t('dashboard_salarie.action_write_article'), path: '/salarie/articles' },
+              { label: t('dashboard_salarie.action_planning'), path: '/salarie/planning' },
             ].map((action, i) => (
-              <Link key={i} to={action.path} className="card hover:shadow-md transition-shadow flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${action.color}`}>{action.icon}</div>
+              <Link key={i} to={action.path} className="card hover:shadow-md transition-shadow flex items-center">
                 <span className="text-sm font-medium text-gray-700">{action.label}</span>
-                <ArrowRight className="w-4 h-4 text-gray-400 ml-auto" />
               </Link>
             ))}
           </div>

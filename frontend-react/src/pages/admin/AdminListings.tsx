@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Tag, Search, CheckCircle, XCircle, Eye, Star, Trash2, EyeOff, X, Check } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Star, Trash2, EyeOff, X, Check } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -101,14 +101,13 @@ export default function AdminListings() {
       <div className="space-y-5">
         
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <div className="flex-1 max-w-sm">
             <input
               type="text"
               placeholder={t('admin_listings.search')}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="input pl-9"
+              className="input"
             />
           </div>
           <div className="flex gap-2">
@@ -235,7 +234,7 @@ export default function AdminListings() {
                 </tbody>
               </table>
               {listings.length === 0 && (
-                <EmptyState icon={<Tag className="w-10 h-10" />} message={t('common.noData')} />
+                <EmptyState message={t('common.noData')} />
               )}
             </div>
           )}

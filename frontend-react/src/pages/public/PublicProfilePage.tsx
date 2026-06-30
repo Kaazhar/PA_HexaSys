@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, BadgeCheck, Star, Package, Calendar, Leaf } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useQuery } from '@tanstack/react-query';
@@ -53,10 +53,7 @@ export default function PublicProfilePage() {
   return (
     <PublicLayout>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link to="/annonces" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
-          <ArrowLeft className="w-4 h-4" />
-          {t('public_profile.back')}
-        </Link>
+        <Link to="/annonces" className="text-sm text-gray-500 hover:text-gray-700 mb-6 inline-block">{t('public_profile.back')}</Link>
 
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
@@ -80,32 +77,16 @@ export default function PublicProfilePage() {
                       {profile.user.firstname} {profile.user.lastname}
                     </h1>
                     {profile.user.siret_verified && (
-                      <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">
-                        <BadgeCheck className="w-3 h-3" />
-                        {t('public_profile.pro_verified')}
-                      </span>
+                      <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">{t('public_profile.pro_verified')}</span>
                     )}
                   </div>
                   <p className="text-sm text-gray-500 mb-2">
                     {roleLabels[profile.user.role] || profile.user.role}
                   </p>
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4" />
-                      {t('public_profile.member_since')} {format(new Date(profile.user.created_at), 'MMMM yyyy', { locale: fr })}
-                    </span>
-                    {reviewCount > 0 && (
-                      <span className="flex items-center gap-1.5">
-                        <Star className="w-4 h-4 text-amber-400" />
-                        {avgRating.toFixed(1)} ({reviewCount} {t('public_profile.reviews')})
-                      </span>
-                    )}
-                    {score && score.total_points > 0 && (
-                      <span className="flex items-center gap-1.5">
-                        <Leaf className="w-4 h-4 text-green-500" />
-                        {score.total_points} pts — {score.level}
-                      </span>
-                    )}
+                    <span>{t('public_profile.member_since')} {format(new Date(profile.user.created_at), 'MMMM yyyy', { locale: fr })}</span>
+                    {reviewCount > 0 && <span>{avgRating.toFixed(1)} ({reviewCount} {t('public_profile.reviews')})</span>}
+                    {score && score.total_points > 0 && <span>{score.total_points} pts — {score.level}</span>}
                   </div>
                 </div>
               </div>
@@ -114,8 +95,7 @@ export default function PublicProfilePage() {
             
             {activeListings.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <Package className="w-5 h-5 text-primary-500" />
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">
                   {t('public_profile.active_listings')} ({activeListings.length})
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -146,8 +126,7 @@ export default function PublicProfilePage() {
             
             {reviews.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-amber-400" />
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">
                   {t('public_profile.reviews_received')} ({reviewCount})
                 </h2>
                 <div className="space-y-3">

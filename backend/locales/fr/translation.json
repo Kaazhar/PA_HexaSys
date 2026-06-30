@@ -443,7 +443,8 @@
     "select_hint": "Cliquez sur une annonce pour contacter un vendeur",
     "re": "Re",
     "write_message": "Écrivez un message...",
-    "unknown_user": "Utilisateur"
+    "unknown_user": "Utilisateur",
+    "send_btn": "Envoyer"
   },
   "listing_detail": {
     "back": "Retour aux annonces",

@@ -443,7 +443,8 @@
     "select_hint": "Click on a listing to contact a seller",
     "re": "Re",
     "write_message": "Write a message...",
-    "unknown_user": "User"
+    "unknown_user": "User",
+    "send_btn": "Send"
   },
   "listing_detail": {
     "back": "Back to listings",

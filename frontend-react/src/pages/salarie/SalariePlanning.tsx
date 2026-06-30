@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Users, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
@@ -160,12 +160,10 @@ export default function SalariePlanning() {
                     <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
                   </div>
                   <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-gray-400" />
-                      {format(parseISO(selected.date), 'EEEE dd MMMM yyyy à HH:mm', { locale: fr })}
-                    </div>
-                    <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-gray-400" />{selected.duration} min</div>
-                    {selected.location && <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gray-400" />{selected.location}</div>}
-                    <div className="flex items-center gap-2"><Users className="w-4 h-4 text-gray-400" />{selected.enrolled}/{selected.max_spots} {t('salarie_planning.enrolled')}</div>
+                    <div>{format(parseISO(selected.date), 'EEEE dd MMMM yyyy à HH:mm', { locale: fr })}</div>
+                    <div>{selected.duration} min</div>
+                    {selected.location && <div>{selected.location}</div>}
+                    <div>{selected.enrolled}/{selected.max_spots} {t('salarie_planning.enrolled')}</div>
                   </div>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                     <span className="text-xs badge-gray">{typeLabels[selected.type] || selected.type}</span>

@@ -1,4 +1,3 @@
-import { CheckCircle, Zap, Star, Crown, Package } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { proSidebar, adminSidebar } from '../../config/sidebars';
@@ -11,11 +10,6 @@ import clsx from 'clsx';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const planIcon = (slug: string) => {
-  if (slug === 'decouverte') return <Zap className="w-6 h-6 text-gray-500" />;
-  if (slug === 'pro') return <Star className="w-6 h-6 text-amber-500" />;
-  return <Crown className="w-6 h-6 text-purple-500" />;
-};
 
 const planFeatures = (features: string): string[] => {
   if (!features) return [];
@@ -97,7 +91,6 @@ export default function AbonnementPage() {
                     </p>
                   )}
                 </div>
-                <Package className="w-8 h-8 text-primary-400" />
               </div>
             </div>
 
@@ -108,7 +101,6 @@ export default function AbonnementPage() {
                   {activeSubs.map((sub) => (
                     <div key={sub.id} className="card flex items-center justify-between py-3">
                       <div className="flex items-center gap-3">
-                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                         <div>
                           <p className="text-sm font-medium text-gray-900 capitalize">{sub.plan}</p>
                           {sub.expires_at && (
@@ -143,9 +135,6 @@ export default function AbonnementPage() {
                     )}
 
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
-                        {planIcon(plan.slug)}
-                      </div>
                       <div>
                         <p className="font-semibold text-gray-900">{plan.name}</p>
                         <p className="text-lg font-bold text-gray-900">
@@ -155,18 +144,14 @@ export default function AbonnementPage() {
                     </div>
 
                     {plan.max_listings_bonus > 0 && (
-                      <div className="mb-3 flex items-center gap-1.5 text-sm text-primary-700 font-medium">
-                        <Package className="w-4 h-4" />
+                      <div className="mb-3 text-sm text-primary-700 font-medium">
                         +{plan.max_listings_bonus} {t('subscription.listings')}
                       </div>
                     )}
 
                     <ul className="space-y-2 mb-5">
                       {planFeatures(plan.features).map((f, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                          <CheckCircle className="w-4 h-4 text-primary-500 flex-shrink-0 mt-0.5" />
-                          {f}
-                        </li>
+                        <li key={i} className="text-sm text-gray-600">— {f}</li>
                       ))}
                     </ul>
 

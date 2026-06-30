@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PlusCircle, Pin, Lock, Trash2, MessageSquare, Eye, X } from 'lucide-react';
+import { Pin, Lock, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -75,9 +75,8 @@ export default function SalarieForum() {
           <button
             type="button"
             onClick={() => setShowCreate(!showCreate)}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary"
           >
-            {showCreate ? <X className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
             {showCreate ? t('salarie_forum.cancel') : t('salarie_forum.new_topic')}
           </button>
         </div>
@@ -134,7 +133,6 @@ export default function SalarieForum() {
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : topics.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
-            <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-20" />
             <p className="text-lg font-medium text-gray-600">{t('salarie_forum.no_topics')}</p>
             <p className="text-sm mt-1">{t('salarie_forum.no_topics_sub')}</p>
           </div>
@@ -168,18 +166,6 @@ function TopicRow({ topic, onPin, onLock, onDelete }: {
       'bg-white rounded-xl border-2 p-4 flex items-center gap-4',
       topic.is_pinned ? 'border-amber-200 bg-amber-50/30' : 'border-gray-100'
     )}>
-      
-      <div className={clsx(
-        'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
-        topic.is_locked ? 'bg-gray-100' : topic.is_pinned ? 'bg-amber-100' : 'bg-green-50'
-      )}>
-        <MessageSquare className={clsx(
-          'w-5 h-5',
-          topic.is_locked ? 'text-gray-400' : topic.is_pinned ? 'text-amber-500' : 'text-[#2D5016]'
-        )} />
-      </div>
-
-      
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-0.5">
           {topic.is_pinned && (
@@ -203,8 +189,8 @@ function TopicRow({ topic, onPin, onLock, onDelete }: {
 
       
       <div className="flex items-center gap-4 text-xs text-gray-400 flex-shrink-0">
-        <span className="flex items-center gap-1"><MessageSquare className="w-3.5 h-3.5" />{topic.replies_count}</span>
-        <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" />{topic.views}</span>
+        <span>{topic.replies_count} rép.</span>
+        <span>{topic.views} vues</span>
       </div>
 
       

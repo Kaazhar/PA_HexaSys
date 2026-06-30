@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { User, Mail, Phone, MapPin, Lock, BadgeCheck, Calendar, Loader2, ShieldAlert, Camera, ExternalLink, Leaf, Bell, Pencil, ImagePlus, X } from 'lucide-react';
+import { Loader2, Camera, X } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -188,7 +188,7 @@ export default function ProfilePage() {
               onClick={() => setBannerPanelOpen(o => !o)}
               className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5 transition-colors opacity-0 group-hover:opacity-100"
             >
-              <Pencil className="w-3.5 h-3.5" /> Modifier la bannière
+              Modifier la bannière
             </button>
             {bannerPanelOpen && (
               <div className="absolute top-2 right-2 z-10 bg-white rounded-xl shadow-xl border border-gray-100 p-4 w-72">
@@ -217,7 +217,7 @@ export default function ProfilePage() {
                   disabled={bannerLoading}
                   className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 rounded-lg py-2 text-sm text-gray-500 hover:border-primary-400 hover:text-primary-600 transition-colors"
                 >
-                  {bannerLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
+                  {bannerLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   Uploader une image
                 </button>
                 <input ref={bannerInputRef} type="file" accept="image/*" className="hidden" onChange={handleBannerImage} />
@@ -245,9 +245,9 @@ export default function ProfilePage() {
               </div>
               <Link
                 to={`/utilisateurs/${user.id}`}
-                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary-600 transition-colors"
+                className="text-sm text-gray-500 hover:text-primary-600 transition-colors"
               >
-                <ExternalLink className="w-4 h-4" /> Voir mon profil public
+                Voir mon profil public
               </Link>
             </div>
 
@@ -259,35 +259,29 @@ export default function ProfilePage() {
                     {t(`auth.role_labels.${user.role}`, { defaultValue: user.role })}
                   </span>
                   {user.siret_verified && (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
-                      <BadgeCheck className="w-3 h-3" /> SIRET vérifié
+                    <span className="text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
+                      SIRET vérifié
                     </span>
                   )}
                   {user.is_banned && (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 px-2 py-0.5 rounded-full">
-                      <ShieldAlert className="w-3 h-3" /> Suspendu
+                    <span className="text-xs font-medium text-red-700 bg-red-50 px-2 py-0.5 rounded-full">
+                      Suspendu
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-4 mt-1.5 text-sm text-gray-500 flex-wrap">
-                  <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" />{user.email}</span>
+                  <span>{user.email}</span>
                   {user.created_at && (
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
-                      Membre depuis {format(new Date(user.created_at), 'MMMM yyyy', { locale: fr })}
-                    </span>
+                    <span>Membre depuis {format(new Date(user.created_at), 'MMMM yyyy', { locale: fr })}</span>
                   )}
                 </div>
               </div>
 
               {score && (
-                <div className="flex items-center gap-3 bg-primary-50 rounded-xl px-4 py-3">
-                  <Leaf className="w-5 h-5 text-primary-600" />
-                  <div>
-                    <p className="text-xs text-primary-500 font-medium">Score upcycling</p>
-                    <p className="text-xl font-bold text-primary-700">{score.total_points} pts</p>
-                    <p className="text-xs text-primary-400">{score.level}</p>
-                  </div>
+                <div className="bg-primary-50 rounded-xl px-4 py-3">
+                  <p className="text-xs text-primary-500 font-medium">Score upcycling</p>
+                  <p className="text-xl font-bold text-primary-700">{score.total_points} pts</p>
+                  <p className="text-xs text-primary-400">{score.level}</p>
                 </div>
               )}
             </div>
@@ -312,8 +306,7 @@ export default function ProfilePage() {
         {activeTab === 'infos' && (
           <div className="space-y-5">
             <div className="card">
-              <div className="flex items-center gap-2 mb-5">
-                <User className="w-4 h-4 text-gray-400" />
+              <div className="mb-5">
                 <h2 className="font-semibold text-gray-900">{t('profile.personal_info')}</h2>
               </div>
               <form onSubmit={handleProfileSubmit} className="space-y-4">
@@ -328,11 +321,11 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div>
-                  <label className="label"><Phone className="w-3.5 h-3.5 inline mr-1 text-gray-400" />{t('profile.phone')}</label>
+                  <label className="label">{t('profile.phone')}</label>
                   <input className="input" value={profileForm.phone} onChange={e => setProfileForm(f => ({ ...f, phone: e.target.value }))} placeholder="+33 6 12 34 56 78" type="tel" />
                 </div>
                 <div>
-                  <label className="label"><MapPin className="w-3.5 h-3.5 inline mr-1 text-gray-400" />{t('profile.address')}</label>
+                  <label className="label">{t('profile.address')}</label>
                   <input className="input" value={profileForm.address} onChange={e => setProfileForm(f => ({ ...f, address: e.target.value }))} placeholder={t('profile.address')} />
                 </div>
                 <div className="flex justify-end pt-1">
@@ -379,8 +372,7 @@ export default function ProfilePage() {
         {activeTab === 'securite' && (
           <div className="space-y-5">
             <div className="card">
-              <div className="flex items-center gap-2 mb-5">
-                <Lock className="w-4 h-4 text-gray-400" />
+              <div className="mb-5">
                 <h2 className="font-semibold text-gray-900">{t('profile.change_password')}</h2>
               </div>
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
@@ -419,8 +411,7 @@ export default function ProfilePage() {
         {activeTab === 'preferences' && (
           <div className="space-y-5">
             <div className="card">
-              <div className="flex items-center gap-2 mb-5">
-                <Bell className="w-4 h-4 text-gray-400" />
+              <div className="mb-5">
                 <h2 className="font-semibold text-gray-900">{t('profile.newsletter')}</h2>
               </div>
               <div className="flex items-center justify-between">

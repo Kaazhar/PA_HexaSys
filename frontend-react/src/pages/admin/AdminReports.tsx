@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Flag, CheckCircle, XCircle, ExternalLink, Clock, Tag, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePaginatedQuery } from '../../hooks/usePaginatedQuery';
 import { Link } from 'react-router-dom';
@@ -31,10 +31,10 @@ export default function AdminReports() {
     other: t('admin_reports.reasons.other'),
   };
 
-  const statusConfig: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
-    pending: { label: t('admin_reports.status.pending'), cls: 'bg-amber-100 text-amber-700', icon: <Clock className="w-3.5 h-3.5" /> },
-    resolved: { label: t('admin_reports.status.resolved'), cls: 'bg-green-100 text-green-700', icon: <CheckCircle className="w-3.5 h-3.5" /> },
-    dismissed: { label: t('admin_reports.status.dismissed'), cls: 'bg-gray-100 text-gray-500', icon: <XCircle className="w-3.5 h-3.5" /> },
+  const statusConfig: Record<string, { label: string; cls: string }> = {
+    pending: { label: t('admin_reports.status.pending'), cls: 'bg-amber-100 text-amber-700' },
+    resolved: { label: t('admin_reports.status.resolved'), cls: 'bg-green-100 text-green-700' },
+    dismissed: { label: t('admin_reports.status.dismissed'), cls: 'bg-gray-100 text-gray-500' },
   };
 
   const { items: reports, total, totalPages, isLoading, page, setPage } = usePaginatedQuery({
@@ -87,7 +87,7 @@ export default function AdminReports() {
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner /></div>
         ) : reports.length === 0 ? (
-          <EmptyState icon={<Flag className="w-10 h-10" />} message={t('admin_reports.no_reports')} />
+          <EmptyState message={t('admin_reports.no_reports')} />
         ) : (
           <div className="space-y-3">
             {reports.map((report: any) => {
@@ -97,10 +97,7 @@ export default function AdminReports() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className={clsx('inline-flex items-center gap-1 badge text-xs', s.cls)}>
-                          {s.icon}
-                          {s.label}
-                        </span>
+                        <span className={clsx('badge text-xs', s.cls)}>{s.label}</span>
                         <span className="badge bg-red-50 text-red-600 text-xs">
                           {reasonLabels[report.reason] ?? report.reason}
                         </span>
@@ -109,14 +106,12 @@ export default function AdminReports() {
                       
                       {report.listing && (
                         <div className="flex items-center gap-2 mb-1">
-                          <Tag className="w-4 h-4 text-gray-400 flex-shrink-0" />
                           <Link
                             to={`/annonces/${report.listing_id}`}
-                            className="font-medium text-gray-900 hover:text-primary-600 transition-colors flex items-center gap-1"
+                            className="font-medium text-gray-900 hover:text-primary-600 transition-colors"
                             target="_blank"
                           >
                             {report.listing.title}
-                            <ExternalLink className="w-3 h-3" />
                           </Link>
                           <span className={clsx('badge text-xs', report.listing.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500')}>
                             {listingStatuses[report.listing.status]?.label || report.listing.status}
@@ -175,8 +170,7 @@ export default function AdminReports() {
       {resolving && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertCircle className="w-5 h-5 text-red-500" />
+            <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-900">{t('admin_reports.remove_modal_title')}</h3>
             </div>
             <p className="text-sm text-gray-500 mb-4">

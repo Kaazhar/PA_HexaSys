@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Pin, Trash2, MessageSquare, Send, Eye } from 'lucide-react';
+import { Lock, Pin, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PublicLayout from '../../components/layout/PublicLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -104,9 +104,7 @@ export default function ForumTopicPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
         
-        <Link to="/forum" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
-          <ArrowLeft className="w-4 h-4" /> {t('forum.back')}
-        </Link>
+        <Link to="/forum" className="text-sm text-gray-500 hover:text-gray-700 mb-6 inline-block">{t('forum.back')}</Link>
 
         
         <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 mb-4">
@@ -114,14 +112,10 @@ export default function ForumTopicPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-2">
                 {topic.is_pinned && (
-                  <span className="flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
-                    <Pin className="w-3 h-3" /> {t('forum.pinned')}
-                  </span>
+                  <span className="text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">{t('forum.pinned')}</span>
                 )}
                 {topic.is_locked && (
-                  <span className="flex items-center gap-1 text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                    <Lock className="w-3 h-3" /> {t('forum.locked')}
-                  </span>
+                  <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{t('forum.locked')}</span>
                 )}
               </div>
               <h1 className="text-2xl font-bold text-gray-900">{topic.title}</h1>
@@ -176,7 +170,7 @@ export default function ForumTopicPage() {
               </p>
               <p className="text-xs text-gray-400">
                 {format(new Date(topic.created_at), "dd MMMM yyyy 'à' HH:mm", { locale: dateLocale })}
-                {' · '}<Eye className="w-3 h-3 inline" /> {topic.views} {t('forum.views')}
+                {' · '}{topic.views} {t('forum.views')}
               </p>
             </div>
           </div>
@@ -207,12 +201,10 @@ export default function ForumTopicPage() {
         
         {topic.is_locked ? (
           <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-5 text-center text-gray-400">
-            <Lock className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm">{t('forum.locked_msg')}</p>
           </div>
         ) : !isAuthenticated ? (
           <div className="bg-green-50 border-2 border-[#2D5016]/20 rounded-xl p-5 text-center">
-            <MessageSquare className="w-6 h-6 mx-auto mb-2 text-[#2D5016]" />
             <p className="text-sm text-gray-600 mb-3">{t('forum.login_to_reply')}</p>
             <Link to="/login" className="btn-primary text-sm">{t('forum.login_btn')}</Link>
           </div>
@@ -230,9 +222,8 @@ export default function ForumTopicPage() {
                 type="button"
                 onClick={() => { if (replyContent.trim()) replyMutation.mutate(); }}
                 disabled={!replyContent.trim() || replyMutation.isPending}
-                className="btn-primary flex items-center gap-2"
+                className="btn-primary"
               >
-                <Send className="w-4 h-4" />
                 {replyMutation.isPending ? t('forum.sending') : t('forum.reply_btn')}
               </button>
             </div>

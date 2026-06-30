@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package, Plus, CheckCircle, XCircle, MapPin, Grid3x3 } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -195,8 +195,8 @@ export default function AdminContainers() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">{t('admin_containers.containers_count', { count: containers.length })}</h2>
-            <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-2">
-              <Plus className="w-4 h-4" /> {t('admin_containers.new')}
+            <button onClick={() => setShowCreate(true)} className="btn-primary">
+              {t('admin_containers.new')}
             </button>
           </div>
 
@@ -213,10 +213,7 @@ export default function AdminContainers() {
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="font-semibold text-gray-900">{container.name}</h3>
-                        <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                          <MapPin className="w-3 h-3" />
-                          <span>{container.address}</span>
-                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{container.address}</p>
                       </div>
                       <StatusBadge status={container.status} config={containerStatuses} />
                     </div>
@@ -241,7 +238,7 @@ export default function AdminContainers() {
                         onClick={() => setSlotsContainer(container)}
                         className="flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium"
                       >
-                        <Grid3x3 className="w-3.5 h-3.5" /> {t('admin_containers.manage_slots')}
+                        {t('admin_containers.manage_slots')}
                       </button>
                     </div>
                   </div>
@@ -356,7 +353,7 @@ export default function AdminContainers() {
                   </tbody>
                 </table>
                 {requests.length === 0 && (
-                  <EmptyState icon={<Package className="w-10 h-10" />} message={t('common.noData')} />
+                  <EmptyState message={t('common.noData')} />
                 )}
               </div>
             </div>

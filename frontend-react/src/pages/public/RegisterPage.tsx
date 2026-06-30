@@ -2,7 +2,6 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
-import { Briefcase, Home } from 'lucide-react';
 import logo from '../../assets/logo.png';
 import { useTranslation } from 'react-i18next';
 
@@ -63,14 +62,12 @@ export default function RegisterPage() {
               <div className="grid grid-cols-2 gap-2">
                 <label className={`flex items-center gap-2 p-3 border cursor-pointer rounded ${selectedRole === 'particulier' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'}`}>
                   <input {...register('role')} type="radio" value="particulier" className="sr-only" />
-                  <Home className={`w-4 h-4 ${selectedRole === 'particulier' ? 'text-primary-500' : 'text-gray-400'}`} />
                   <span className={`text-sm font-medium ${selectedRole === 'particulier' ? 'text-primary-500' : 'text-gray-600'}`}>
                     {t('auth.particulier')}
                   </span>
                 </label>
                 <label className={`flex items-center gap-2 p-3 border cursor-pointer rounded ${selectedRole === 'professionnel' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'}`}>
                   <input {...register('role')} type="radio" value="professionnel" className="sr-only" />
-                  <Briefcase className={`w-4 h-4 ${selectedRole === 'professionnel' ? 'text-primary-500' : 'text-gray-400'}`} />
                   <span className={`text-sm font-medium ${selectedRole === 'professionnel' ? 'text-primary-500' : 'text-gray-600'}`}>
                     {t('auth.professionnel')}
                   </span>

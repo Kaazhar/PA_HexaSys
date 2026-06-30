@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, CheckCircle, Clock, XCircle, Tag, MapPin, Pencil, Zap } from 'lucide-react';
+import { Trash2, Pencil } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePaginatedQuery } from '../../hooks/usePaginatedQuery';
 import { Link } from 'react-router-dom';
@@ -17,11 +17,11 @@ import { useTranslation } from 'react-i18next';
 
 export default function MesAnnoncesPage() {
   const { t } = useTranslation();
-  const statusConfig: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
-    pending: { label: t('listings.status.pending'), icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-amber-100 text-amber-700' },
-    active: { label: t('listings.status.active'), icon: <CheckCircle className="w-3.5 h-3.5" />, cls: 'bg-green-100 text-green-700' },
-    rejected: { label: t('listings.status.rejected'), icon: <XCircle className="w-3.5 h-3.5" />, cls: 'bg-red-100 text-red-700' },
-    sold: { label: t('listings.status.sold'), icon: <CheckCircle className="w-3.5 h-3.5" />, cls: 'bg-gray-100 text-gray-600' },
+  const statusConfig: Record<string, { label: string; cls: string }> = {
+    pending: { label: t('listings.status.pending'), cls: 'bg-amber-100 text-amber-700' },
+    active: { label: t('listings.status.active'), cls: 'bg-green-100 text-green-700' },
+    rejected: { label: t('listings.status.rejected'), cls: 'bg-red-100 text-red-700' },
+    sold: { label: t('listings.status.sold'), cls: 'bg-gray-100 text-gray-600' },
   };
   const { user } = useAuth();
   const sidebar = user?.role === 'professionnel' ? proSidebar : user?.role === 'admin' ? adminSidebar : particulierSidebar;
@@ -70,8 +70,7 @@ export default function MesAnnoncesPage() {
             <h1 className="text-xl font-bold text-gray-900">{t('my_listings.title')}</h1>
             <p className="text-sm text-gray-500 mt-0.5">{t('my_listings.count', { count: total })}</p>
           </div>
-          <Link to="/annonces/creer" className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" />
+          <Link to="/annonces/creer" className="btn-primary">
             {t('my_listings.new')}
           </Link>
         </div>
@@ -97,17 +96,16 @@ export default function MesAnnoncesPage() {
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner /></div>
         ) : listings.length === 0 ? (
-          <EmptyState icon={<Tag className="w-10 h-10" />} message={t('my_listings.no_listings')} />
+          <EmptyState message={t('my_listings.no_listings')} />
         ) : (
           <div className="space-y-3">
             {listings.map((listing) => {
-              const s = statusConfig[listing.status] ?? { label: listing.status, cls: 'bg-gray-100 text-gray-600', icon: null };
+              const s = statusConfig[listing.status] ?? { label: listing.status, cls: 'bg-gray-100 text-gray-600' };
               return (
                 <div key={listing.id} className="card flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className={clsx('inline-flex items-center gap-1 badge text-xs', s.cls)}>
-                        {s.icon}
+                      <span className={clsx('badge text-xs', s.cls)}>
                         {s.label}
                       </span>
                       <span className={clsx('badge text-xs', listing.type === 'don' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700')}>
@@ -121,12 +119,7 @@ export default function MesAnnoncesPage() {
                       {listing.title}
                     </Link>
                     <div className="flex flex-wrap gap-3 mt-1.5 text-xs text-gray-400">
-                      {listing.location && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {listing.location}
-                        </span>
-                      )}
+                      {listing.location && <span>{listing.location}</span>}
                       <span>{format(new Date(listing.created_at), 'dd MMM yyyy', { locale: fr })}</span>
                     </div>
                     {listing.reject_reason && (
@@ -138,17 +131,15 @@ export default function MesAnnoncesPage() {
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {listing.status === 'active' && listing.is_sponsored && (
-                      <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md bg-amber-100 text-amber-700 font-medium">
-                        <Zap className="w-3 h-3" />
+                      <span className="text-xs px-2.5 py-1 rounded-md bg-amber-100 text-amber-700 font-medium">
                         {t('my_listings.boosted')}
                       </span>
                     )}
                     {listing.status === 'active' && !listing.is_sponsored && (
                       <button
                         onClick={() => setBoostId(listing.id)}
-                        className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors font-medium border border-amber-200"
+                        className="text-xs px-2.5 py-1.5 rounded-md bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors font-medium border border-amber-200"
                       >
-                        <Zap className="w-3 h-3" />
                         {t('my_listings.boost_btn')}
                       </button>
                     )}
@@ -188,12 +179,7 @@ export default function MesAnnoncesPage() {
       {boostId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                <Zap className="w-5 h-5 text-amber-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">{t('my_listings.boost_modal_title')}</h3>
-            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('my_listings.boost_modal_title')}</h3>
             <p className="text-sm text-gray-500 mb-5">
               {user?.has_used_free_boost ? t('my_listings.boost_modal_paid') : t('my_listings.boost_modal_free')}
             </p>

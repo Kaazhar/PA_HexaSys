@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Search, SlidersHorizontal, Package, MapPin, LayoutGrid, Map } from 'lucide-react';
 import PublicLayout from '../../components/layout/PublicLayout';
 import ListingCard from '../../components/common/ListingCard';
 import { useQuery } from '@tanstack/react-query';
@@ -66,17 +65,13 @@ export default function ListingsPage() {
           
           <aside className="w-full lg:w-64 flex-shrink-0">
             <div className="card sticky top-24">
-              <div className="flex items-center gap-2 mb-4">
-                <SlidersHorizontal className="w-5 h-5 text-primary-500" />
+              <div className="mb-4">
                 <h2 className="font-semibold text-gray-900">{t('listings.filters')}</h2>
               </div>
 
               
               <div className="mb-5">
-                <label className="label flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  {t('listings.filter_location')}
-                </label>
+                <label className="label">{t('listings.filter_location')}</label>
                 <input
                   type="text"
                   placeholder={t('listings.location_placeholder')}
@@ -154,25 +149,24 @@ export default function ListingsPage() {
           
           <div className="flex-1">
             
-            <div className="relative mb-6">
-              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="mb-6">
               <input
                 type="text"
                 placeholder={t('listings.search')}
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="input pl-12 py-3 text-base"
+                className="input py-3 text-base"
               />
             </div>
 
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm text-gray-500">{total} {t('listings.results')}</span>
               <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
-                <button onClick={() => setViewMode('grid')} className={clsx('p-1.5 rounded-md transition-colors', viewMode === 'grid' ? 'bg-white shadow text-primary-600' : 'text-gray-400 hover:text-gray-600')}>
-                  <LayoutGrid className="w-4 h-4" />
+                <button onClick={() => setViewMode('grid')} className={clsx('px-3 py-1.5 rounded-md text-xs font-medium transition-colors', viewMode === 'grid' ? 'bg-white shadow text-primary-600' : 'text-gray-400 hover:text-gray-600')}>
+                  {t('listings.view_grid', { defaultValue: 'Grille' })}
                 </button>
-                <button onClick={() => setViewMode('map')} className={clsx('p-1.5 rounded-md transition-colors', viewMode === 'map' ? 'bg-white shadow text-primary-600' : 'text-gray-400 hover:text-gray-600')}>
-                  <Map className="w-4 h-4" />
+                <button onClick={() => setViewMode('map')} className={clsx('px-3 py-1.5 rounded-md text-xs font-medium transition-colors', viewMode === 'map' ? 'bg-white shadow text-primary-600' : 'text-gray-400 hover:text-gray-600')}>
+                  {t('listings.view_map', { defaultValue: 'Carte' })}
                 </button>
               </div>
             </div>
@@ -183,7 +177,7 @@ export default function ListingsPage() {
                 <LoadingSpinner size="lg" />
               </div>
             ) : listings.length === 0 ? (
-              <EmptyState icon={<Package className="w-10 h-10" />} message={t('listings.noListings')} />
+              <EmptyState message={t('listings.noListings')} />
             ) : viewMode === 'map' ? (
               <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-[600px]">
                 <MapContainer center={[48.8566, 2.3522]} zoom={12} style={{ height: '100%', width: '100%' }}>

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock, BookOpen, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { bookingService } from '../../services/api';
@@ -73,7 +73,6 @@ export default function MonPlanningPage() {
         <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
       ) : bookings.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
-          <Calendar className="w-16 h-16 mx-auto mb-4 opacity-20" />
           <p className="text-lg font-medium text-gray-600">{t('planning.no_bookings')}</p>
           <p className="text-sm mt-1">{t('planning.no_bookings_sub')}</p>
           <Link to="/formations" className="btn-primary mt-6 inline-block">
@@ -193,10 +192,7 @@ export default function MonPlanningPage() {
           
           {upcoming.length > 0 && (
             <div className="card">
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-[#2D5016]" />
-                {t('planning.upcoming')} ({upcoming.length})
-              </h3>
+              <h3 className="font-semibold text-gray-900 mb-4">{t('planning.upcoming')} ({upcoming.length})</h3>
               <div className="space-y-3">
                 {upcoming.map(b => (
                   <WorkshopCard key={b.id} booking={b} />
@@ -208,10 +204,7 @@ export default function MonPlanningPage() {
           
           {past.length > 0 && (
             <div className="card">
-              <h3 className="font-semibold text-gray-500 mb-4 flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                {t('planning.past')} ({past.length})
-              </h3>
+              <h3 className="font-semibold text-gray-500 mb-4">{t('planning.past')} ({past.length})</h3>
               <div className="space-y-3 opacity-60">
                 {past.map(b => (
                   <WorkshopCard key={b.id} booking={b} past />
@@ -265,14 +258,8 @@ function WorkshopCard({ booking, past = false }: { booking: WorkshopBooking; pas
         </div>
         <p className="font-semibold text-gray-900 truncate">{ws.title}</p>
         <div className="flex flex-wrap gap-3 mt-1.5">
-          <span className="flex items-center gap-1 text-xs text-gray-500">
-            <Clock className="w-3 h-3" />
-            {format(date, 'HH:mm')} — {ws.duration} min
-          </span>
-          <span className="flex items-center gap-1 text-xs text-gray-500">
-            <MapPin className="w-3 h-3" />
-            {ws.location}
-          </span>
+          <span className="text-xs text-gray-500">{format(date, 'HH:mm')} — {ws.duration} min</span>
+          <span className="text-xs text-gray-500">{ws.location}</span>
         </div>
       </div>
 
@@ -283,9 +270,9 @@ function WorkshopCard({ booking, past = false }: { booking: WorkshopBooking; pas
         </span>
         <Link
           to={`/formations/${ws.id}`}
-          className="flex items-center gap-1 text-xs text-gray-400 hover:text-[#2D5016] transition-colors"
+          className="text-xs text-gray-400 hover:text-[#2D5016] transition-colors"
         >
-          {t('planning.see')} <ExternalLink className="w-3 h-3" />
+          {t('planning.see')}
         </Link>
       </div>
     </div>

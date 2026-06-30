@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Globe, Plus, Trash2, Info } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import api from '../../services/api';
 import { useTranslation } from 'react-i18next';
@@ -70,24 +70,21 @@ export default function AdminLanguages() {
       <div className="p-6 max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Globe className="w-6 h-6 text-primary-600" />
+            <h1 className="text-2xl font-bold text-gray-900">
               {t('admin_languages.title')}
             </h1>
             <p className="text-sm text-gray-500 mt-1">{t('admin_languages.subtitle')}</p>
           </div>
           <button
             onClick={() => { setShowModal(true); setError(''); }}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary"
           >
-            <Plus className="w-4 h-4" />
             {t('admin_languages.add')}
           </button>
         </div>
 
         
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex gap-3">
-          <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="text-sm text-blue-800">
             <p className="font-medium mb-1">{t('admin_languages.libre_info_title')}</p>
             <p>{t('admin_languages.libre_info_desc')}</p>

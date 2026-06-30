@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FolderOpen, Plus, Pencil, Trash2, Check, X } from 'lucide-react';
+import { Pencil, Trash2, Check, X } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { categoryService } from '../../services/api';
@@ -84,8 +84,8 @@ export default function AdminCategories() {
         <div className="flex items-center justify-between">
           <p className="text-gray-500 text-sm">{categories.length} {t('admin_categories.col_category').toLowerCase()}{categories.length > 1 ? 's' : ''}</p>
           {!showForm && (
-            <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2 text-sm">
-              <Plus className="w-4 h-4" /> {t('admin_categories.new')}
+            <button onClick={() => setShowForm(true)} className="btn-primary text-sm">
+              {t('admin_categories.new')}
             </button>
           )}
         </div>
@@ -137,7 +137,7 @@ export default function AdminCategories() {
         {isLoading ? (
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : categories.length === 0 ? (
-          <EmptyState icon={<FolderOpen className="w-10 h-10" />} message={t('admin_categories.no_categories')} />
+          <EmptyState message={t('admin_categories.no_categories')} />
         ) : (
           <div className="card overflow-hidden p-0">
             <table className="w-full text-sm">

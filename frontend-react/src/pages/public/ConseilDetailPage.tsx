@@ -1,5 +1,4 @@
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Eye, Clock, Tag } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import PublicLayout from '../../components/layout/PublicLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -53,16 +52,15 @@ export default function ConseilDetailPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
         
-        <Link to="/conseils" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
-          <ArrowLeft className="w-4 h-4" /> {t('conseils.back')}
+        <Link to="/conseils" className="text-sm text-gray-500 hover:text-gray-700 mb-6 inline-block">
+          {t('conseils.back')}
         </Link>
 
         
         {tags.length > 0 && (
           <div className="flex gap-2 flex-wrap mb-4">
             {tags.map(tag => (
-              <span key={tag} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-green-50 text-[#2D5016] font-medium">
-                <Tag className="w-3 h-3" />
+              <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-green-50 text-[#2D5016] font-medium">
                 {tag}
               </span>
             ))}
@@ -85,8 +83,8 @@ export default function ConseilDetailPage() {
             </span>
           </div>
           <span>{format(new Date(article.created_at), 'dd MMMM yyyy', { locale: dateLocale })}</span>
-          <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {readingTime} {t('conseils.reading_time')}</span>
-          <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {article.views} {t('conseils.views')}</span>
+          <span>{readingTime} {t('conseils.reading_time')}</span>
+          <span>{article.views} {t('conseils.views')}</span>
         </div>
 
         
@@ -96,8 +94,8 @@ export default function ConseilDetailPage() {
 
         
         <div className="mt-10 pt-6 border-t border-gray-100 flex items-center justify-between">
-          <Link to="/conseils" className="text-sm text-[#2D5016] hover:underline flex items-center gap-1">
-            <ArrowLeft className="w-4 h-4" /> {t('conseils.back')}
+          <Link to="/conseils" className="text-sm text-[#2D5016] hover:underline">
+            {t('conseils.back')}
           </Link>
           <Link to="/forum" className="text-sm text-gray-500 hover:text-gray-700">
             {t('conseils.discuss')}

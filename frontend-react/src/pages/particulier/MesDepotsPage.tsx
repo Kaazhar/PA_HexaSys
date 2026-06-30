@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
-import { Package, MapPin, CheckCircle, Clock, XCircle, KeyRound, ScanBarcode } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { containerService } from '../../services/api';
@@ -40,11 +38,11 @@ export default function MesDepotsPage() {
   const sidebar = user?.role === 'admin' ? adminSidebar : particulierSidebar;
   const queryClient = useQueryClient();
 
-  const STATUS_META: Record<string, { label: string; className: string; icon: ReactNode }> = {
-    pending:   { label: t('depots.status_pending'),   className: 'bg-amber-100 text-amber-700', icon: <Clock className="w-3.5 h-3.5" /> },
-    approved:  { label: t('depots.status_approved'),  className: 'bg-green-100 text-green-700', icon: <CheckCircle className="w-3.5 h-3.5" /> },
-    rejected:  { label: t('depots.status_rejected'),  className: 'bg-red-100 text-red-700',    icon: <XCircle className="w-3.5 h-3.5" /> },
-    deposited: { label: t('depots.status_deposited'), className: 'bg-blue-100 text-blue-700',  icon: <Package className="w-3.5 h-3.5" /> },
+  const STATUS_META: Record<string, { label: string; className: string }> = {
+    pending:   { label: t('depots.status_pending'),   className: 'bg-amber-100 text-amber-700' },
+    approved:  { label: t('depots.status_approved'),  className: 'bg-green-100 text-green-700' },
+    rejected:  { label: t('depots.status_rejected'),  className: 'bg-red-100 text-red-700' },
+    deposited: { label: t('depots.status_deposited'), className: 'bg-blue-100 text-blue-700' },
   };
 
   const { data, isLoading } = useQuery({
@@ -71,7 +69,6 @@ export default function MesDepotsPage() {
           <div className="flex justify-center py-12"><LoadingSpinner size="lg" /></div>
         ) : requests.length === 0 ? (
           <EmptyState
-            icon={<Package className="w-12 h-12" />}
             message={t('depots.empty')}
           />
         ) : (
@@ -83,13 +80,10 @@ export default function MesDepotsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="font-bold text-gray-900">{req.object_title}</h3>
-                      <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                        <MapPin className="w-3 h-3" />
-                        <span>{req.container?.name}{req.slot_code ? ` · ${t('depots.slot')} ${req.slot_code}` : ''}</span>
-                      </div>
+                      <p className="text-xs text-gray-500 mt-1">{req.container?.name}{req.slot_code ? ` · ${t('depots.slot')} ${req.slot_code}` : ''}</p>
                     </div>
-                    <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${meta.className}`}>
-                      {meta.icon}{meta.label}
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${meta.className}`}>
+                      {meta.label}
                     </span>
                   </div>
 
@@ -101,8 +95,7 @@ export default function MesDepotsPage() {
 
                   {(req.status === 'approved' || req.status === 'deposited') && (
                     <div className="mt-4 space-y-4">
-                      <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
-                        <KeyRound className="w-5 h-5 text-green-600 flex-shrink-0" />
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-xl">
                         <div>
                           <p className="text-xs text-gray-500">{t('depots.access_code')}</p>
                           <p className="font-mono font-bold text-lg text-[#2D5016] tracking-widest">{req.access_code}</p>
@@ -110,10 +103,7 @@ export default function MesDepotsPage() {
                       </div>
 
                       <div className="p-4 border border-gray-200 rounded-xl">
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
-                          <ScanBarcode className="w-3.5 h-3.5" />
-                          {t('depots.barcode_label')}
-                        </div>
+                        <p className="text-xs text-gray-500 mb-2">{t('depots.barcode_label')}</p>
                         <BarcodeImage requestId={req.id} />
                         <p className="text-center font-mono text-sm text-gray-600 mt-1">{req.barcode}</p>
                       </div>

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Send, MessageCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -91,7 +90,6 @@ export default function MessagesPage() {
             <div className="flex justify-center py-8"><LoadingSpinner /></div>
           ) : conversations.length === 0 ? (
             <div className="text-center py-12 px-4">
-              <MessageCircle className="w-8 h-8 text-gray-200 mx-auto mb-2" />
               <p className="text-sm text-gray-400">{t('messages_page.no_conversations')}</p>
             </div>
           ) : (
@@ -134,7 +132,6 @@ export default function MessagesPage() {
         <div className="flex-1 flex flex-col card p-0 overflow-hidden">
           {!selectedConv ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-              <MessageCircle className="w-12 h-12 text-gray-200 mb-3" />
               <p className="text-gray-500 font-medium">{t('messages_page.select_conversation')}</p>
               <p className="text-sm text-gray-400 mt-1">{t('messages_page.select_hint')}</p>
             </div>
@@ -202,7 +199,7 @@ export default function MessagesPage() {
                   disabled={!messageText.trim() || sendMutation.isPending}
                   className="btn-primary px-4 disabled:opacity-40"
                 >
-                  <Send className="w-4 h-4" />
+                  {t('messages_page.send_btn')}
                 </button>
               </div>
             </>

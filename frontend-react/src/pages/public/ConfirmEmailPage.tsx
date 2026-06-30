@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, Mail } from 'lucide-react';
 import { authService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -54,7 +53,6 @@ export default function ConfirmEmailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-beige-50">
         <div className="text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('confirm_email.success_title')}</h1>
           <p className="text-gray-500">{t('confirm_email.redirecting')}</p>
         </div>
@@ -66,9 +64,6 @@ export default function ConfirmEmailPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-beige-50 px-4">
       <img src={logo} alt="UpcycleConnect" className="h-12 mb-8" />
       <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8 text-center">
-        <div className="w-14 h-14 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Mail className="w-7 h-7 text-primary-600" />
-        </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('confirm_email.title')}</h1>
         <p className="text-gray-500 mb-1">{t('confirm_email.subtitle')}</p>
         <p className="font-semibold text-gray-800 mb-6">{email}</p>

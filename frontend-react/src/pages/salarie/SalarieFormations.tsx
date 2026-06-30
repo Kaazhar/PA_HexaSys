@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, Calendar, Plus, MapPin, Users, Clock, X, Loader2, AlertCircle, Trash2, Target, ListChecks } from 'lucide-react';
+import { X, Loader2, Trash2 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { salarieService, workshopService, categoryService } from '../../services/api';
@@ -148,8 +148,8 @@ export default function SalarieFormations() {
             <h2 className="text-xl font-bold text-gray-900">{t('salarie_formations.title')}</h2>
             <p className="text-gray-500 text-sm mt-0.5">{workshops.length}</p>
           </div>
-          <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> {t('salarie_formations.create')}
+          <button onClick={() => setShowForm(true)} className="btn-primary">
+            {t('salarie_formations.create')}
           </button>
         </div>
 
@@ -157,7 +157,6 @@ export default function SalarieFormations() {
           <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
         ) : workshops.length === 0 ? (
           <div className="card text-center py-16 text-gray-400">
-            <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p className="font-medium">{t('salarie_formations.no_workshops')}</p>
             <p className="text-sm mt-1">{t('salarie_formations.no_workshops_sub')}</p>
           </div>
@@ -179,33 +178,18 @@ export default function SalarieFormations() {
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {ws.date ? format(new Date(ws.date), 'dd MMMM yyyy à HH:mm', { locale: fr }) : '-'}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5" />
-                        {ws.duration} min
-                      </span>
-                      {ws.location && (
-                        <span className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5" />
-                          {ws.location}
-                        </span>
-                      )}
-                      <span className="flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5" />
+                      <span>{ws.date ? format(new Date(ws.date), 'dd MMMM yyyy à HH:mm', { locale: fr }) : '-'}</span>
+                      <span>{ws.duration} min</span>
+                      {ws.location && <span>{ws.location}</span>}
+                      <span>
                         {ws.enrolled}/{ws.max_spots} {t('salarie_formations.enrolled')}
                         {ws.enrolled < ws.min_spots && (
-                          <span className="text-amber-500 text-xs">(min {ws.min_spots})</span>
+                          <span className="text-amber-500 text-xs ml-1">(min {ws.min_spots})</span>
                         )}
                       </span>
                     </div>
                     {ws.cancel_reason && (
-                      <div className="flex items-start gap-1.5 mt-2 text-xs text-red-600">
-                        <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-                        <span>{t('salarie_formations.cancelled_reason')} {ws.cancel_reason}</span>
-                      </div>
+                      <p className="mt-2 text-xs text-red-600">{t('salarie_formations.cancelled_reason')} {ws.cancel_reason}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -246,8 +230,8 @@ export default function SalarieFormations() {
                 <textarea className="input min-h-[80px] resize-y" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div>
-                <label className="label flex items-center gap-1.5">
-                  <Target className="w-3.5 h-3.5 text-primary-500" /> {t('salarie_formations.label_objective')}
+                <label className="label">
+                  {t('salarie_formations.label_objective')}
                 </label>
                 <textarea
                   className="input min-h-[60px] resize-y"
@@ -277,11 +261,9 @@ export default function SalarieFormations() {
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="label mb-0 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-primary-500" /> {t('salarie_formations.label_sessions')}
-                  </label>
-                  <button type="button" onClick={addSession} className="text-xs text-primary-600 hover:text-primary-700 flex items-center gap-1 font-medium">
-                    <Plus className="w-3.5 h-3.5" /> {t('salarie_formations.add_session')}
+                  <label className="label mb-0">{t('salarie_formations.label_sessions')}</label>
+                  <button type="button" onClick={addSession} className="text-xs text-primary-600 hover:text-primary-700 font-medium">
+                    {t('salarie_formations.add_session')}
                   </button>
                 </div>
                 <p className="text-xs text-gray-400 mb-2">{t('salarie_formations.sessions_hint')}</p>
@@ -329,11 +311,11 @@ export default function SalarieFormations() {
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="label mb-0 flex items-center gap-1.5">
-                    <ListChecks className="w-3.5 h-3.5 text-primary-500" /> {t('salarie_formations.label_chapters')}
+                  <label className="label mb-0">
+                    {t('salarie_formations.label_chapters')}
                   </label>
-                  <button type="button" onClick={addChapter} className="text-xs text-primary-600 hover:text-primary-700 flex items-center gap-1 font-medium">
-                    <Plus className="w-3.5 h-3.5" /> {t('salarie_formations.add_chapter')}
+                  <button type="button" onClick={addChapter} className="text-xs text-primary-600 hover:text-primary-700 font-medium">
+                    {t('salarie_formations.add_chapter')}
                   </button>
                 </div>
                 {form.chapters.length === 0 ? (
@@ -461,12 +443,8 @@ function WorkshopDetailModal({ id, onClose }: { id: number; onClose: () => void 
               {ws.description && <p className="text-sm text-gray-600">{ws.description}</p>}
 
               <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                {ws.location && (
-                  <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{ws.location}</span>
-                )}
-                <span className="flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5" />{ws.enrolled}/{ws.max_spots} {t('salarie_formations.enrolled')}
-                </span>
+                {ws.location && <span>{ws.location}</span>}
+                <span>{ws.enrolled}/{ws.max_spots} {t('salarie_formations.enrolled')}</span>
                 <span className="font-bold text-primary-500">{ws.price === 0 ? t('salarie_formations.free') : `${ws.price}€`}</span>
               </div>
             </div>
@@ -474,18 +452,14 @@ function WorkshopDetailModal({ id, onClose }: { id: number; onClose: () => void 
 
             {ws.objective && (
               <div className="bg-primary-50/50 border border-primary-100 rounded-xl p-4">
-                <div className="flex items-center gap-1.5 text-sm font-semibold text-primary-700 mb-1">
-                  <Target className="w-4 h-4" /> {t('salarie_formations.label_objective')}
-                </div>
+                <p className="text-sm font-semibold text-primary-700 mb-1">{t('salarie_formations.label_objective')}</p>
                 <p className="text-sm text-gray-700">{ws.objective}</p>
               </div>
             )}
 
 
             <div>
-              <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 mb-2">
-                <Calendar className="w-4 h-4 text-primary-500" /> {t('salarie_formations.label_sessions')}
-              </div>
+              <p className="text-sm font-semibold text-gray-900 mb-2">{t('salarie_formations.label_sessions')}</p>
               <div className="space-y-1.5">
                 {(ws.sessions && ws.sessions.length > 0
                   ? ws.sessions
@@ -493,11 +467,8 @@ function WorkshopDetailModal({ id, onClose }: { id: number; onClose: () => void 
                 ).map((s, i) => (
                   <div key={s.id || i} className="flex items-center gap-3 text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
                     <span className="font-medium text-gray-400">{i + 1}.</span>
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {s.date ? format(new Date(s.date), 'dd MMMM yyyy à HH:mm', { locale: fr }) : '-'}
-                    </span>
-                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{s.duration} min</span>
+                    <span>{s.date ? format(new Date(s.date), 'dd MMMM yyyy à HH:mm', { locale: fr }) : '-'}</span>
+                    <span>{s.duration} min</span>
                   </div>
                 ))}
               </div>
@@ -506,9 +477,7 @@ function WorkshopDetailModal({ id, onClose }: { id: number; onClose: () => void 
 
             {ws.chapters && ws.chapters.length > 0 && (
               <div>
-                <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 mb-2">
-                  <ListChecks className="w-4 h-4 text-primary-500" /> {t('salarie_formations.label_chapters')}
-                </div>
+                <p className="text-sm font-semibold text-gray-900 mb-2">{t('salarie_formations.label_chapters')}</p>
                 <div className="space-y-2">
                   {ws.chapters.map((ch, i) => (
                     <div key={ch.id || i} className="border border-gray-100 rounded-xl p-3">
@@ -522,10 +491,9 @@ function WorkshopDetailModal({ id, onClose }: { id: number; onClose: () => void 
 
 
             <div className="border-t border-gray-100 pt-4">
-              <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 mb-3">
-                <Users className="w-4 h-4 text-primary-500" />
+              <p className="text-sm font-semibold text-gray-900 mb-3">
                 {t('salarie_formations.enrolled_list')} ({ws.enrolled}/{ws.max_spots})
-              </div>
+              </p>
               {bLoading ? (
                 <div className="flex justify-center py-6"><LoadingSpinner /></div>
               ) : participants.length === 0 ? (
