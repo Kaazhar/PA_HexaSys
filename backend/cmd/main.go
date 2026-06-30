@@ -279,7 +279,7 @@ func main() {
 		adminGroup.PUT("/projects/:id", handlers.UpdateProject)
 		adminGroup.DELETE("/projects/:id", handlers.DeleteProject)
 		adminGroup.DELETE("/listings/:id", handlers.DeleteListing)
-		adminGroup.PUT("/listings/:id", handlers.UpdateListing)
+		adminGroup.PUT("/listings/:id/moderate", handlers.ModerateListing)
 	}
 
 	salarieGroup := api.Group("/salarie")

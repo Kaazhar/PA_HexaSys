@@ -220,7 +220,7 @@ export const adminService = {
   getUserSubscriptions: () => api.get<Subscription[]>('/admin/user-subscriptions'),
   cancelSubscription: (id: number) => api.delete(`/admin/user-subscriptions/${id}`),
   deleteListing: (id: number) => api.delete(`/admin/listings/${id}`),
-  updateListing: (id: number, data: Partial<Listing>) => api.put<Listing>(`/admin/listings/${id}`, data),
+  moderateListing: (id: number, data: { is_moderated: boolean; moderation_note: string }) => api.put<Listing>(`/admin/listings/${id}/moderate`, data),
 };
 
 export const dashboardService = {

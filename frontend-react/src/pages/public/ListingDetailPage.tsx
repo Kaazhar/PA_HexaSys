@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { MapPin, Clock, ArrowLeft, Tag, BadgeCheck, User as UserIcon, Briefcase, Building2, Users, Calendar, TrendingUp, Star, MessageCircle, Send, Flag, ShoppingCart } from 'lucide-react';
+import { MapPin, Clock, ArrowLeft, Tag, BadgeCheck, User as UserIcon, Briefcase, Building2, Users, Calendar, TrendingUp, Star, MessageCircle, Send, Flag, ShoppingCart, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -146,7 +146,16 @@ export default function ListingDetailPage() {
           </div>
         ) : (
           <>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {listing.is_moderated && (
+            <div className="mb-6 flex items-start gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-4">
+              <EyeOff className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-orange-700">Cette annonce a été masquée par la modération</p>
+                {listing.moderation_note && <p className="text-sm text-orange-600 mt-0.5">{listing.moderation_note}</p>}
+              </div>
+            </div>
+          )}
+          <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${listing.is_moderated ? 'blur-sm pointer-events-none select-none' : ''}`}>
             
             <div className="lg:col-span-2 space-y-5">
               

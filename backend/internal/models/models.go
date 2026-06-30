@@ -129,6 +129,8 @@ type Listing struct {
 	SponsoredUntil   *time.Time `json:"sponsored_until,omitempty"`
 	CommissionRate   float64    `gorm:"default:7.5" json:"commission_rate"`
 	CommissionAmount float64    `gorm:"default:0" json:"commission_amount"`
+	IsModerated      bool       `gorm:"default:false" json:"is_moderated"`
+	ModerationNote   string     `gorm:"type:varchar(500)" json:"moderation_note,omitempty"`
 }
 
 type Workshop struct {

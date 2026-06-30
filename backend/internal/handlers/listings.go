@@ -239,6 +239,28 @@ func MarkListingSold(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Annonce marquée comme vendue", "commission": commission})
 }
 
+func ModerateListing(c *gin.Context) {
+	id := c.Param("id")
+	var listing models.Listing
+	if err := config.DB.First(&listing, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
+		return
+	}
+	var req struct {
+		IsModerated    bool   `json:"is_moderated"`
+		ModerationNote string `json:"moderation_note"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	config.DB.Model(&listing).Updates(map[string]interface{}{
+		"is_moderated":    req.IsModerated,
+		"moderation_note": req.ModerationNote,
+	})
+	c.JSON(http.StatusOK, listing)
+}
+
 func DeleteListing(c *gin.Context) {
 	id := c.Param("id")
 	userID, _ := c.Get("userID")
