@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { User, Mail, Phone, MapPin, Lock, BadgeCheck, Calendar, Loader2, ShieldAlert, Camera, ExternalLink, Leaf, Bell } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Lock, BadgeCheck, Calendar, Loader2, ShieldAlert, Camera, ExternalLink, Leaf, Bell, Pencil, ImagePlus, X } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -35,8 +35,17 @@ export default function ProfilePage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
   const [avatarLoading, setAvatarLoading] = useState(false);
+  const [bannerLoading, setBannerLoading] = useState(false);
+  const [bannerPanelOpen, setBannerPanelOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'infos' | 'securite' | 'preferences'>('infos');
+
+  const BANNER_COLORS = [
+    '#2D5016', '#1e40af', '#7c3aed', '#b45309', '#be185d',
+    '#0f766e', '#c2410c', '#1d4ed8', '#047857', '#9333ea',
+    '#b91c1c', '#0369a1',
+  ];
 
   const sidebar =
     user?.role === 'admin' ? adminSidebar
@@ -50,6 +59,35 @@ export default function ProfilePage() {
     enabled: !!user,
   });
   const score = scoreData?.data;
+
+  const handleBannerImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBannerLoading(true);
+    try {
+      const uploadRes = await uploadService.upload(file);
+      const saveRes = await authService.updateBanner({ banner_url: uploadRes.data.url, banner_color: '' });
+      updateUser(saveRes.data);
+      setBannerPanelOpen(false);
+      toast.success('Bannière mise à jour');
+    } catch {
+      toast.error('Erreur lors de la mise à jour de la bannière');
+    } finally {
+      setBannerLoading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleBannerColor = async (color: string) => {
+    try {
+      const saveRes = await authService.updateBanner({ banner_color: color, banner_url: '' });
+      updateUser(saveRes.data);
+      setBannerPanelOpen(false);
+      toast.success('Bannière mise à jour');
+    } catch {
+      toast.error('Erreur lors de la mise à jour de la bannière');
+    }
+  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -137,7 +175,55 @@ export default function ProfilePage() {
       <div className="max-w-3xl mx-auto space-y-6">
 
         <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-          <div className={`bg-gradient-to-r ${gradient} h-28`} />
+          <div className="relative h-28 group">
+            {user.banner_url ? (
+              <img src={user.banner_url} alt="Bannière" className="w-full h-full object-cover" />
+            ) : user.banner_color ? (
+              <div className="w-full h-full" style={{ backgroundColor: user.banner_color }} />
+            ) : (
+              <div className={`w-full h-full bg-gradient-to-r ${gradient}`} />
+            )}
+            <button
+              type="button"
+              onClick={() => setBannerPanelOpen(o => !o)}
+              className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5 transition-colors opacity-0 group-hover:opacity-100"
+            >
+              <Pencil className="w-3.5 h-3.5" /> Modifier la bannière
+            </button>
+            {bannerPanelOpen && (
+              <div className="absolute top-2 right-2 z-10 bg-white rounded-xl shadow-xl border border-gray-100 p-4 w-72">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-semibold text-gray-800">Personnaliser la bannière</span>
+                  <button type="button" onClick={() => setBannerPanelOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                </div>
+                <div className="grid grid-cols-6 gap-2 mb-3">
+                  {BANNER_COLORS.map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => handleBannerColor(color)}
+                      className="w-9 h-9 rounded-lg border-2 hover:scale-110 transition-transform"
+                      style={{
+                        backgroundColor: color,
+                        borderColor: user.banner_color === color ? '#fff' : 'transparent',
+                        outline: user.banner_color === color ? `2px solid ${color}` : 'none',
+                      }}
+                    />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => bannerInputRef.current?.click()}
+                  disabled={bannerLoading}
+                  className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 rounded-lg py-2 text-sm text-gray-500 hover:border-primary-400 hover:text-primary-600 transition-colors"
+                >
+                  {bannerLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
+                  Uploader une image
+                </button>
+                <input ref={bannerInputRef} type="file" accept="image/*" className="hidden" onChange={handleBannerImage} />
+              </div>
+            )}
+          </div>
           <div className="bg-white px-6 pb-6">
             <div className="flex items-end justify-between -mt-12 mb-4">
               <div className="relative">

@@ -20,6 +20,8 @@ export interface User {
   email_two_fa_enabled?: boolean;
   newsletter_subscribed?: boolean;
   avatar_url?: string;
+  banner_url?: string;
+  banner_color?: string;
   created_at: string;
   updated_at: string;
 }
