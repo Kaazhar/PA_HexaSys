@@ -72,6 +72,8 @@ type User struct {
 	TwoFAEnabled         bool       `gorm:"default:false" json:"two_fa_enabled"`
 	EmailTwoFAEnabled    bool       `gorm:"default:false" json:"email_two_fa_enabled"`
 	AvatarURL            string     `gorm:"size:500" json:"avatar_url,omitempty"`
+	BannerURL            string     `gorm:"size:500" json:"banner_url,omitempty"`
+	BannerColor          string     `gorm:"size:20" json:"banner_color,omitempty"`
 	HasUsedFreeBoost     bool       `gorm:"default:false" json:"has_used_free_boost"`
 }
 

@@ -113,6 +113,7 @@ func main() {
 		auth.GET("/me", middleware.AuthRequired(), handlers.Me)
 		auth.PUT("/profile", middleware.AuthRequired(), handlers.UpdateProfile)
 		auth.PUT("/avatar", middleware.AuthRequired(), handlers.UpdateAvatar)
+		auth.PUT("/banner", middleware.AuthRequired(), handlers.UpdateBanner)
 		auth.PUT("/password", middleware.AuthRequired(), handlers.ChangePassword)
 		auth.POST("/confirm-email", handlers.ConfirmEmail)
 		auth.POST("/forgot-password", handlers.ForgotPassword)

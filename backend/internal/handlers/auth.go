@@ -305,6 +305,26 @@ type UpdateProfileRequest struct {
 	Address   string `json:"address"`
 }
 
+func UpdateBanner(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	var req struct {
+		BannerURL   string `json:"banner_url"`
+		BannerColor string `json:"banner_color"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var user models.User
+	config.DB.First(&user, userID)
+	config.DB.Model(&user).Updates(map[string]interface{}{
+		"banner_url":   req.BannerURL,
+		"banner_color": req.BannerColor,
+	})
+	config.DB.First(&user, userID)
+	c.JSON(http.StatusOK, user)
+}
+
 func UpdateAvatar(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	var req struct {
