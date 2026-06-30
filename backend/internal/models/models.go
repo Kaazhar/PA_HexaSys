@@ -242,7 +242,7 @@ type ScoreEntry struct {
 type SubscriptionPlan struct {
 	Base
 	Name             string  `gorm:"not null" json:"name"`
-	Slug             string  `gorm:"uniqueIndex;not null" json:"slug"`
+	Slug             string  `gorm:"uniqueIndex;not null;size:255" json:"slug"`
 	Price            float64 `json:"price"`
 	MaxListingsBonus int     `gorm:"default:0" json:"max_listings_bonus"`
 	Features         string  `gorm:"type:text" json:"features"`
