@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Tag, Search, CheckCircle, XCircle, Eye, Star, Trash2 } from 'lucide-react';
+import { Tag, Search, CheckCircle, XCircle, Eye, Star, Trash2, Pencil, X, Check } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -26,6 +26,8 @@ export default function AdminListings() {
   const [page, setPage] = useState(1);
   const [rejectListing, setRejectListing] = useState<Listing | null>(null);
   const [viewListing, setViewListing] = useState<Listing | null>(null);
+  const [editListing, setEditListing] = useState<Listing | null>(null);
+  const [editForm, setEditForm] = useState({ title: '', description: '', price: 0, type: 'don', status: 'active' });
 
   const { register, handleSubmit, reset } = useForm<{ reason: string }>();
 
@@ -76,6 +78,21 @@ export default function AdminListings() {
     },
     onError: () => toast.error(t('common.error')),
   });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<Listing> }) => adminService.updateListing(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'listings'] });
+      toast.success(t('common.success'));
+      setEditListing(null);
+    },
+    onError: () => toast.error(t('common.error')),
+  });
+
+  const openEdit = (listing: Listing) => {
+    setEditForm({ title: listing.title, description: listing.description, price: listing.price ?? 0, type: listing.type, status: listing.status });
+    setEditListing(listing);
+  };
 
   const onRejectSubmit = (data: { reason: string }) => {
     if (rejectListing) {
@@ -172,6 +189,13 @@ export default function AdminListings() {
                             title={t('admin_listings.view_tooltip')}
                           >
                             <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => openEdit(listing)}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                            title="Modifier"
+                          >
+                            <Pencil className="w-4 h-4" />
                           </button>
                           {listing.status === 'active' && (
                             <button
@@ -297,6 +321,59 @@ export default function AdminListings() {
           )}
         </Modal>
       </div>
+
+      {editListing && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-semibold">Modifier l'annonce</h3>
+              <button onClick={() => setEditListing(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">Titre</label>
+                <input className="input w-full" value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">Description</label>
+                <textarea className="input w-full h-24 resize-none" value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">Prix (€)</label>
+                  <input type="number" min="0" className="input w-full" value={editForm.price} onChange={e => setEditForm(f => ({ ...f, price: parseFloat(e.target.value) || 0 }))} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">Type</label>
+                  <select className="input w-full" value={editForm.type} onChange={e => setEditForm(f => ({ ...f, type: e.target.value }))}>
+                    <option value="don">Don</option>
+                    <option value="vente">Vente</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">Statut</label>
+                  <select className="input w-full" value={editForm.status} onChange={e => setEditForm(f => ({ ...f, status: e.target.value }))}>
+                    <option value="active">Actif</option>
+                    <option value="pending">En attente</option>
+                    <option value="rejected">Rejeté</option>
+                    <option value="sold">Vendu</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-5">
+              <button onClick={() => setEditListing(null)} className="btn-secondary">Annuler</button>
+              <button
+                onClick={() => updateMutation.mutate({ id: editListing.id, data: editForm })}
+                disabled={updateMutation.isPending}
+                className="btn-primary flex items-center gap-2"
+              >
+                <Check className="w-4 h-4" /> Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
