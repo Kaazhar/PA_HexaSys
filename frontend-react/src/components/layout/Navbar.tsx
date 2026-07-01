@@ -107,7 +107,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 gap-4">
           
           <Link to="/" className="flex items-center flex-shrink-0">
-            <img src={logo} alt="UpcycleConnect" className="h-8" style={{ filter: 'invert(1) brightness(0)' }} />
+            <img src={logo} alt="UpcycleConnect" className="h-8" />
           </Link>
 
           
