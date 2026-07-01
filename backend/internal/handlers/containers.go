@@ -291,6 +291,19 @@ func ConfirmDeposit(c *gin.Context) {
 		Type:    "success",
 	})
 
+	var premiumPros []models.User
+	config.DB.Joins("JOIN subscriptions ON subscriptions.user_id = users.id").
+		Where("users.role = ? AND subscriptions.status = ?", models.RoleProfessionnel, "active").
+		Find(&premiumPros)
+	proMsg := fmt.Sprintf("Nouvel objet disponible à récupérer : \"%s\" — conteneur %s", request.ObjectTitle, request.SlotCode)
+	for _, pro := range premiumPros {
+		config.DB.Create(&models.Notification{
+			UserID:  pro.ID,
+			Message: proMsg,
+			Type:    "info",
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Dépôt confirmé"})
 }
 
