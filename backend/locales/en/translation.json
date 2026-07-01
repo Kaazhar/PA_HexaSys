@@ -1418,6 +1418,24 @@
     "resent_success": "New code sent by SMS",
     "resend_error": "Error sending"
   },
+  "purchases": {
+    "title": "My purchases",
+    "history": "Purchase history",
+    "empty": "No purchases yet",
+    "total_spent": "Total spent:",
+    "download": "PDF",
+    "type_workshop": "Workshop",
+    "type_subscription": "Subscription",
+    "type_listing": "Listing purchase",
+    "type_boost": "Sponsoring",
+    "col_number": "Invoice #",
+    "col_type": "Type",
+    "col_desc": "Description",
+    "col_ht": "Net",
+    "col_tva": "VAT",
+    "col_ttc": "Gross",
+    "col_date": "Date"
+  },
   "tutorial": {
     "prev": "Previous",
     "prev_short": "Prev.",

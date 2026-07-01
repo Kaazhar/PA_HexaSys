@@ -1398,6 +1398,24 @@
     "resent_success": "Nouveau code envoyé par SMS",
     "resend_error": "Erreur lors de l'envoi"
   },
+  "purchases": {
+    "title": "Mes achats",
+    "history": "Historique des achats",
+    "empty": "Aucun achat pour le moment",
+    "total_spent": "Total dépensé :",
+    "download": "PDF",
+    "type_workshop": "Formation",
+    "type_subscription": "Abonnement",
+    "type_listing": "Achat annonce",
+    "type_boost": "Sponsoring",
+    "col_number": "N° Facture",
+    "col_type": "Type",
+    "col_desc": "Description",
+    "col_ht": "HT",
+    "col_tva": "TVA",
+    "col_ttc": "TTC",
+    "col_date": "Date"
+  },
   "tutorial": {
     "prev": "Précédent",
     "prev_short": "Préc.",

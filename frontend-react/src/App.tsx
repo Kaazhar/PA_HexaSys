@@ -43,6 +43,7 @@ import EditListingPage from './pages/particulier/EditListingPage';
 import ScorePage from './pages/particulier/ScorePage';
 import MesDepotsPage from './pages/particulier/MesDepotsPage';
 import AbonnementPage from './pages/particulier/AbonnementPage';
+import MesAchatsPage from './pages/particulier/MesAchatsPage';
 import MonPlanningPage from './pages/particulier/MonPlanningPage';
 
 import DashboardPro from './pages/professionnel/DashboardPro';
@@ -147,6 +148,7 @@ function App() {
       <Route path="/score" element={<ProtectedRoute roles={['particulier', 'professionnel', 'salarie', 'admin']}><ScorePage /></ProtectedRoute>} />
       <Route path="/mes-depots" element={<ProtectedRoute roles={['particulier', 'admin']}><MesDepotsPage /></ProtectedRoute>} />
       <Route path="/abonnement" element={<ProtectedRoute roles={['professionnel', 'admin']}><AbonnementPage /></ProtectedRoute>} />
+      <Route path="/mes-achats" element={<ProtectedRoute roles={['particulier', 'professionnel', 'admin']}><MesAchatsPage /></ProtectedRoute>} />
       <Route path="/planning" element={<ProtectedRoute roles={['particulier', 'admin']}><MonPlanningPage /></ProtectedRoute>} />
 
       <Route path="/pro" element={<ProtectedRoute roles={['professionnel', 'admin']}><DashboardPro /></ProtectedRoute>} />

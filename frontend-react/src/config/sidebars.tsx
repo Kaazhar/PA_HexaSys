@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, Tag, BookOpen, Package, DollarSign,
   FolderOpen, Flag, PlusCircle, Star, MessageCircle, Map,
-  Briefcase, Image, FileText, Calendar, Send, MessageSquare, Lightbulb, PackageCheck, Globe,
+  Briefcase, Image, FileText, Calendar, Send, MessageSquare, Lightbulb, PackageCheck, Globe, Receipt,
 } from 'lucide-react';
 
 export const adminSidebar = [
@@ -30,6 +30,7 @@ export const particulierSidebar = [
   { label: 'Formations',       path: '/formations',        icon: <BookOpen className="w-4 h-4" /> },
   { label: 'Conteneurs',       path: '/conteneurs',        icon: <Map className="w-4 h-4" /> },
   { label: 'Mes dépôts',       path: '/mes-depots',        icon: <PackageCheck className="w-4 h-4" /> },
+  { label: 'Mes achats',       path: '/mes-achats',        icon: <Receipt className="w-4 h-4" /> },
   { label: 'Mon score',        path: '/score',             icon: <Star className="w-4 h-4" /> },
 ];
 
@@ -41,6 +42,7 @@ export const proSidebar = [
   { label: 'Conteneurs',        path: '/conteneurs',      icon: <Map className="w-4 h-4" /> },
   { label: 'Messages',          path: '/messages',        icon: <MessageCircle className="w-4 h-4" /> },
   { label: 'Abonnement',        path: '/abonnement',      icon: <Briefcase className="w-4 h-4" /> },
+  { label: 'Mes achats',        path: '/mes-achats',      icon: <Receipt className="w-4 h-4" /> },
 ];
 
 export const salarieSidebar = [
