@@ -1443,5 +1443,33 @@
     "next": "Next",
     "finish": "Finish!",
     "step_counter": "Step {{current}} of {{total}}"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "overview": "Overview",
+    "users": "Users",
+    "listings": "Listings",
+    "my_listings": "My listings",
+    "create_listing": "Create a listing",
+    "workshops": "Workshops",
+    "conseils": "Tips",
+    "forum": "Forum",
+    "projects": "Projects",
+    "projects_upcycling": "Upcycling projects",
+    "subscriptions": "Subscriptions",
+    "subscription": "Subscription",
+    "categories": "Categories",
+    "containers": "Containers",
+    "finance": "Finance",
+    "reports": "Reports",
+    "newsletter": "Newsletter",
+    "languages": "Languages",
+    "my_planning": "My schedule",
+    "planning": "Schedule",
+    "messages": "Messages",
+    "my_deposits": "My drop-offs",
+    "my_purchases": "My purchases",
+    "my_score": "My score",
+    "articles": "Articles"
   }
 }

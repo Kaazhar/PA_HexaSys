@@ -1423,5 +1423,33 @@
     "next": "Suivant",
     "finish": "Terminer !",
     "step_counter": "Étape {{current}} sur {{total}}"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "overview": "Vue d'ensemble",
+    "users": "Utilisateurs",
+    "listings": "Annonces",
+    "my_listings": "Mes annonces",
+    "create_listing": "Créer une annonce",
+    "workshops": "Formations",
+    "conseils": "Conseils",
+    "forum": "Forum",
+    "projects": "Projets",
+    "projects_upcycling": "Projets upcycling",
+    "subscriptions": "Abonnements",
+    "subscription": "Abonnement",
+    "categories": "Catégories",
+    "containers": "Conteneurs",
+    "finance": "Finance",
+    "reports": "Signalements",
+    "newsletter": "Newsletter",
+    "languages": "Langues",
+    "my_planning": "Mon planning",
+    "planning": "Planning",
+    "messages": "Messages",
+    "my_deposits": "Mes dépôts",
+    "my_purchases": "Mes achats",
+    "my_score": "Mon score",
+    "articles": "Articles"
   }
 }

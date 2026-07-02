@@ -57,10 +57,10 @@ export default function Sidebar({ items, collapsed = false }: SidebarProps) {
                       ? 'bg-primary-500 text-white font-medium'
                       : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                   )}
-                  title={collapsed ? item.label : undefined}
+                  title={collapsed ? t(item.label) : undefined}
                 >
                   <span className="flex-shrink-0">{item.icon}</span>
-                  {!collapsed && <span>{item.label}</span>}
+                  {!collapsed && <span>{t(item.label)}</span>}
                 </Link>
               </li>
             );
