@@ -33,33 +33,72 @@ export default function HomePage() {
 
   return (
     <PublicLayout>
-      
-      <section className="bg-primary-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="max-w-2xl">
-            <span className="inline-block bg-white/10 text-white/90 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
-              {t('home.hero_badge')}
-            </span>
-            <h1 className="text-4xl sm:text-5xl font-bold leading-tight mb-5">
-              {t('home.hero_title')}
-            </h1>
-            <p className="text-lg text-white/80 mb-8">
-              {t('home.hero_subtitle')}
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link to="/register" className="inline-flex items-center bg-white text-primary-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                {t('home.hero_cta_primary')}
-              </Link>
-              <Link to="/annonces" className="inline-flex items-center gap-2 border border-white/40 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors">
-                {t('home.hero_cta_secondary')}
-              </Link>
+
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#1e3a0f] via-[#2D5016] to-[#3d6b20] text-white">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
+          <div className="absolute top-1/2 right-1/4 w-64 h-64 rounded-full bg-white/5" />
+          <div className="absolute -bottom-16 right-8 w-48 h-48 rounded-full bg-white/5" />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            <div>
+              <span className="inline-block bg-white/10 backdrop-blur-sm text-white/90 text-sm font-medium px-4 py-1.5 rounded-full mb-6 border border-white/20">
+                {t('home.hero_badge')}
+              </span>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-6 tracking-tight">
+                {t('home.hero_title')}
+              </h1>
+              <p className="text-lg text-white/75 mb-10 leading-relaxed max-w-lg">
+                {t('home.hero_subtitle')}
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link to="/register" className="inline-flex items-center bg-[#F5E6D3] text-[#2D5016] px-7 py-3.5 rounded-xl font-bold hover:bg-white transition-colors shadow-lg">
+                  {t('home.hero_cta_primary')}
+                </Link>
+                <Link to="/annonces" className="inline-flex items-center gap-2 border-2 border-white/30 text-white px-7 py-3.5 rounded-xl font-semibold hover:bg-white/10 transition-colors">
+                  {t('home.hero_cta_secondary')}
+                </Link>
+              </div>
+            </div>
+
+            <div className="hidden lg:flex flex-col gap-4 items-end">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-5 w-72 shadow-xl">
+                <p className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3">{t('home.stat_users')}</p>
+                <p className="text-4xl font-black text-white">{stats?.total_users ?? '—'}</p>
+                <div className="mt-3 flex gap-1">
+                  {[40, 65, 55, 80, 70, 90, 85].map((h, i) => (
+                    <div key={i} className="flex-1 bg-white/20 rounded-sm" style={{ height: `${h * 0.4}px` }} />
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-4 w-72">
+                <div className="flex-1 bg-[#C97664]/80 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-xl">
+                  <p className="text-xs font-semibold text-white/70 mb-1">{t('home.stat_co2')}</p>
+                  <p className="text-2xl font-black text-white">{stats ? `${Math.round(stats.co2_saved_kg)} kg` : '—'}</p>
+                </div>
+                <div className="flex-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-xl">
+                  <p className="text-xs font-semibold text-white/70 mb-1">{t('home.stat_listings')}</p>
+                  <p className="text-2xl font-black text-white">{stats?.active_listings ?? '—'}</p>
+                </div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 w-64 shadow-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#F5E6D3]/20 flex items-center justify-center text-lg">♻️</div>
+                  <div>
+                    <p className="text-xs text-white/60">{t('home.stat_waste')}</p>
+                    <p className="font-bold text-white">{stats ? `${Math.round(stats.waste_avoided_kg)} kg` : '—'}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-
-      <section className="py-12 bg-white border-b border-gray-100">
+      <section className="py-10 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
@@ -68,7 +107,7 @@ export default function HomePage() {
               { value: stats ? `${Math.round(stats.waste_avoided_kg)} kg` : '…', label: t('home.stat_waste') },
               { value: stats ? `${Math.round(stats.co2_saved_kg)} kg` : '…', label: t('home.stat_co2') },
             ].map((s, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 py-4">
+              <div key={i} className="flex flex-col items-center gap-1 py-4">
                 <p className="text-3xl font-black text-gray-900">{s.value}</p>
                 <p className="text-sm text-gray-500">{s.label}</p>
               </div>
@@ -77,8 +116,7 @@ export default function HomePage() {
         </div>
       </section>
 
-
-      <section className="py-20 bg-beige-50">
+      <section className="py-20 bg-[#F5E6D3]/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900">{t('home.how_title')}</h2>
@@ -90,8 +128,11 @@ export default function HomePage() {
               { title: t('home.step2_title'), description: t('home.step2_desc'), step: '02' },
               { title: t('home.step3_title'), description: t('home.step3_desc'), step: '03' },
             ].map((step, i) => (
-              <div key={i} className="relative p-8 bg-white rounded-2xl hover:shadow-md transition-shadow">
+              <div key={i} className="relative p-8 bg-white rounded-2xl hover:shadow-md transition-shadow border border-gray-100">
                 <div className="absolute top-6 right-6 text-5xl font-black text-gray-100">{step.step}</div>
+                <div className="w-10 h-10 rounded-xl bg-[#2D5016]/10 flex items-center justify-center mb-4">
+                  <div className="w-3 h-3 rounded-full bg-[#2D5016]" />
+                </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{step.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{step.description}</p>
               </div>
@@ -100,7 +141,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-10">
@@ -108,8 +148,9 @@ export default function HomePage() {
               <h2 className="text-3xl font-bold text-gray-900">{t('home.listings_title')}</h2>
               <p className="text-gray-500 mt-2">{t('home.listings_subtitle')}</p>
             </div>
-            <Link to="/annonces" className="inline-flex items-center gap-2 text-primary-500 font-medium hover:text-primary-600 transition-colors">
-              {t('home.see_all')}            </Link>
+            <Link to="/annonces" className="text-[#2D5016] font-medium hover:text-[#3a6a1e] transition-colors text-sm">
+              {t('home.see_all')}
+            </Link>
           </div>
           {listings.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -125,39 +166,33 @@ export default function HomePage() {
         </div>
       </section>
 
-      
       {workshops.length > 0 && (
-        <section className="py-20 bg-beige-50">
+        <section className="py-20 bg-[#F5E6D3]/40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-10">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900">{t('home.workshops_title')}</h2>
                 <p className="text-gray-500 mt-2">{t('home.workshops_subtitle')}</p>
               </div>
-              <Link to="/formations" className="inline-flex items-center gap-2 text-primary-500 font-medium hover:text-primary-600 transition-colors">
-                {t('home.see_all')}              </Link>
+              <Link to="/formations" className="text-[#2D5016] font-medium hover:text-[#3a6a1e] transition-colors text-sm">
+                {t('home.see_all')}
+              </Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {workshops.map((w) => (
                 <Link key={w.id} to={`/formations/${w.id}`} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                  <div className="bg-primary-600 px-5 py-4">
-                    <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">{w.type}</span>
+                  <div className="bg-[#2D5016] px-5 py-4">
+                    <span className="text-xs font-semibold text-white/60 uppercase tracking-wide">{w.type}</span>
                     <h3 className="text-white font-bold mt-1 line-clamp-2">{w.title}</h3>
                   </div>
                   <div className="p-5 space-y-2.5">
                     <div className="text-sm text-gray-500">
-                      <span>{format(new Date(w.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}</span>
+                      {format(new Date(w.date), 'dd MMMM yyyy à HH:mm', { locale: dateLocale })}
                     </div>
-                    <div className="text-sm text-gray-500">
-                      <span>{w.location}</span>
-                    </div>
+                    <div className="text-sm text-gray-500">{w.location}</div>
                     <div className="flex items-center justify-between pt-1">
-                      <span className="text-sm text-gray-500">
-                        {w.enrolled || 0}/{w.max_spots} {t('home.enrolled')}
-                      </span>
-                      <span className="font-bold text-primary-600">
-                        {w.price === 0 ? t('home.free') : `${w.price}€`}
-                      </span>
+                      <span className="text-sm text-gray-500">{w.enrolled || 0}/{w.max_spots} {t('home.enrolled')}</span>
+                      <span className="font-bold text-[#2D5016]">{w.price === 0 ? t('home.free') : `${w.price}€`}</span>
                     </div>
                   </div>
                 </Link>
@@ -167,16 +202,11 @@ export default function HomePage() {
         </section>
       )}
 
-      
-      <section className="py-20 bg-primary-500">
+      <section className="py-24 bg-gradient-to-br from-[#2D5016] to-[#1e3a0f]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-            {t('home.cta_title')}
-          </h2>
-          <p className="text-white/70 text-lg mb-8">
-            {t('home.cta_subtitle')}
-          </p>
-          <Link to="/register" className="inline-flex items-center bg-coral-500 text-white px-8 py-4 rounded-xl font-semibold hover:bg-coral-600 transition-colors text-lg shadow-lg">
+          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">{t('home.cta_title')}</h2>
+          <p className="text-white/70 text-lg mb-10">{t('home.cta_subtitle')}</p>
+          <Link to="/register" className="inline-flex items-center bg-[#C97664] text-white px-10 py-4 rounded-xl font-bold hover:bg-[#b8604f] transition-colors text-lg shadow-xl">
             {t('home.cta_button')}
           </Link>
         </div>
