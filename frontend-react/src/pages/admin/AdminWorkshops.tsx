@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { CheckCircle, XCircle, Trash2, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, RefreshCw, Loader2 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modal from '../../components/common/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { workshopService, categoryService } from '../../services/api';
-import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import type { Workshop } from '../../types';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -17,17 +16,37 @@ import StatusBadge from '../../components/common/StatusBadge';
 import { workshopStatuses } from '../../config/statuses';
 import { useTranslation } from 'react-i18next';
 
-interface CreateWorkshopForm {
+interface SessionForm {
+  date: string;
+  duration: string;
+}
+
+interface ChapterForm {
+  title: string;
+  content: string;
+}
+
+interface WorkshopForm {
   title: string;
   description: string;
-  date: string;
-  duration: number;
+  objective: string;
   location: string;
-  price: number;
-  max_spots: number;
-  category_id: number;
+  price: string;
+  max_spots: string;
+  min_spots: string;
   type: string;
+  category_id: string;
+  sessions: SessionForm[];
+  chapters: ChapterForm[];
 }
+
+const defaultWorkshopForm: WorkshopForm = {
+  title: '', description: '', objective: '',
+  location: '', price: '0', max_spots: '15', min_spots: '10',
+  type: 'atelier', category_id: '',
+  sessions: [{ date: '', duration: '120' }],
+  chapters: [],
+};
 
 export default function AdminWorkshops() {
   const { t } = useTranslation();
@@ -60,9 +79,46 @@ export default function AdminWorkshops() {
   const total = data?.data?.total || 0;
   const categories = categoriesData?.data || [];
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateWorkshopForm>({
-    defaultValues: { type: 'atelier', max_spots: 15, price: 0 },
-  });
+  const [form, setForm] = useState<WorkshopForm>(defaultWorkshopForm);
+  const resetForm = () => setForm(defaultWorkshopForm);
+
+  const addSession = () => setForm(f => ({ ...f, sessions: [...f.sessions, { date: '', duration: '120' }] }));
+  const removeSession = (i: number) => setForm(f => ({ ...f, sessions: f.sessions.filter((_, idx) => idx !== i) }));
+  const updateSession = (i: number, key: keyof SessionForm, value: string) =>
+    setForm(f => ({ ...f, sessions: f.sessions.map((s, idx) => (idx === i ? { ...s, [key]: value } : s)) }));
+  const addChapter = () => setForm(f => ({ ...f, chapters: [...f.chapters, { title: '', content: '' }] }));
+  const removeChapter = (i: number) => setForm(f => ({ ...f, chapters: f.chapters.filter((_, idx) => idx !== i) }));
+  const updateChapter = (i: number, key: keyof ChapterForm, value: string) =>
+    setForm(f => ({ ...f, chapters: f.chapters.map((ch, idx) => (idx === i ? { ...ch, [key]: value } : ch)) }));
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const sessions = form.sessions
+      .filter(s => s.date)
+      .map(s => ({ date: new Date(s.date).toISOString(), duration: Number(s.duration) || 0 }));
+    if (sessions.length === 0) {
+      toast.error(t('salarie_formations.need_session'));
+      return;
+    }
+    const chapters = form.chapters
+      .filter(ch => ch.title.trim() || ch.content.trim())
+      .map(ch => ({ title: ch.title.trim(), content: ch.content.trim() }));
+    createMutation.mutate({
+      title: form.title.trim(),
+      description: form.description?.trim(),
+      objective: form.objective?.trim(),
+      date: sessions[0].date,
+      duration: sessions[0].duration,
+      location: form.location.trim(),
+      price: Number(form.price),
+      max_spots: Number(form.max_spots),
+      min_spots: Number(form.min_spots),
+      type: form.type,
+      category_id: form.category_id ? Number(form.category_id) : undefined,
+      sessions,
+      chapters,
+    });
+  };
 
   const validateMutation = useMutation({
     mutationFn: (id: number) => workshopService.validate(id),
@@ -74,14 +130,11 @@ export default function AdminWorkshops() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: CreateWorkshopForm) => workshopService.create({
-      ...data,
-      date: new Date(data.date).toISOString(),
-    }),
+    mutationFn: (d: Parameters<typeof workshopService.create>[0]) => workshopService.create(d),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
       setShowCreate(false);
-      reset();
+      resetForm();
       toast.success(t('common.success'));
     },
     onError: () => toast.error(t('common.error')),
@@ -257,62 +310,134 @@ export default function AdminWorkshops() {
         </div>
 
         
-        <Modal isOpen={showCreate} onClose={() => { setShowCreate(false); reset(); }} title={t('admin_workshops.create_modal')} size="lg">
-          <form onSubmit={handleSubmit((d) => createMutation.mutate(d))} className="space-y-4">
+        <Modal isOpen={showCreate} onClose={() => { setShowCreate(false); resetForm(); }} title={t('admin_workshops.create_modal')} size="lg">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="label">{t('admin_workshops.label_title')}</label>
-              <input {...register('title', { required: true })} className="input" />
-              {errors.title && <p className="text-red-500 text-xs mt-1">{t('admin_users.form_required')}</p>}
+              <input className="input" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
             </div>
             <div>
               <label className="label">{t('admin_workshops.label_desc')}</label>
-              <textarea {...register('description')} className="input min-h-[80px] resize-none" />
+              <textarea className="input min-h-[80px] resize-y" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+            </div>
+            <div>
+              <label className="label">{t('salarie_formations.label_objective')}</label>
+              <textarea
+                className="input min-h-[60px] resize-y"
+                placeholder={t('salarie_formations.objective_placeholder')}
+                value={form.objective}
+                onChange={e => setForm(f => ({ ...f, objective: e.target.value }))}
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="label">{t('admin_workshops.label_date')}</label>
-                <input {...register('date', { required: true })} type="datetime-local" className="input" />
-                {errors.date && <p className="text-red-500 text-xs mt-1">{t('admin_users.form_required')}</p>}
-              </div>
-              <div>
-                <label className="label">{t('admin_workshops.label_duration')}</label>
-                <input {...register('duration', { valueAsNumber: true })} type="number" className="input" placeholder="120" />
-              </div>
-            </div>
-            <div>
-              <label className="label">{t('admin_workshops.label_location')}</label>
-              <input {...register('location')} className="input" />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="label">{t('admin_workshops.label_price')}</label>
-                <input {...register('price', { valueAsNumber: true })} type="number" step="0.01" className="input" placeholder="0" />
-              </div>
-              <div>
-                <label className="label">{t('admin_workshops.label_max')}</label>
-                <input {...register('max_spots', { valueAsNumber: true })} type="number" className="input" placeholder="15" />
-              </div>
-              <div>
                 <label className="label">{t('admin_workshops.label_type')}</label>
-                <select {...register('type')} className="input">
+                <select className="input" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
                   <option value="atelier">{t('workshops.type.atelier')}</option>
                   <option value="formation">{t('workshops.type.formation')}</option>
                   <option value="conference">{t('workshops.type.conference')}</option>
                 </select>
               </div>
+              <div>
+                <label className="label">{t('admin_workshops.label_category')}</label>
+                <select className="input" value={form.category_id} onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))}>
+                  <option value="">{t('admin_workshops.select_category')}</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div>
-              <label className="label">{t('admin_workshops.label_category')}</label>
-              <select {...register('category_id', { valueAsNumber: true })} className="input">
-                <option value={0}>{t('admin_workshops.select_category')}</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <div className="flex items-center justify-between mb-1">
+                <label className="label mb-0">{t('salarie_formations.label_sessions')}</label>
+                <button type="button" onClick={addSession} className="text-xs text-primary-600 hover:text-primary-700 font-medium">
+                  {t('salarie_formations.add_session')}
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mb-2">{t('salarie_formations.sessions_hint')}</p>
+              <div className="space-y-2">
+                {form.sessions.map((s, i) => (
+                  <div key={i} className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <label className="text-xs text-gray-500">{t('salarie_formations.session_date')}</label>
+                      <input type="datetime-local" className="input" value={s.date} onChange={e => updateSession(i, 'date', e.target.value)} required />
+                    </div>
+                    <div className="w-32">
+                      <label className="text-xs text-gray-500">{t('salarie_formations.session_duration')}</label>
+                      <input type="number" className="input" value={s.duration} onChange={e => updateSession(i, 'duration', e.target.value)} min="15" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeSession(i)}
+                      disabled={form.sessions.length === 1}
+                      className="p-2 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:hover:text-gray-400"
+                      title={t('salarie_formations.remove')}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 ))}
-              </select>
+              </div>
+            </div>
+            <div>
+              <label className="label">{t('admin_workshops.label_location')}</label>
+              <input className="input" value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="label">{t('admin_workshops.label_price')}</label>
+                <input type="number" className="input" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} min="0" step="0.5" />
+              </div>
+              <div>
+                <label className="label">{t('admin_workshops.label_max')}</label>
+                <input type="number" className="input" value={form.max_spots} onChange={e => setForm(f => ({ ...f, max_spots: e.target.value }))} min="1" />
+              </div>
+              <div>
+                <label className="label">{t('salarie_formations.label_min')}</label>
+                <input type="number" className="input" value={form.min_spots} onChange={e => setForm(f => ({ ...f, min_spots: e.target.value }))} min="1" />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="label mb-0">{t('salarie_formations.label_chapters')}</label>
+                <button type="button" onClick={addChapter} className="text-xs text-primary-600 hover:text-primary-700 font-medium">
+                  {t('salarie_formations.add_chapter')}
+                </button>
+              </div>
+              {form.chapters.length === 0 ? (
+                <p className="text-xs text-gray-400">{t('salarie_formations.no_chapter')}</p>
+              ) : (
+                <div className="space-y-3">
+                  {form.chapters.map((ch, i) => (
+                    <div key={i} className="border border-gray-100 rounded-xl p-3 space-y-2 bg-gray-50/50">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-400 w-5">{i + 1}.</span>
+                        <input
+                          className="input flex-1"
+                          placeholder={t('salarie_formations.chapter_title')}
+                          value={ch.title}
+                          onChange={e => updateChapter(i, 'title', e.target.value)}
+                        />
+                        <button type="button" onClick={() => removeChapter(i)} className="p-2 text-gray-400 hover:text-red-500" title={t('salarie_formations.remove')}>
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <textarea
+                        className="input min-h-[60px] resize-y"
+                        placeholder={t('salarie_formations.chapter_content')}
+                        value={ch.content}
+                        onChange={e => updateChapter(i, 'content', e.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => { setShowCreate(false); reset(); }} className="btn-secondary flex-1">{t('common.cancel')}</button>
-              <button type="submit" disabled={createMutation.isPending} className="btn-primary flex-1">
+              <button type="button" onClick={() => { setShowCreate(false); resetForm(); }} className="btn-secondary flex-1">{t('common.cancel')}</button>
+              <button type="submit" disabled={createMutation.isPending} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 {createMutation.isPending ? t('admin_workshops.creating') : t('admin_workshops.create_btn')}
               </button>
             </div>
