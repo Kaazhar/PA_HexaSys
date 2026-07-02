@@ -86,7 +86,9 @@ export default function HomePage() {
               </div>
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 w-64 shadow-xl">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#F5E6D3]/20 flex items-center justify-center text-lg">♻️</div>
+                  <div className="w-10 h-10 rounded-full bg-[#F5E6D3]/20 flex items-center justify-center">
+                    <div className="w-4 h-4 rounded-full bg-[#F5E6D3]/60" />
+                  </div>
                   <div>
                     <p className="text-xs text-white/60">{t('home.stat_waste')}</p>
                     <p className="font-bold text-white">{stats ? `${Math.round(stats.waste_avoided_kg)} kg` : '—'}</p>

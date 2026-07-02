@@ -10,10 +10,10 @@ import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 const levels = [
-  { key: 'debutant',      name: 'Débutant',       min: 0,   max: 99,       color: 'bg-green-200',  ring: '#86efac', medal: '🌱' },
-  { key: 'intermediaire', name: 'Intermédiaire',   min: 100, max: 299,      color: 'bg-green-400',  ring: '#4ade80', medal: '🌿' },
-  { key: 'avance',        name: 'Avancé',          min: 300, max: 699,      color: 'bg-green-600',  ring: '#16a34a', medal: '🏆' },
-  { key: 'expert',        name: 'Expert',          min: 700, max: Infinity, color: 'bg-[#2D5016]',  ring: '#2D5016', medal: '🌟' },
+  { key: 'debutant',      name: 'Débutant',       min: 0,   max: 99,       color: 'bg-green-200',  ring: '#86efac', dot: 'bg-green-300' },
+  { key: 'intermediaire', name: 'Intermédiaire',   min: 100, max: 299,      color: 'bg-green-400',  ring: '#4ade80', dot: 'bg-green-400' },
+  { key: 'avance',        name: 'Avancé',          min: 300, max: 699,      color: 'bg-green-600',  ring: '#16a34a', dot: 'bg-green-600' },
+  { key: 'expert',        name: 'Expert',          min: 700, max: Infinity, color: 'bg-[#2D5016]',  ring: '#2D5016', dot: 'bg-[#2D5016]' },
 ];
 
 const RADIUS = 72;
@@ -95,7 +95,7 @@ export default function ScorePage() {
               </div>
 
               <div className="flex-1 text-center sm:text-left">
-                <div className="text-4xl mb-2">{currentLevel.medal}</div>
+                <div className={`w-8 h-8 rounded-full mb-2 ${currentLevel.dot}`} />
                 <p className="text-white/70 text-sm mb-1">{t('score.current_level')}</p>
                 <h2 className="text-3xl font-black text-white mb-3">{score?.level || t(`score.levels.${currentLevel.key}`)}</h2>
                 {nextLevel ? (
@@ -143,7 +143,7 @@ export default function ScorePage() {
                 const isDone = (score?.total_points || 0) > level.max;
                 return (
                   <div key={level.key} className={clsx('flex items-center gap-4 px-5 py-3.5', isActive && 'bg-[#2D5016]/5')}>
-                    <span className="text-xl">{level.medal}</span>
+                    <div className={`w-4 h-4 rounded-full flex-shrink-0 ${level.dot}`} />
                     <div className="flex-1">
                       <p className={clsx('text-sm font-semibold', isActive ? 'text-[#2D5016]' : isDone ? 'text-gray-400' : 'text-gray-700')}>
                         {t(`score.levels.${level.key}`)}
@@ -173,7 +173,7 @@ export default function ScorePage() {
                       i === 2 ? 'bg-amber-700 text-white' :
                       'bg-gray-100 text-gray-500'
                     )}>
-                      {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+                      {i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">{entry.firstname} {entry.lastname.charAt(0)}.</p>
