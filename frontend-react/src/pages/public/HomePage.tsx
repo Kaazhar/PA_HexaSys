@@ -34,68 +34,21 @@ export default function HomePage() {
   return (
     <PublicLayout>
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#1e3a0f] via-[#2D5016] to-[#3d6b20] text-white">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
-          <div className="absolute top-1/2 right-1/4 w-64 h-64 rounded-full bg-white/5" />
-          <div className="absolute -bottom-16 right-8 w-48 h-48 rounded-full bg-white/5" />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-
-            <div>
-              <span className="inline-block bg-white/10 backdrop-blur-sm text-white/90 text-sm font-medium px-4 py-1.5 rounded-full mb-6 border border-white/20">
-                {t('home.hero_badge')}
-              </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-6 tracking-tight">
-                {t('home.hero_title')}
-              </h1>
-              <p className="text-lg text-white/75 mb-10 leading-relaxed max-w-lg">
-                {t('home.hero_subtitle')}
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link to="/register" className="inline-flex items-center bg-[#F5E6D3] text-[#2D5016] px-7 py-3.5 rounded-xl font-bold hover:bg-white transition-colors shadow-lg">
-                  {t('home.hero_cta_primary')}
-                </Link>
-                <Link to="/annonces" className="inline-flex items-center gap-2 border-2 border-white/30 text-white px-7 py-3.5 rounded-xl font-semibold hover:bg-white/10 transition-colors">
-                  {t('home.hero_cta_secondary')}
-                </Link>
-              </div>
-            </div>
-
-            <div className="hidden lg:flex flex-col gap-4 items-end">
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-5 w-72 shadow-xl">
-                <p className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3">{t('home.stat_users')}</p>
-                <p className="text-4xl font-black text-white">{stats?.total_users ?? '—'}</p>
-                <div className="mt-3 flex gap-1">
-                  {[40, 65, 55, 80, 70, 90, 85].map((h, i) => (
-                    <div key={i} className="flex-1 bg-white/20 rounded-sm" style={{ height: `${h * 0.4}px` }} />
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-4 w-72">
-                <div className="flex-1 bg-[#C97664]/80 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-xl">
-                  <p className="text-xs font-semibold text-white/70 mb-1">{t('home.stat_co2')}</p>
-                  <p className="text-2xl font-black text-white">{stats ? `${Math.round(stats.co2_saved_kg)} kg` : '—'}</p>
-                </div>
-                <div className="flex-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-xl">
-                  <p className="text-xs font-semibold text-white/70 mb-1">{t('home.stat_listings')}</p>
-                  <p className="text-2xl font-black text-white">{stats?.active_listings ?? '—'}</p>
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 w-64 shadow-xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#F5E6D3]/20 flex items-center justify-center">
-                    <div className="w-4 h-4 rounded-full bg-[#F5E6D3]/60" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/60">{t('home.stat_waste')}</p>
-                    <p className="font-bold text-white">{stats ? `${Math.round(stats.waste_avoided_kg)} kg` : '—'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <section className="bg-[#2D5016] text-white py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-6">
+            {t('home.hero_title')}
+          </h1>
+          <p className="text-lg text-white/75 mb-10 leading-relaxed">
+            {t('home.hero_subtitle')}
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/register" className="inline-flex items-center bg-[#F5E6D3] text-[#2D5016] px-7 py-3.5 rounded-xl font-bold hover:bg-white transition-colors shadow-lg">
+              {t('home.hero_cta_primary')}
+            </Link>
+            <Link to="/annonces" className="inline-flex items-center gap-2 border-2 border-white/30 text-white px-7 py-3.5 rounded-xl font-semibold hover:bg-white/10 transition-colors">
+              {t('home.hero_cta_secondary')}
+            </Link>
           </div>
         </div>
       </section>
