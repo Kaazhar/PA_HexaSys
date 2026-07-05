@@ -9,6 +9,7 @@ import clsx from 'clsx';
 import { particulierSidebar, proSidebar, adminSidebar } from '../../config/sidebars';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import ImageCropModal from '../../components/common/ImageCropModal';
 import type { ContainerSlot } from '../../types';
 import { useTranslation } from 'react-i18next';
 
@@ -52,6 +53,7 @@ export default function CreateListingPage() {
   const [sizeCategory, setSizeCategory] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
 
   const [containerId, setContainerId] = useState<number | null>(null);
   const [slotId, setSlotId] = useState<number | null>(null);
@@ -83,20 +85,25 @@ export default function CreateListingPage() {
   const sizeSlots = allSlots.filter(s => s.size === sizeCategory);
   const freeCount = sizeSlots.filter(s => s.status === 'free').length;
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
+  // Les fichiers choisis passent d'abord par le recadrage (un par un).
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []).filter(f => f.type.startsWith('image/'));
     if (!files.length) return;
+    setCropQueue(prev => [...prev, ...files]);
+    e.target.value = '';
+  };
+
+  // Upload de l'image recadrée, puis passage au fichier suivant de la file.
+  const handleCropConfirm = async (cropped: File) => {
+    setCropQueue(prev => prev.slice(1));
     setUploading(true);
     try {
-      for (const file of files) {
-        const res = await uploadService.upload(file);
-        setImages(prev => [...prev, res.data.url]);
-      }
+      const res = await uploadService.upload(cropped);
+      setImages(prev => [...prev, res.data.url]);
     } catch {
       toast.error(t('common.error'));
     } finally {
       setUploading(false);
-      e.target.value = '';
     }
   };
 
@@ -568,6 +575,15 @@ export default function CreateListingPage() {
           </div>
         </div>
       </div>
+
+      {cropQueue.length > 0 && (
+        <ImageCropModal
+          key={`${cropQueue[0].name}-${cropQueue[0].size}-${cropQueue.length}`}
+          file={cropQueue[0]}
+          onCancel={() => setCropQueue(prev => prev.slice(1))}
+          onConfirm={handleCropConfirm}
+        />
+      )}
     </DashboardLayout>
   );
 }
