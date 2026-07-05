@@ -254,6 +254,10 @@ export interface ProjectUpdate {
   project_id: number;
   image_url: string;
   comment: string;
+  description: string;
+  before_images: string;
+  after_images: string;
+  tags: string;
   created_at: string;
   updated_at: string;
 }

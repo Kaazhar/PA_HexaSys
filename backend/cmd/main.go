@@ -304,6 +304,7 @@ func main() {
 		proGroup.PUT("/projects/:id", handlers.UpdateProject)
 		proGroup.DELETE("/projects/:id", handlers.DeleteProject)
 		proGroup.POST("/projects/:id/updates", handlers.AddProjectUpdate)
+		proGroup.PUT("/projects/:id/updates/:updateId", handlers.UpdateProjectUpdate)
 		proGroup.DELETE("/projects/:id/updates/:updateId", handlers.DeleteProjectUpdate)
 	}
 

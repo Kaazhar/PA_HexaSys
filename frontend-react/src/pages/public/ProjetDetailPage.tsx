@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PublicLayout from '../../components/layout/PublicLayout';
@@ -16,6 +17,7 @@ export default function ProjetDetailPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [stepTab, setStepTab] = useState(0);
 
   const { data, isLoading } = useQuery({
     queryKey: ['project-detail', id],
@@ -112,23 +114,61 @@ export default function ProjetDetailPage() {
 
         {updates.length === 0 ? (
           <p className="text-sm text-gray-400 py-8 text-center">{t('project_detail.no_updates')}</p>
-        ) : (
-          <div className="space-y-6">
-            {updates.map(u => (
-              <div key={u.id} className="border-l-2 border-[#2D5016]/20 pl-4">
-                <p className="text-xs text-gray-400 mb-2">{format(new Date(u.created_at), 'dd MMMM yyyy, HH:mm', { locale: dateLocale })}</p>
-                {u.image_url && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {u.image_url.split(',').map(s => s.trim()).filter(Boolean).map((src, i) => (
-                      <img key={i} src={src} alt="" className="rounded-xl max-h-96 w-auto object-cover" />
-                    ))}
+        ) : (() => {
+          const sp = (s?: string) => (s || '').split(',').map(x => x.trim()).filter(Boolean);
+          const idx = Math.min(stepTab, updates.length - 1);
+          const step = updates[idx];
+          return (
+            <div>
+              {/* Onglets des étapes */}
+              <div className="flex flex-wrap gap-1.5 border-b border-gray-100 pb-3 mb-4">
+                {updates.map((u, i) => (
+                  <button
+                    key={u.id}
+                    onClick={() => setStepTab(i)}
+                    className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${idx === i ? 'bg-[#2D5016] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                  >
+                    {t('project_steps.step', { defaultValue: 'Étape' })} n°{i + 1}
+                  </button>
+                ))}
+              </div>
+
+              {/* Contenu de l'étape sélectionnée */}
+              <div className="space-y-4">
+                <p className="text-xs text-gray-400">{format(new Date(step.created_at), 'dd MMMM yyyy, HH:mm', { locale: dateLocale })}</p>
+                {(step.description || step.comment) && (
+                  <p className="text-gray-700 whitespace-pre-line">{step.description || step.comment}</p>
+                )}
+                {sp(step.before_images).length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 mb-1">{t('project_steps.before', { defaultValue: 'Avant' })}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {sp(step.before_images).map((src, i) => <img key={i} src={src} alt="" className="rounded-xl max-h-80 w-auto object-cover" />)}
+                    </div>
                   </div>
                 )}
-                {u.comment && <p className="text-gray-700 whitespace-pre-line">{u.comment}</p>}
+                {sp(step.after_images).length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 mb-1">{t('project_steps.after', { defaultValue: 'Après' })}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {sp(step.after_images).map((src, i) => <img key={i} src={src} alt="" className="rounded-xl max-h-80 w-auto object-cover" />)}
+                    </div>
+                  </div>
+                )}
+                {sp(step.image_url).length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {sp(step.image_url).map((src, i) => <img key={i} src={src} alt="" className="rounded-xl max-h-80 w-auto object-cover" />)}
+                  </div>
+                )}
+                {sp(step.tags).length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {sp(step.tags).map((tag, i) => <span key={i} className="badge bg-primary-50 text-primary-600 text-xs">{tag}</span>)}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          );
+        })()}
       </div>
     </PublicLayout>
   );

@@ -328,9 +328,13 @@ type Project struct {
 // ProjectUpdate : une avancée d'un projet (image + commentaire).
 type ProjectUpdate struct {
 	Base
-	ProjectID uint   `gorm:"index" json:"project_id"`
-	ImageURL  string `json:"image_url"`
-	Comment   string `gorm:"type:text" json:"comment"`
+	ProjectID    uint   `gorm:"index" json:"project_id"`
+	ImageURL     string `json:"image_url"`
+	Comment      string `gorm:"type:text" json:"comment"`
+	Description  string `gorm:"type:text" json:"description"`
+	BeforeImages string `gorm:"type:text" json:"before_images"`
+	AfterImages  string `gorm:"type:text" json:"after_images"`
+	Tags         string `json:"tags"`
 }
 
 // ProjectFollower : un utilisateur qui suit un projet.

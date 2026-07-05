@@ -254,6 +254,16 @@ export const adminPlanService = {
   delete: (id: number) => api.delete(`/admin/subscription-plans/${id}`),
 };
 
+export interface ProjectStepInput {
+  description?: string;
+  before_images?: string;
+  after_images?: string;
+  tags?: string;
+  // Rétro-compatibilité anciennes avancées
+  image_url?: string;
+  comment?: string;
+}
+
 export const projectService = {
   getAll: (params?: { search?: string }) => api.get<Project[]>('/projects', { params }),
   getOne: (id: number) => api.get<ProjectDetail>(`/projects/${id}`),
@@ -263,8 +273,10 @@ export const projectService = {
   delete: (id: number) => api.delete(`/pro/projects/${id}`),
   follow: (id: number) => api.post(`/projects/${id}/follow`),
   unfollow: (id: number) => api.delete(`/projects/${id}/follow`),
-  addUpdate: (id: number, data: { image_url: string; comment: string }) =>
+  addUpdate: (id: number, data: ProjectStepInput) =>
     api.post<ProjectUpdate>(`/pro/projects/${id}/updates`, data),
+  updateUpdate: (id: number, updateId: number, data: ProjectStepInput) =>
+    api.put<ProjectUpdate>(`/pro/projects/${id}/updates/${updateId}`, data),
   deleteUpdate: (id: number, updateId: number) =>
     api.delete(`/pro/projects/${id}/updates/${updateId}`),
 };

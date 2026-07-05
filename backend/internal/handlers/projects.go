@@ -95,7 +95,7 @@ func GetProject(c *gin.Context) {
 	}
 
 	var updates []models.ProjectUpdate
-	config.DB.Where("project_id = ?", id).Order("created_at DESC").Find(&updates)
+	config.DB.Where("project_id = ?", id).Order("created_at ASC").Find(&updates)
 
 	var followersCount int64
 	config.DB.Model(&models.ProjectFollower{}).Where("project_id = ?", id).Count(&followersCount)
@@ -164,27 +164,82 @@ func AddProjectUpdate(c *gin.Context) {
 	}
 
 	var req struct {
-		ImageURL string `json:"image_url"`
-		Comment  string `json:"comment"`
+		ImageURL     string `json:"image_url"`
+		Comment      string `json:"comment"`
+		Description  string `json:"description"`
+		BeforeImages string `json:"before_images"`
+		AfterImages  string `json:"after_images"`
+		Tags         string `json:"tags"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if req.ImageURL == "" && req.Comment == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ajoutez une image ou un commentaire"})
+	if req.Description == "" && req.Comment == "" && req.ImageURL == "" && req.BeforeImages == "" && req.AfterImages == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ajoutez au moins une description ou une image"})
 		return
 	}
 
 	update := models.ProjectUpdate{
-		ProjectID: uint(id),
-		ImageURL:  req.ImageURL,
-		Comment:   req.Comment,
+		ProjectID:    uint(id),
+		ImageURL:     req.ImageURL,
+		Comment:      req.Comment,
+		Description:  req.Description,
+		BeforeImages: req.BeforeImages,
+		AfterImages:  req.AfterImages,
+		Tags:         req.Tags,
 	}
 	config.DB.Create(&update)
 
-	notifyProjectFollowers(uint(id), "Nouvelle avancée sur le projet \""+project.Title+"\"")
+	notifyProjectFollowers(uint(id), "Nouvelle étape sur le projet \""+project.Title+"\"")
 	c.JSON(http.StatusCreated, update)
+}
+
+// UpdateProjectUpdate : le créateur (ou un admin) modifie une étape existante.
+func UpdateProjectUpdate(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	updateID, _ := strconv.Atoi(c.Param("updateId"))
+	userID, _ := c.Get("userID")
+	userRole, _ := c.Get("userRole")
+
+	var project models.Project
+	if err := config.DB.First(&project, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Projet introuvable"})
+		return
+	}
+	if userRole.(models.UserRole) != models.RoleAdmin && project.UserID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
+		return
+	}
+
+	var update models.ProjectUpdate
+	if err := config.DB.Where("id = ? AND project_id = ?", updateID, id).First(&update).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Étape introuvable"})
+		return
+	}
+
+	var req struct {
+		ImageURL     string `json:"image_url"`
+		Comment      string `json:"comment"`
+		Description  string `json:"description"`
+		BeforeImages string `json:"before_images"`
+		AfterImages  string `json:"after_images"`
+		Tags         string `json:"tags"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	config.DB.Model(&update).Updates(map[string]interface{}{
+		"image_url":     req.ImageURL,
+		"comment":       req.Comment,
+		"description":   req.Description,
+		"before_images": req.BeforeImages,
+		"after_images":  req.AfterImages,
+		"tags":          req.Tags,
+	})
+	c.JSON(http.StatusOK, update)
 }
 
 // DeleteProjectUpdate : le créateur supprime une avancée.
