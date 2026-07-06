@@ -94,6 +94,9 @@ func GetProject(c *gin.Context) {
 		return
 	}
 
+	config.DB.Exec("UPDATE projects SET views = views + 1 WHERE id = ?", project.ID)
+	project.Views++
+
 	var updates []models.ProjectUpdate
 	config.DB.Where("project_id = ?", id).Order("created_at ASC").Find(&updates)
 

@@ -652,6 +652,11 @@
     "timeline": "Avancées du projet",
     "no_updates": "Aucune avancée publiée pour le moment."
   },
+  "project_steps": {
+    "step": "Étape",
+    "before": "Avant",
+    "after": "Après"
+  },
   "not_found_page": {
     "title": "Page introuvable",
     "desc": "Cette page n'existe pas ou a été déplacée. Retournez à l'accueil pour continuer.",

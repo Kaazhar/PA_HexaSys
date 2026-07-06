@@ -652,6 +652,11 @@
     "timeline": "Project updates",
     "no_updates": "No updates published yet."
   },
+  "project_steps": {
+    "step": "Step",
+    "before": "Before",
+    "after": "After"
+  },
   "admin_languages": {
     "title": "Language Management",
     "subtitle": "Manage the languages available on the platform",
