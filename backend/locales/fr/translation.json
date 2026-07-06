@@ -1260,8 +1260,8 @@
     "translating": "Création en cours...",
     "required_fields": "Le code et le nom sont requis",
     "libre_info_title": "Comment ajouter une langue ?",
-    "libre_info_desc": "Le fichier de traduction doit être présent dans le dépôt (public/locales/[code]/translation.json) et déclaré dans languages.json avant d'activer la langue.",
-    "translation_warning": "Assurez-vous que le fichier de traduction a bien été déployé avant de créer la langue."
+    "libre_info_desc": "Renseignez le code ISO, le nom et le label de la langue. Les traductions françaises sont automatiquement copiées comme base — aucune modification du code n'est nécessaire.",
+    "translation_warning": "Les traductions seront initialisées avec le contenu français. Vous pouvez les modifier directement depuis la base de données."
   },
   "create_listing": {
     "title": "Créer une annonce",

@@ -681,8 +681,8 @@
     "translating": "Creating...",
     "required_fields": "Code and name are required",
     "libre_info_title": "How to add a language?",
-    "libre_info_desc": "The translation file must be present in the repository (public/locales/[code]/translation.json) and declared in languages.json before activating the language.",
-    "translation_warning": "Make sure the translation file has been deployed before creating the language."
+    "libre_info_desc": "Enter the ISO code, name and label for the language. French translations are automatically copied as a base — no code modification required.",
+    "translation_warning": "Translations will be initialized with the French content. You can update them directly from the database."
   },
   "create_listing": {
     "title": "Create a listing",
