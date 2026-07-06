@@ -9,160 +9,160 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-func GetAdminStats(c *gin.Context) {
-	var totalUsers int64
-	var activeListings int64
-	var pendingListings int64
-	var totalWorkshops int64
-	var pendingWorkshops int64
-	var totalContainers int64
-	var pendingContainerRequests int64
+func StatsAdmin(c *gin.Context) {
+	var nbUtilisateurs int64
+	var nbAnnoncesActives int64
+	var nbAnnoncesPending int64
+	var nbFormations int64
+	var nbFormationsPending int64
+	var nbConteneurs int64
+	var nbDemandesConteneur int64
 
-	config.DB.Model(&models.User{}).Count(&totalUsers)
-	config.DB.Model(&models.Listing{}).Where("status = ?", "active").Count(&activeListings)
-	config.DB.Model(&models.Listing{}).Where("status = ?", "pending").Count(&pendingListings)
-	config.DB.Model(&models.Workshop{}).Count(&totalWorkshops)
-	config.DB.Model(&models.Workshop{}).Where("status = ?", "pending").Count(&pendingWorkshops)
-	config.DB.Model(&models.Container{}).Count(&totalContainers)
-	config.DB.Model(&models.ContainerRequest{}).Where("status = ?", "pending").Count(&pendingContainerRequests)
+	config.DB.Model(&models.User{}).Count(&nbUtilisateurs)
+	config.DB.Model(&models.Listing{}).Where("status = ?", "active").Count(&nbAnnoncesActives)
+	config.DB.Model(&models.Listing{}).Where("status = ?", "pending").Count(&nbAnnoncesPending)
+	config.DB.Model(&models.Workshop{}).Count(&nbFormations)
+	config.DB.Model(&models.Workshop{}).Where("status = ?", "pending").Count(&nbFormationsPending)
+	config.DB.Model(&models.Container{}).Count(&nbConteneurs)
+	config.DB.Model(&models.ContainerRequest{}).Where("status = ?", "pending").Count(&nbDemandesConteneur)
 
-	now := time.Now()
-	monthlyRevenue := []map[string]interface{}{}
+	maintenant := time.Now()
+	revenuesMensuels := []map[string]interface{}{}
 	for i := 5; i >= 0; i-- {
-		month := now.AddDate(0, -i, 0)
-		start := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, now.Location())
-		end := start.AddDate(0, 1, 0)
+		mois := maintenant.AddDate(0, -i, 0)
+		debut := time.Date(mois.Year(), mois.Month(), 1, 0, 0, 0, 0, maintenant.Location())
+		fin := debut.AddDate(0, 1, 0)
 		var rev float64
 		config.DB.Model(&models.Invoice{}).
-			Where("status = ? AND created_at >= ? AND created_at < ?", "paid", start, end).
+			Where("status = ? AND created_at >= ? AND created_at < ?", "paid", debut, fin).
 			Select("COALESCE(SUM(total), 0)").Scan(&rev)
-		monthlyRevenue = append(monthlyRevenue, map[string]interface{}{
-			"month":   month.Format("Jan"),
+		revenuesMensuels = append(revenuesMensuels, map[string]interface{}{
+			"month":   mois.Format("Jan"),
 			"revenue": rev,
 		})
 	}
 
-	var monthlyRevenueTotal float64
-	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	var revenusMois float64
+	premierDuMois := time.Date(maintenant.Year(), maintenant.Month(), 1, 0, 0, 0, 0, maintenant.Location())
 	config.DB.Model(&models.Invoice{}).
-		Where("status = ? AND created_at >= ?", "paid", firstOfMonth).
-		Select("COALESCE(SUM(total), 0)").Scan(&monthlyRevenueTotal)
+		Where("status = ? AND created_at >= ?", "paid", premierDuMois).
+		Select("COALESCE(SUM(total), 0)").Scan(&revenusMois)
 
 	c.JSON(http.StatusOK, gin.H{
-		"total_users":                totalUsers,
-		"active_listings":            activeListings,
-		"pending_listings":           pendingListings,
-		"total_workshops":            totalWorkshops,
-		"pending_workshops":          pendingWorkshops,
-		"total_containers":           totalContainers,
-		"pending_container_requests": pendingContainerRequests,
-		"monthly_revenue":            monthlyRevenue,
-		"monthly_revenue_total":      monthlyRevenueTotal,
+		"total_users":                nbUtilisateurs,
+		"active_listings":            nbAnnoncesActives,
+		"pending_listings":           nbAnnoncesPending,
+		"total_workshops":            nbFormations,
+		"pending_workshops":          nbFormationsPending,
+		"total_containers":           nbConteneurs,
+		"pending_container_requests": nbDemandesConteneur,
+		"monthly_revenue":            revenuesMensuels,
+		"monthly_revenue_total":      revenusMois,
 	})
 }
 
-func GetPublicStats(c *gin.Context) {
-	var totalUsers int64
-	var activeListings int64
+func StatsPubliques(c *gin.Context) {
+	var nbUtilisateurs int64
+	var nbAnnonces int64
 	var totalCO2 float64
-	var totalWaste float64
+	var totalDechets float64
 
-	config.DB.Model(&models.User{}).Count(&totalUsers)
-	config.DB.Model(&models.Listing{}).Where("status = ?", "active").Count(&activeListings)
+	config.DB.Model(&models.User{}).Count(&nbUtilisateurs)
+	config.DB.Model(&models.Listing{}).Where("status = ?", "active").Count(&nbAnnonces)
 	config.DB.Model(&models.UpcyclingScore{}).Select("COALESCE(SUM(co2_saved_kg), 0)").Scan(&totalCO2)
-	config.DB.Model(&models.UpcyclingScore{}).Select("COALESCE(SUM(waste_avoided_kg), 0)").Scan(&totalWaste)
+	config.DB.Model(&models.UpcyclingScore{}).Select("COALESCE(SUM(waste_avoided_kg), 0)").Scan(&totalDechets)
 
 	c.JSON(http.StatusOK, gin.H{
-		"total_users":     totalUsers,
-		"active_listings": activeListings,
-		"co2_saved_kg":    totalCO2,
-		"waste_avoided_kg": totalWaste,
+		"total_users":      nbUtilisateurs,
+		"active_listings":  nbAnnonces,
+		"co2_saved_kg":     totalCO2,
+		"waste_avoided_kg": totalDechets,
 	})
 }
 
-func GetParticularDashboard(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func DashboardParticulier(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 
-	var myListings []models.Listing
-	config.DB.Preload("Category").Where("user_id = ?", userID).
-		Order("created_at DESC").Limit(5).Find(&myListings)
+	var mesAnnonces []models.Listing
+	config.DB.Preload("Category").Where("user_id = ?", idUtilisateur).
+		Order("created_at DESC").Limit(5).Find(&mesAnnonces)
 
-	var myListingsCount int64
-	config.DB.Model(&models.Listing{}).Where("user_id = ? AND status = ?", userID, "active").Count(&myListingsCount)
+	var nbAnnoncesActives int64
+	config.DB.Model(&models.Listing{}).Where("user_id = ? AND status = ?", idUtilisateur, "active").Count(&nbAnnoncesActives)
 
-	var myBookings []models.WorkshopBooking
-	config.DB.Preload("Workshop").Where("user_id = ?", userID).
-		Order("created_at DESC").Limit(3).Find(&myBookings)
+	var mesReservations []models.WorkshopBooking
+	config.DB.Preload("Workshop").Where("user_id = ?", idUtilisateur).
+		Order("created_at DESC").Limit(3).Find(&mesReservations)
 
-	var score models.UpcyclingScore
-	config.DB.Where("user_id = ?", userID).First(&score)
+	var scoreUpcycling models.UpcyclingScore
+	config.DB.Where("user_id = ?", idUtilisateur).First(&scoreUpcycling)
 
-	var upcomingWorkshops []models.Workshop
+	var prochainesFormations []models.Workshop
 	config.DB.Preload("Category").Where("status = ? AND date > ?", "active", time.Now()).
-		Order("date ASC").Limit(3).Find(&upcomingWorkshops)
+		Order("date ASC").Limit(3).Find(&prochainesFormations)
 
-	type MonthStat struct {
+	type StatMois struct {
 		Month string `json:"month"`
 		Count int64  `json:"count"`
 	}
-	now := time.Now()
-	monthlyListings := []MonthStat{}
+	maintenant := time.Now()
+	annoncesParMois := []StatMois{}
 	for i := 5; i >= 0; i-- {
-		m := now.AddDate(0, -i, 0)
-		start := time.Date(m.Year(), m.Month(), 1, 0, 0, 0, 0, now.Location())
-		end := start.AddDate(0, 1, 0)
-		var count int64
+		m := maintenant.AddDate(0, -i, 0)
+		debut := time.Date(m.Year(), m.Month(), 1, 0, 0, 0, 0, maintenant.Location())
+		fin := debut.AddDate(0, 1, 0)
+		var nb int64
 		config.DB.Model(&models.Listing{}).
-			Where("user_id = ? AND created_at >= ? AND created_at < ?", userID, start, end).
-			Count(&count)
-		monthlyListings = append(monthlyListings, MonthStat{Month: m.Format("Jan"), Count: count})
+			Where("user_id = ? AND created_at >= ? AND created_at < ?", idUtilisateur, debut, fin).
+			Count(&nb)
+		annoncesParMois = append(annoncesParMois, StatMois{Month: m.Format("Jan"), Count: nb})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"my_listings":        myListings,
-		"active_listings":    myListingsCount,
-		"bookings":           myBookings,
-		"score":              score,
-		"upcoming_workshops": upcomingWorkshops,
-		"monthly_listings":   monthlyListings,
+		"my_listings":        mesAnnonces,
+		"active_listings":    nbAnnoncesActives,
+		"bookings":           mesReservations,
+		"score":              scoreUpcycling,
+		"upcoming_workshops": prochainesFormations,
+		"monthly_listings":   annoncesParMois,
 	})
 }
 
-func GetProDashboard(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func DashboardPro(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 
-	var projects []models.Project
-	config.DB.Where("user_id = ?", userID).Order("created_at DESC").Limit(5).Find(&projects)
+	var projets []models.Project
+	config.DB.Where("user_id = ?", idUtilisateur).Order("created_at DESC").Limit(5).Find(&projets)
 
-	var subscription models.Subscription
-	config.DB.Where("user_id = ?", userID).First(&subscription)
+	var abonnement models.Subscription
+	config.DB.Where("user_id = ?", idUtilisateur).First(&abonnement)
 
-	var myListings []models.Listing
-	config.DB.Preload("Category").Where("user_id = ?", userID).
-		Order("created_at DESC").Limit(5).Find(&myListings)
+	var mesAnnonces []models.Listing
+	config.DB.Preload("Category").Where("user_id = ?", idUtilisateur).
+		Order("created_at DESC").Limit(5).Find(&mesAnnonces)
 
-	response := gin.H{
-		"projects":     projects,
-		"subscription": subscription,
-		"my_listings":  myListings,
+	reponse := gin.H{
+		"projects":     projets,
+		"subscription": abonnement,
+		"my_listings":  mesAnnonces,
 	}
 
-	if subscription.Status == "active" {
-		var donationsCount int64
+	if abonnement.Status == "active" {
+		var nbDons int64
 		config.DB.Model(&models.Listing{}).
-			Where("user_id = ? AND type = 'don' AND status = 'active'", userID).
-			Count(&donationsCount)
+			Where("user_id = ? AND type = 'don' AND status = 'active'", idUtilisateur).
+			Count(&nbDons)
 
-		var totalWeight float64
+		var poidsTotal float64
 		config.DB.Model(&models.Listing{}).
-			Where("user_id = ? AND type = 'don' AND status = 'active' AND weight > 0", userID).
-			Select("COALESCE(SUM(weight), 0)").Scan(&totalWeight)
+			Where("user_id = ? AND type = 'don' AND status = 'active' AND weight > 0", idUtilisateur).
+			Select("COALESCE(SUM(weight), 0)").Scan(&poidsTotal)
 
-		type CatStat struct {
+		type StatCategorie struct {
 			Name  string `json:"name"`
 			Count int64  `json:"count"`
 		}
-		var topCategories []CatStat
+		var topCategories []StatCategorie
 		config.DB.Table("listings").
 			Select("categories.name, COUNT(listings.id) as count").
 			Joins("JOIN categories ON listings.category_id = categories.id").
@@ -172,46 +172,46 @@ func GetProDashboard(c *gin.Context) {
 			Limit(5).
 			Scan(&topCategories)
 
-		var newDeposits int64
+		var nbNouveauxDepots int64
 		config.DB.Model(&models.ContainerRequest{}).
 			Where("status = 'approved' AND updated_at > ?", time.Now().AddDate(0, 0, -7)).
-			Count(&newDeposits)
+			Count(&nbNouveauxDepots)
 
-		var newListings int64
+		var nbNouvellesAnnonces int64
 		config.DB.Model(&models.Listing{}).
 			Where("status = 'active' AND created_at > ?", time.Now().AddDate(0, 0, -7)).
-			Count(&newListings)
+			Count(&nbNouvellesAnnonces)
 
-		response["premium_stats"] = gin.H{
-			"donations_count": donationsCount,
-			"total_weight":    totalWeight,
-			"co2_saved":       totalWeight * 2.5,
+		reponse["premium_stats"] = gin.H{
+			"donations_count": nbDons,
+			"total_weight":    poidsTotal,
+			"co2_saved":       poidsTotal * 2.5,
 			"top_categories":  topCategories,
-			"new_deposits":    newDeposits,
-			"new_listings":    newListings,
+			"new_deposits":    nbNouveauxDepots,
+			"new_listings":    nbNouvellesAnnonces,
 		}
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, reponse)
 }
 
-func GetSalarieDashboard(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func DashboardSalarie(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 
-	var myWorkshops []models.Workshop
-	config.DB.Preload("Category").Where("instructor_id = ?", userID).
-		Order("date ASC").Limit(5).Find(&myWorkshops)
+	var mesFormations []models.Workshop
+	config.DB.Preload("Category").Where("instructor_id = ?", idUtilisateur).
+		Order("date ASC").Limit(5).Find(&mesFormations)
 
-	var myArticles []models.Article
-	config.DB.Where("author_id = ?", userID).Order("created_at DESC").Limit(5).Find(&myArticles)
+	var mesArticles []models.Article
+	config.DB.Where("author_id = ?", idUtilisateur).Order("created_at DESC").Limit(5).Find(&mesArticles)
 
-	var upcomingWorkshops []models.Workshop
+	var prochainesFormations []models.Workshop
 	config.DB.Preload("Category").Where("status = ? AND date > ?", "active", time.Now()).
-		Order("date ASC").Limit(5).Find(&upcomingWorkshops)
+		Order("date ASC").Limit(5).Find(&prochainesFormations)
 
 	c.JSON(http.StatusOK, gin.H{
-		"my_workshops":       myWorkshops,
-		"my_articles":        myArticles,
-		"upcoming_workshops": upcomingWorkshops,
+		"my_workshops":       mesFormations,
+		"my_articles":        mesArticles,
+		"upcoming_workshops": prochainesFormations,
 	})
 }

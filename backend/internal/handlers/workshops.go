@@ -13,7 +13,7 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-func notifyWorkshopParticipants(workshopID uint, message, notifType string) {
+func notifierParticipants(workshopID uint, message, notifType string) {
 	var bookings []models.WorkshopBooking
 	config.DB.Where("workshop_id = ? AND status = ?", workshopID, "confirmed").Find(&bookings)
 	for _, b := range bookings {
@@ -25,75 +25,73 @@ func notifyWorkshopParticipants(workshopID uint, message, notifType string) {
 	}
 }
 
-func GetWorkshops(c *gin.Context) {
-	var workshops []models.Workshop
-	query := config.DB.Preload("Category").Preload("Instructor")
+func ListerFormations(c *gin.Context) {
+	var formations []models.Workshop
+	q := config.DB.Preload("Category").Preload("Instructor")
 
-	if status := c.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
+	if statut := c.Query("status"); statut != "" {
+		q = q.Where("status = ?", statut)
 	} else {
-		query = query.Where("status = ?", "active")
+		q = q.Where("status = ?", "active")
 	}
 
-	if workshopType := c.Query("type"); workshopType != "" {
-		query = query.Where("type = ?", workshopType)
-	}
-
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	offset := (page - 1) * limit
-
-	var total int64
-	query.Model(&models.Workshop{}).Count(&total)
-
-	query.Offset(offset).Limit(limit).Order("date ASC").Find(&workshops)
-
-	c.JSON(http.StatusOK, gin.H{
-		"workshops": workshops,
-		"total":     total,
-		"page":      page,
-		"limit":     limit,
-	})
-}
-
-func GetAdminWorkshops(c *gin.Context) {
-	var workshops []models.Workshop
-	query := config.DB.Preload("Category").Preload("Instructor")
-
-	if status := c.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
+	if typeFormation := c.Query("type"); typeFormation != "" {
+		q = q.Where("type = ?", typeFormation)
 	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	offset := (page - 1) * limit
+	limite, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	decalage := (page - 1) * limite
 
 	var total int64
-	query.Model(&models.Workshop{}).Count(&total)
-
-	query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&workshops)
+	q.Model(&models.Workshop{}).Count(&total)
+	q.Offset(decalage).Limit(limite).Order("date ASC").Find(&formations)
 
 	c.JSON(http.StatusOK, gin.H{
-		"workshops": workshops,
+		"workshops": formations,
 		"total":     total,
 		"page":      page,
-		"limit":     limit,
+		"limit":     limite,
 	})
 }
 
-func GetWorkshop(c *gin.Context) {
+func ListerFormationsAdmin(c *gin.Context) {
+	var formations []models.Workshop
+	q := config.DB.Preload("Category").Preload("Instructor")
+
+	if statut := c.Query("status"); statut != "" {
+		q = q.Where("status = ?", statut)
+	}
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limite, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	decalage := (page - 1) * limite
+
+	var total int64
+	q.Model(&models.Workshop{}).Count(&total)
+	q.Offset(decalage).Limit(limite).Order("created_at DESC").Find(&formations)
+
+	c.JSON(http.StatusOK, gin.H{
+		"workshops": formations,
+		"total":     total,
+		"page":      page,
+		"limit":     limite,
+	})
+}
+
+func ObtenirFormation(c *gin.Context) {
 	id := c.Param("id")
-	var workshop models.Workshop
+	var formation models.Workshop
 	if err := config.DB.
 		Preload("Category").
 		Preload("Instructor").
 		Preload("Sessions", func(db *gorm.DB) *gorm.DB { return db.Order("`order` ASC, date ASC") }).
 		Preload("Chapters", func(db *gorm.DB) *gorm.DB { return db.Order("`order` ASC") }).
-		First(&workshop, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Workshop not found"})
+		First(&formation, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Formation introuvable"})
 		return
 	}
-	c.JSON(http.StatusOK, workshop)
+	c.JSON(http.StatusOK, formation)
 }
 
 type SessionInput struct {
@@ -106,7 +104,7 @@ type ChapterInput struct {
 	Content string `json:"content"`
 }
 
-type CreateWorkshopRequest struct {
+type RequeteFormation struct {
 	Title       string         `json:"title" binding:"required"`
 	Description string         `json:"description"`
 	Objective   string         `json:"objective"`
@@ -123,8 +121,7 @@ type CreateWorkshopRequest struct {
 	Chapters    []ChapterInput `json:"chapters"`
 }
 
-// parseWorkshopDate accepte plusieurs formats (RFC3339, datetime-local, date seule).
-func parseWorkshopDate(s string) (time.Time, error) {
+func parserDateFormation(s string) (time.Time, error) {
 	if t, err := time.Parse("2006-01-02T15:04:05Z07:00", s); err == nil {
 		return t, nil
 	}
@@ -134,97 +131,93 @@ func parseWorkshopDate(s string) (time.Time, error) {
 	return time.Parse("2006-01-02", s)
 }
 
-func CreateWorkshop(c *gin.Context) {
-	var req CreateWorkshopRequest
+func CreerFormation(c *gin.Context) {
+	var req RequeteFormation
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 
-	// Parse les séances (si fournies), triées par date.
-	var sessions []models.WorkshopSession
+	var seances []models.WorkshopSession
 	for _, s := range req.Sessions {
 		if s.Date == "" {
 			continue
 		}
-		d, err := parseWorkshopDate(s.Date)
+		d, err := parserDateFormation(s.Date)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid session date format"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Format de date de séance invalide"})
 			return
 		}
-		sessions = append(sessions, models.WorkshopSession{Date: d, Duration: s.Duration})
+		seances = append(seances, models.WorkshopSession{Date: d, Duration: s.Duration})
 	}
-	sort.Slice(sessions, func(i, j int) bool { return sessions[i].Date.Before(sessions[j].Date) })
+	sort.Slice(seances, func(i, j int) bool { return seances[i].Date.Before(seances[j].Date) })
 
-	// Date/durée principales : 1ère séance si dispo, sinon champs hérités.
-	var date time.Time
-	duration := req.Duration
-	if len(sessions) > 0 {
-		date = sessions[0].Date
-		duration = sessions[0].Duration
+	var dateFormation time.Time
+	duree := req.Duration
+	if len(seances) > 0 {
+		dateFormation = seances[0].Date
+		duree = seances[0].Duration
 	} else {
-		d, err := parseWorkshopDate(req.Date)
+		d, err := parserDateFormation(req.Date)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Format de date invalide"})
 			return
 		}
-		date = d
+		dateFormation = d
 	}
 
-	maxSpots := req.MaxSpots
-	if maxSpots == 0 {
-		maxSpots = 15
+	maxPlaces := req.MaxSpots
+	if maxPlaces == 0 {
+		maxPlaces = 15
 	}
-	minSpots := req.MinSpots
-	if minSpots == 0 {
-		minSpots = 10
-	}
-
-	workshopType := req.Type
-	if workshopType == "" {
-		workshopType = "atelier"
+	minPlaces := req.MinSpots
+	if minPlaces == 0 {
+		minPlaces = 10
 	}
 
-	workshop := models.Workshop{
+	typeFormation := req.Type
+	if typeFormation == "" {
+		typeFormation = "atelier"
+	}
+
+	formation := models.Workshop{
 		Title:        req.Title,
 		Description:  req.Description,
 		Objective:    req.Objective,
-		Date:         date,
-		Duration:     duration,
+		Date:         dateFormation,
+		Duration:     duree,
 		Location:     req.Location,
 		Price:        req.Price,
-		MaxSpots:     maxSpots,
-		MinSpots:     minSpots,
+		MaxSpots:     maxPlaces,
+		MinSpots:     minPlaces,
 		CategoryID:   req.CategoryID,
-		Type:         workshopType,
+		Type:         typeFormation,
 		Image:        req.Image,
 		Status:       "pending",
-		InstructorID: userID.(uint),
+		InstructorID: idUtilisateur.(uint),
 	}
 
-	if err := config.DB.Create(&workshop).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create workshop"})
+	if err := config.DB.Create(&formation).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de la formation"})
 		return
 	}
 
-	// Séances rattachées (Order = position chronologique).
-	for i := range sessions {
-		sessions[i].WorkshopID = workshop.ID
-		sessions[i].Order = i
+	for i := range seances {
+		seances[i].WorkshopID = formation.ID
+		seances[i].Order = i
 	}
-	if len(sessions) > 0 {
-		config.DB.Create(&sessions)
+	if len(seances) > 0 {
+		config.DB.Create(&seances)
 	}
 
-	// Chapitres rattachés (Order = position dans le formulaire).
 	for i, ch := range req.Chapters {
 		if ch.Title == "" && ch.Content == "" {
 			continue
 		}
 		config.DB.Create(&models.WorkshopChapter{
-			WorkshopID: workshop.ID,
+			WorkshopID: formation.ID,
 			Title:      ch.Title,
 			Content:    ch.Content,
 			Order:      i,
@@ -236,248 +229,246 @@ func CreateWorkshop(c *gin.Context) {
 		Preload("Instructor").
 		Preload("Sessions", func(db *gorm.DB) *gorm.DB { return db.Order("`order` ASC, date ASC") }).
 		Preload("Chapters", func(db *gorm.DB) *gorm.DB { return db.Order("`order` ASC") }).
-		First(&workshop, workshop.ID)
-	c.JSON(http.StatusCreated, workshop)
+		First(&formation, formation.ID)
+	c.JSON(http.StatusCreated, formation)
 }
 
-func UpdateWorkshop(c *gin.Context) {
+func ModifierFormation(c *gin.Context) {
 	id := c.Param("id")
-	var workshop models.Workshop
-	if err := config.DB.First(&workshop, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Workshop not found"})
+	var formation models.Workshop
+	if err := config.DB.First(&formation, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Formation introuvable"})
 		return
 	}
 
-	var req map[string]interface{}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	var modifications map[string]interface{}
+	if err := c.ShouldBindJSON(&modifications); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := config.DB.Model(&workshop).Updates(req).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update workshop"})
+	if err := config.DB.Model(&formation).Updates(modifications).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la modification"})
 		return
 	}
 
-	config.DB.Preload("Category").Preload("Instructor").First(&workshop, id)
-	c.JSON(http.StatusOK, workshop)
+	config.DB.Preload("Category").Preload("Instructor").First(&formation, id)
+	c.JSON(http.StatusOK, formation)
 }
 
-func ValidateWorkshop(c *gin.Context) {
+func ValiderFormation(c *gin.Context) {
 	id := c.Param("id")
-	var workshop models.Workshop
-	if err := config.DB.First(&workshop, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Workshop not found"})
+	var formation models.Workshop
+	if err := config.DB.First(&formation, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Formation introuvable"})
 		return
 	}
 
-	config.DB.Model(&workshop).Update("status", "active")
+	config.DB.Model(&formation).Update("status", "active")
 
 	notif := models.Notification{
-		UserID:  workshop.InstructorID,
-		Message: "Votre formation \"" + workshop.Title + "\" a été validée !",
+		UserID:  formation.InstructorID,
+		Message: "Votre formation \"" + formation.Title + "\" a été validée !",
 		Type:    "success",
 	}
 	config.DB.Create(&notif)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Workshop validated"})
+	c.JSON(http.StatusOK, gin.H{"message": "Formation validée"})
 }
 
-func BookWorkshop(c *gin.Context) {
+func ReserverFormation(c *gin.Context) {
 	id := c.Param("id")
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 
-	var workshop models.Workshop
-	if err := config.DB.First(&workshop, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Workshop not found"})
+	var formation models.Workshop
+	if err := config.DB.First(&formation, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Formation introuvable"})
 		return
 	}
 
-	if workshop.Price > 0 {
+	if formation.Price > 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Cette formation est payante, veuillez passer par le paiement"})
 		return
 	}
 
-	if workshop.Enrolled >= workshop.MaxSpots {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Workshop is full"})
+	if formation.Enrolled >= formation.MaxSpots {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Formation complète"})
 		return
 	}
 
-	var existing models.WorkshopBooking
-	if err := config.DB.Where("workshop_id = ? AND user_id = ?", id, userID).First(&existing).Error; err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Already booked"})
+	var existante models.WorkshopBooking
+	if err := config.DB.Where("workshop_id = ? AND user_id = ?", id, idUtilisateur).First(&existante).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Vous êtes déjà inscrit"})
 		return
 	}
 
-	booking := models.WorkshopBooking{
-		WorkshopID: workshop.ID,
-		UserID:     userID.(uint),
+	reservation := models.WorkshopBooking{
+		WorkshopID: formation.ID,
+		UserID:     idUtilisateur.(uint),
 		Status:     "confirmed",
 	}
 
-	if err := config.DB.Create(&booking).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to book workshop"})
+	if err := config.DB.Create(&reservation).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de l'inscription"})
 		return
 	}
 
-	config.DB.Model(&workshop).UpdateColumn("enrolled", gorm.Expr("enrolled + 1"))
+	config.DB.Model(&formation).UpdateColumn("enrolled", gorm.Expr("enrolled + 1"))
 
-	c.JSON(http.StatusCreated, booking)
+	c.JSON(http.StatusCreated, reservation)
 }
 
-type CancelWorkshopRequest struct {
+type RequeteAnnulationFormation struct {
 	Reason string `json:"reason" binding:"required"`
 }
 
-func CancelWorkshop(c *gin.Context) {
+func AnnulerFormation(c *gin.Context) {
 	id := c.Param("id")
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 	userRole, _ := c.Get("userRole")
 
-	var workshop models.Workshop
-	if err := config.DB.First(&workshop, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Événement introuvable"})
+	var formation models.Workshop
+	if err := config.DB.First(&formation, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Formation introuvable"})
 		return
 	}
 
 	role := userRole.(models.UserRole)
-	if role != models.RoleAdmin && workshop.InstructorID != userID.(uint) {
+	if role != models.RoleAdmin && formation.InstructorID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}
 
-	if workshop.Status == "cancelled" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Cet événement est déjà annulé"})
+	if formation.Status == "cancelled" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cette formation est déjà annulée"})
 		return
 	}
 
-	var req CancelWorkshopRequest
+	var req RequeteAnnulationFormation
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	config.DB.Model(&workshop).Updates(map[string]interface{}{
+	config.DB.Model(&formation).Updates(map[string]interface{}{
 		"status":        "cancelled",
 		"cancel_reason": req.Reason,
 	})
 
-	msg := fmt.Sprintf("L'événement \"%s\" a été annulé. Raison : %s", workshop.Title, req.Reason)
-	notifyWorkshopParticipants(workshop.ID, msg, "warning")
+	msg := fmt.Sprintf("La formation \"%s\" a été annulée. Raison : %s", formation.Title, req.Reason)
+	notifierParticipants(formation.ID, msg, "warning")
 
-	if role == models.RoleAdmin && workshop.InstructorID != userID.(uint) {
+	if role == models.RoleAdmin && formation.InstructorID != idUtilisateur.(uint) {
 		config.DB.Create(&models.Notification{
-			UserID:  workshop.InstructorID,
-			Message: fmt.Sprintf("Votre événement \"%s\" a été annulé par un administrateur. Raison : %s", workshop.Title, req.Reason),
+			UserID:  formation.InstructorID,
+			Message: fmt.Sprintf("Votre formation \"%s\" a été annulée par un administrateur. Raison : %s", formation.Title, req.Reason),
 			Type:    "warning",
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Événement annulé, participants notifiés"})
+	c.JSON(http.StatusOK, gin.H{"message": "Formation annulée, participants notifiés"})
 }
 
-func DeleteWorkshop(c *gin.Context) {
+func SupprimerFormation(c *gin.Context) {
 	id := c.Param("id")
 
-	var workshop models.Workshop
-	if err := config.DB.First(&workshop, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Événement introuvable"})
+	var formation models.Workshop
+	if err := config.DB.First(&formation, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Formation introuvable"})
 		return
 	}
 
-	msg := fmt.Sprintf("L'événement \"%s\" prévu le %s a été supprimé.", workshop.Title, workshop.Date.Format("02/01/2006"))
-	notifyWorkshopParticipants(workshop.ID, msg, "error")
+	msg := fmt.Sprintf("La formation \"%s\" prévue le %s a été supprimée.", formation.Title, formation.Date.Format("02/01/2006"))
+	notifierParticipants(formation.ID, msg, "error")
 
 	config.DB.Create(&models.Notification{
-		UserID:  workshop.InstructorID,
-		Message: fmt.Sprintf("Votre événement \"%s\" a été supprimé par un administrateur.", workshop.Title),
+		UserID:  formation.InstructorID,
+		Message: fmt.Sprintf("Votre formation \"%s\" a été supprimée par un administrateur.", formation.Title),
 		Type:    "error",
 	})
 
-	config.DB.Delete(&workshop)
-	c.JSON(http.StatusOK, gin.H{"message": "Événement supprimé, participants notifiés"})
+	config.DB.Delete(&formation)
+	c.JSON(http.StatusOK, gin.H{"message": "Formation supprimée, participants notifiés"})
 }
 
-// GetWorkshopBookings renvoie la liste des inscrits d'une formation.
-// Réservé à l'instructeur propriétaire ou à un admin. N'expose pas l'email.
-func GetWorkshopBookings(c *gin.Context) {
+func InscritsFormation(c *gin.Context) {
 	id := c.Param("id")
-	var workshop models.Workshop
-	if err := config.DB.First(&workshop, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Workshop not found"})
+	var formation models.Workshop
+	if err := config.DB.First(&formation, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Formation introuvable"})
 		return
 	}
 
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 	userRole, _ := c.Get("userRole")
 	role, _ := userRole.(models.UserRole)
-	if role != models.RoleAdmin && workshop.InstructorID != userID.(uint) {
+	if role != models.RoleAdmin && formation.InstructorID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
 		return
 	}
 
-	var bookings []models.WorkshopBooking
+	var reservations []models.WorkshopBooking
 	config.DB.Preload("User").
-		Where("workshop_id = ? AND status = ?", workshop.ID, "confirmed").
-		Order("created_at ASC").Find(&bookings)
+		Where("workshop_id = ? AND status = ?", formation.ID, "confirmed").
+		Order("created_at ASC").Find(&reservations)
 
 	type participant struct {
 		Firstname string `json:"firstname"`
 		Lastname  string `json:"lastname"`
 		BookedAt  string `json:"booked_at"`
 	}
-	participants := make([]participant, 0, len(bookings))
-	for _, b := range bookings {
+	participants := make([]participant, 0, len(reservations))
+	for _, r := range reservations {
 		participants = append(participants, participant{
-			Firstname: b.User.Firstname,
-			Lastname:  b.User.Lastname,
-			BookedAt:  b.CreatedAt.Format(time.RFC3339),
+			Firstname: r.User.Firstname,
+			Lastname:  r.User.Lastname,
+			BookedAt:  r.CreatedAt.Format(time.RFC3339),
 		})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"participants": participants,
 		"count":        len(participants),
-		"max_spots":    workshop.MaxSpots,
+		"max_spots":    formation.MaxSpots,
 	})
 }
 
-func GetMyBookings(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	var bookings []models.WorkshopBooking
+func MesReservations(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	var reservations []models.WorkshopBooking
 	config.DB.Preload("Workshop").Preload("Workshop.Category").
-		Where("user_id = ? AND status = ?", userID, "confirmed").
-		Order("created_at DESC").Find(&bookings)
-	c.JSON(http.StatusOK, bookings)
+		Where("user_id = ? AND status = ?", idUtilisateur, "confirmed").
+		Order("created_at DESC").Find(&reservations)
+	c.JSON(http.StatusOK, reservations)
 }
 
-func CheckLowEnrollment(c *gin.Context) {
-	deadline := time.Now().Add(48 * time.Hour)
-	var workshops []models.Workshop
-	config.DB.Where("status = 'active' AND date <= ? AND date > ? AND enrolled < min_spots", deadline, time.Now()).Find(&workshops)
+func VerifierMinInscrits(c *gin.Context) {
+	limite := time.Now().Add(48 * time.Hour)
+	var formations []models.Workshop
+	config.DB.Where("status = 'active' AND date <= ? AND date > ? AND enrolled < min_spots", limite, time.Now()).Find(&formations)
 
-	cancelled := 0
-	for _, w := range workshops {
-		reason := fmt.Sprintf("Nombre minimum de participants non atteint (%d/%d inscrits)", w.Enrolled, w.MinSpots)
-		config.DB.Model(&w).Updates(map[string]interface{}{
+	nbAnnules := 0
+	for _, f := range formations {
+		raison := fmt.Sprintf("Nombre minimum de participants non atteint (%d/%d inscrits)", f.Enrolled, f.MinSpots)
+		config.DB.Model(&f).Updates(map[string]interface{}{
 			"status":        "cancelled",
-			"cancel_reason": reason,
+			"cancel_reason": raison,
 		})
 
-		msg := fmt.Sprintf("L'événement \"%s\" du %s a été annulé : le nombre minimum de participants (%d) n'a pas été atteint.",
-			w.Title, w.Date.Format("02/01/2006"), w.MinSpots)
-		notifyWorkshopParticipants(w.ID, msg, "warning")
+		msg := fmt.Sprintf("La formation \"%s\" du %s a été annulée : le nombre minimum de participants (%d) n'a pas été atteint.",
+			f.Title, f.Date.Format("02/01/2006"), f.MinSpots)
+		notifierParticipants(f.ID, msg, "warning")
 
 		config.DB.Create(&models.Notification{
-			UserID:  w.InstructorID,
+			UserID:  f.InstructorID,
 			Message: msg,
 			Type:    "warning",
 		})
-		cancelled++
+		nbAnnules++
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":   fmt.Sprintf("%d événement(s) annulé(s) faute de participants", cancelled),
-		"cancelled": cancelled,
+		"message":   fmt.Sprintf("%d formation(s) annulée(s) faute de participants", nbAnnules),
+		"cancelled": nbAnnules,
 	})
 }

@@ -10,82 +10,82 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-type BanRequest struct {
+type RequeteBan struct {
 	Reason      string `json:"reason" binding:"required"`
 	Duration    int    `json:"duration"`
 	IsPermanent bool   `json:"is_permanent"`
 }
 
-func BanUser(c *gin.Context) {
+func BannirUtilisateur(c *gin.Context) {
 	id := c.Param("id")
-	adminID, _ := c.Get("userID")
+	idAdmin, _ := c.Get("userID")
 
-	var user models.User
-	if err := config.DB.First(&user, id).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.First(&utilisateur, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
 
-	var req BanRequest
+	var req RequeteBan
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var expiresAt *time.Time
-	isPermanent := req.IsPermanent
+	var expiration *time.Time
+	definitif := req.IsPermanent
 	if req.Duration == 0 {
-		isPermanent = true
+		definitif = true
 	}
-	if !isPermanent && req.Duration > 0 {
+	if !definitif && req.Duration > 0 {
 		t := time.Now().AddDate(0, 0, req.Duration)
-		expiresAt = &t
+		expiration = &t
 	}
 
-	config.DB.Model(&user).Updates(map[string]interface{}{
+	config.DB.Model(&utilisateur).Updates(map[string]interface{}{
 		"is_banned":      true,
 		"ban_reason":     req.Reason,
-		"ban_expires_at": expiresAt,
+		"ban_expires_at": expiration,
 	})
 
-	banRecord := models.BanRecord{
-		UserID:      user.ID,
-		AdminID:     adminID.(uint),
+	enregistrementBan := models.BanRecord{
+		UserID:      utilisateur.ID,
+		AdminID:     idAdmin.(uint),
 		Reason:      req.Reason,
-		ExpiresAt:   expiresAt,
-		IsPermanent: isPermanent,
+		ExpiresAt:   expiration,
+		IsPermanent: definitif,
 		IsActive:    true,
 	}
-	config.DB.Create(&banRecord)
+	config.DB.Create(&enregistrementBan)
 
-	durationMsg := "définitivement"
-	if expiresAt != nil {
-		durationMsg = fmt.Sprintf("jusqu'au %s", expiresAt.Format("02/01/2006"))
+	dureeMsg := "définitivement"
+	if expiration != nil {
+		dureeMsg = fmt.Sprintf("jusqu'au %s", expiration.Format("02/01/2006"))
 	}
 	config.DB.Create(&models.Notification{
-		UserID:  user.ID,
-		Message: fmt.Sprintf("Votre compte a été banni %s. Raison : %s", durationMsg, req.Reason),
+		UserID:  utilisateur.ID,
+		Message: fmt.Sprintf("Votre compte a été banni %s. Raison : %s", dureeMsg, req.Reason),
 		Type:    "error",
 	})
 
-	c.JSON(http.StatusOK, gin.H{"message": "Utilisateur banni", "ban": banRecord})
+	c.JSON(http.StatusOK, gin.H{"message": "Utilisateur banni", "ban": enregistrementBan})
 }
 
-func UnbanUser(c *gin.Context) {
+func LeverBan(c *gin.Context) {
 	id := c.Param("id")
 
-	var user models.User
-	if err := config.DB.First(&user, id).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.First(&utilisateur, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
 
-	if !user.IsBanned {
+	if !utilisateur.IsBanned {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Cet utilisateur n'est pas banni"})
 		return
 	}
 
-	config.DB.Model(&user).Updates(map[string]interface{}{
+	config.DB.Model(&utilisateur).Updates(map[string]interface{}{
 		"is_banned":      false,
 		"ban_reason":     "",
 		"ban_expires_at": nil,
@@ -93,7 +93,7 @@ func UnbanUser(c *gin.Context) {
 	config.DB.Model(&models.BanRecord{}).Where("user_id = ? AND is_active = ?", id, true).Update("is_active", false)
 
 	config.DB.Create(&models.Notification{
-		UserID:  user.ID,
+		UserID:  utilisateur.ID,
 		Message: "Votre bannissement a été levé. Vous pouvez de nouveau accéder à votre compte.",
 		Type:    "success",
 	})
@@ -101,7 +101,7 @@ func UnbanUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Utilisateur débanni"})
 }
 
-func GetBanHistory(c *gin.Context) {
+func HistoriqueBans(c *gin.Context) {
 	id := c.Param("id")
 	var bans []models.BanRecord
 	config.DB.Preload("Admin").Where("user_id = ?", id).Order("created_at DESC").Find(&bans)

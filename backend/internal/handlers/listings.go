@@ -385,7 +385,7 @@ func BoosterAnnonce(c *gin.Context) {
 		return
 	}
 
-	urlPaiement, err := createBoostCheckoutSession(annonce.ID, idUtilisateur.(uint))
+	urlPaiement, err := creerSessionBoost(annonce.ID, idUtilisateur.(uint))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur Stripe : " + err.Error()})
 		return

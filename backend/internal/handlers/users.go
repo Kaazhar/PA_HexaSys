@@ -10,73 +10,73 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-func GetUsers(c *gin.Context) {
-	var users []models.User
-	query := config.DB.Model(&models.User{})
+func ListerUtilisateurs(c *gin.Context) {
+	var utilisateurs []models.User
+	q := config.DB.Model(&models.User{})
 
 	if role := c.Query("role"); role != "" {
-		query = query.Where("role = ?", role)
+		q = q.Where("role = ?", role)
 	}
-	if status := c.Query("status"); status == "active" {
-		query = query.Where("is_active = ?", true)
-	} else if status == "inactive" {
-		query = query.Where("is_active = ?", false)
+	if statut := c.Query("status"); statut == "active" {
+		q = q.Where("is_active = ?", true)
+	} else if statut == "inactive" {
+		q = q.Where("is_active = ?", false)
 	}
-	if search := c.Query("search"); search != "" {
-		query = query.Where("firstname LIKE ? OR lastname LIKE ? OR email LIKE ?",
-			"%"+search+"%", "%"+search+"%", "%"+search+"%")
+	if recherche := c.Query("search"); recherche != "" {
+		q = q.Where("firstname LIKE ? OR lastname LIKE ? OR email LIKE ?",
+			"%"+recherche+"%", "%"+recherche+"%", "%"+recherche+"%")
 	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	offset := (page - 1) * limit
+	limite, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	decalage := (page - 1) * limite
 
 	var total int64
-	query.Count(&total)
+	q.Count(&total)
 
-	query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&users)
+	q.Offset(decalage).Limit(limite).Order("created_at DESC").Find(&utilisateurs)
 
 	c.JSON(http.StatusOK, gin.H{
-		"users": users,
+		"users": utilisateurs,
 		"total": total,
 		"page":  page,
-		"limit": limit,
+		"limit": limite,
 	})
 }
 
-func GetPublicProfile(c *gin.Context) {
+func ProfilPublic(c *gin.Context) {
 	id := c.Param("id")
-	var user models.User
-	if err := config.DB.Select("id, firstname, lastname, role, created_at, siret_verified").First(&user, id).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.Select("id, firstname, lastname, role, created_at, siret_verified").First(&utilisateur, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
 
-	var activeListings []models.Listing
+	var annoncesActives []models.Listing
 	config.DB.Preload("Category").Where("user_id = ? AND status = ?", id, "active").
-		Order("created_at DESC").Limit(12).Find(&activeListings)
+		Order("created_at DESC").Limit(12).Find(&annoncesActives)
 
-	var reviewCount int64
-	var avgRating float64
-	config.DB.Model(&models.Review{}).Where("target_user_id = ?", id).Count(&reviewCount)
-	if reviewCount > 0 {
-		config.DB.Model(&models.Review{}).Where("target_user_id = ?", id).Select("AVG(rating)").Scan(&avgRating)
+	var nbAvis int64
+	var noteMoyenne float64
+	config.DB.Model(&models.Review{}).Where("target_user_id = ?", id).Count(&nbAvis)
+	if nbAvis > 0 {
+		config.DB.Model(&models.Review{}).Where("target_user_id = ?", id).Select("AVG(rating)").Scan(&noteMoyenne)
 	}
 
-	var score models.UpcyclingScore
-	config.DB.Where("user_id = ?", id).First(&score)
+	var scoreUpcycling models.UpcyclingScore
+	config.DB.Where("user_id = ?", id).First(&scoreUpcycling)
 
 	c.JSON(http.StatusOK, gin.H{
-		"user":            user,
-		"active_listings": activeListings,
-		"review_count":    reviewCount,
-		"avg_rating":      avgRating,
-		"score":           score,
+		"user":            utilisateur,
+		"active_listings": annoncesActives,
+		"review_count":    nbAvis,
+		"avg_rating":      noteMoyenne,
+		"score":           scoreUpcycling,
 	})
 }
 
 
-type UpdateUserRequest struct {
+type RequeteModificationUtilisateur struct {
 	Firstname string          `json:"firstname"`
 	Lastname  string          `json:"lastname"`
 	Email     string          `json:"email"`
@@ -86,69 +86,69 @@ type UpdateUserRequest struct {
 	Address   string          `json:"address"`
 }
 
-func UpdateUser(c *gin.Context) {
+func ModifierUtilisateur(c *gin.Context) {
 	id := c.Param("id")
-	var user models.User
-	if err := config.DB.First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	var utilisateur models.User
+	if err := config.DB.First(&utilisateur, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
 
-	var req UpdateUserRequest
+	var req RequeteModificationUtilisateur
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	updates := map[string]interface{}{}
+	modifications := map[string]interface{}{}
 	if req.Firstname != "" {
-		updates["firstname"] = req.Firstname
+		modifications["firstname"] = req.Firstname
 	}
 	if req.Lastname != "" {
-		updates["lastname"] = req.Lastname
+		modifications["lastname"] = req.Lastname
 	}
 	if req.Email != "" {
-		updates["email"] = req.Email
+		modifications["email"] = req.Email
 	}
 	if req.Role != "" {
-		updates["role"] = req.Role
+		modifications["role"] = req.Role
 	}
 	if req.IsActive != nil {
-		updates["is_active"] = *req.IsActive
+		modifications["is_active"] = *req.IsActive
 	}
 	if req.Phone != "" {
-		updates["phone"] = req.Phone
+		modifications["phone"] = req.Phone
 	}
 	if req.Address != "" {
-		updates["address"] = req.Address
+		modifications["address"] = req.Address
 	}
 
-	if err := config.DB.Model(&user).Updates(updates).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+	if err := config.DB.Model(&utilisateur).Updates(modifications).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la modification"})
 		return
 	}
 
-	config.DB.First(&user, id)
-	c.JSON(http.StatusOK, user)
+	config.DB.First(&utilisateur, id)
+	c.JSON(http.StatusOK, utilisateur)
 }
 
-func DeleteUser(c *gin.Context) {
+func SupprimerUtilisateur(c *gin.Context) {
 	id := c.Param("id")
-	var user models.User
-	if err := config.DB.First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	var utilisateur models.User
+	if err := config.DB.First(&utilisateur, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
 
-	if err := config.DB.Delete(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+	if err := config.DB.Delete(&utilisateur).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la suppression"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "Utilisateur supprimé"})
 }
 
-type CreateUserRequest struct {
+type RequeteCreationUtilisateur struct {
 	Email      string          `json:"email" binding:"required,email"`
 	Password   string          `json:"password" binding:"required,min=6"`
 	Firstname  string          `json:"firstname" binding:"required"`
@@ -157,22 +157,22 @@ type CreateUserRequest struct {
 	IsVerified bool            `json:"is_verified"`
 }
 
-func CreateUser(c *gin.Context) {
-	var req CreateUserRequest
+func CreerUtilisateur(c *gin.Context) {
+	var req RequeteCreationUtilisateur
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var existing models.User
-	if err := config.DB.Where("email = ?", req.Email).First(&existing).Error; err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Email already registered"})
+	var existant models.User
+	if err := config.DB.Where("email = ?", req.Email).First(&existant).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Email déjà utilisé"})
 		return
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	hashMdp, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors du hachage du mot de passe"})
 		return
 	}
 
@@ -181,9 +181,9 @@ func CreateUser(c *gin.Context) {
 		role = models.RoleParticulier
 	}
 
-	user := models.User{
+	utilisateur := models.User{
 		Email:        req.Email,
-		PasswordHash: string(hash),
+		PasswordHash: string(hashMdp),
 		Firstname:    req.Firstname,
 		Lastname:     req.Lastname,
 		Role:         role,
@@ -191,28 +191,27 @@ func CreateUser(c *gin.Context) {
 		IsVerified:   req.IsVerified,
 	}
 
-	if err := config.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+	if err := config.DB.Create(&utilisateur).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création"})
 		return
 	}
 
-	score := models.UpcyclingScore{UserID: user.ID}
-	config.DB.Create(&score)
+	config.DB.Create(&models.UpcyclingScore{UserID: utilisateur.ID})
 
-	c.JSON(http.StatusCreated, user)
+	c.JSON(http.StatusCreated, utilisateur)
 }
 
-func ResetEmailTwoFA(c *gin.Context) {
+func ReinitialiserEmail2FA(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID invalide"})
 		return
 	}
-	var user models.User
-	if err := config.DB.First(&user, id).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.First(&utilisateur, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
-	config.DB.Model(&user).Update("email_two_fa_enabled", false)
+	config.DB.Model(&utilisateur).Update("email_two_fa_enabled", false)
 	c.JSON(http.StatusOK, gin.H{"message": "2FA email réinitialisée"})
 }

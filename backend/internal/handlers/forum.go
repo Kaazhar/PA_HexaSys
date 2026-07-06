@@ -10,44 +10,41 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-// canSeeProjectTopic indique si l'utilisateur courant peut voir/écrire dans un topic lié à un projet.
-// Accès = suiveur du projet, OU créateur du projet, OU admin.
-func canSeeProjectTopic(c *gin.Context, topic *models.ForumTopic) bool {
-	if topic.ProjectID == nil {
+func peutVoirSujetProjet(c *gin.Context, sujet *models.ForumTopic) bool {
+	if sujet.ProjectID == nil {
 		return true
 	}
-	userID, ok := c.Get("userID")
+	idUtilisateur, ok := c.Get("userID")
 	if !ok {
 		return false
 	}
 	if role, ok := c.Get("userRole"); ok && role.(models.UserRole) == models.RoleAdmin {
 		return true
 	}
-	var project models.Project
-	if err := config.DB.First(&project, *topic.ProjectID).Error; err == nil && project.UserID == userID.(uint) {
+	var projet models.Project
+	if err := config.DB.First(&projet, *sujet.ProjectID).Error; err == nil && projet.UserID == idUtilisateur.(uint) {
 		return true
 	}
-	var count int64
-	config.DB.Model(&models.ProjectFollower{}).Where("project_id = ? AND user_id = ?", *topic.ProjectID, userID).Count(&count)
-	return count > 0
+	var nb int64
+	config.DB.Model(&models.ProjectFollower{}).Where("project_id = ? AND user_id = ?", *sujet.ProjectID, idUtilisateur).Count(&nb)
+	return nb > 0
 }
 
-func GetForumTopics(c *gin.Context) {
+func ListerSujets(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	offset := (page - 1) * limit
+	limite, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	decalage := (page - 1) * limite
 
-	var topics []models.ForumTopic
+	var sujets []models.ForumTopic
 	var total int64
 
-	// Visibilité des topics de projet : seulement ceux suivis par l'utilisateur (+ ses propres projets).
 	q := config.DB.Model(&models.ForumTopic{})
-	if userID, ok := c.Get("userID"); ok {
+	if idUtilisateur, ok := c.Get("userID"); ok {
 		if role, isRole := c.Get("userRole"); !isRole || role.(models.UserRole) != models.RoleAdmin {
 			q = q.Where(
 				"project_id IS NULL OR project_id IN (?) OR project_id IN (?)",
-				config.DB.Model(&models.ProjectFollower{}).Select("project_id").Where("user_id = ?", userID),
-				config.DB.Model(&models.Project{}).Select("id").Where("user_id = ?", userID),
+				config.DB.Model(&models.ProjectFollower{}).Select("project_id").Where("user_id = ?", idUtilisateur),
+				config.DB.Model(&models.Project{}).Select("id").Where("user_id = ?", idUtilisateur),
 			)
 		}
 	} else {
@@ -57,36 +54,36 @@ func GetForumTopics(c *gin.Context) {
 	q.Count(&total)
 	q.Preload("Author").
 		Order("is_pinned DESC, created_at DESC").
-		Offset(offset).Limit(limit).
-		Find(&topics)
+		Offset(decalage).Limit(limite).
+		Find(&sujets)
 
-	c.JSON(http.StatusOK, gin.H{"topics": topics, "total": total, "page": page, "limit": limit})
+	c.JSON(http.StatusOK, gin.H{"topics": sujets, "total": total, "page": page, "limit": limite})
 }
 
-func GetForumTopic(c *gin.Context) {
+func ObtenirSujet(c *gin.Context) {
 	id := c.Param("id")
 
-	var topic models.ForumTopic
-	if err := config.DB.Preload("Author").First(&topic, id).Error; err != nil {
+	var sujet models.ForumTopic
+	if err := config.DB.Preload("Author").First(&sujet, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Sujet introuvable"})
 		return
 	}
 
-	if !canSeeProjectTopic(c, &topic) {
+	if !peutVoirSujetProjet(c, &sujet) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Abonnez-vous au projet pour accéder à cet espace"})
 		return
 	}
 
-	config.DB.Model(&topic).UpdateColumn("views", gorm.Expr("views + 1"))
+	config.DB.Model(&sujet).UpdateColumn("views", gorm.Expr("views + 1"))
 
-	var posts []models.ForumPost
-	config.DB.Preload("Author").Where("topic_id = ?", id).Order("created_at ASC").Find(&posts)
+	var reponses []models.ForumPost
+	config.DB.Preload("Author").Where("topic_id = ?", id).Order("created_at ASC").Find(&reponses)
 
-	c.JSON(http.StatusOK, gin.H{"topic": topic, "posts": posts})
+	c.JSON(http.StatusOK, gin.H{"topic": sujet, "posts": reponses})
 }
 
-func CreateForumTopic(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func CreerSujet(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 
 	var req struct {
 		Title   string `json:"title" binding:"required"`
@@ -97,34 +94,34 @@ func CreateForumTopic(c *gin.Context) {
 		return
 	}
 
-	topic := models.ForumTopic{
+	sujet := models.ForumTopic{
 		Title:    req.Title,
 		Content:  req.Content,
-		AuthorID: userID.(uint),
+		AuthorID: idUtilisateur.(uint),
 	}
 
-	if err := config.DB.Create(&topic).Error; err != nil {
+	if err := config.DB.Create(&sujet).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création"})
 		return
 	}
 
-	config.DB.Preload("Author").First(&topic, topic.ID)
-	c.JSON(http.StatusCreated, topic)
+	config.DB.Preload("Author").First(&sujet, sujet.ID)
+	c.JSON(http.StatusCreated, sujet)
 }
 
-func UpdateForumTopic(c *gin.Context) {
+func ModifierSujet(c *gin.Context) {
 	id := c.Param("id")
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 	userRole, _ := c.Get("userRole")
 
-	var topic models.ForumTopic
-	if err := config.DB.First(&topic, id).Error; err != nil {
+	var sujet models.ForumTopic
+	if err := config.DB.First(&sujet, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Sujet introuvable"})
 		return
 	}
 
 	role := userRole.(models.UserRole)
-	if role != models.RoleAdmin && topic.AuthorID != userID.(uint) {
+	if role != models.RoleAdmin && sujet.AuthorID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}
@@ -135,79 +132,79 @@ func UpdateForumTopic(c *gin.Context) {
 	}
 	c.ShouldBindJSON(&req)
 
-	updates := map[string]interface{}{}
+	modifications := map[string]interface{}{}
 	if req.Title != "" {
-		updates["title"] = req.Title
+		modifications["title"] = req.Title
 	}
 	if req.Content != "" {
-		updates["content"] = req.Content
+		modifications["content"] = req.Content
 	}
 
-	config.DB.Model(&topic).Updates(updates)
-	config.DB.Preload("Author").First(&topic, id)
-	c.JSON(http.StatusOK, topic)
+	config.DB.Model(&sujet).Updates(modifications)
+	config.DB.Preload("Author").First(&sujet, id)
+	c.JSON(http.StatusOK, sujet)
 }
 
-func DeleteForumTopic(c *gin.Context) {
+func SupprimerSujet(c *gin.Context) {
 	id := c.Param("id")
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 	userRole, _ := c.Get("userRole")
 
-	var topic models.ForumTopic
-	if err := config.DB.First(&topic, id).Error; err != nil {
+	var sujet models.ForumTopic
+	if err := config.DB.First(&sujet, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Sujet introuvable"})
 		return
 	}
 
 	role := userRole.(models.UserRole)
-	if role != models.RoleAdmin && role != models.RoleSalarie && topic.AuthorID != userID.(uint) {
+	if role != models.RoleAdmin && role != models.RoleSalarie && sujet.AuthorID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}
 
 	config.DB.Where("topic_id = ?", id).Delete(&models.ForumPost{})
-	config.DB.Delete(&topic)
+	config.DB.Delete(&sujet)
 	c.JSON(http.StatusOK, gin.H{"message": "Sujet supprimé"})
 }
 
-func PinForumTopic(c *gin.Context) {
+func EpinglerSujet(c *gin.Context) {
 	id := c.Param("id")
-	var topic models.ForumTopic
-	if err := config.DB.First(&topic, id).Error; err != nil {
+	var sujet models.ForumTopic
+	if err := config.DB.First(&sujet, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Sujet introuvable"})
 		return
 	}
-	config.DB.Model(&topic).Update("is_pinned", !topic.IsPinned)
-	c.JSON(http.StatusOK, gin.H{"is_pinned": !topic.IsPinned})
+	config.DB.Model(&sujet).Update("is_pinned", !sujet.IsPinned)
+	c.JSON(http.StatusOK, gin.H{"is_pinned": !sujet.IsPinned})
 }
 
-func LockForumTopic(c *gin.Context) {
+func VerrouillerSujet(c *gin.Context) {
 	id := c.Param("id")
-	var topic models.ForumTopic
-	if err := config.DB.First(&topic, id).Error; err != nil {
+	var sujet models.ForumTopic
+	if err := config.DB.First(&sujet, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Sujet introuvable"})
 		return
 	}
-	config.DB.Model(&topic).Update("is_locked", !topic.IsLocked)
-	c.JSON(http.StatusOK, gin.H{"is_locked": !topic.IsLocked})
+	config.DB.Model(&sujet).Update("is_locked", !sujet.IsLocked)
+	c.JSON(http.StatusOK, gin.H{"is_locked": !sujet.IsLocked})
 }
 
-func CreateForumPost(c *gin.Context) {
-	topicID := c.Param("id")
-	userID, _ := c.Get("userID")
+func CreerReponse(c *gin.Context) {
+	idSujet := c.Param("id")
+	idUtilisateur, _ := c.Get("userID")
 
-	var topic models.ForumTopic
-	if err := config.DB.First(&topic, topicID).Error; err != nil {
+	var sujet models.ForumTopic
+	if err := config.DB.First(&sujet, idSujet).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Sujet introuvable"})
 		return
 	}
 
-	if topic.IsLocked {
+	if sujet.IsLocked {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Ce sujet est verrouillé"})
 		return
 	}
 
-	if !canSeeProjectTopic(c, &topic) {
+	if !peutVoirSujetProjet(c, &sujet) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Abonnez-vous au projet pour participer à cet espace"})
 		return
 	}
@@ -220,42 +217,42 @@ func CreateForumPost(c *gin.Context) {
 		return
 	}
 
-	tid, _ := strconv.ParseUint(topicID, 10, 64)
-	post := models.ForumPost{
+	tid, _ := strconv.ParseUint(idSujet, 10, 64)
+	reponse := models.ForumPost{
 		TopicID:  uint(tid),
-		AuthorID: userID.(uint),
+		AuthorID: idUtilisateur.(uint),
 		Content:  req.Content,
 	}
 
-	if err := config.DB.Create(&post).Error; err != nil {
+	if err := config.DB.Create(&reponse).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la réponse"})
 		return
 	}
 
-	config.DB.Model(&topic).UpdateColumn("replies_count", topic.RepliesCount+1)
-	config.DB.Preload("Author").First(&post, post.ID)
-	c.JSON(http.StatusCreated, post)
+	config.DB.Model(&sujet).UpdateColumn("replies_count", sujet.RepliesCount+1)
+	config.DB.Preload("Author").First(&reponse, reponse.ID)
+	c.JSON(http.StatusCreated, reponse)
 }
 
-func DeleteForumPost(c *gin.Context) {
+func SupprimerReponse(c *gin.Context) {
 	id := c.Param("id")
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 	userRole, _ := c.Get("userRole")
 
-	var post models.ForumPost
-	if err := config.DB.First(&post, id).Error; err != nil {
+	var reponse models.ForumPost
+	if err := config.DB.First(&reponse, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Réponse introuvable"})
 		return
 	}
 
 	role := userRole.(models.UserRole)
-	if role != models.RoleAdmin && role != models.RoleSalarie && post.AuthorID != userID.(uint) {
+	if role != models.RoleAdmin && role != models.RoleSalarie && reponse.AuthorID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}
 
-	config.DB.Delete(&post)
-	config.DB.Model(&models.ForumTopic{}).Where("id = ?", post.TopicID).
+	config.DB.Delete(&reponse)
+	config.DB.Model(&models.ForumTopic{}).Where("id = ?", reponse.TopicID).
 		UpdateColumn("replies_count", gorm.Expr("replies_count - 1"))
 
 	c.JSON(http.StatusOK, gin.H{"message": "Réponse supprimée"})

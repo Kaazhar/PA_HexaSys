@@ -9,128 +9,128 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-func GetFinanceStats(c *gin.Context) {
-	var totalInvoices int64
-	var pendingAmount float64
-	var monthlyRevenue float64
-	var annualRevenue float64
+func StatsFinance(c *gin.Context) {
+	var nbFactures int64
+	var montantEnAttente float64
+	var revenusMois float64
+	var revenusAnnee float64
 	var totalCommissions float64
-	var monthlyCommissions float64
-	var totalSoldListings int64
+	var commissionsMois float64
+	var nbVentes int64
 
-	config.DB.Model(&models.Invoice{}).Count(&totalInvoices)
+	config.DB.Model(&models.Invoice{}).Count(&nbFactures)
 
-	var pendingInvoices []models.Invoice
-	config.DB.Where("status = ?", "pending").Find(&pendingInvoices)
-	for _, inv := range pendingInvoices {
-		pendingAmount += inv.Total
+	var facturesEnAttente []models.Invoice
+	config.DB.Where("status = ?", "pending").Find(&facturesEnAttente)
+	for _, f := range facturesEnAttente {
+		montantEnAttente += f.Total
 	}
 
-	now := time.Now()
-	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-	firstOfYear := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+	maintenant := time.Now()
+	premierDuMois := time.Date(maintenant.Year(), maintenant.Month(), 1, 0, 0, 0, 0, maintenant.Location())
+	premierDeLAnnee := time.Date(maintenant.Year(), 1, 1, 0, 0, 0, 0, maintenant.Location())
 
 	config.DB.Model(&models.Invoice{}).
-		Where("status = ? AND created_at >= ?", "paid", firstOfMonth).
-		Select("COALESCE(SUM(total), 0)").Scan(&monthlyRevenue)
+		Where("status = ? AND created_at >= ?", "paid", premierDuMois).
+		Select("COALESCE(SUM(total), 0)").Scan(&revenusMois)
 
 	config.DB.Model(&models.Invoice{}).
-		Where("status = ? AND created_at >= ?", "paid", firstOfYear).
-		Select("COALESCE(SUM(total), 0)").Scan(&annualRevenue)
+		Where("status = ? AND created_at >= ?", "paid", premierDeLAnnee).
+		Select("COALESCE(SUM(total), 0)").Scan(&revenusAnnee)
 
 	config.DB.Model(&models.Listing{}).
 		Where("status = ? AND type = ?", "sold", "vente").
-		Count(&totalSoldListings)
+		Count(&nbVentes)
 
 	config.DB.Model(&models.Listing{}).
 		Where("status = ? AND type = ?", "sold", "vente").
 		Select("COALESCE(SUM(commission_amount), 0)").Scan(&totalCommissions)
 
 	config.DB.Model(&models.Listing{}).
-		Where("status = ? AND type = ? AND updated_at >= ?", "sold", "vente", firstOfMonth).
-		Select("COALESCE(SUM(commission_amount), 0)").Scan(&monthlyCommissions)
+		Where("status = ? AND type = ? AND updated_at >= ?", "sold", "vente", premierDuMois).
+		Select("COALESCE(SUM(commission_amount), 0)").Scan(&commissionsMois)
 
-	type PlanStat struct {
+	type StatPlan struct {
 		Plan  string
 		Count int64
 		Total float64
 	}
-	var planStats []PlanStat
+	var statsPlans []StatPlan
 	config.DB.Model(&models.Subscription{}).
 		Where("status = ?", "active").
 		Select("plan, COUNT(*) as count, COALESCE(SUM(price), 0) as total").
 		Group("plan").
-		Scan(&planStats)
+		Scan(&statsPlans)
 
-	revenueByPlan := make([]map[string]interface{}, 0, len(planStats))
-	for _, ps := range planStats {
-		revenueByPlan = append(revenueByPlan, map[string]interface{}{
-			"plan":   ps.Plan,
-			"amount": ps.Total,
-			"count":  ps.Count,
+	revenusParPlan := make([]map[string]interface{}, 0, len(statsPlans))
+	for _, sp := range statsPlans {
+		revenusParPlan = append(revenusParPlan, map[string]interface{}{
+			"plan":   sp.Plan,
+			"amount": sp.Total,
+			"count":  sp.Count,
 		})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"total_invoices":       totalInvoices,
-		"pending_amount":       pendingAmount,
-		"monthly_revenue":      monthlyRevenue,
-		"annual_revenue":       annualRevenue,
-		"revenue_by_plan":      revenueByPlan,
-		"total_commissions":    totalCommissions,
-		"monthly_commissions":  monthlyCommissions,
-		"total_sold_listings":  totalSoldListings,
+		"total_invoices":      nbFactures,
+		"pending_amount":      montantEnAttente,
+		"monthly_revenue":     revenusMois,
+		"annual_revenue":      revenusAnnee,
+		"revenue_by_plan":     revenusParPlan,
+		"total_commissions":   totalCommissions,
+		"monthly_commissions": commissionsMois,
+		"total_sold_listings": nbVentes,
 	})
 }
 
-func GetInvoices(c *gin.Context) {
-	var invoices []models.Invoice
-	query := config.DB.Preload("User")
+func ListerFactures(c *gin.Context) {
+	var factures []models.Invoice
+	q := config.DB.Preload("User")
 
-	if status := c.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
+	if statut := c.Query("status"); statut != "" {
+		q = q.Where("status = ?", statut)
 	}
 
-	query.Order("created_at DESC").Find(&invoices)
-	c.JSON(http.StatusOK, invoices)
+	q.Order("created_at DESC").Find(&factures)
+	c.JSON(http.StatusOK, factures)
 }
 
-func GetCategories(c *gin.Context) {
+func ListerCategories(c *gin.Context) {
 	var categories []models.Category
 	config.DB.Where("is_active = ?", true).Order("name ASC").Find(&categories)
 	c.JSON(http.StatusOK, categories)
 }
 
-func CreateCategory(c *gin.Context) {
-	var category models.Category
-	if err := c.ShouldBindJSON(&category); err != nil {
+func CreerCategorie(c *gin.Context) {
+	var categorie models.Category
+	if err := c.ShouldBindJSON(&categorie); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := config.DB.Create(&category).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create category"})
+	if err := config.DB.Create(&categorie).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création"})
 		return
 	}
-	c.JSON(http.StatusCreated, category)
+	c.JSON(http.StatusCreated, categorie)
 }
 
-func UpdateCategory(c *gin.Context) {
+func ModifierCategorie(c *gin.Context) {
 	id := c.Param("id")
-	var category models.Category
-	if err := config.DB.First(&category, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+	var categorie models.Category
+	if err := config.DB.First(&categorie, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Catégorie introuvable"})
 		return
 	}
-	if err := c.ShouldBindJSON(&category); err != nil {
+	if err := c.ShouldBindJSON(&categorie); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	config.DB.Save(&category)
-	c.JSON(http.StatusOK, category)
+	config.DB.Save(&categorie)
+	c.JSON(http.StatusOK, categorie)
 }
 
-func DeleteCategory(c *gin.Context) {
+func SupprimerCategorie(c *gin.Context) {
 	id := c.Param("id")
 	config.DB.Delete(&models.Category{}, id)
-	c.JSON(http.StatusOK, gin.H{"message": "Category deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "Catégorie supprimée"})
 }

@@ -11,8 +11,7 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-// parseArticleExpiry accepte une date (YYYY-MM-DD) ou un datetime-local.
-func parseArticleExpiry(s string) (*time.Time, error) {
+func parserDateExpiration(s string) (*time.Time, error) {
 	if s == "" {
 		return nil, nil
 	}
@@ -29,10 +28,10 @@ func parseArticleExpiry(s string) (*time.Time, error) {
 	return &t, nil
 }
 
-func GetPublicArticles(c *gin.Context) {
+func ListerArticles(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "12"))
-	offset := (page - 1) * limit
+	limite, _ := strconv.Atoi(c.DefaultQuery("limit", "12"))
+	decalage := (page - 1) * limite
 	tag := c.Query("tag")
 
 	var articles []models.Article
@@ -44,12 +43,12 @@ func GetPublicArticles(c *gin.Context) {
 		q = q.Where("tags LIKE ?", "%"+tag+"%")
 	}
 	q.Count(&total)
-	q.Preload("Author").Order("created_at DESC").Offset(offset).Limit(limit).Find(&articles)
+	q.Preload("Author").Order("created_at DESC").Offset(decalage).Limit(limite).Find(&articles)
 
-	c.JSON(http.StatusOK, gin.H{"articles": articles, "total": total, "page": page, "limit": limit})
+	c.JSON(http.StatusOK, gin.H{"articles": articles, "total": total, "page": page, "limit": limite})
 }
 
-func GetPublicArticle(c *gin.Context) {
+func ObtenirArticle(c *gin.Context) {
 	id := c.Param("id")
 	var article models.Article
 	if err := config.DB.Preload("Author").Where("status = ?", "published").
@@ -61,30 +60,30 @@ func GetPublicArticle(c *gin.Context) {
 	c.JSON(http.StatusOK, article)
 }
 
-func GetMyArticles(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func MesArticles(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 	userRole, _ := c.Get("userRole")
 	var articles []models.Article
 	q := config.DB.Preload("Author")
 	if userRole.(models.UserRole) != models.RoleAdmin {
-		q = q.Where("author_id = ?", userID)
+		q = q.Where("author_id = ?", idUtilisateur)
 	}
 	q.Order("created_at DESC").Find(&articles)
 	c.JSON(http.StatusOK, articles)
 }
 
-func GetMyWorkshops(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	var workshops []models.Workshop
-	query := config.DB.Preload("Category").Where("instructor_id = ?", userID).Order("date ASC")
-	if status := c.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
+func MesFormations(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	var formations []models.Workshop
+	q := config.DB.Preload("Category").Where("instructor_id = ?", idUtilisateur).Order("date ASC")
+	if statut := c.Query("status"); statut != "" {
+		q = q.Where("status = ?", statut)
 	}
-	query.Find(&workshops)
-	c.JSON(http.StatusOK, workshops)
+	q.Find(&formations)
+	c.JSON(http.StatusOK, formations)
 }
 
-type ArticleRequest struct {
+type RequeteArticle struct {
 	Title     string `json:"title" binding:"required"`
 	Content   string `json:"content"`
 	Tags      string `json:"tags"`
@@ -92,20 +91,20 @@ type ArticleRequest struct {
 	ExpiresAt string `json:"expires_at"`
 }
 
-func CreateArticle(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	var req ArticleRequest
+func CreerArticle(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	var req RequeteArticle
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	status := req.Status
-	if status == "" {
-		status = "draft"
+	statut := req.Status
+	if statut == "" {
+		statut = "draft"
 	}
 
-	expiresAt, err := parseArticleExpiry(req.ExpiresAt)
+	dateExpiration, err := parserDateExpiration(req.ExpiresAt)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Date de péremption invalide"})
 		return
@@ -115,9 +114,9 @@ func CreateArticle(c *gin.Context) {
 		Title:     req.Title,
 		Content:   req.Content,
 		Tags:      req.Tags,
-		Status:    status,
-		AuthorID:  userID.(uint),
-		ExpiresAt: expiresAt,
+		Status:    statut,
+		AuthorID:  idUtilisateur.(uint),
+		ExpiresAt: dateExpiration,
 	}
 
 	if err := config.DB.Create(&article).Error; err != nil {
@@ -128,9 +127,9 @@ func CreateArticle(c *gin.Context) {
 	c.JSON(http.StatusCreated, article)
 }
 
-func UpdateArticle(c *gin.Context) {
+func ModifierArticle(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 	userRole, _ := c.Get("userRole")
 
 	var article models.Article
@@ -140,35 +139,34 @@ func UpdateArticle(c *gin.Context) {
 	}
 
 	role := userRole.(models.UserRole)
-	if role != models.RoleAdmin && article.AuthorID != userID.(uint) {
+	if role != models.RoleAdmin && article.AuthorID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}
 
-	var req map[string]interface{}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	var modifications map[string]interface{}
+	if err := c.ShouldBindJSON(&modifications); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// expires_at arrive en chaîne (YYYY-MM-DD) : on le convertit en date ou null.
-	if raw, ok := req["expires_at"]; ok {
+	if raw, ok := modifications["expires_at"]; ok {
 		s, _ := raw.(string)
-		expiresAt, err := parseArticleExpiry(s)
+		dateExpiration, err := parserDateExpiration(s)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Date de péremption invalide"})
 			return
 		}
-		req["expires_at"] = expiresAt
+		modifications["expires_at"] = dateExpiration
 	}
 
-	config.DB.Model(&article).Updates(req)
+	config.DB.Model(&article).Updates(modifications)
 	c.JSON(http.StatusOK, article)
 }
 
-func DeleteArticle(c *gin.Context) {
+func SupprimerArticle(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 	userRole, _ := c.Get("userRole")
 
 	var article models.Article
@@ -178,7 +176,7 @@ func DeleteArticle(c *gin.Context) {
 	}
 
 	role := userRole.(models.UserRole)
-	if role != models.RoleAdmin && article.AuthorID != userID.(uint) {
+	if role != models.RoleAdmin && article.AuthorID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}

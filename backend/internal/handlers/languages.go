@@ -9,23 +9,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetLanguages(c *gin.Context) {
-	var languages []models.Language
-	config.DB.Where("active = true").Order("created_at asc").Find(&languages)
-	c.JSON(http.StatusOK, languages)
+func ListerLangues(c *gin.Context) {
+	var langues []models.Language
+	config.DB.Where("active = true").Order("created_at asc").Find(&langues)
+	c.JSON(http.StatusOK, langues)
 }
 
-func GetTranslation(c *gin.Context) {
-	lang := c.Param("lang")
-	var translation models.Translation
-	if err := config.DB.Where("lang_code = ?", lang).First(&translation).Error; err != nil {
+func ObtenirTraduction(c *gin.Context) {
+	code := c.Param("lang")
+	var traduction models.Translation
+	if err := config.DB.Where("lang_code = ?", code).First(&traduction).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "traduction introuvable"})
 		return
 	}
-	c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(translation.Data))
+	c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(traduction.Data))
 }
 
-func CreateLanguage(c *gin.Context) {
+func CreerLangue(c *gin.Context) {
 	var req struct {
 		Code  string `json:"code"`
 		Name  string `json:"name"`
@@ -41,10 +41,10 @@ func CreateLanguage(c *gin.Context) {
 		req.Label = strings.ToUpper(req.Code)
 	}
 
-	var existing models.Language
-	if err := config.DB.Unscoped().Where("code = ?", req.Code).First(&existing).Error; err == nil {
-		if existing.DeletedAt.Valid {
-			config.DB.Unscoped().Delete(&existing)
+	var existante models.Language
+	if err := config.DB.Unscoped().Where("code = ?", req.Code).First(&existante).Error; err == nil {
+		if existante.DeletedAt.Valid {
+			config.DB.Unscoped().Delete(&existante)
 			config.DB.Unscoped().Where("lang_code = ?", req.Code).Delete(&models.Translation{})
 		} else {
 			c.JSON(http.StatusConflict, gin.H{"error": "cette langue existe déjà"})
@@ -52,7 +52,7 @@ func CreateLanguage(c *gin.Context) {
 		}
 	}
 
-	lang := models.Language{
+	nouvelle := models.Language{
 		Code:      req.Code,
 		Name:      req.Name,
 		Label:     req.Label,
@@ -60,20 +60,20 @@ func CreateLanguage(c *gin.Context) {
 		DeepLCode: req.Code,
 		Active:    true,
 	}
-	if err := config.DB.Create(&lang).Error; err != nil {
+	if err := config.DB.Create(&nouvelle).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "erreur création langue: " + err.Error()})
 		return
 	}
 
-	var frTranslation models.Translation
-	if config.DB.Where("lang_code = ?", "fr").First(&frTranslation).Error == nil {
-		config.DB.Create(&models.Translation{LangCode: req.Code, Data: frTranslation.Data})
+	var traductionFR models.Translation
+	if config.DB.Where("lang_code = ?", "fr").First(&traductionFR).Error == nil {
+		config.DB.Create(&models.Translation{LangCode: req.Code, Data: traductionFR.Data})
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"language": lang, "message": "Langue créée avec succès"})
+	c.JSON(http.StatusCreated, gin.H{"language": nouvelle, "message": "Langue créée avec succès"})
 }
 
-func DeleteLanguage(c *gin.Context) {
+func SupprimerLangue(c *gin.Context) {
 	code := strings.ToLower(c.Param("code"))
 	if code == "fr" || code == "en" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "impossible de supprimer les langues par défaut"})
@@ -84,9 +84,8 @@ func DeleteLanguage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "langue supprimée"})
 }
 
-
-func GetAdminLanguages(c *gin.Context) {
-	var languages []models.Language
-	config.DB.Order("created_at asc").Find(&languages)
-	c.JSON(http.StatusOK, languages)
+func ListerLanguesAdmin(c *gin.Context) {
+	var langues []models.Language
+	config.DB.Order("created_at asc").Find(&langues)
+	c.JSON(http.StatusOK, langues)
 }

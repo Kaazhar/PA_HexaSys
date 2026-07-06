@@ -12,62 +12,62 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-func ensureInvoice(number string, userID uint, invoiceType, description string, amount float64) models.Invoice {
-	var inv models.Invoice
-	if config.DB.Where("number = ?", number).First(&inv).Error == nil {
-		return inv
+func creerOuObtenirFacture(numero string, idUtilisateur uint, typeFacture, description string, montant float64) models.Invoice {
+	var facture models.Invoice
+	if config.DB.Where("number = ?", numero).First(&facture).Error == nil {
+		return facture
 	}
 
-	tax := amount * 0.20
-	inv = models.Invoice{
-		Number:      number,
-		UserID:      userID,
-		Type:        invoiceType,
+	tva := montant * 0.20
+	facture = models.Invoice{
+		Number:      numero,
+		UserID:      idUtilisateur,
+		Type:        typeFacture,
 		Description: description,
-		Amount:      amount,
-		Tax:         tax,
-		Total:       amount + tax,
+		Amount:      montant,
+		Tax:         tva,
+		Total:       montant + tva,
 		Status:      "paid",
 	}
-	config.DB.Create(&inv)
-	return inv
+	config.DB.Create(&facture)
+	return facture
 }
 
-func GetMyInvoices(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	var invoices []models.Invoice
-	config.DB.Where("user_id = ?", userID).Order("created_at DESC").Find(&invoices)
-	c.JSON(http.StatusOK, invoices)
+func MesFactures(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	var factures []models.Invoice
+	config.DB.Where("user_id = ?", idUtilisateur).Order("created_at DESC").Find(&factures)
+	c.JSON(http.StatusOK, factures)
 }
 
-func DownloadInvoicePDF(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func TelechargerFacturePDF(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 	role, _ := c.Get("userRole")
 
 	id := c.Param("id")
-	var invoice models.Invoice
-	if err := config.DB.Preload("User").First(&invoice, id).Error; err != nil {
+	var facture models.Invoice
+	if err := config.DB.Preload("User").First(&facture, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Facture introuvable"})
 		return
 	}
 
-	if invoice.UserID != userID.(uint) && role != models.RoleAdmin {
+	if facture.UserID != idUtilisateur.(uint) && role != models.RoleAdmin {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Cette facture ne vous appartient pas"})
 		return
 	}
 
-	pdfBytes, err := buildInvoicePDF(invoice)
+	contenuPDF, err := genererPDF(facture)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de générer le PDF"})
 		return
 	}
 
-	filename := fmt.Sprintf("facture-%s.pdf", invoice.Number)
-	c.Header("Content-Disposition", "attachment; filename="+filename)
-	c.Data(http.StatusOK, "application/pdf", pdfBytes)
+	nomFichier := fmt.Sprintf("facture-%s.pdf", facture.Number)
+	c.Header("Content-Disposition", "attachment; filename="+nomFichier)
+	c.Data(http.StatusOK, "application/pdf", contenuPDF)
 }
 
-func buildInvoicePDF(inv models.Invoice) ([]byte, error) {
+func genererPDF(inv models.Invoice) ([]byte, error) {
 	pdf := fpdf.New("P", "mm", "A4", "")
 	pdf.SetMargins(20, 20, 20)
 	pdf.SetAutoPageBreak(false, 0)

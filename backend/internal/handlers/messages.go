@@ -10,17 +10,17 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-func GetConversations(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	var convs []models.Conversation
+func ListerConversations(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	var conversations []models.Conversation
 	config.DB.Preload("ParticipantOne").Preload("ParticipantTwo").Preload("Listing").
-		Where("participant_one_id = ? OR participant_two_id = ?", userID, userID).
-		Order("last_message_at DESC").Find(&convs)
-	c.JSON(http.StatusOK, convs)
+		Where("participant_one_id = ? OR participant_two_id = ?", idUtilisateur, idUtilisateur).
+		Order("last_message_at DESC").Find(&conversations)
+	c.JSON(http.StatusOK, conversations)
 }
 
-func GetOrCreateConversation(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func ObtenirOuCreerConversation(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 	var req struct {
 		OtherUserID uint  `json:"other_user_id" binding:"required"`
 		ListingID   *uint `json:"listing_id"`
@@ -29,71 +29,71 @@ func GetOrCreateConversation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if req.OtherUserID == userID.(uint) {
+	if req.OtherUserID == idUtilisateur.(uint) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Vous ne pouvez pas vous envoyer un message"})
 		return
 	}
 
-	uid := userID.(uint)
-	var conv models.Conversation
-	query := config.DB.Where(
+	uid := idUtilisateur.(uint)
+	var conversation models.Conversation
+	q := config.DB.Where(
 		"(participant_one_id = ? AND participant_two_id = ?) OR (participant_one_id = ? AND participant_two_id = ?)",
 		uid, req.OtherUserID, req.OtherUserID, uid,
 	)
 	if req.ListingID != nil {
-		query = query.Where("listing_id = ?", *req.ListingID)
+		q = q.Where("listing_id = ?", *req.ListingID)
 	}
 
-	if err := query.First(&conv).Error; err != nil {
-		conv = models.Conversation{
+	if err := q.First(&conversation).Error; err != nil {
+		conversation = models.Conversation{
 			ParticipantOneID: uid,
 			ParticipantTwoID: req.OtherUserID,
 			ListingID:        req.ListingID,
 			LastMessageAt:    time.Now(),
 		}
-		config.DB.Create(&conv)
+		config.DB.Create(&conversation)
 	}
 
-	config.DB.Preload("ParticipantOne").Preload("ParticipantTwo").Preload("Listing").First(&conv, conv.ID)
-	c.JSON(http.StatusOK, conv)
+	config.DB.Preload("ParticipantOne").Preload("ParticipantTwo").Preload("Listing").First(&conversation, conversation.ID)
+	c.JSON(http.StatusOK, conversation)
 }
 
-func GetMessages(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	convID, _ := strconv.Atoi(c.Param("id"))
+func ListerMessages(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	idConversation, _ := strconv.Atoi(c.Param("id"))
 
-	var conv models.Conversation
-	if err := config.DB.First(&conv, convID).Error; err != nil {
+	var conversation models.Conversation
+	if err := config.DB.First(&conversation, idConversation).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Conversation introuvable"})
 		return
 	}
-	uid := userID.(uint)
-	if conv.ParticipantOneID != uid && conv.ParticipantTwoID != uid {
+	uid := idUtilisateur.(uint)
+	if conversation.ParticipantOneID != uid && conversation.ParticipantTwoID != uid {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
 		return
 	}
 
 	config.DB.Model(&models.Message{}).
-		Where("conversation_id = ? AND sender_id != ? AND read = false", convID, uid).
+		Where("conversation_id = ? AND sender_id != ? AND read = false", idConversation, uid).
 		Update("read", true)
 
 	var messages []models.Message
-	config.DB.Preload("Sender").Where("conversation_id = ?", convID).
+	config.DB.Preload("Sender").Where("conversation_id = ?", idConversation).
 		Order("created_at ASC").Limit(100).Find(&messages)
 	c.JSON(http.StatusOK, messages)
 }
 
-func SendMessage(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	convID, _ := strconv.Atoi(c.Param("id"))
+func EnvoyerMessage(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	idConversation, _ := strconv.Atoi(c.Param("id"))
 
-	var conv models.Conversation
-	if err := config.DB.First(&conv, convID).Error; err != nil {
+	var conversation models.Conversation
+	if err := config.DB.First(&conversation, idConversation).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Conversation introuvable"})
 		return
 	}
-	uid := userID.(uint)
-	if conv.ParticipantOneID != uid && conv.ParticipantTwoID != uid {
+	uid := idUtilisateur.(uint)
+	if conversation.ParticipantOneID != uid && conversation.ParticipantTwoID != uid {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
 		return
 	}
@@ -106,45 +106,44 @@ func SendMessage(c *gin.Context) {
 		return
 	}
 
-	msg := models.Message{
-		ConversationID: uint(convID),
+	message := models.Message{
+		ConversationID: uint(idConversation),
 		SenderID:       uid,
 		Content:        req.Content,
 	}
-	config.DB.Create(&msg)
-	config.DB.Model(&conv).Updates(map[string]interface{}{
+	config.DB.Create(&message)
+	config.DB.Model(&conversation).Updates(map[string]interface{}{
 		"last_message_at": time.Now(),
 		"last_message":    req.Content,
 	})
 
-	recipientID := conv.ParticipantOneID
-	if conv.ParticipantOneID == uid {
-		recipientID = conv.ParticipantTwoID
+	idDestinataire := conversation.ParticipantOneID
+	if conversation.ParticipantOneID == uid {
+		idDestinataire = conversation.ParticipantTwoID
 	}
-	var sender models.User
-	config.DB.First(&sender, uid)
-	preview := req.Content
-	if len(preview) > 50 {
-		preview = preview[:50] + "..."
+	var expediteur models.User
+	config.DB.First(&expediteur, uid)
+	apercu := req.Content
+	if len(apercu) > 50 {
+		apercu = apercu[:50] + "..."
 	}
-	notif := models.Notification{
-		UserID:  recipientID,
-		Message: "Nouveau message de " + sender.Firstname + " " + sender.Lastname + " : " + preview,
+	config.DB.Create(&models.Notification{
+		UserID:  idDestinataire,
+		Message: "Nouveau message de " + expediteur.Firstname + " " + expediteur.Lastname + " : " + apercu,
 		Type:    "info",
-	}
-	config.DB.Create(&notif)
+	})
 
-	var recipient models.User
-	if err := config.DB.First(&recipient, recipientID).Error; err == nil {
-		senderName := sender.Firstname + " " + sender.Lastname
+	var destinataire models.User
+	if err := config.DB.First(&destinataire, idDestinataire).Error; err == nil {
+		nomExpediteur := expediteur.Firstname + " " + expediteur.Lastname
 		appURL := config.GetEnv("APP_URL", "https://upcycleconnect.net")
 		go config.SendEmail(
-			recipient.Email,
-			"Nouveau message de "+senderName,
-			emailNewMessageTemplate(recipient.Firstname, senderName, preview, appURL),
+			destinataire.Email,
+			"Nouveau message de "+nomExpediteur,
+			emailNewMessageTemplate(destinataire.Firstname, nomExpediteur, apercu, appURL),
 		)
 	}
 
-	config.DB.Preload("Sender").First(&msg, msg.ID)
-	c.JSON(http.StatusCreated, msg)
+	config.DB.Preload("Sender").First(&message, message.ID)
+	c.JSON(http.StatusCreated, message)
 }

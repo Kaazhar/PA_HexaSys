@@ -9,49 +9,49 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-func GetListingReviews(c *gin.Context) {
+func AvisAnnonce(c *gin.Context) {
 	id := c.Param("id")
-	var reviews []models.Review
-	config.DB.Preload("Reviewer").Where("listing_id = ?", id).Order("created_at DESC").Find(&reviews)
-	c.JSON(http.StatusOK, reviews)
+	var avis []models.Review
+	config.DB.Preload("Reviewer").Where("listing_id = ?", id).Order("created_at DESC").Find(&avis)
+	c.JSON(http.StatusOK, avis)
 }
 
-func GetUserReviews(c *gin.Context) {
+func AvisUtilisateur(c *gin.Context) {
 	id := c.Param("id")
-	var reviews []models.Review
-	config.DB.Preload("Reviewer").Preload("Listing").Where("target_user_id = ?", id).Order("created_at DESC").Find(&reviews)
+	var avis []models.Review
+	config.DB.Preload("Reviewer").Preload("Listing").Where("target_user_id = ?", id).Order("created_at DESC").Find(&avis)
 
-	var avg float64
-	var count int64
-	config.DB.Model(&models.Review{}).Where("target_user_id = ?", id).Count(&count)
-	if count > 0 {
+	var moyenne float64
+	var nbAvis int64
+	config.DB.Model(&models.Review{}).Where("target_user_id = ?", id).Count(&nbAvis)
+	if nbAvis > 0 {
 		config.DB.Model(&models.Review{}).Where("target_user_id = ?", id).
-			Select("AVG(rating)").Scan(&avg)
+			Select("AVG(rating)").Scan(&moyenne)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"reviews": reviews,
-		"average": avg,
-		"count":   count,
+		"reviews": avis,
+		"average": moyenne,
+		"count":   nbAvis,
 	})
 }
 
-func CreateReview(c *gin.Context) {
-	listingID, _ := strconv.Atoi(c.Param("id"))
-	reviewerID, _ := c.Get("userID")
+func CreerAvis(c *gin.Context) {
+	idAnnonce, _ := strconv.Atoi(c.Param("id"))
+	idEvaluateur, _ := c.Get("userID")
 
-	var listing models.Listing
-	if err := config.DB.First(&listing, listingID).Error; err != nil {
+	var annonce models.Listing
+	if err := config.DB.First(&annonce, idAnnonce).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
 		return
 	}
-	if listing.UserID == reviewerID.(uint) {
+	if annonce.UserID == idEvaluateur.(uint) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Vous ne pouvez pas noter votre propre annonce"})
 		return
 	}
 
-	var existing models.Review
-	if err := config.DB.Where("listing_id = ? AND reviewer_id = ?", listingID, reviewerID).First(&existing).Error; err == nil {
+	var existant models.Review
+	if err := config.DB.Where("listing_id = ? AND reviewer_id = ?", idAnnonce, idEvaluateur).First(&existant).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Vous avez déjà noté cette annonce"})
 		return
 	}
@@ -65,33 +65,33 @@ func CreateReview(c *gin.Context) {
 		return
 	}
 
-	review := models.Review{
-		ReviewerID:   reviewerID.(uint),
-		TargetUserID: listing.UserID,
-		ListingID:    uint(listingID),
+	avis := models.Review{
+		ReviewerID:   idEvaluateur.(uint),
+		TargetUserID: annonce.UserID,
+		ListingID:    uint(idAnnonce),
 		Rating:       req.Rating,
 		Comment:      req.Comment,
 	}
-	config.DB.Create(&review)
-	config.DB.Preload("Reviewer").First(&review, review.ID)
-	c.JSON(http.StatusCreated, review)
+	config.DB.Create(&avis)
+	config.DB.Preload("Reviewer").First(&avis, avis.ID)
+	c.JSON(http.StatusCreated, avis)
 }
 
-func DeleteReview(c *gin.Context) {
+func SupprimerAvis(c *gin.Context) {
 	id := c.Param("id")
-	reviewerID, _ := c.Get("userID")
+	idEvaluateur, _ := c.Get("userID")
 	userRole, _ := c.Get("userRole")
 
-	var review models.Review
-	if err := config.DB.First(&review, id).Error; err != nil {
+	var avis models.Review
+	if err := config.DB.First(&avis, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Avis introuvable"})
 		return
 	}
 	role := userRole.(models.UserRole)
-	if role != models.RoleAdmin && review.ReviewerID != reviewerID.(uint) {
+	if role != models.RoleAdmin && avis.ReviewerID != idEvaluateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}
-	config.DB.Delete(&review)
+	config.DB.Delete(&avis)
 	c.JSON(http.StatusOK, gin.H{"message": "Avis supprimé"})
 }

@@ -12,7 +12,7 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-type SiretRequest struct {
+type RequeteSiret struct {
 	Siret string `json:"siret" binding:"required"`
 }
 
@@ -76,10 +76,10 @@ var categorieEntreprise = map[string]string{
 	"GE":  "Grande entreprise (GE)",
 }
 
-func VerifySiret(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func VerifierSiret(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 
-	var req SiretRequest
+	var req RequeteSiret
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -91,14 +91,14 @@ func VerifySiret(c *gin.Context) {
 	}
 
 	url := fmt.Sprintf("https://recherche-entreprises.api.gouv.fr/search?q=%s&page=1&per_page=1", req.Siret)
-	httpReq, err := http.NewRequest("GET", url, nil)
+	requete, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur interne"})
 		return
 	}
-	httpReq.Header.Set("User-Agent", "UpcycleConnect/1.0")
+	requete.Header.Set("User-Agent", "UpcycleConnect/1.0")
 
-	resp, err := (&http.Client{}).Do(httpReq)
+	resp, err := (&http.Client{}).Do(requete)
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Impossible de contacter l'API SIRENE"})
 		return
@@ -110,23 +110,23 @@ func VerifySiret(c *gin.Context) {
 		return
 	}
 
-	body, _ := io.ReadAll(resp.Body)
-	var data RechercheEntreprisesResponse
-	if err := json.Unmarshal(body, &data); err != nil || data.TotalResults == 0 {
+	corps, _ := io.ReadAll(resp.Body)
+	var donnees RechercheEntreprisesResponse
+	if err := json.Unmarshal(corps, &donnees); err != nil || donnees.TotalResults == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "SIRET introuvable dans la base SIRENE"})
 		return
 	}
 
-	company := data.Results[0]
+	entreprise := donnees.Results[0]
 
-	if company.EtatAdministratif != "A" {
+	if entreprise.EtatAdministratif != "A" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Cette entreprise n'est pas active (fermée ou radiée)"})
 		return
 	}
 
 	var etabAdresse, etabVille, etabCP string
 	etabActif := false
-	for _, etab := range company.MatchingEtablissements {
+	for _, etab := range entreprise.MatchingEtablissements {
 		if etab.Siret == req.Siret {
 			if etab.EtatAdministratif == "A" {
 				etabActif = true
@@ -137,77 +137,77 @@ func VerifySiret(c *gin.Context) {
 			break
 		}
 	}
-	if !etabActif && company.Siege.Siret == req.Siret {
-		etabActif = company.Siege.EtatAdministratif == "A"
-		etabAdresse = company.Siege.Adresse
-		etabVille = company.Siege.LibelleCommune
-		etabCP = company.Siege.CodePostal
+	if !etabActif && entreprise.Siege.Siret == req.Siret {
+		etabActif = entreprise.Siege.EtatAdministratif == "A"
+		etabAdresse = entreprise.Siege.Adresse
+		etabVille = entreprise.Siege.LibelleCommune
+		etabCP = entreprise.Siege.CodePostal
 	}
 	if !etabActif {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Cet établissement n'est pas actif"})
 		return
 	}
 
-	companyName := company.NomComplet
-	if companyName == "" {
-		companyName = company.NomRaisonSociale
+	nomEntreprise := entreprise.NomComplet
+	if nomEntreprise == "" {
+		nomEntreprise = entreprise.NomRaisonSociale
 	}
 
-	effectifsLabel := trancheEffectifs[company.TrancheEffectifSalarie]
-	if effectifsLabel == "" && company.TrancheEffectifSalarie != "" {
-		effectifsLabel = "Tranche " + company.TrancheEffectifSalarie
+	libelleEffectifs := trancheEffectifs[entreprise.TrancheEffectifSalarie]
+	if libelleEffectifs == "" && entreprise.TrancheEffectifSalarie != "" {
+		libelleEffectifs = "Tranche " + entreprise.TrancheEffectifSalarie
 	}
 
-	catLabel := categorieEntreprise[company.CategorieEntreprise]
-	if catLabel == "" {
-		catLabel = company.CategorieEntreprise
+	libelleCategorie := categorieEntreprise[entreprise.CategorieEntreprise]
+	if libelleCategorie == "" {
+		libelleCategorie = entreprise.CategorieEntreprise
 	}
 
-	var lastCA *int64
-	var lastCAYear string
-	for year, fin := range company.Finances {
-		if fin.CA != nil && (lastCAYear == "" || year > lastCAYear) {
-			lastCA = fin.CA
-			lastCAYear = year
+	var dernierCA *int64
+	var anneeDernierCA string
+	for annee, fin := range entreprise.Finances {
+		if fin.CA != nil && (anneeDernierCA == "" || annee > anneeDernierCA) {
+			dernierCA = fin.CA
+			anneeDernierCA = annee
 		}
 	}
 
-	var user models.User
-	config.DB.First(&user, userID)
-	config.DB.Model(&user).Updates(map[string]interface{}{
+	var utilisateur models.User
+	config.DB.First(&utilisateur, idUtilisateur)
+	config.DB.Model(&utilisateur).Updates(map[string]interface{}{
 		"siret":          req.Siret,
 		"siret_verified": true,
 	})
 
 	config.DB.Create(&models.Notification{
-		UserID:  user.ID,
-		Message: fmt.Sprintf("Votre SIRET %s a été vérifié avec succès. Entreprise : %s", req.Siret, companyName),
+		UserID:  utilisateur.ID,
+		Message: fmt.Sprintf("Votre SIRET %s a été vérifié avec succès. Entreprise : %s", req.Siret, nomEntreprise),
 		Type:    "success",
 	})
 
-	result := gin.H{
-		"message":          "SIRET vérifié avec succès",
-		"siret":            req.Siret,
-		"siren":            company.Siren,
-		"company_name":     companyName,
-		"activity_code":    company.ActivitePrincipale,
-		"category":         catLabel,
-		"employees":        effectifsLabel,
-		"date_creation":    company.DateCreation,
-		"address":          etabAdresse,
-		"city":             etabVille,
-		"postal_code":      etabCP,
-		"siret_verified":   true,
+	reponse := gin.H{
+		"message":        "SIRET vérifié avec succès",
+		"siret":          req.Siret,
+		"siren":          entreprise.Siren,
+		"company_name":   nomEntreprise,
+		"activity_code":  entreprise.ActivitePrincipale,
+		"category":       libelleCategorie,
+		"employees":      libelleEffectifs,
+		"date_creation":  entreprise.DateCreation,
+		"address":        etabAdresse,
+		"city":           etabVille,
+		"postal_code":    etabCP,
+		"siret_verified": true,
 	}
-	if lastCA != nil {
-		result["turnover"] = *lastCA
-		result["turnover_year"] = lastCAYear
+	if dernierCA != nil {
+		reponse["turnover"] = *dernierCA
+		reponse["turnover_year"] = anneeDernierCA
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, reponse)
 }
 
-func GetCompanyBySiret(c *gin.Context) {
+func ObtenirEntrepriseSiret(c *gin.Context) {
 	siret := c.Param("siret")
 	if !siretRegexp.MatchString(siret) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "SIRET invalide"})
@@ -215,35 +215,35 @@ func GetCompanyBySiret(c *gin.Context) {
 	}
 
 	url := fmt.Sprintf("https://recherche-entreprises.api.gouv.fr/search?q=%s&page=1&per_page=1", siret)
-	httpReq, err := http.NewRequest("GET", url, nil)
+	requete, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur interne"})
 		return
 	}
-	httpReq.Header.Set("User-Agent", "UpcycleConnect/1.0")
+	requete.Header.Set("User-Agent", "UpcycleConnect/1.0")
 
-	resp, err := (&http.Client{}).Do(httpReq)
+	resp, err := (&http.Client{}).Do(requete)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Impossible de contacter l'API SIRENE"})
 		return
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
-	var data RechercheEntreprisesResponse
-	if err := json.Unmarshal(body, &data); err != nil || data.TotalResults == 0 {
+	corps, _ := io.ReadAll(resp.Body)
+	var donnees RechercheEntreprisesResponse
+	if err := json.Unmarshal(corps, &donnees); err != nil || donnees.TotalResults == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Entreprise introuvable"})
 		return
 	}
 
-	company := data.Results[0]
-	companyName := company.NomComplet
-	if companyName == "" {
-		companyName = company.NomRaisonSociale
+	entreprise := donnees.Results[0]
+	nomEntreprise := entreprise.NomComplet
+	if nomEntreprise == "" {
+		nomEntreprise = entreprise.NomRaisonSociale
 	}
 
 	var etabAdresse, etabVille, etabCP string
-	for _, etab := range company.MatchingEtablissements {
+	for _, etab := range entreprise.MatchingEtablissements {
 		if etab.Siret == siret {
 			etabAdresse = etab.Adresse
 			etabVille = etab.LibelleCommune
@@ -252,104 +252,104 @@ func GetCompanyBySiret(c *gin.Context) {
 		}
 	}
 	if etabAdresse == "" {
-		etabAdresse = company.Siege.Adresse
-		etabVille = company.Siege.LibelleCommune
-		etabCP = company.Siege.CodePostal
+		etabAdresse = entreprise.Siege.Adresse
+		etabVille = entreprise.Siege.LibelleCommune
+		etabCP = entreprise.Siege.CodePostal
 	}
 
-	effectifsLabel := trancheEffectifs[company.TrancheEffectifSalarie]
-	catLabel := categorieEntreprise[company.CategorieEntreprise]
-	if catLabel == "" {
-		catLabel = company.CategorieEntreprise
+	libelleEffectifs := trancheEffectifs[entreprise.TrancheEffectifSalarie]
+	libelleCategorie := categorieEntreprise[entreprise.CategorieEntreprise]
+	if libelleCategorie == "" {
+		libelleCategorie = entreprise.CategorieEntreprise
 	}
 
-	var lastCA *int64
-	var lastCAYear string
-	for year, fin := range company.Finances {
-		if fin.CA != nil && (lastCAYear == "" || year > lastCAYear) {
-			lastCA = fin.CA
-			lastCAYear = year
+	var dernierCA *int64
+	var anneeDernierCA string
+	for annee, fin := range entreprise.Finances {
+		if fin.CA != nil && (anneeDernierCA == "" || annee > anneeDernierCA) {
+			dernierCA = fin.CA
+			anneeDernierCA = annee
 		}
 	}
 
-	result := gin.H{
-		"siren":          company.Siren,
-		"company_name":   companyName,
-		"activity_code":  company.ActivitePrincipale,
-		"category":       catLabel,
-		"employees":      effectifsLabel,
-		"date_creation":  company.DateCreation,
-		"address":        etabAdresse,
-		"city":           etabVille,
-		"postal_code":    etabCP,
+	reponse := gin.H{
+		"siren":         entreprise.Siren,
+		"company_name":  nomEntreprise,
+		"activity_code": entreprise.ActivitePrincipale,
+		"category":      libelleCategorie,
+		"employees":     libelleEffectifs,
+		"date_creation": entreprise.DateCreation,
+		"address":       etabAdresse,
+		"city":          etabVille,
+		"postal_code":   etabCP,
 	}
-	if lastCA != nil {
-		result["turnover"] = *lastCA
-		result["turnover_year"] = lastCAYear
+	if dernierCA != nil {
+		reponse["turnover"] = *dernierCA
+		reponse["turnover_year"] = anneeDernierCA
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, reponse)
 }
 
-func GetSiretStatus(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func StatutSiret(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 
-	var user models.User
-	if err := config.DB.Select("id, siret, siret_verified").First(&user, userID).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.Select("id, siret, siret_verified").First(&utilisateur, idUtilisateur).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"siret":          user.Siret,
-		"siret_verified": user.SiretVerified,
+		"siret":          utilisateur.Siret,
+		"siret_verified": utilisateur.SiretVerified,
 	})
 }
 
-func GetCompanyInfo(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func InfosEntreprise(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 
-	var user models.User
-	if err := config.DB.Select("id, siret, siret_verified").First(&user, userID).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.Select("id, siret, siret_verified").First(&utilisateur, idUtilisateur).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
-	if !user.SiretVerified || user.Siret == "" {
+	if !utilisateur.SiretVerified || utilisateur.Siret == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Aucun SIRET vérifié"})
 		return
 	}
 
-	url := fmt.Sprintf("https://recherche-entreprises.api.gouv.fr/search?q=%s&page=1&per_page=1", user.Siret)
-	httpReq, err := http.NewRequest("GET", url, nil)
+	url := fmt.Sprintf("https://recherche-entreprises.api.gouv.fr/search?q=%s&page=1&per_page=1", utilisateur.Siret)
+	requete, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur interne"})
 		return
 	}
-	httpReq.Header.Set("User-Agent", "UpcycleConnect/1.0")
+	requete.Header.Set("User-Agent", "UpcycleConnect/1.0")
 
-	resp, err := (&http.Client{}).Do(httpReq)
+	resp, err := (&http.Client{}).Do(requete)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Impossible de contacter l'API SIRENE"})
 		return
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
-	var data RechercheEntreprisesResponse
-	if err := json.Unmarshal(body, &data); err != nil || data.TotalResults == 0 {
+	corps, _ := io.ReadAll(resp.Body)
+	var donnees RechercheEntreprisesResponse
+	if err := json.Unmarshal(corps, &donnees); err != nil || donnees.TotalResults == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Entreprise introuvable"})
 		return
 	}
 
-	company := data.Results[0]
-	companyName := company.NomComplet
-	if companyName == "" {
-		companyName = company.NomRaisonSociale
+	entreprise := donnees.Results[0]
+	nomEntreprise := entreprise.NomComplet
+	if nomEntreprise == "" {
+		nomEntreprise = entreprise.NomRaisonSociale
 	}
 
 	var etabAdresse, etabVille, etabCP string
-	for _, etab := range company.MatchingEtablissements {
-		if etab.Siret == user.Siret {
+	for _, etab := range entreprise.MatchingEtablissements {
+		if etab.Siret == utilisateur.Siret {
 			etabAdresse = etab.Adresse
 			etabVille = etab.LibelleCommune
 			etabCP = etab.CodePostal
@@ -357,43 +357,43 @@ func GetCompanyInfo(c *gin.Context) {
 		}
 	}
 	if etabAdresse == "" {
-		etabAdresse = company.Siege.Adresse
-		etabVille = company.Siege.LibelleCommune
-		etabCP = company.Siege.CodePostal
+		etabAdresse = entreprise.Siege.Adresse
+		etabVille = entreprise.Siege.LibelleCommune
+		etabCP = entreprise.Siege.CodePostal
 	}
 
-	effectifsLabel := trancheEffectifs[company.TrancheEffectifSalarie]
-	catLabel := categorieEntreprise[company.CategorieEntreprise]
-	if catLabel == "" {
-		catLabel = company.CategorieEntreprise
+	libelleEffectifs := trancheEffectifs[entreprise.TrancheEffectifSalarie]
+	libelleCategorie := categorieEntreprise[entreprise.CategorieEntreprise]
+	if libelleCategorie == "" {
+		libelleCategorie = entreprise.CategorieEntreprise
 	}
 
-	var lastCA *int64
-	var lastCAYear string
-	for year, fin := range company.Finances {
-		if fin.CA != nil && (lastCAYear == "" || year > lastCAYear) {
-			lastCA = fin.CA
-			lastCAYear = year
+	var dernierCA *int64
+	var anneeDernierCA string
+	for annee, fin := range entreprise.Finances {
+		if fin.CA != nil && (anneeDernierCA == "" || annee > anneeDernierCA) {
+			dernierCA = fin.CA
+			anneeDernierCA = annee
 		}
 	}
 
-	result := gin.H{
-		"siret":          user.Siret,
-		"siren":          company.Siren,
-		"company_name":   companyName,
-		"activity_code":  company.ActivitePrincipale,
-		"category":       catLabel,
-		"employees":      effectifsLabel,
-		"date_creation":  company.DateCreation,
+	reponse := gin.H{
+		"siret":          utilisateur.Siret,
+		"siren":          entreprise.Siren,
+		"company_name":   nomEntreprise,
+		"activity_code":  entreprise.ActivitePrincipale,
+		"category":       libelleCategorie,
+		"employees":      libelleEffectifs,
+		"date_creation":  entreprise.DateCreation,
 		"address":        etabAdresse,
 		"city":           etabVille,
 		"postal_code":    etabCP,
 		"siret_verified": true,
 	}
-	if lastCA != nil {
-		result["turnover"] = *lastCA
-		result["turnover_year"] = lastCAYear
+	if dernierCA != nil {
+		reponse["turnover"] = *dernierCA
+		reponse["turnover_year"] = anneeDernierCA
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, reponse)
 }
