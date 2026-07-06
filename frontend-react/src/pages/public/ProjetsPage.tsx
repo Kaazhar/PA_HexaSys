@@ -57,7 +57,7 @@ export default function ProjetsPage() {
 }
 
 function ProjectCard({ project }: { project: Project }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dateLocale = i18n.language?.startsWith('en') ? enUS : fr;
   const tags = project.tags ? project.tags.split(',').map(s => s.trim()).filter(Boolean) : [];
 
@@ -88,7 +88,7 @@ function ProjectCard({ project }: { project: Project }) {
           {' · '}{format(new Date(project.created_at), 'dd MMM yyyy', { locale: dateLocale })}
         </div>
         <div className="flex items-center gap-3 text-xs text-gray-400">
-          <span>{project.views} vues</span>
+          <span>{project.views} {t('admin_articles.col_views').toLowerCase()}</span>
           <span>{project.likes} ♡</span>
         </div>
       </div>

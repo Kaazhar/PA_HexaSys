@@ -120,7 +120,6 @@ export default function ProjetDetailPage() {
           const step = updates[idx];
           return (
             <div>
-              {/* Onglets des étapes */}
               <div className="flex flex-wrap gap-1.5 border-b border-gray-100 pb-3 mb-4">
                 {updates.map((u, i) => (
                   <button
@@ -133,7 +132,6 @@ export default function ProjetDetailPage() {
                 ))}
               </div>
 
-              {/* Contenu de l'étape sélectionnée */}
               <div className="space-y-4">
                 <p className="text-xs text-gray-400">{format(new Date(step.created_at), 'dd MMMM yyyy, HH:mm', { locale: dateLocale })}</p>
                 {(step.description || step.comment) && (
