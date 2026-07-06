@@ -36,20 +36,20 @@ export default function AdminProjects() {
 
   const createMutation = useMutation({
     mutationFn: (d: any) => adminService.createProject(d),
-    onSuccess: () => { toast.success('Projet créé'); queryClient.invalidateQueries({ queryKey: ['admin-projects'] }); closeModal(); },
-    onError: (e: any) => toast.error(e?.response?.data?.error || 'Erreur'),
+    onSuccess: () => { toast.success(t('admin_projects.created')); queryClient.invalidateQueries({ queryKey: ['admin-projects'] }); closeModal(); },
+    onError: (e: any) => toast.error(e?.response?.data?.error || t('common.error')),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: any) => adminService.updateProject(id, data),
-    onSuccess: () => { toast.success('Projet mis à jour'); queryClient.invalidateQueries({ queryKey: ['admin-projects'] }); closeModal(); },
-    onError: (e: any) => toast.error(e?.response?.data?.error || 'Erreur'),
+    onSuccess: () => { toast.success(t('admin_projects.updated')); queryClient.invalidateQueries({ queryKey: ['admin-projects'] }); closeModal(); },
+    onError: (e: any) => toast.error(e?.response?.data?.error || t('common.error')),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => adminService.deleteProject(id),
-    onSuccess: () => { toast.success('Projet supprimé'); queryClient.invalidateQueries({ queryKey: ['admin-projects'] }); },
-    onError: (e: any) => toast.error(e?.response?.data?.error || 'Erreur'),
+    onSuccess: () => { toast.success(t('admin_projects.deleted')); queryClient.invalidateQueries({ queryKey: ['admin-projects'] }); },
+    onError: (e: any) => toast.error(e?.response?.data?.error || t('common.error')),
   });
 
   const openCreate = () => { setForm(emptyForm); setEditing({}); setIsNew(true); };
@@ -61,28 +61,28 @@ export default function AdminProjects() {
   const closeModal = () => { setEditing(null); setIsNew(false); setForm(emptyForm); };
 
   const handleSave = () => {
-    if (!form.title.trim()) { toast.error('Titre requis'); return; }
+    if (!form.title.trim()) { toast.error(t('admin_projects.title_required')); return; }
     if (isNew) { createMutation.mutate(form); }
     else if (editing?.id) { updateMutation.mutate({ id: editing.id, data: form }); }
   };
 
   return (
-    <DashboardLayout sidebarItems={adminSidebar} title="Gestion des projets">
+    <DashboardLayout sidebarItems={adminSidebar} title={t('admin_projects.title')}>
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Projets upcycling</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{projects.length} projets</p>
+            <h1 className="text-xl font-bold text-gray-900">{t('admin_projects.heading')}</h1>
+            <p className="text-sm text-gray-500 mt-0.5">{t('admin_projects.count', { count: projects.length })}</p>
           </div>
           <button onClick={openCreate} className="btn-primary">
-            Nouveau projet
+            {t('admin_projects.new')}
           </button>
         </div>
 
         <div className="max-w-sm">
           <input
             type="text"
-            placeholder="Rechercher..."
+            placeholder={t('admin_projects.search')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="input w-full"
@@ -96,12 +96,12 @@ export default function AdminProjects() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  <th className="table-header">Titre</th>
-                  <th className="table-header">Auteur</th>
-                  <th className="table-header">Tags</th>
-                  <th className="table-header">Vues</th>
-                  <th className="table-header">Date</th>
-                  <th className="table-header">Actions</th>
+                  <th className="table-header">{t('admin_projects.col_title')}</th>
+                  <th className="table-header">{t('admin_projects.col_author')}</th>
+                  <th className="table-header">{t('admin_projects.col_tags')}</th>
+                  <th className="table-header">{t('admin_projects.col_views')}</th>
+                  <th className="table-header">{t('admin_projects.col_date')}</th>
+                  <th className="table-header">{t('admin_projects.col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -128,13 +128,13 @@ export default function AdminProjects() {
                         >
                           ···
                         </button>
-                        <button onClick={() => openEdit(p)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Modifier">
+                        <button onClick={() => openEdit(p)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title={t('admin_projects.edit_tooltip')}>
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => { if (confirm(`Supprimer "${p.title}" ?`)) deleteMutation.mutate(p.id); }}
+                          onClick={() => { if (confirm(t('admin_projects.confirm_delete', { title: p.title }))) deleteMutation.mutate(p.id); }}
                           className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Supprimer"
+                          title={t('admin_projects.delete_tooltip')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -143,7 +143,7 @@ export default function AdminProjects() {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={6} className="py-12 text-center text-gray-400">Aucun projet</td></tr>
+                  <tr><td colSpan={6} className="py-12 text-center text-gray-400">{t('admin_projects.no_projects')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -155,35 +155,35 @@ export default function AdminProjects() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold">{isNew ? 'Nouveau projet' : 'Modifier le projet'}</h3>
+              <h3 className="text-lg font-semibold">{isNew ? t('admin_projects.modal_create') : t('admin_projects.modal_edit')}</h3>
               <button onClick={closeModal} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Titre</label>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">{t('admin_projects.label_title')}</label>
                 <input className="input w-full" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Description</label>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">{t('admin_projects.label_desc')}</label>
                 <textarea className="input w-full h-24 resize-none" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Images avant (URLs, virgules)</label>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">{t('admin_projects.label_before')}</label>
                 <input className="input w-full" value={form.before_images} onChange={e => setForm(f => ({ ...f, before_images: e.target.value }))} placeholder="https://..." />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Images après (URLs, virgules)</label>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">{t('admin_projects.label_after')}</label>
                 <input className="input w-full" value={form.after_images} onChange={e => setForm(f => ({ ...f, after_images: e.target.value }))} placeholder="https://..." />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Tags (virgules)</label>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">{t('admin_projects.label_tags')}</label>
                 <input className="input w-full" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} placeholder="mobilier, textile, déco" />
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-5">
-              <button onClick={closeModal} className="btn-secondary">Annuler</button>
+              <button onClick={closeModal} className="btn-secondary">{t('common.cancel')}</button>
               <button onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending} className="btn-primary flex items-center gap-2">
-                <Check className="w-4 h-4" /> {isNew ? 'Créer' : 'Enregistrer'}
+                <Check className="w-4 h-4" /> {isNew ? t('common.create') : t('admin_projects.save')}
               </button>
             </div>
           </div>

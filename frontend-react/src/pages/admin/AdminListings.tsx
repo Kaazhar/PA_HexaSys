@@ -221,9 +221,9 @@ export default function AdminListings() {
                             </>
                           )}
                           <button
-                            onClick={() => { if (confirm(`Supprimer "${listing.title}" ?`)) deleteMutation.mutate(listing.id); }}
+                            onClick={() => { if (confirm(t('admin_projects.confirm_delete', { title: listing.title }))) deleteMutation.mutate(listing.id); }}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                            title="Supprimer"
+                            title={t('common.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
