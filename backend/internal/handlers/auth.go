@@ -17,7 +17,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type RegisterRequest struct {
+type RequeteInscription struct {
 	Email     string          `json:"email" binding:"required,email"`
 	Password  string          `json:"password" binding:"required,min=6"`
 	Firstname string          `json:"firstname" binding:"required"`
@@ -25,28 +25,28 @@ type RegisterRequest struct {
 	Role      models.UserRole `json:"role"`
 }
 
-type LoginRequest struct {
+type RequeteConnexion struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
 
-func generateToken(user models.User) (string, error) {
+func genererToken(utilisateur models.User) (string, error) {
 	claims := middleware.Claims{
-		UserID: user.ID,
-		Email:  user.Email,
-		Role:   user.Role,
+		UserID: utilisateur.ID,
+		Email:  utilisateur.Email,
+		Role:   utilisateur.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	jeton := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return jeton.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
 
-func Register(c *gin.Context) {
-	var req RegisterRequest
+func Inscrire(c *gin.Context) {
+	var req RequeteInscription
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -57,16 +57,16 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	var existing models.User
-	if err := config.DB.Where("email = ?", req.Email).First(&existing).Error; err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Email already registered"})
+	var existant models.User
+	if err := config.DB.Where("email = ?", req.Email).First(&existant).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Cet email est déjà utilisé"})
 		return
 	}
 	config.DB.Unscoped().Where("email = ? AND deleted_at IS NOT NULL", req.Email).Delete(&models.User{})
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	hashMdp, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors du chiffrement"})
 		return
 	}
 
@@ -78,9 +78,9 @@ func Register(c *gin.Context) {
 		role = models.RoleParticulier
 	}
 
-	user := models.User{
+	utilisateur := models.User{
 		Email:        req.Email,
-		PasswordHash: string(hash),
+		PasswordHash: string(hashMdp),
 		Firstname:    req.Firstname,
 		Lastname:     req.Lastname,
 		Role:         role,
@@ -89,112 +89,110 @@ func Register(c *gin.Context) {
 		FirstLogin:   true,
 	}
 
-	if err := config.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+	if err := config.DB.Create(&utilisateur).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création du compte"})
 		return
 	}
 
-	score := models.UpcyclingScore{UserID: user.ID}
-	config.DB.Create(&score)
+	scoreInitial := models.UpcyclingScore{UserID: utilisateur.ID}
+	config.DB.Create(&scoreInitial)
 
-	verifyCode := config.GenerateCode()
-	config.DB.Model(&user).Update("email_verify_token", verifyCode)
+	codeVerification := config.GenerateCode()
+	config.DB.Model(&utilisateur).Update("email_verify_token", codeVerification)
 	go func() {
-		if err := config.SendEmail(user.Email, "Votre code de confirmation - UpcycleConnect", emailConfirmTemplate(user.Firstname, verifyCode)); err != nil {
+		if err := config.SendEmail(utilisateur.Email, "Votre code de confirmation - UpcycleConnect", emailConfirmTemplate(utilisateur.Firstname, codeVerification)); err != nil {
 			log.Printf("[EMAIL ERROR] %v", err)
 		}
 	}()
 
-	token, err := generateToken(user)
+	jeton, err := genererToken(utilisateur)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la génération du token"})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"token": token, "user": user})
+	c.JSON(http.StatusCreated, gin.H{"token": jeton, "user": utilisateur})
 }
 
-func Login(c *gin.Context) {
-	var req LoginRequest
+func Connexion(c *gin.Context) {
+	var req RequeteConnexion
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var user models.User
-	if err := config.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.Where("email = ?", req.Email).First(&utilisateur).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Identifiants incorrects"})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur base de données"})
 		}
 		return
 	}
 
-	if !user.IsActive {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Account is disabled"})
+	if !utilisateur.IsActive {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Ce compte est désactivé"})
 		return
 	}
 
-	if user.IsBanned {
+	if utilisateur.IsBanned {
 		c.JSON(http.StatusForbidden, gin.H{
 			"error":          "banned",
-			"ban_reason":     user.BanReason,
-			"ban_expires_at": user.BanExpiresAt,
+			"ban_reason":     utilisateur.BanReason,
+			"ban_expires_at": utilisateur.BanExpiresAt,
 		})
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+	if err := bcrypt.CompareHashAndPassword([]byte(utilisateur.PasswordHash), []byte(req.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Identifiants incorrects"})
 		return
 	}
 
-	if user.FirstLogin {
-		config.DB.Model(&user).Update("first_login", false)
-		user.FirstLogin = false
+	if utilisateur.FirstLogin {
+		config.DB.Model(&utilisateur).Update("first_login", false)
+		utilisateur.FirstLogin = false
 	}
 
-	if user.EmailTwoFAEnabled {
-		if err := services.EnvoyerCodeEmail(user.ID, user.Email, "email_two_fa", config.SendEmail, email2FATemplate, user.Firstname); err != nil {
+	if utilisateur.EmailTwoFAEnabled {
+		if err := services.EnvoyerCodeEmail(utilisateur.ID, utilisateur.Email, "email_two_fa", config.SendEmail, email2FATemplate, utilisateur.Firstname); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible d'envoyer le code email"})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"requires_2fa":  true,
-			"user_id":       user.ID,
+			"user_id":       utilisateur.ID,
 			"two_fa_method": "email",
 		})
 		return
 	}
 
-	if user.TwoFAEnabled {
-		err := services.EnvoyerCodeVerification(user.ID, user.Phone, "two_fa")
-		if err != nil {
+	if utilisateur.TwoFAEnabled {
+		if err := services.EnvoyerCodeVerification(utilisateur.ID, utilisateur.Phone, "two_fa"); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible d'envoyer le code SMS"})
 			return
 		}
-
 		c.JSON(http.StatusOK, gin.H{
 			"requires_2fa":  true,
-			"user_id":       user.ID,
+			"user_id":       utilisateur.ID,
 			"two_fa_method": "sms",
 		})
 		return
 	}
 
-	token, err := generateToken(user)
+	jeton, err := genererToken(utilisateur)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la génération du token"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
-		"user":  user,
+		"token": jeton,
+		"user":  utilisateur,
 	})
 }
 
-func Verify2FA(c *gin.Context) {
+func Verifier2FA(c *gin.Context) {
 	var req struct {
 		UserID uint   `json:"user_id" binding:"required"`
 		Code   string `json:"code" binding:"required"`
@@ -204,35 +202,35 @@ func Verify2FA(c *gin.Context) {
 		return
 	}
 
-	var userFor2FA models.User
-	if err := config.DB.First(&userFor2FA, req.UserID).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.First(&utilisateur, req.UserID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
-	purpose := "two_fa"
-	if userFor2FA.EmailTwoFAEnabled {
-		purpose = "email_two_fa"
+	objectif := "two_fa"
+	if utilisateur.EmailTwoFAEnabled {
+		objectif = "email_two_fa"
 	}
 
-	if err := services.ValiderCode(req.UserID, req.Code, purpose); err != nil {
+	if err := services.ValiderCode(req.UserID, req.Code, objectif); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	token, err := generateToken(userFor2FA)
+	jeton, err := genererToken(utilisateur)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la génération du token"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
-		"user":  userFor2FA,
+		"token": jeton,
+		"user":  utilisateur,
 	})
 }
 
-func ToggleEmailTwoFA(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func BasculerEmail2FA(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 	var req struct {
 		Enabled bool `json:"enabled"`
 	}
@@ -240,18 +238,18 @@ func ToggleEmailTwoFA(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var user models.User
-	config.DB.First(&user, userID)
-	config.DB.Model(&user).Update("email_two_fa_enabled", req.Enabled)
-	config.DB.First(&user, userID)
+	var utilisateur models.User
+	config.DB.First(&utilisateur, idUtilisateur)
+	config.DB.Model(&utilisateur).Update("email_two_fa_enabled", req.Enabled)
+	config.DB.First(&utilisateur, idUtilisateur)
 	msg := "2FA email désactivée"
 	if req.Enabled {
 		msg = "2FA email activée"
 	}
-	c.JSON(http.StatusOK, gin.H{"message": msg, "user": user})
+	c.JSON(http.StatusOK, gin.H{"message": msg, "user": utilisateur})
 }
 
-func Resend2FACode(c *gin.Context) {
+func RenvoyerCode2FA(c *gin.Context) {
 	var req struct {
 		UserID uint `json:"user_id" binding:"required"`
 	}
@@ -260,14 +258,14 @@ func Resend2FACode(c *gin.Context) {
 		return
 	}
 
-	var user models.User
-	if err := config.DB.First(&user, req.UserID).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.First(&utilisateur, req.UserID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
 
-	if user.EmailTwoFAEnabled {
-		if err := services.EnvoyerCodeEmail(user.ID, user.Email, "email_two_fa", config.SendEmail, email2FATemplate, user.Firstname); err != nil {
+	if utilisateur.EmailTwoFAEnabled {
+		if err := services.EnvoyerCodeEmail(utilisateur.ID, utilisateur.Email, "email_two_fa", config.SendEmail, email2FATemplate, utilisateur.Firstname); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
@@ -275,12 +273,12 @@ func Resend2FACode(c *gin.Context) {
 		return
 	}
 
-	if !user.TwoFAEnabled || !user.PhoneVerified {
+	if !utilisateur.TwoFAEnabled || !utilisateur.PhoneVerified {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "La 2FA n'est pas activée pour ce compte"})
 		return
 	}
 
-	if err := services.EnvoyerCodeVerification(user.ID, user.Phone, "two_fa"); err != nil {
+	if err := services.EnvoyerCodeVerification(utilisateur.ID, utilisateur.Phone, "two_fa"); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -288,25 +286,25 @@ func Resend2FACode(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Nouveau code envoyé par SMS"})
 }
 
-func Me(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	var user models.User
-	if err := config.DB.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+func MonProfil(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	var utilisateur models.User
+	if err := config.DB.First(&utilisateur, idUtilisateur).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, utilisateur)
 }
 
-type UpdateProfileRequest struct {
+type RequeteModificationProfil struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 	Phone     string `json:"phone"`
 	Address   string `json:"address"`
 }
 
-func UpdateBanner(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func ModifierBanniere(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 	var req struct {
 		BannerURL   string `json:"banner_url"`
 		BannerColor string `json:"banner_color"`
@@ -315,18 +313,18 @@ func UpdateBanner(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var user models.User
-	config.DB.First(&user, userID)
-	config.DB.Model(&user).Updates(map[string]interface{}{
+	var utilisateur models.User
+	config.DB.First(&utilisateur, idUtilisateur)
+	config.DB.Model(&utilisateur).Updates(map[string]interface{}{
 		"banner_url":   req.BannerURL,
 		"banner_color": req.BannerColor,
 	})
-	config.DB.First(&user, userID)
-	c.JSON(http.StatusOK, user)
+	config.DB.First(&utilisateur, idUtilisateur)
+	c.JSON(http.StatusOK, utilisateur)
 }
 
-func UpdateAvatar(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func ModifierAvatar(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 	var req struct {
 		AvatarURL string `json:"avatar_url"`
 	}
@@ -334,16 +332,16 @@ func UpdateAvatar(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var user models.User
-	config.DB.First(&user, userID)
-	config.DB.Model(&user).Update("avatar_url", req.AvatarURL)
-	config.DB.First(&user, userID)
-	c.JSON(http.StatusOK, user)
+	var utilisateur models.User
+	config.DB.First(&utilisateur, idUtilisateur)
+	config.DB.Model(&utilisateur).Update("avatar_url", req.AvatarURL)
+	config.DB.First(&utilisateur, idUtilisateur)
+	c.JSON(http.StatusOK, utilisateur)
 }
 
-func UpdateProfile(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	var req UpdateProfileRequest
+func ModifierProfil(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	var req RequeteModificationProfil
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -354,59 +352,59 @@ func UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	updates := map[string]interface{}{}
+	modifications := map[string]interface{}{}
 	if req.Firstname != "" {
-		updates["firstname"] = req.Firstname
+		modifications["firstname"] = req.Firstname
 	}
 	if req.Lastname != "" {
-		updates["lastname"] = req.Lastname
+		modifications["lastname"] = req.Lastname
 	}
-	updates["phone"] = req.Phone
-	updates["address"] = req.Address
+	modifications["phone"] = req.Phone
+	modifications["address"] = req.Address
 
-	var user models.User
-	config.DB.First(&user, userID)
-	config.DB.Model(&user).Updates(updates)
-	config.DB.First(&user, userID)
+	var utilisateur models.User
+	config.DB.First(&utilisateur, idUtilisateur)
+	config.DB.Model(&utilisateur).Updates(modifications)
+	config.DB.First(&utilisateur, idUtilisateur)
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, utilisateur)
 }
 
-type ChangePasswordRequest struct {
+type RequeteChangementMotDePasse struct {
 	CurrentPassword string `json:"current_password" binding:"required"`
 	NewPassword     string `json:"new_password" binding:"required,min=6"`
 }
 
-func ChangePassword(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	var req ChangePasswordRequest
+func ChangerMotDePasse(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	var req RequeteChangementMotDePasse
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var user models.User
-	if err := config.DB.First(&user, userID).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.First(&utilisateur, idUtilisateur).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.CurrentPassword)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(utilisateur.PasswordHash), []byte(req.CurrentPassword)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Mot de passe actuel incorrect"})
 		return
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	hashMdp, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors du chiffrement"})
 		return
 	}
 
-	config.DB.Model(&user).Update("password_hash", string(hash))
+	config.DB.Model(&utilisateur).Update("password_hash", string(hashMdp))
 	c.JSON(http.StatusOK, gin.H{"message": "Mot de passe mis à jour"})
 }
 
-func ConfirmEmail(c *gin.Context) {
+func ConfirmerEmail(c *gin.Context) {
 	var req struct {
 		Email string `json:"email" binding:"required,email"`
 		Code  string `json:"code" binding:"required"`
@@ -415,26 +413,26 @@ func ConfirmEmail(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Email et code requis"})
 		return
 	}
-	var user models.User
-	if err := config.DB.Where("email = ? AND email_verify_token = ?", req.Email, req.Code).First(&user).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.Where("email = ? AND email_verify_token = ?", req.Email, req.Code).First(&utilisateur).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Code invalide ou déjà utilisé"})
 		return
 	}
-	config.DB.Model(&user).Updates(map[string]interface{}{
+	config.DB.Model(&utilisateur).Updates(map[string]interface{}{
 		"is_verified":        true,
 		"email_verify_token": "",
 	})
-	user.IsVerified = true
-	user.EmailVerifyToken = ""
-	token, err := generateToken(user)
+	utilisateur.IsVerified = true
+	utilisateur.EmailVerifyToken = ""
+	jeton, err := genererToken(utilisateur)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur serveur"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
+	c.JSON(http.StatusOK, gin.H{"token": jeton, "user": utilisateur})
 }
 
-func ForgotPassword(c *gin.Context) {
+func MotDePasseOublie(c *gin.Context) {
 	var req struct {
 		Email string `json:"email" binding:"required,email"`
 	}
@@ -444,22 +442,22 @@ func ForgotPassword(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Si cet email est enregistré, vous recevrez un lien de réinitialisation."})
 
-	var user models.User
-	if err := config.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.Where("email = ?", req.Email).First(&utilisateur).Error; err != nil {
 		return
 	}
-	token := config.GenerateToken()
-	expiry := time.Now().Add(1 * time.Hour)
-	config.DB.Model(&user).Updates(map[string]interface{}{
-		"password_reset_token":  token,
-		"password_reset_expiry": expiry,
+	jeton := config.GenerateToken()
+	expiration := time.Now().Add(1 * time.Hour)
+	config.DB.Model(&utilisateur).Updates(map[string]interface{}{
+		"password_reset_token":  jeton,
+		"password_reset_expiry": expiration,
 	})
 	appURL := config.GetEnv("APP_URL", "http://localhost:5173")
-	link := appURL + "/reinitialiser-mot-de-passe?token=" + token
-	go config.SendEmail(user.Email, "Réinitialisation de votre mot de passe - UpcycleConnect", emailResetPasswordTemplate(user.Firstname, link))
+	lien := appURL + "/reinitialiser-mot-de-passe?token=" + jeton
+	go config.SendEmail(utilisateur.Email, "Réinitialisation de votre mot de passe - UpcycleConnect", emailResetPasswordTemplate(utilisateur.Firstname, lien))
 }
 
-func ResendConfirmEmail(c *gin.Context) {
+func RenvoyerConfirmationEmail(c *gin.Context) {
 	var req struct {
 		Email string `json:"email" binding:"required,email"`
 	}
@@ -469,20 +467,20 @@ func ResendConfirmEmail(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Si cet email est enregistré et non vérifié, un nouveau code vous a été envoyé."})
 
-	var user models.User
-	if err := config.DB.Where("email = ? AND is_verified = ?", req.Email, false).First(&user).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.Where("email = ? AND is_verified = ?", req.Email, false).First(&utilisateur).Error; err != nil {
 		return
 	}
-	verifyCode := config.GenerateCode()
-	config.DB.Model(&user).Update("email_verify_token", verifyCode)
+	codeVerification := config.GenerateCode()
+	config.DB.Model(&utilisateur).Update("email_verify_token", codeVerification)
 	go func() {
-		if err := config.SendEmail(user.Email, "Nouveau code de confirmation - UpcycleConnect", emailConfirmTemplate(user.Firstname, verifyCode)); err != nil {
+		if err := config.SendEmail(utilisateur.Email, "Nouveau code de confirmation - UpcycleConnect", emailConfirmTemplate(utilisateur.Firstname, codeVerification)); err != nil {
 			log.Printf("[EMAIL ERROR] %v", err)
 		}
 	}()
 }
 
-func ResetPassword(c *gin.Context) {
+func ReinitialiserMotDePasse(c *gin.Context) {
 	var req struct {
 		Token    string `json:"token" binding:"required"`
 		Password string `json:"password" binding:"required,min=6"`
@@ -491,14 +489,14 @@ func ResetPassword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var user models.User
-	if err := config.DB.Where("password_reset_token = ? AND password_reset_expiry > ?", req.Token, time.Now()).First(&user).Error; err != nil {
+	var utilisateur models.User
+	if err := config.DB.Where("password_reset_token = ? AND password_reset_expiry > ?", req.Token, time.Now()).First(&utilisateur).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Token invalide ou expiré"})
 		return
 	}
-	hash, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	config.DB.Model(&user).Updates(map[string]interface{}{
-		"password_hash":         string(hash),
+	hashMdp, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	config.DB.Model(&utilisateur).Updates(map[string]interface{}{
+		"password_hash":         string(hashMdp),
 		"password_reset_token":  "",
 		"password_reset_expiry": nil,
 	})

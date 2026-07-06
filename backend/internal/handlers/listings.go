@@ -14,67 +14,66 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetListings(c *gin.Context) {
+func ListerAnnonces(c *gin.Context) {
 	config.DB.Model(&models.Listing{}).Where("is_sponsored = true AND sponsored_until < ?", time.Now()).Updates(map[string]interface{}{"is_sponsored": false, "sponsored_until": nil})
 
-	var listings []models.Listing
-	query := config.DB.Preload("Category").Preload("User")
+	var annonces []models.Listing
+	q := config.DB.Preload("Category").Preload("User")
 
 	role, _ := c.Get("userRole")
-	userRole, _ := role.(models.UserRole)
-	if userRole != models.RoleAdmin {
-		if status := c.Query("status"); status != "" {
-			query = query.Where("status = ?", status)
+	roleUtilisateur, _ := role.(models.UserRole)
+	if roleUtilisateur != models.RoleAdmin {
+		if statut := c.Query("status"); statut != "" {
+			q = q.Where("status = ?", statut)
 		} else {
-			query = query.Where("status = ?", "active")
+			q = q.Where("status = ?", "active")
 		}
 	} else {
-		if status := c.Query("status"); status != "" {
-			query = query.Where("status = ?", status)
+		if statut := c.Query("status"); statut != "" {
+			q = q.Where("status = ?", statut)
 		}
 	}
 
-	if category := c.Query("category"); category != "" {
-		query = query.Where("category_id = ?", category)
+	if categorie := c.Query("category"); categorie != "" {
+		q = q.Where("category_id = ?", categorie)
 	}
-	if listingType := c.Query("type"); listingType != "" {
-		query = query.Where("type = ?", listingType)
+	if typeAnnonce := c.Query("type"); typeAnnonce != "" {
+		q = q.Where("type = ?", typeAnnonce)
 	}
-	if search := c.Query("search"); search != "" {
-		query = query.Where("title LIKE ? OR description LIKE ?", "%"+search+"%", "%"+search+"%")
+	if recherche := c.Query("search"); recherche != "" {
+		q = q.Where("title LIKE ? OR description LIKE ?", "%"+recherche+"%", "%"+recherche+"%")
 	}
-	if location := c.Query("location"); location != "" {
-		query = query.Where("location LIKE ?", "%"+location+"%")
+	if localisation := c.Query("location"); localisation != "" {
+		q = q.Where("location LIKE ?", "%"+localisation+"%")
 	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	offset := (page - 1) * limit
+	limite, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	decalage := (page - 1) * limite
 
 	var total int64
-	query.Model(&models.Listing{}).Count(&total)
-
-	query.Offset(offset).Limit(limit).Order("is_sponsored DESC, created_at DESC").Find(&listings)
+	q.Model(&models.Listing{}).Count(&total)
+	q.Offset(decalage).Limit(limite).Order("is_sponsored DESC, created_at DESC").Find(&annonces)
 
 	c.JSON(http.StatusOK, gin.H{
-		"listings": listings,
+		"listings": annonces,
 		"total":    total,
 		"page":     page,
-		"limit":    limit,
+		"limit":    limite,
 	})
 }
 
-func GetListing(c *gin.Context) {
+func ObtenirAnnonce(c *gin.Context) {
 	id := c.Param("id")
-	var listing models.Listing
-	if err := config.DB.Preload("Category").Preload("User").First(&listing, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Listing not found"})
+	var annonce models.Listing
+	if err := config.DB.Preload("Category").Preload("User").First(&annonce, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
 		return
 	}
-	c.JSON(http.StatusOK, listing)
+	c.JSON(http.StatusOK, annonce)
 }
 
-type CreateListingRequest struct {
+type RequeteAnnonce struct {
 	Title       string  `json:"title" binding:"required"`
 	Description string  `json:"description"`
 	Type        string  `json:"type" binding:"required"`
@@ -85,8 +84,8 @@ type CreateListingRequest struct {
 	Images      string  `json:"images"`
 }
 
-func CreateListing(c *gin.Context) {
-	var req CreateListingRequest
+func CreerAnnonce(c *gin.Context) {
+	var req RequeteAnnonce
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -97,17 +96,17 @@ func CreateListing(c *gin.Context) {
 		return
 	}
 
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 
-	var activeCount int64
-	config.DB.Model(&models.Listing{}).Where("user_id = ? AND status IN ('active', 'pending')", userID).Count(&activeCount)
-	limit := GetUserListingLimit(userID.(uint))
-	if int(activeCount) >= limit {
-		c.JSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("Limite d'annonces atteinte (%d/%d). Souscrivez un abonnement pour publier plus d'annonces.", activeCount, limit)})
+	var nbAnnonces int64
+	config.DB.Model(&models.Listing{}).Where("user_id = ? AND status IN ('active', 'pending')", idUtilisateur).Count(&nbAnnonces)
+	plafond := LimiteAnnonces(idUtilisateur.(uint))
+	if int(nbAnnonces) >= plafond {
+		c.JSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("Limite d'annonces atteinte (%d/%d). Souscrivez un abonnement pour publier plus d'annonces.", nbAnnonces, plafond)})
 		return
 	}
 
-	listing := models.Listing{
+	annonce := models.Listing{
 		Title:       req.Title,
 		Description: req.Description,
 		Type:        req.Type,
@@ -117,132 +116,132 @@ func CreateListing(c *gin.Context) {
 		Location:    req.Location,
 		Images:      req.Images,
 		Status:      "pending",
-		UserID:      userID.(uint),
+		UserID:      idUtilisateur.(uint),
 	}
 
-	if err := config.DB.Create(&listing).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create listing"})
+	if err := config.DB.Create(&annonce).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de l'annonce"})
 		return
 	}
 
-	scoreEntry := models.ScoreEntry{
-		UserID: userID.(uint),
+	entreeScore := models.ScoreEntry{
+		UserID: idUtilisateur.(uint),
 		Points: 10,
 		Reason: "Annonce créée",
 		Action: "listing_created",
 	}
-	config.DB.Create(&scoreEntry)
-	wasteKg := listing.Weight
-	if wasteKg <= 0 {
-		wasteKg = 1.0
+	config.DB.Create(&entreeScore)
+	poids := annonce.Weight
+	if poids <= 0 {
+		poids = 1.0
 	}
-	config.DB.Model(&models.UpcyclingScore{}).Where("user_id = ?", userID).Updates(map[string]interface{}{
+	config.DB.Model(&models.UpcyclingScore{}).Where("user_id = ?", idUtilisateur).Updates(map[string]interface{}{
 		"total_points":       gorm.Expr("total_points + ?", 10),
-		"waste_avoided_kg":   gorm.Expr("waste_avoided_kg + ?", wasteKg),
-		"co2_saved_kg":       gorm.Expr("co2_saved_kg + ?", wasteKg*2.5),
-		"water_saved_liters": gorm.Expr("water_saved_liters + ?", wasteKg*50),
+		"waste_avoided_kg":   gorm.Expr("waste_avoided_kg + ?", poids),
+		"co2_saved_kg":       gorm.Expr("co2_saved_kg + ?", poids*2.5),
+		"water_saved_liters": gorm.Expr("water_saved_liters + ?", poids*50),
 	})
 
-	config.DB.Preload("Category").Preload("User").First(&listing, listing.ID)
-	c.JSON(http.StatusCreated, listing)
+	config.DB.Preload("Category").Preload("User").First(&annonce, annonce.ID)
+	c.JSON(http.StatusCreated, annonce)
 }
 
-func ValidateListing(c *gin.Context) {
+func ValiderAnnonce(c *gin.Context) {
 	id := c.Param("id")
-	var listing models.Listing
-	if err := config.DB.First(&listing, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Listing not found"})
+	var annonce models.Listing
+	if err := config.DB.First(&annonce, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
 		return
 	}
 
-	config.DB.Model(&listing).Updates(map[string]interface{}{
+	config.DB.Model(&annonce).Updates(map[string]interface{}{
 		"status":        "active",
 		"reject_reason": "",
 	})
 
 	notif := models.Notification{
-		UserID:  listing.UserID,
-		Message: "Votre annonce \"" + listing.Title + "\" a été validée !",
+		UserID:  annonce.UserID,
+		Message: "Votre annonce \"" + annonce.Title + "\" a été validée !",
 		Type:    "success",
 	}
 	config.DB.Create(&notif)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Listing validated", "listing": listing})
+	c.JSON(http.StatusOK, gin.H{"message": "Annonce validée", "listing": annonce})
 }
 
-type RejectRequest struct {
+type RequeteRejet struct {
 	Reason string `json:"reason" binding:"required"`
 }
 
-func RejectListing(c *gin.Context) {
+func RejeterAnnonce(c *gin.Context) {
 	id := c.Param("id")
-	var listing models.Listing
-	if err := config.DB.First(&listing, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Listing not found"})
+	var annonce models.Listing
+	if err := config.DB.First(&annonce, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
 		return
 	}
 
-	var req RejectRequest
+	var req RequeteRejet
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	config.DB.Model(&listing).Updates(map[string]interface{}{
+	config.DB.Model(&annonce).Updates(map[string]interface{}{
 		"status":        "rejected",
 		"reject_reason": req.Reason,
 	})
 
 	notif := models.Notification{
-		UserID:  listing.UserID,
-		Message: "Votre annonce \"" + listing.Title + "\" a été rejetée : " + req.Reason,
+		UserID:  annonce.UserID,
+		Message: "Votre annonce \"" + annonce.Title + "\" a été rejetée : " + req.Reason,
 		Type:    "error",
 	}
 	config.DB.Create(&notif)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Listing rejected"})
+	c.JSON(http.StatusOK, gin.H{"message": "Annonce rejetée"})
 }
 
-func GetMyListings(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	var listings []models.Listing
-	query := config.DB.Preload("Category").Where("user_id = ?", userID)
-	if status := c.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
+func MesAnnonces(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	var annonces []models.Listing
+	q := config.DB.Preload("Category").Where("user_id = ?", idUtilisateur)
+	if statut := c.Query("status"); statut != "" {
+		q = q.Where("status = ?", statut)
 	}
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	offset := (page - 1) * limit
+	limite, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	decalage := (page - 1) * limite
 	var total int64
-	query.Model(&models.Listing{}).Count(&total)
-	query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&listings)
-	c.JSON(http.StatusOK, gin.H{"listings": listings, "total": total, "page": page, "limit": limit})
+	q.Model(&models.Listing{}).Count(&total)
+	q.Offset(decalage).Limit(limite).Order("created_at DESC").Find(&annonces)
+	c.JSON(http.StatusOK, gin.H{"listings": annonces, "total": total, "page": page, "limit": limite})
 }
 
-func MarkListingSold(c *gin.Context) {
+func MarquerVendue(c *gin.Context) {
 	id := c.Param("id")
-	userID, _ := c.Get("userID")
-	var listing models.Listing
-	if err := config.DB.First(&listing, id).Error; err != nil {
+	idUtilisateur, _ := c.Get("userID")
+	var annonce models.Listing
+	if err := config.DB.First(&annonce, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
 		return
 	}
-	if listing.UserID != userID.(uint) {
+	if annonce.UserID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}
-	commission := listing.Price * (listing.CommissionRate / 100)
-	config.DB.Model(&listing).Updates(map[string]interface{}{
+	commission := annonce.Price * (annonce.CommissionRate / 100)
+	config.DB.Model(&annonce).Updates(map[string]interface{}{
 		"status":            "sold",
 		"commission_amount": commission,
 	})
 	c.JSON(http.StatusOK, gin.H{"message": "Annonce marquée comme vendue", "commission": commission})
 }
 
-func ModerateListing(c *gin.Context) {
+func ModererAnnonce(c *gin.Context) {
 	id := c.Param("id")
-	var listing models.Listing
-	if err := config.DB.First(&listing, id).Error; err != nil {
+	var annonce models.Listing
+	if err := config.DB.First(&annonce, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
 		return
 	}
@@ -254,77 +253,76 @@ func ModerateListing(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	config.DB.Model(&listing).Updates(map[string]interface{}{
+	config.DB.Model(&annonce).Updates(map[string]interface{}{
 		"is_moderated":    req.IsModerated,
 		"moderation_note": req.ModerationNote,
 	})
-	c.JSON(http.StatusOK, listing)
+	c.JSON(http.StatusOK, annonce)
 }
 
-func DeleteListing(c *gin.Context) {
+func SupprimerAnnonce(c *gin.Context) {
 	id := c.Param("id")
-	userID, _ := c.Get("userID")
-	userRole, _ := c.Get("userRole")
-	var listing models.Listing
-	if err := config.DB.First(&listing, id).Error; err != nil {
+	idUtilisateur, _ := c.Get("userID")
+	roleRaw, _ := c.Get("userRole")
+	var annonce models.Listing
+	if err := config.DB.First(&annonce, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
 		return
 	}
-	role := userRole.(models.UserRole)
-	if role != models.RoleAdmin && listing.UserID != userID.(uint) {
+	role := roleRaw.(models.UserRole)
+	if role != models.RoleAdmin && annonce.UserID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}
-	config.DB.Delete(&listing)
+	config.DB.Delete(&annonce)
 	c.JSON(http.StatusOK, gin.H{"message": "Annonce supprimée"})
 }
 
-func GetAdminListings(c *gin.Context) {
-	var listings []models.Listing
-	query := config.DB.Preload("Category").Preload("User")
+func ListerAnnoncesAdmin(c *gin.Context) {
+	var annonces []models.Listing
+	q := config.DB.Preload("Category").Preload("User")
 
-	if status := c.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
+	if statut := c.Query("status"); statut != "" {
+		q = q.Where("status = ?", statut)
 	}
-	if search := c.Query("search"); search != "" {
-		query = query.Where("title LIKE ? OR description LIKE ?", "%"+search+"%", "%"+search+"%")
+	if recherche := c.Query("search"); recherche != "" {
+		q = q.Where("title LIKE ? OR description LIKE ?", "%"+recherche+"%", "%"+recherche+"%")
 	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	offset := (page - 1) * limit
+	limite, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	decalage := (page - 1) * limite
 
 	var total int64
-	query.Model(&models.Listing{}).Count(&total)
-
-	query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&listings)
+	q.Model(&models.Listing{}).Count(&total)
+	q.Offset(decalage).Limit(limite).Order("created_at DESC").Find(&annonces)
 
 	c.JSON(http.StatusOK, gin.H{
-		"listings": listings,
+		"listings": annonces,
 		"total":    total,
 		"page":     page,
-		"limit":    limit,
+		"limit":    limite,
 	})
 }
 
-func UpdateListing(c *gin.Context) {
+func ModifierAnnonce(c *gin.Context) {
 	id := c.Param("id")
-	userID, _ := c.Get("userID")
-	userRole, _ := c.Get("userRole")
+	idUtilisateur, _ := c.Get("userID")
+	roleRaw, _ := c.Get("userRole")
 
-	var listing models.Listing
-	if err := config.DB.First(&listing, id).Error; err != nil {
+	var annonce models.Listing
+	if err := config.DB.First(&annonce, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
 		return
 	}
 
-	role := userRole.(models.UserRole)
-	if role != models.RoleAdmin && listing.UserID != userID.(uint) {
+	role := roleRaw.(models.UserRole)
+	if role != models.RoleAdmin && annonce.UserID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission refusée"})
 		return
 	}
 
-	var req CreateListingRequest
+	var req RequeteAnnonce
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -335,7 +333,7 @@ func UpdateListing(c *gin.Context) {
 		return
 	}
 
-	config.DB.Model(&listing).Updates(map[string]interface{}{
+	config.DB.Model(&annonce).Updates(map[string]interface{}{
 		"title":       req.Title,
 		"description": req.Description,
 		"type":        req.Type,
@@ -347,58 +345,58 @@ func UpdateListing(c *gin.Context) {
 		"status":      "pending",
 	})
 
-	config.DB.Preload("Category").Preload("User").First(&listing, listing.ID)
-	c.JSON(http.StatusOK, listing)
+	config.DB.Preload("Category").Preload("User").First(&annonce, annonce.ID)
+	c.JSON(http.StatusOK, annonce)
 }
 
-func BoostListing(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func BoosterAnnonce(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 	id := c.Param("id")
 
-	var listing models.Listing
-	if err := config.DB.First(&listing, id).Error; err != nil {
+	var annonce models.Listing
+	if err := config.DB.First(&annonce, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
 		return
 	}
-	if listing.UserID != userID.(uint) {
+	if annonce.UserID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
 		return
 	}
-	if listing.Status != "active" {
+	if annonce.Status != "active" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "L'annonce doit être active pour être boostée"})
 		return
 	}
-	if listing.IsSponsored && listing.SponsoredUntil != nil && listing.SponsoredUntil.After(time.Now()) {
+	if annonce.IsSponsored && annonce.SponsoredUntil != nil && annonce.SponsoredUntil.After(time.Now()) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Cette annonce est déjà boostée"})
 		return
 	}
 
-	var user models.User
-	config.DB.First(&user, userID)
+	var utilisateur models.User
+	config.DB.First(&utilisateur, idUtilisateur)
 
-	if !user.HasUsedFreeBoost {
-		until := time.Now().Add(24 * time.Hour)
-		config.DB.Model(&listing).Updates(map[string]interface{}{
+	if !utilisateur.HasUsedFreeBoost {
+		finSponsoring := time.Now().Add(24 * time.Hour)
+		config.DB.Model(&annonce).Updates(map[string]interface{}{
 			"is_sponsored":    true,
-			"sponsored_until": until,
+			"sponsored_until": finSponsoring,
 		})
-		config.DB.Model(&user).Update("has_used_free_boost", true)
-		c.JSON(http.StatusOK, gin.H{"free": true, "sponsored_until": until})
+		config.DB.Model(&utilisateur).Update("has_used_free_boost", true)
+		c.JSON(http.StatusOK, gin.H{"free": true, "sponsored_until": finSponsoring})
 		return
 	}
 
-	checkoutURL, err := createBoostCheckoutSession(listing.ID, userID.(uint))
+	urlPaiement, err := createBoostCheckoutSession(annonce.ID, idUtilisateur.(uint))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur Stripe : " + err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"checkout_url": checkoutURL})
+	c.JSON(http.StatusOK, gin.H{"checkout_url": urlPaiement})
 }
 
-func SponsorListing(c *gin.Context) {
+func SponsoriserAnnonce(c *gin.Context) {
 	id := c.Param("id")
-	var listing models.Listing
-	if err := config.DB.First(&listing, id).Error; err != nil {
+	var annonce models.Listing
+	if err := config.DB.First(&annonce, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Annonce introuvable"})
 		return
 	}
@@ -411,6 +409,6 @@ func SponsorListing(c *gin.Context) {
 		return
 	}
 
-	config.DB.Model(&listing).Update("is_sponsored", req.IsSponsored)
+	config.DB.Model(&annonce).Update("is_sponsored", req.IsSponsored)
 	c.JSON(http.StatusOK, gin.H{"is_sponsored": req.IsSponsored})
 }

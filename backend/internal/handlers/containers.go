@@ -17,36 +17,36 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-func GetContainers(c *gin.Context) {
-	var containers []models.Container
-	config.DB.Order("name ASC").Find(&containers)
+func ListerConteneurs(c *gin.Context) {
+	var conteneurs []models.Container
+	config.DB.Order("name ASC").Find(&conteneurs)
 
-	for i := range containers {
-		var occupiedCount int64
+	for i := range conteneurs {
+		var nbOccupes int64
 		config.DB.Model(&models.ContainerSlot{}).
-			Where("container_id = ? AND status IN ('reserved','occupied')", containers[i].ID).
-			Count(&occupiedCount)
-		containers[i].CurrentCount = int(occupiedCount)
+			Where("container_id = ? AND status IN ('reserved','occupied')", conteneurs[i].ID).
+			Count(&nbOccupes)
+		conteneurs[i].CurrentCount = int(nbOccupes)
 
-		var totalSlots int64
+		var totalEmplacements int64
 		config.DB.Model(&models.ContainerSlot{}).
-			Where("container_id = ?", containers[i].ID).
-			Count(&totalSlots)
+			Where("container_id = ?", conteneurs[i].ID).
+			Count(&totalEmplacements)
 
-		newStatus := "operational"
-		if totalSlots > 0 && occupiedCount >= totalSlots {
-			newStatus = "full"
+		statutCalcule := "operational"
+		if totalEmplacements > 0 && nbOccupes >= totalEmplacements {
+			statutCalcule = "full"
 		}
-		if containers[i].Status != newStatus {
-			config.DB.Model(&containers[i]).Update("status", newStatus)
-			containers[i].Status = newStatus
+		if conteneurs[i].Status != statutCalcule {
+			config.DB.Model(&conteneurs[i]).Update("status", statutCalcule)
+			conteneurs[i].Status = statutCalcule
 		}
 	}
 
-	c.JSON(http.StatusOK, containers)
+	c.JSON(http.StatusOK, conteneurs)
 }
 
-type CreateContainerRequest struct {
+type RequeteConteneur struct {
 	Name      string  `json:"name" binding:"required"`
 	Address   string  `json:"address"`
 	District  string  `json:"district"`
@@ -55,71 +55,71 @@ type CreateContainerRequest struct {
 	Longitude float64 `json:"longitude"`
 }
 
-func CreateContainer(c *gin.Context) {
-	var req CreateContainerRequest
+func CreerConteneur(c *gin.Context) {
+	var req RequeteConteneur
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	capacity := req.Capacity
-	if capacity == 0 {
-		capacity = 25
+	capacite := req.Capacity
+	if capacite == 0 {
+		capacite = 25
 	}
 
-	container := models.Container{
+	conteneur := models.Container{
 		Name:      req.Name,
 		Address:   req.Address,
 		District:  req.District,
-		Capacity:  capacity,
+		Capacity:  capacite,
 		Status:    "operational",
 		Latitude:  req.Latitude,
 		Longitude: req.Longitude,
 	}
 
-	if err := config.DB.Create(&container).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create container"})
+	if err := config.DB.Create(&conteneur).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création du conteneur"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, container)
+	c.JSON(http.StatusCreated, conteneur)
 }
 
-func UpdateContainer(c *gin.Context) {
+func ModifierConteneur(c *gin.Context) {
 	id := c.Param("id")
-	var container models.Container
-	if err := config.DB.First(&container, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Container not found"})
+	var conteneur models.Container
+	if err := config.DB.First(&conteneur, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Conteneur introuvable"})
 		return
 	}
 
-	var req map[string]interface{}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	var modifications map[string]interface{}
+	if err := c.ShouldBindJSON(&modifications); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	config.DB.Model(&container).Updates(req)
-	config.DB.First(&container, id)
-	c.JSON(http.StatusOK, container)
+	config.DB.Model(&conteneur).Updates(modifications)
+	config.DB.First(&conteneur, id)
+	c.JSON(http.StatusOK, conteneur)
 }
 
-func GetContainerSlots(c *gin.Context) {
-	containerID := c.Query("container_id")
-	if containerID == "" {
+func ListerEmplacements(c *gin.Context) {
+	idConteneur := c.Query("container_id")
+	if idConteneur == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "container_id requis"})
 		return
 	}
-	var slots []models.ContainerSlot
-	config.DB.Where("container_id = ?", containerID).Order("size ASC, slot_code ASC").Find(&slots)
-	c.JSON(http.StatusOK, slots)
+	var emplacements []models.ContainerSlot
+	config.DB.Where("container_id = ?", idConteneur).Order("size ASC, slot_code ASC").Find(&emplacements)
+	c.JSON(http.StatusOK, emplacements)
 }
 
-func SeedContainerSlots(c *gin.Context) {
+func InitialiserEmplacements(c *gin.Context) {
 	id := c.Param("id")
-	containerID, err := strconv.ParseUint(id, 10, 64)
+	idConteneur, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid container ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Identifiant conteneur invalide"})
 		return
 	}
 
@@ -129,44 +129,44 @@ func SeedContainerSlots(c *gin.Context) {
 		return
 	}
 
-	for _, size := range []string{"S", "M", "L"} {
-		count := req[size]
-		if count <= 0 {
+	for _, taille := range []string{"S", "M", "L"} {
+		nb := req[taille]
+		if nb <= 0 {
 			continue
 		}
-		var existing int64
+		var existants int64
 		config.DB.Model(&models.ContainerSlot{}).
-			Where("container_id = ? AND size = ?", containerID, size).
-			Count(&existing)
-		for i := 1; i <= count; i++ {
-			slotCode := fmt.Sprintf("%s-%02d", size, int(existing)+i)
+			Where("container_id = ? AND size = ?", idConteneur, taille).
+			Count(&existants)
+		for i := 1; i <= nb; i++ {
+			codeEmplacement := fmt.Sprintf("%s-%02d", taille, int(existants)+i)
 			config.DB.Create(&models.ContainerSlot{
-				ContainerID: uint(containerID),
-				SlotCode:    slotCode,
-				Size:        size,
+				ContainerID: uint(idConteneur),
+				SlotCode:    codeEmplacement,
+				Size:        taille,
 				Status:      "free",
 			})
 		}
 	}
 
-	var slots []models.ContainerSlot
-	config.DB.Where("container_id = ?", containerID).Order("size ASC, slot_code ASC").Find(&slots)
-	c.JSON(http.StatusCreated, slots)
+	var emplacements []models.ContainerSlot
+	config.DB.Where("container_id = ?", idConteneur).Order("size ASC, slot_code ASC").Find(&emplacements)
+	c.JSON(http.StatusCreated, emplacements)
 }
 
-func GetContainerRequests(c *gin.Context) {
-	var requests []models.ContainerRequest
-	query := config.DB.Preload("User").Preload("Container")
+func ListerDemandesConteneur(c *gin.Context) {
+	var demandes []models.ContainerRequest
+	q := config.DB.Preload("User").Preload("Container")
 
-	if status := c.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
+	if statut := c.Query("status"); statut != "" {
+		q = q.Where("status = ?", statut)
 	}
 
-	query.Order("created_at DESC").Find(&requests)
-	c.JSON(http.StatusOK, requests)
+	q.Order("created_at DESC").Find(&demandes)
+	c.JSON(http.StatusOK, demandes)
 }
 
-type ContainerRequestBody struct {
+type CorpsDemandeConteneur struct {
 	ContainerID       uint   `json:"container_id" binding:"required"`
 	ObjectTitle       string `json:"object_title" binding:"required"`
 	ObjectDescription string `json:"object_description"`
@@ -175,131 +175,131 @@ type ContainerRequestBody struct {
 	SlotID            uint   `json:"slot_id"`
 }
 
-func CreateContainerRequestHandler(c *gin.Context) {
-	var req ContainerRequestBody
+func CreerDemandeConteneur(c *gin.Context) {
+	var req CorpsDemandeConteneur
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 
-	date, err := time.Parse("2006-01-02", req.DesiredDate)
+	dateDepot, err := time.Parse("2006-01-02", req.DesiredDate)
 	if err != nil {
-		date = time.Now().Add(7 * 24 * time.Hour)
+		dateDepot = time.Now().Add(7 * 24 * time.Hour)
 	}
 
-	request := models.ContainerRequest{
-		UserID:            userID.(uint),
+	demande := models.ContainerRequest{
+		UserID:            idUtilisateur.(uint),
 		ContainerID:       req.ContainerID,
 		ObjectTitle:       req.ObjectTitle,
 		ObjectDescription: req.ObjectDescription,
-		DesiredDate:       date,
+		DesiredDate:       dateDepot,
 		SizeCategory:      req.SizeCategory,
 		Status:            "pending",
 	}
 
 	if req.SlotID > 0 {
-		txErr := config.DB.Transaction(func(tx *gorm.DB) error {
-			var slot models.ContainerSlot
+		errTx := config.DB.Transaction(func(tx *gorm.DB) error {
+			var emplacement models.ContainerSlot
 			if err := tx.Where("id = ? AND container_id = ? AND size = ? AND status = 'free'",
-				req.SlotID, req.ContainerID, req.SizeCategory).First(&slot).Error; err != nil {
-				return fmt.Errorf("slot indisponible")
+				req.SlotID, req.ContainerID, req.SizeCategory).First(&emplacement).Error; err != nil {
+				return fmt.Errorf("emplacement indisponible")
 			}
-			request.SlotID = &slot.ID
-			request.SlotCode = slot.SlotCode
-			if err := tx.Create(&request).Error; err != nil {
+			demande.SlotID = &emplacement.ID
+			demande.SlotCode = emplacement.SlotCode
+			if err := tx.Create(&demande).Error; err != nil {
 				return err
 			}
-			return tx.Model(&slot).Updates(map[string]interface{}{
+			return tx.Model(&emplacement).Updates(map[string]interface{}{
 				"status":     "reserved",
-				"request_id": request.ID,
+				"request_id": demande.ID,
 			}).Error
 		})
-		if txErr != nil {
-			c.JSON(http.StatusConflict, gin.H{"error": txErr.Error()})
+		if errTx != nil {
+			c.JSON(http.StatusConflict, gin.H{"error": errTx.Error()})
 			return
 		}
 	} else {
-		if err := config.DB.Create(&request).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+		if err := config.DB.Create(&demande).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de la demande"})
 			return
 		}
 	}
 
-	config.DB.Preload("User").Preload("Container").First(&request, request.ID)
-	c.JSON(http.StatusCreated, request)
+	config.DB.Preload("User").Preload("Container").First(&demande, demande.ID)
+	c.JSON(http.StatusCreated, demande)
 }
 
-func ValidateContainerRequest(c *gin.Context) {
+func ValiderDemandeConteneur(c *gin.Context) {
 	id := c.Param("id")
-	var request models.ContainerRequest
-	if err := config.DB.Preload("Container").First(&request, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Request not found"})
-		return
-	}
-
-	accessCode := fmt.Sprintf("%06d", rand.Intn(1000000))
-	barcode := fmt.Sprintf("UC%010d", rand.Intn(10000000000))
-
-	config.DB.Model(&request).Updates(map[string]interface{}{
-		"status":      "approved",
-		"access_code": accessCode,
-		"barcode":     barcode,
-	})
-
-	notif := models.Notification{
-		UserID:  request.UserID,
-		Message: fmt.Sprintf("Votre demande de dépôt a été approuvée ! Code d'accès : %s — Case : %s", accessCode, request.SlotCode),
-		Type:    "success",
-	}
-	config.DB.Create(&notif)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Request approved", "access_code": accessCode, "barcode": barcode})
-}
-
-func ConfirmDeposit(c *gin.Context) {
-	id := c.Param("id")
-	userID, _ := c.Get("userID")
-
-	var request models.ContainerRequest
-	if err := config.DB.First(&request, id).Error; err != nil {
+	var demande models.ContainerRequest
+	if err := config.DB.Preload("Container").First(&demande, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Demande introuvable"})
 		return
 	}
 
-	if request.UserID != userID.(uint) {
+	codeAcces := fmt.Sprintf("%06d", rand.Intn(1000000))
+	codeBarres := fmt.Sprintf("UC%010d", rand.Intn(10000000000))
+
+	config.DB.Model(&demande).Updates(map[string]interface{}{
+		"status":      "approved",
+		"access_code": codeAcces,
+		"barcode":     codeBarres,
+	})
+
+	notif := models.Notification{
+		UserID:  demande.UserID,
+		Message: fmt.Sprintf("Votre demande de dépôt a été approuvée ! Code d'accès : %s — Case : %s", codeAcces, demande.SlotCode),
+		Type:    "success",
+	}
+	config.DB.Create(&notif)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Demande approuvée", "access_code": codeAcces, "barcode": codeBarres})
+}
+
+func ConfirmerDepot(c *gin.Context) {
+	id := c.Param("id")
+	idUtilisateur, _ := c.Get("userID")
+
+	var demande models.ContainerRequest
+	if err := config.DB.First(&demande, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Demande introuvable"})
+		return
+	}
+
+	if demande.UserID != idUtilisateur.(uint) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Accès interdit"})
 		return
 	}
 
-	if request.Status != "approved" {
+	if demande.Status != "approved" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "La demande doit être approuvée avant de confirmer le dépôt"})
 		return
 	}
 
-	config.DB.Model(&request).Update("status", "deposited")
+	config.DB.Model(&demande).Update("status", "deposited")
 
-	if request.SlotID != nil {
-		config.DB.Model(&models.ContainerSlot{}).Where("id = ?", *request.SlotID).
+	if demande.SlotID != nil {
+		config.DB.Model(&models.ContainerSlot{}).Where("id = ?", *demande.SlotID).
 			Update("status", "occupied")
 	}
 
 	config.DB.Create(&models.Notification{
-		UserID:  request.UserID,
-		Message: fmt.Sprintf("Dépôt confirmé pour \"%s\" — case %s.", request.ObjectTitle, request.SlotCode),
+		UserID:  demande.UserID,
+		Message: fmt.Sprintf("Dépôt confirmé pour \"%s\" — case %s.", demande.ObjectTitle, demande.SlotCode),
 		Type:    "success",
 	})
 
-	var premiumPros []models.User
+	var prosPremium []models.User
 	config.DB.Joins("JOIN subscriptions ON subscriptions.user_id = users.id").
 		Where("users.role = ? AND subscriptions.status = ?", models.RoleProfessionnel, "active").
-		Find(&premiumPros)
-	proMsg := fmt.Sprintf("Nouvel objet disponible à récupérer : \"%s\" — conteneur %s", request.ObjectTitle, request.SlotCode)
-	for _, pro := range premiumPros {
+		Find(&prosPremium)
+	msgPro := fmt.Sprintf("Nouvel objet disponible à récupérer : \"%s\" — conteneur %s", demande.ObjectTitle, demande.SlotCode)
+	for _, pro := range prosPremium {
 		config.DB.Create(&models.Notification{
 			UserID:  pro.ID,
-			Message: proMsg,
+			Message: msgPro,
 			Type:    "info",
 		})
 	}
@@ -307,28 +307,28 @@ func ConfirmDeposit(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Dépôt confirmé"})
 }
 
-func GenerateRequestBarcode(c *gin.Context) {
+func GenererCodeBarres(c *gin.Context) {
 	id := c.Param("id")
-	userID, _ := c.Get("userID")
+	idUtilisateur, _ := c.Get("userID")
 	role, _ := c.Get("userRole")
 
-	var request models.ContainerRequest
-	if err := config.DB.First(&request, id).Error; err != nil {
+	var demande models.ContainerRequest
+	if err := config.DB.First(&demande, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Demande introuvable"})
 		return
 	}
 
-	if request.UserID != userID.(uint) && role != models.RoleAdmin {
+	if demande.UserID != idUtilisateur.(uint) && role != models.RoleAdmin {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Accès interdit"})
 		return
 	}
 
-	if request.Barcode == "" {
+	if demande.Barcode == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Aucun code-barres : la demande n'est pas encore approuvée"})
 		return
 	}
 
-	encoded, err := code128.Encode(request.Barcode)
+	encoded, err := code128.Encode(demande.Barcode)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de générer le code-barres"})
 		return
@@ -349,68 +349,68 @@ func GenerateRequestBarcode(c *gin.Context) {
 	c.Data(http.StatusOK, "image/png", buf.Bytes())
 }
 
-func GetMyContainerRequests(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	var requests []models.ContainerRequest
-	config.DB.Preload("Container").Where("user_id = ?", userID).
-		Order("created_at DESC").Find(&requests)
-	c.JSON(http.StatusOK, requests)
+func MesDemandes(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	var demandes []models.ContainerRequest
+	config.DB.Preload("Container").Where("user_id = ?", idUtilisateur).
+		Order("created_at DESC").Find(&demandes)
+	c.JSON(http.StatusOK, demandes)
 }
 
-func ClearContainerSlots(c *gin.Context) {
+func ViderEmplacements(c *gin.Context) {
 	id := c.Param("id")
-	containerID, err := strconv.ParseUint(id, 10, 64)
+	idConteneur, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid container ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Identifiant conteneur invalide"})
 		return
 	}
 
 	config.DB.Model(&models.ContainerSlot{}).
-		Where("container_id = ?", containerID).
+		Where("container_id = ?", idConteneur).
 		Updates(map[string]interface{}{"status": "free", "request_id": nil})
 
-	config.DB.Model(&models.Container{}).Where("id = ?", containerID).
+	config.DB.Model(&models.Container{}).Where("id = ?", idConteneur).
 		Updates(map[string]interface{}{"current_count": 0, "status": "operational"})
 
 	c.JSON(http.StatusOK, gin.H{"message": "Stock vidé"})
 }
 
-func RejectContainerRequest(c *gin.Context) {
+func RejeterDemandeConteneur(c *gin.Context) {
 	id := c.Param("id")
-	var request models.ContainerRequest
-	if err := config.DB.First(&request, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Request not found"})
+	var demande models.ContainerRequest
+	if err := config.DB.First(&demande, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Demande introuvable"})
 		return
 	}
 
-	var req RejectRequest
+	var req RequeteRejet
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	config.DB.Model(&request).Updates(map[string]interface{}{
+	config.DB.Model(&demande).Updates(map[string]interface{}{
 		"status":        "rejected",
 		"reject_reason": req.Reason,
 	})
 
-	if request.SlotID != nil {
-		config.DB.Model(&models.ContainerSlot{}).Where("id = ?", *request.SlotID).
+	if demande.SlotID != nil {
+		config.DB.Model(&models.ContainerSlot{}).Where("id = ?", *demande.SlotID).
 			Updates(map[string]interface{}{"status": "free", "request_id": nil})
 	}
 
 	notif := models.Notification{
-		UserID:  request.UserID,
+		UserID:  demande.UserID,
 		Message: "Votre demande de dépôt a été refusée : " + req.Reason,
 		Type:    "error",
 	}
 	config.DB.Create(&notif)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Request rejected"})
+	c.JSON(http.StatusOK, gin.H{"message": "Demande rejetée"})
 }
 
-func GetAvailableObjects(c *gin.Context) {
-	type AvailableObject struct {
+func ObjetsDisponibles(c *gin.Context) {
+	type ObjetDispo struct {
 		SlotID        uint    `json:"slot_id"`
 		SlotCode      string  `json:"slot_code"`
 		Size          string  `json:"size"`
@@ -425,32 +425,32 @@ func GetAvailableObjects(c *gin.Context) {
 		ObjectDesc    string  `json:"object_description"`
 	}
 
-	var slots []models.ContainerSlot
-	config.DB.Where("status = 'occupied'").Find(&slots)
+	var emplacements []models.ContainerSlot
+	config.DB.Where("status = 'occupied'").Find(&emplacements)
 
-	result := []AvailableObject{}
-	for _, slot := range slots {
-		if slot.RequestID == nil {
+	objets := []ObjetDispo{}
+	for _, e := range emplacements {
+		if e.RequestID == nil {
 			continue
 		}
-		var req models.ContainerRequest
-		if err := config.DB.Preload("Container").First(&req, *slot.RequestID).Error; err != nil {
+		var demande models.ContainerRequest
+		if err := config.DB.Preload("Container").First(&demande, *e.RequestID).Error; err != nil {
 			continue
 		}
-		result = append(result, AvailableObject{
-			SlotID:        slot.ID,
-			SlotCode:      slot.SlotCode,
-			Size:          slot.Size,
-			ContainerID:   req.ContainerID,
-			ContainerName: req.Container.Name,
-			Address:       req.Container.Address,
-			District:      req.Container.District,
-			Latitude:      req.Container.Latitude,
-			Longitude:     req.Container.Longitude,
-			RequestID:     req.ID,
-			ObjectTitle:   req.ObjectTitle,
-			ObjectDesc:    req.ObjectDescription,
+		objets = append(objets, ObjetDispo{
+			SlotID:        e.ID,
+			SlotCode:      e.SlotCode,
+			Size:          e.Size,
+			ContainerID:   demande.ContainerID,
+			ContainerName: demande.Container.Name,
+			Address:       demande.Container.Address,
+			District:      demande.Container.District,
+			Latitude:      demande.Container.Latitude,
+			Longitude:     demande.Container.Longitude,
+			RequestID:     demande.ID,
+			ObjectTitle:   demande.ObjectTitle,
+			ObjectDesc:    demande.ObjectDescription,
 		})
 	}
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, objets)
 }

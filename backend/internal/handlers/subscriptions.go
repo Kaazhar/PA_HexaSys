@@ -21,46 +21,46 @@ func planLabel(plan string) string {
 	return plan
 }
 
-func GetUserListingLimit(userID uint) int {
-	var subs []models.Subscription
-	now := time.Now()
-	config.DB.Where("user_id = ? AND status = 'active' AND (expires_at IS NULL OR expires_at > ?)", userID, now).Find(&subs)
+func LimiteAnnonces(idUtilisateur uint) int {
+	var abonnements []models.Subscription
+	maintenant := time.Now()
+	config.DB.Where("user_id = ? AND status = 'active' AND (expires_at IS NULL OR expires_at > ?)", idUtilisateur, maintenant).Find(&abonnements)
 	total := BaseListingLimit
-	for _, s := range subs {
-		total += s.MaxListingsBonus
+	for _, a := range abonnements {
+		total += a.MaxListingsBonus
 	}
 	return total
 }
 
-func GetSubscriptionPlans(c *gin.Context) {
+func ListerPlansAbonnement(c *gin.Context) {
 	var plans []models.SubscriptionPlan
 	config.DB.Where("is_active = true").Order("sort_order ASC, price ASC").Find(&plans)
 	c.JSON(http.StatusOK, plans)
 }
 
-func GetMySubscriptions(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	now := time.Now()
-	soon := now.Add(3 * 24 * time.Hour)
+func MesAbonnements(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
+	maintenant := time.Now()
+	bientot := maintenant.Add(3 * 24 * time.Hour)
 
-	var subs []models.Subscription
-	config.DB.Where("user_id = ? AND status = 'active'", userID).Order("expires_at ASC").Find(&subs)
+	var abonnements []models.Subscription
+	config.DB.Where("user_id = ? AND status = 'active'", idUtilisateur).Order("expires_at ASC").Find(&abonnements)
 
-	for i := range subs {
-		if subs[i].ExpiresAt != nil && subs[i].ExpiresAt.Before(soon) && !subs[i].NotifiedExpiry {
-			days := int(time.Until(*subs[i].ExpiresAt).Hours() / 24)
-			msg := fmt.Sprintf("⏰ Votre abonnement \"%s\" expire dans %d jour(s). Renouvelez-le pour conserver vos avantages.", subs[i].Plan, days)
-			config.DB.Create(&models.Notification{UserID: userID.(uint), Message: msg, Type: "warning"})
-			config.DB.Model(&subs[i]).Update("notified_expiry", true)
+	for i := range abonnements {
+		if abonnements[i].ExpiresAt != nil && abonnements[i].ExpiresAt.Before(bientot) && !abonnements[i].NotifiedExpiry {
+			jours := int(time.Until(*abonnements[i].ExpiresAt).Hours() / 24)
+			msg := fmt.Sprintf("⏰ Votre abonnement \"%s\" expire dans %d jour(s). Renouvelez-le pour conserver vos avantages.", abonnements[i].Plan, jours)
+			config.DB.Create(&models.Notification{UserID: idUtilisateur.(uint), Message: msg, Type: "warning"})
+			config.DB.Model(&abonnements[i]).Update("notified_expiry", true)
 		}
 	}
 
-	limit := GetUserListingLimit(userID.(uint))
-	c.JSON(http.StatusOK, gin.H{"subscriptions": subs, "listing_limit": limit, "base_limit": BaseListingLimit})
+	plafond := LimiteAnnonces(idUtilisateur.(uint))
+	c.JSON(http.StatusOK, gin.H{"subscriptions": abonnements, "listing_limit": plafond, "base_limit": BaseListingLimit})
 }
 
-func SubscribeToFreePlan(c *gin.Context) {
-	userID, _ := c.Get("userID")
+func SouscrirePlanGratuit(c *gin.Context) {
+	idUtilisateur, _ := c.Get("userID")
 
 	var req struct {
 		Slug string `json:"slug" binding:"required"`
@@ -76,32 +76,32 @@ func SubscribeToFreePlan(c *gin.Context) {
 		return
 	}
 
-	expiresAt := time.Now().AddDate(0, 0, plan.DurationDays)
-	sub := models.Subscription{
-		UserID:           userID.(uint),
+	expiration := time.Now().AddDate(0, 0, plan.DurationDays)
+	abonnement := models.Subscription{
+		UserID:           idUtilisateur.(uint),
 		Plan:             plan.Slug,
 		Price:            0,
 		Status:           "active",
-		RenewalDate:      expiresAt,
-		ExpiresAt:        &expiresAt,
+		RenewalDate:      expiration,
+		ExpiresAt:        &expiration,
 		MaxListingsBonus: plan.MaxListingsBonus,
 	}
-	config.DB.Create(&sub)
+	config.DB.Create(&abonnement)
 	config.DB.Create(&models.Notification{
-		UserID:  userID.(uint),
+		UserID:  idUtilisateur.(uint),
 		Message: fmt.Sprintf("🎉 Abonnement \"%s\" activé ! Vous pouvez désormais poster %d annonces supplémentaires.", plan.Name, plan.MaxListingsBonus),
 		Type:    "success",
 	})
-	c.JSON(http.StatusCreated, sub)
+	c.JSON(http.StatusCreated, abonnement)
 }
 
-func AdminGetPlans(c *gin.Context) {
+func AdminListerPlans(c *gin.Context) {
 	var plans []models.SubscriptionPlan
 	config.DB.Order("sort_order ASC, price ASC").Find(&plans)
 	c.JSON(http.StatusOK, plans)
 }
 
-func AdminCreatePlan(c *gin.Context) {
+func AdminCreerPlan(c *gin.Context) {
 	var req struct {
 		Name             string  `json:"name" binding:"required"`
 		Slug             string  `json:"slug" binding:"required"`
@@ -136,36 +136,36 @@ func AdminCreatePlan(c *gin.Context) {
 	c.JSON(http.StatusCreated, plan)
 }
 
-func AdminUpdatePlan(c *gin.Context) {
+func AdminModifierPlan(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var plan models.SubscriptionPlan
 	if err := config.DB.First(&plan, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan introuvable"})
 		return
 	}
-	var req map[string]interface{}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	var modifications map[string]interface{}
+	if err := c.ShouldBindJSON(&modifications); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	config.DB.Model(&plan).Updates(req)
+	config.DB.Model(&plan).Updates(modifications)
 	config.DB.First(&plan, id)
 	c.JSON(http.StatusOK, plan)
 }
 
-func AdminDeletePlan(c *gin.Context) {
+func AdminSupprimerPlan(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	config.DB.Delete(&models.SubscriptionPlan{}, id)
 	c.JSON(http.StatusOK, gin.H{"message": "Plan supprimé"})
 }
 
-func AdminGetUserSubscriptions(c *gin.Context) {
-	var subs []models.Subscription
-	config.DB.Preload("User").Order("created_at DESC").Find(&subs)
-	c.JSON(http.StatusOK, subs)
+func AdminAbonnementsUtilisateurs(c *gin.Context) {
+	var abonnements []models.Subscription
+	config.DB.Preload("User").Order("created_at DESC").Find(&abonnements)
+	c.JSON(http.StatusOK, abonnements)
 }
 
-func AdminCancelSubscription(c *gin.Context) {
+func AdminAnnulerAbonnement(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	config.DB.Model(&models.Subscription{}).Where("id = ?", id).Update("status", "cancelled")
 	c.JSON(http.StatusOK, gin.H{"message": "Abonnement annulé"})

@@ -13,7 +13,7 @@ import (
 	"upcycleconnect/backend/internal/models"
 )
 
-func GetGoogleConfig(c *gin.Context) {
+func ConfigGoogle(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"client_id": os.Getenv("GOOGLE_CLIENT_ID")})
 }
 
@@ -46,7 +46,7 @@ func verifierTokenGoogle(credential string) (*googleTokenInfo, error) {
 	return &info, nil
 }
 
-func GoogleLogin(c *gin.Context) {
+func ConnexionGoogle(c *gin.Context) {
 	var req struct {
 		Credential string `json:"credential" binding:"required"`
 	}
@@ -71,14 +71,14 @@ func GoogleLogin(c *gin.Context) {
 		return
 	}
 
-	var user models.User
-	err = config.DB.Where("email = ?", info.Email).First(&user).Error
+	var utilisateur models.User
+	err = config.DB.Where("email = ?", info.Email).First(&utilisateur).Error
 
 	if err != nil {
-		randomHash, _ := bcrypt.GenerateFromPassword([]byte(config.GenerateToken()), bcrypt.DefaultCost)
-		user = models.User{
+		hashAlea, _ := bcrypt.GenerateFromPassword([]byte(config.GenerateToken()), bcrypt.DefaultCost)
+		utilisateur = models.User{
 			Email:        info.Email,
-			PasswordHash: string(randomHash),
+			PasswordHash: string(hashAlea),
 			Firstname:    info.GivenName,
 			Lastname:     info.FamilyName,
 			Role:         models.RoleParticulier,
@@ -87,31 +87,31 @@ func GoogleLogin(c *gin.Context) {
 			FirstLogin:   false,
 			AvatarURL:    info.Picture,
 		}
-		if err := config.DB.Create(&user).Error; err != nil {
+		if err := config.DB.Create(&utilisateur).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de créer le compte"})
 			return
 		}
-		config.DB.Create(&models.UpcyclingScore{UserID: user.ID})
+		config.DB.Create(&models.UpcyclingScore{UserID: utilisateur.ID})
 	}
 
-	if !user.IsActive {
+	if !utilisateur.IsActive {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Compte désactivé"})
 		return
 	}
-	if user.IsBanned {
+	if utilisateur.IsBanned {
 		c.JSON(http.StatusForbidden, gin.H{
 			"error":          "banned",
-			"ban_reason":     user.BanReason,
-			"ban_expires_at": user.BanExpiresAt,
+			"ban_reason":     utilisateur.BanReason,
+			"ban_expires_at": utilisateur.BanExpiresAt,
 		})
 		return
 	}
 
-	token, err := generateToken(user)
+	jeton, err := genererToken(utilisateur)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la génération du token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
+	c.JSON(http.StatusOK, gin.H{"token": jeton, "user": utilisateur})
 }
