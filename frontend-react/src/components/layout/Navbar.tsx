@@ -106,8 +106,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           
-          <Link to="/" className="flex items-center flex-shrink-0">
-            <img src={logo} alt="UpcycleConnect" className="h-8" />
+          <Link to="/" className="flex items-center flex-shrink-0 bg-[#2D5016] rounded-lg p-1.5">
+            <img src={logo} alt="UpcycleConnect" className="h-7" />
           </Link>
 
           
