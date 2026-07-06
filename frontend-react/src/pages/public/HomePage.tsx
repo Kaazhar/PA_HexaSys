@@ -71,30 +71,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-20 bg-[#F5E6D3]/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">{t('home.how_title')}</h2>
-            <p className="text-gray-500 mt-3 max-w-xl mx-auto">{t('home.how_subtitle')}</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { title: t('home.step1_title'), description: t('home.step1_desc'), step: '01' },
-              { title: t('home.step2_title'), description: t('home.step2_desc'), step: '02' },
-              { title: t('home.step3_title'), description: t('home.step3_desc'), step: '03' },
-            ].map((step, i) => (
-              <div key={i} className="relative p-8 bg-white rounded-2xl hover:shadow-md transition-shadow border border-gray-100">
-                <div className="absolute top-6 right-6 text-5xl font-black text-gray-100">{step.step}</div>
-                <div className="w-10 h-10 rounded-xl bg-[#2D5016]/10 flex items-center justify-center mb-4">
-                  <div className="w-3 h-3 rounded-full bg-[#2D5016]" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
