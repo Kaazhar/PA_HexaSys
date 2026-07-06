@@ -139,7 +139,7 @@ export default function AdminUsers() {
   };
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<User> }) => userService.update(id, data),
+    mutationFn: ({ id, data }: any) => userService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setEditUser(null);
@@ -149,7 +149,7 @@ export default function AdminUsers() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: UserFormData & { password: string }) => userService.create(data),
+    mutationFn: (data: any) => userService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setShowCreateModal(false);
@@ -168,7 +168,7 @@ export default function AdminUsers() {
   });
 
   const toggleActiveMutation = useMutation({
-    mutationFn: ({ id, is_active }: { id: number; is_active: boolean }) => userService.update(id, { is_active }),
+    mutationFn: ({ id, is_active }: any) => userService.update(id, { is_active }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       toast.success(t('common.success'));
@@ -176,7 +176,7 @@ export default function AdminUsers() {
   });
 
   const banMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: BanFormData }) => userService.ban(id, data),
+    mutationFn: ({ id, data }: any) => userService.ban(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setBanUser(null);

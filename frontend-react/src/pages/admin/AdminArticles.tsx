@@ -29,13 +29,13 @@ export default function AdminArticles() {
   const articles = (data?.data as unknown as Article[]) ?? [];
 
   const createMutation = useMutation({
-    mutationFn: (d: Partial<Article>) => adminService.createArticle(d),
+    mutationFn: (d: any) => adminService.createArticle(d),
     onSuccess: () => { toast.success(t('admin_articles.created')); queryClient.invalidateQueries({ queryKey: ['admin-articles'] }); closeModal(); },
     onError: (e: any) => toast.error(e?.response?.data?.error || t('common.error')),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Article> }) => adminService.updateArticle(id, data),
+    mutationFn: ({ id, data }: any) => adminService.updateArticle(id, data),
     onSuccess: () => { toast.success(t('admin_articles.updated')); queryClient.invalidateQueries({ queryKey: ['admin-articles'] }); closeModal(); },
     onError: (e: any) => toast.error(e?.response?.data?.error || t('common.error')),
   });

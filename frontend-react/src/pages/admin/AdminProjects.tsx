@@ -35,13 +35,13 @@ export default function AdminProjects() {
     : projects;
 
   const createMutation = useMutation({
-    mutationFn: (d: Partial<Project>) => adminService.createProject(d),
+    mutationFn: (d: any) => adminService.createProject(d),
     onSuccess: () => { toast.success('Projet créé'); queryClient.invalidateQueries({ queryKey: ['admin-projects'] }); closeModal(); },
     onError: (e: any) => toast.error(e?.response?.data?.error || 'Erreur'),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Project> }) => adminService.updateProject(id, data),
+    mutationFn: ({ id, data }: any) => adminService.updateProject(id, data),
     onSuccess: () => { toast.success('Projet mis à jour'); queryClient.invalidateQueries({ queryKey: ['admin-projects'] }); closeModal(); },
     onError: (e: any) => toast.error(e?.response?.data?.error || 'Erreur'),
   });

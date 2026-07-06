@@ -84,11 +84,11 @@ export default function AdminWorkshops() {
 
   const addSession = () => setForm(f => ({ ...f, sessions: [...f.sessions, { date: '', duration: '120' }] }));
   const removeSession = (i: number) => setForm(f => ({ ...f, sessions: f.sessions.filter((_, idx) => idx !== i) }));
-  const updateSession = (i: number, key: keyof SessionForm, value: string) =>
+  const updateSession = (i: number, key: string, value: string) =>
     setForm(f => ({ ...f, sessions: f.sessions.map((s, idx) => (idx === i ? { ...s, [key]: value } : s)) }));
   const addChapter = () => setForm(f => ({ ...f, chapters: [...f.chapters, { title: '', content: '' }] }));
   const removeChapter = (i: number) => setForm(f => ({ ...f, chapters: f.chapters.filter((_, idx) => idx !== i) }));
-  const updateChapter = (i: number, key: keyof ChapterForm, value: string) =>
+  const updateChapter = (i: number, key: string, value: string) =>
     setForm(f => ({ ...f, chapters: f.chapters.map((ch, idx) => (idx === i ? { ...ch, [key]: value } : ch)) }));
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -130,7 +130,7 @@ export default function AdminWorkshops() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (d: Parameters<typeof workshopService.create>[0]) => workshopService.create(d),
+    mutationFn: (d: any) => workshopService.create(d),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
       setShowCreate(false);
@@ -141,7 +141,7 @@ export default function AdminWorkshops() {
   });
 
   const cancelMutation = useMutation({
-    mutationFn: ({ id, reason }: { id: number; reason: string }) => workshopService.cancel(id, reason),
+    mutationFn: ({ id, reason }: any) => workshopService.cancel(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'workshops'] });
       setCancelWorkshop(null);

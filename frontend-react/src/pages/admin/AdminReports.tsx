@@ -45,7 +45,7 @@ export default function AdminReports() {
   });
 
   const resolveMutation = useMutation({
-    mutationFn: ({ id, status, note }: { id: number; status: string; note: string }) =>
+    mutationFn: ({ id, status, note }: any) =>
       reportService.resolve(id, { status, admin_note: note }),
     onSuccess: (_, vars) => {
       toast.success(vars.status === 'resolved' ? t('admin_reports.resolved_success') : t('admin_reports.dismissed_success'));

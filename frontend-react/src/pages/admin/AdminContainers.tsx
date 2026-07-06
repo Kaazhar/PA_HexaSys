@@ -42,7 +42,7 @@ function SlotsModal({ container, onClose }: { container: Container; onClose: () 
   const { register, handleSubmit, reset } = useForm({ defaultValues: { S: 0, M: 0, L: 0 } });
 
   const seedMutation = useMutation({
-    mutationFn: (counts: { S: number; M: number; L: number }) =>
+    mutationFn: (counts: any) =>
       containerService.seedSlots(container.id, counts),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['container-slots', container.id] });
@@ -113,7 +113,7 @@ function SlotsModal({ container, onClose }: { container: Container; onClose: () 
                 <div key={size}>
                   <label className="label">{t('admin_containers.slot_size', { size })}</label>
                   <input
-                    {...register(size as 'S' | 'M' | 'L', { valueAsNumber: true, min: 0 })}
+                    {...register(size as any, { valueAsNumber: true, min: 0 })}
                     type="number"
                     min="0"
                     className="input text-center"
@@ -179,7 +179,7 @@ export default function AdminContainers() {
   });
 
   const rejectMutation = useMutation({
-    mutationFn: ({ id, reason }: { id: number; reason: string }) => containerService.rejectRequest(id, reason),
+    mutationFn: ({ id, reason }: any) => containerService.rejectRequest(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['container-requests'] });
       setRejectRequest(null);

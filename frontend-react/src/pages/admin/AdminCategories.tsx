@@ -27,7 +27,7 @@ export default function AdminCategories() {
   const categories: Category[] = data?.data || [];
 
   const createMutation = useMutation({
-    mutationFn: (data: typeof emptyForm) => categoryService.create(data),
+    mutationFn: (data: any) => categoryService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       setShowForm(false);
@@ -38,7 +38,7 @@ export default function AdminCategories() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: typeof emptyForm }) => categoryService.update(id, data),
+    mutationFn: ({ id, data }: any) => categoryService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       setEditingId(null);

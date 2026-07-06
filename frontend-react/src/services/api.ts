@@ -37,16 +37,16 @@ api.interceptors.response.use(
 export const authService = {
   login: (email: string, password: string) =>
     api.post<AuthResponse>('/auth/login', { email, password }),
-  register: (data: { email: string; password: string; firstname: string; lastname: string; role: string }) =>
+  register: (data: any) =>
     api.post<AuthResponse>('/auth/register', data),
   me: () => api.get<User>('/auth/me'),
-  updateProfile: (data: { firstname?: string; lastname?: string; phone?: string; address?: string }) =>
+  updateProfile: (data: any) =>
     api.put<User>('/auth/profile', data),
-  changePassword: (data: { current_password: string; new_password: string }) =>
+  changePassword: (data: any) =>
     api.put('/auth/password', data),
   updateAvatar: (avatarUrl: string) =>
     api.put<User>('/auth/avatar', { avatar_url: avatarUrl }),
-  updateBanner: (data: { banner_url?: string; banner_color?: string }) =>
+  updateBanner: (data: any) =>
     api.put<User>('/auth/banner', data),
   confirmEmail: (email: string, code: string) => api.post('/auth/confirm-email', { email, code }),
   resendConfirmEmail: (email: string) => api.post('/auth/resend-confirm', { email }),
@@ -78,14 +78,14 @@ export const newsletterService = {
 };
 
 export const userService = {
-  getAll: (params?: { page?: number; limit?: number; role?: string; status?: string; search?: string }) =>
+  getAll: (params?: any) =>
     api.get<{ users: User[]; total: number; page: number; limit: number }>('/admin/users', { params }),
   getOne: (id: number) => api.get<User>(`/admin/users/${id}`),
   getPublicProfile: (id: number) => api.get(`/users/${id}`),
   create: (data: Partial<User> & { password: string }) => api.post<User>('/admin/users', data),
   update: (id: number, data: Partial<User>) => api.put<User>(`/admin/users/${id}`, data),
   delete: (id: number) => api.delete(`/admin/users/${id}`),
-  ban: (id: number, data: { reason: string; duration: number; is_permanent: boolean }) =>
+  ban: (id: number, data: any) =>
     api.post(`/admin/users/${id}/ban`, data),
   unban: (id: number) => api.post(`/admin/users/${id}/unban`),
   getBanHistory: (id: number) => api.get(`/admin/users/${id}/bans`),
@@ -93,11 +93,11 @@ export const userService = {
 };
 
 export const listingService = {
-  getAll: (params?: { page?: number; limit?: number; status?: string; category?: string; type?: string; search?: string; location?: string }) =>
+  getAll: (params?: any) =>
     api.get<{ listings: Listing[]; total: number; page: number; limit: number }>('/listings', { params }),
-  getMine: (params?: { page?: number; limit?: number; status?: string }) =>
+  getMine: (params?: any) =>
     api.get<{ listings: Listing[]; total: number; page: number; limit: number }>('/listings/mine', { params }),
-  getAdminAll: (params?: { page?: number; limit?: number; status?: string; search?: string }) =>
+  getAdminAll: (params?: any) =>
     api.get<{ listings: Listing[]; total: number; page: number; limit: number }>('/admin/listings', { params }),
   getOne: (id: number) => api.get<Listing>(`/listings/${id}`),
   create: (data: Partial<Listing>) => api.post<Listing>('/listings', data),
@@ -111,9 +111,9 @@ export const listingService = {
 };
 
 export const workshopService = {
-  getAll: (params?: { page?: number; limit?: number; status?: string; type?: string }) =>
+  getAll: (params?: any) =>
     api.get<{ workshops: Workshop[]; total: number; page: number; limit: number }>('/workshops', { params }),
-  getAdminAll: (params?: { page?: number; limit?: number; status?: string }) =>
+  getAdminAll: (params?: any) =>
     api.get<{ workshops: Workshop[]; total: number; page: number; limit: number }>('/admin/workshops', { params }),
   getOne: (id: number) => api.get<Workshop>(`/workshops/${id}`),
   create: (data: WorkshopCreatePayload) => api.post<Workshop>('/workshops', data),
@@ -170,18 +170,11 @@ export const containerService = {
   create: (data: Partial<Container>) => api.post<Container>('/containers', data),
   update: (id: number, data: Partial<Container>) => api.put<Container>(`/containers/${id}`, data),
   getSlots: (id: number) => api.get<ContainerSlot[]>('/containers/slots', { params: { container_id: id } }),
-  seedSlots: (id: number, counts: { S: number; M: number; L: number }) =>
+  seedSlots: (id: number, counts: any) =>
     api.post<ContainerSlot[]>(`/containers/${id}/slots`, counts),
   getRequests: (params?: { status?: string }) =>
     api.get<ContainerRequest[]>('/containers/requests', { params }),
-  createRequest: (data: {
-    container_id: number;
-    object_title: string;
-    object_description: string;
-    desired_date: string;
-    size_category: string;
-    slot_id: number;
-  }) => api.post<ContainerRequest>('/containers/requests', data),
+  createRequest: (data: any) => api.post<ContainerRequest>('/containers/requests', data),
   validateRequest: (id: number) => api.put(`/containers/requests/${id}/validate`),
   rejectRequest: (id: number, reason: string) => api.put(`/containers/requests/${id}/reject`, { reason }),
   getMyRequests: () => api.get<ContainerRequest[]>('/containers/requests/mine'),
@@ -195,11 +188,11 @@ export const containerService = {
 
 export const scoreService = {
   getMyScore: () => api.get('/score/me'),
-  getLeaderboard: () => api.get<{ user_id: number; firstname: string; lastname: string; total_points: number; level: string; co2_saved_kg: number }[]>('/score/leaderboard'),
+  getLeaderboard: () => api.get<any>('/score/leaderboard'),
 };
 
 export const publicStatsService = {
-  get: () => api.get<{ total_users: number; active_listings: number; co2_saved_kg: number; waste_avoided_kg: number }>('/stats/public'),
+  get: () => api.get<any>('/stats/public'),
 };
 
 export const notificationService = {
@@ -222,7 +215,7 @@ export const adminService = {
   getUserSubscriptions: () => api.get<Subscription[]>('/admin/user-subscriptions'),
   cancelSubscription: (id: number) => api.delete(`/admin/user-subscriptions/${id}`),
   deleteListing: (id: number) => api.delete(`/admin/listings/${id}`),
-  moderateListing: (id: number, data: { is_moderated: boolean; moderation_note: string }) => api.put<Listing>(`/admin/listings/${id}/moderate`, data),
+  moderateListing: (id: number, data: any) => api.put<Listing>(`/admin/listings/${id}/moderate`, data),
 };
 
 export const dashboardService = {
@@ -234,9 +227,9 @@ export const dashboardService = {
 export const salarieService = {
   getMyWorkshops: (params?: { status?: string }) => api.get('/salarie/workshops', { params }),
   getMyArticles: () => api.get('/salarie/articles'),
-  createArticle: (data: { title: string; content: string; tags?: string; status?: string }) =>
+  createArticle: (data: any) =>
     api.post('/salarie/articles', data),
-  updateArticle: (id: number, data: Partial<{ title: string; content: string; tags: string; status: string }>) =>
+  updateArticle: (id: number, data: any) =>
     api.put(`/salarie/articles/${id}`, data),
   deleteArticle: (id: number) => api.delete(`/salarie/articles/${id}`),
 };
@@ -282,7 +275,7 @@ export const projectService = {
 
 export const messageService = {
   getConversations: () => api.get<Conversation[]>('/conversations'),
-  getOrCreate: (data: { other_user_id: number; listing_id?: number }) =>
+  getOrCreate: (data: any) =>
     api.post<Conversation>('/conversations', data),
   getMessages: (conversationId: number) =>
     api.get<Message[]>(`/conversations/${conversationId}/messages`),
@@ -293,34 +286,34 @@ export const messageService = {
 export const reviewService = {
   getForListing: (listingId: number) => api.get<Review[]>(`/listings/${listingId}/reviews`),
   getForUser: (userId: number) => api.get(`/users/${userId}/reviews`),
-  create: (listingId: number, data: { rating: number; comment: string }) =>
+  create: (listingId: number, data: any) =>
     api.post<Review>(`/listings/${listingId}/reviews`, data),
   delete: (id: number) => api.delete(`/reviews/${id}`),
 };
 
 export const reportService = {
-  create: (listingId: number, data: { reason: string; details?: string }) =>
+  create: (listingId: number, data: any) =>
     api.post(`/listings/${listingId}/report`, data),
-  getAll: (params?: { status?: string; page?: number; limit?: number }) =>
+  getAll: (params?: any) =>
     api.get<{ reports: any[]; total: number; page: number; limit: number }>('/admin/reports', { params }),
-  resolve: (id: number, data: { status: string; admin_note?: string }) =>
+  resolve: (id: number, data: any) =>
     api.put(`/admin/reports/${id}/resolve`, data),
 };
 
 export const articleService = {
-  getAll: (params?: { page?: number; limit?: number; tag?: string }) =>
+  getAll: (params?: any) =>
     api.get<{ articles: Article[]; total: number; page: number; limit: number }>('/articles', { params }),
   getOne: (id: number) => api.get<Article>(`/articles/${id}`),
 };
 
 export const forumService = {
-  getTopics: (params?: { page?: number; limit?: number }) =>
+  getTopics: (params?: any) =>
     api.get<{ topics: ForumTopic[]; total: number; page: number; limit: number }>('/forum/topics', { params }),
   getTopic: (id: number) =>
     api.get<{ topic: ForumTopic; posts: ForumPost[] }>(`/forum/topics/${id}`),
-  createTopic: (data: { title: string; content: string }) =>
+  createTopic: (data: any) =>
     api.post<ForumTopic>('/forum/topics', data),
-  updateTopic: (id: number, data: { title?: string; content?: string }) =>
+  updateTopic: (id: number, data: any) =>
     api.put<ForumTopic>(`/forum/topics/${id}`, data),
   deleteTopic: (id: number) => api.delete(`/forum/topics/${id}`),
   pinTopic: (id: number) => api.put(`/forum/topics/${id}/pin`),
@@ -363,7 +356,7 @@ export const searchService = {
 };
 
 export const uploadService = {
-  upload: (file: File): Promise<{ data: { url: string } }> => {
+  upload: (file: File): Promise<any> => {
     const formData = new FormData();
     formData.append('file', file);
     return api.post('/upload', formData, {

@@ -54,7 +54,7 @@ export default function DashboardPro() {
       refetchCompany();
       toast.success(t('dashboard_pro.siret_success'));
     },
-    onError: (err: { response?: { data?: { error?: string } } }) => {
+    onError: (err: any) => {
       toast.error(err.response?.data?.error || t('dashboard_pro.siret_error'));
     },
   });

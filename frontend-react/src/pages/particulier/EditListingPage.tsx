@@ -69,7 +69,7 @@ export default function EditListingPage() {
   const formValues = watch();
 
   const updateMutation = useMutation({
-    mutationFn: (data: ListingForm & { images: string }) =>
+    mutationFn: (data: any) =>
       listingService.update(Number(id), data),
     onSuccess: () => {
       toast.success(t('edit_listing.success'));

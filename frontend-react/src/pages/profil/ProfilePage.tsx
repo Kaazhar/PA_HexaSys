@@ -124,7 +124,7 @@ export default function ProfilePage() {
   const handleUserUpdated = (updatedUser: UserType) => updateUser(updatedUser);
 
   const profileMutation = useMutation({
-    mutationFn: (data: typeof profileForm) => authService.updateProfile(data),
+    mutationFn: (data: any) => authService.updateProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
       toast.success(t('profile.profile_updated'));
@@ -133,12 +133,12 @@ export default function ProfilePage() {
   });
 
   const passwordMutation = useMutation({
-    mutationFn: (data: { current_password: string; new_password: string }) => authService.changePassword(data),
+    mutationFn: (data: any) => authService.changePassword(data),
     onSuccess: () => {
       setPasswordForm({ current_password: '', new_password: '', confirm_password: '' });
       toast.success(t('profile.password_updated'));
     },
-    onError: (err: { response?: { data?: { error?: string } } }) => {
+    onError: (err: any) => {
       toast.error(err.response?.data?.error || t('profile.profile_error'));
     },
   });

@@ -50,7 +50,7 @@ export default function ProjetsPro() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, d }: { id: number; d: FormData }) => projectService.update(id, d),
+    mutationFn: ({ id, d }: any) => projectService.update(id, d),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['my-projects'] }); closeModal(); },
   });
 

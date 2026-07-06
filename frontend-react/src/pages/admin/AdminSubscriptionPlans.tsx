@@ -65,13 +65,13 @@ export default function AdminSubscriptionPlans() {
   const plans = data?.data ?? [];
 
   const createMutation = useMutation({
-    mutationFn: (d: Partial<SubscriptionPlan>) => adminPlanService.create(d),
+    mutationFn: (d: any) => adminPlanService.create(d),
     onSuccess: () => { toast.success(t('admin_plans.created')); queryClient.invalidateQueries({ queryKey: ['admin-plans'] }); closeModal(); },
     onError: (e: any) => toast.error(e?.response?.data?.error || t('common.error')),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<SubscriptionPlan> }) => adminPlanService.update(id, data),
+    mutationFn: ({ id, data }: any) => adminPlanService.update(id, data),
     onSuccess: () => { toast.success(t('admin_plans.updated')); queryClient.invalidateQueries({ queryKey: ['admin-plans'] }); closeModal(); },
     onError: (e: any) => toast.error(e?.response?.data?.error || t('common.error')),
   });

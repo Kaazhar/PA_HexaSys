@@ -55,7 +55,7 @@ export default function ProjectStepsManager({ projectId, title, onClose }: Proje
     onError: () => toast.error(t('common.error', { defaultValue: 'Erreur' })),
   });
   const updateMutation = useMutation({
-    mutationFn: ({ id, d }: { id: number; d: ProjectStepInput }) => projectService.updateUpdate(projectId, id, d),
+    mutationFn: ({ id, d }: any) => projectService.updateUpdate(projectId, id, d),
     onSuccess: () => { invalidate(); resetForm(); setMode('view'); toast.success(t('project_steps.updated', { defaultValue: 'Étape modifiée' })); },
     onError: () => toast.error(t('common.error', { defaultValue: 'Erreur' })),
   });

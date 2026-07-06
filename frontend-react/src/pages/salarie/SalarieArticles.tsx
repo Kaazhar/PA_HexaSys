@@ -66,7 +66,7 @@ export default function SalarieArticles() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<ArticleForm> }) =>
+    mutationFn: ({ id, data }: any) =>
       salarieService.updateArticle(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['salarie', 'articles'] });

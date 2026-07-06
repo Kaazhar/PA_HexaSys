@@ -50,7 +50,7 @@ export default function AdminListings() {
   });
 
   const sponsorMutation = useMutation({
-    mutationFn: ({ id, isSponsored }: { id: number; isSponsored: boolean }) =>
+    mutationFn: ({ id, isSponsored }: any) =>
       listingService.sponsor(id, isSponsored),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'listings'] });
@@ -60,7 +60,7 @@ export default function AdminListings() {
   });
 
   const rejectMutation = useMutation({
-    mutationFn: ({ id, reason }: { id: number; reason: string }) => listingService.reject(id, reason),
+    mutationFn: ({ id, reason }: any) => listingService.reject(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'listings'] });
       setRejectListing(null);
@@ -80,7 +80,7 @@ export default function AdminListings() {
   });
 
   const moderateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: { is_moderated: boolean; moderation_note: string } }) => adminService.moderateListing(id, data),
+    mutationFn: ({ id, data }: any) => adminService.moderateListing(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'listings'] });
       toast.success(t('common.success'));
@@ -90,7 +90,7 @@ export default function AdminListings() {
     onError: () => toast.error(t('common.error')),
   });
 
-  const onRejectSubmit = (data: { reason: string }) => {
+  const onRejectSubmit = (data: any) => {
     if (rejectListing) {
       rejectMutation.mutate({ id: rejectListing.id, reason: data.reason });
     }

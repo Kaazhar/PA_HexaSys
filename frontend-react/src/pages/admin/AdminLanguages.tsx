@@ -30,7 +30,7 @@ export default function AdminLanguages() {
   const languages = data ?? [];
 
   const createMutation = useMutation({
-    mutationFn: (payload: typeof form) => api.post('/admin/languages', payload),
+    mutationFn: (payload: any) => api.post('/admin/languages', payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-languages'] });
       queryClient.invalidateQueries({ queryKey: ['languages'] });

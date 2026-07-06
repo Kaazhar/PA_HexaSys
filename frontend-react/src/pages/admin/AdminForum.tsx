@@ -52,7 +52,7 @@ export default function AdminForum() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: { title: string; content: string }) => forumService.createTopic(data),
+    mutationFn: (data: any) => forumService.createTopic(data),
     onSuccess: () => {
       toast.success(t('common.success'));
       queryClient.invalidateQueries({ queryKey: ['admin-forum'] });
