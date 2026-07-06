@@ -11,8 +11,10 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminForum() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -33,48 +35,50 @@ export default function AdminForum() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => forumService.deleteTopic(id),
-    onSuccess: () => { toast.success('Topic supprimé'); queryClient.invalidateQueries({ queryKey: ['admin-forum'] }); },
-    onError: () => toast.error('Erreur'),
+    onSuccess: () => { toast.success(t('admin_forum.deleted')); queryClient.invalidateQueries({ queryKey: ['admin-forum'] }); },
+    onError: () => toast.error(t('common.error')),
   });
 
   const pinMutation = useMutation({
     mutationFn: (id: number) => forumService.pinTopic(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-forum'] }),
+    onError: () => toast.error(t('common.error')),
   });
 
   const lockMutation = useMutation({
     mutationFn: (id: number) => forumService.lockTopic(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-forum'] }),
+    onError: () => toast.error(t('common.error')),
   });
 
   const createMutation = useMutation({
     mutationFn: (data: { title: string; content: string }) => forumService.createTopic(data),
     onSuccess: () => {
-      toast.success('Topic créé');
+      toast.success(t('common.success'));
       queryClient.invalidateQueries({ queryKey: ['admin-forum'] });
       setShowCreate(false);
       setNewTopic({ title: '', content: '' });
     },
-    onError: () => toast.error('Erreur'),
+    onError: () => toast.error(t('common.error')),
   });
 
   return (
-    <DashboardLayout sidebarItems={adminSidebar} title="Gestion du forum">
+    <DashboardLayout sidebarItems={adminSidebar} title={t('admin_forum.title')}>
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Forum</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{total} sujets au total</p>
+            <h1 className="text-xl font-bold text-gray-900">{t('admin_forum.title')}</h1>
+            <p className="text-sm text-gray-500 mt-0.5">{t('admin_forum.subjects_total', { count: total })}</p>
           </div>
           <button onClick={() => setShowCreate(true)} className="btn-primary">
-            Nouveau sujet
+            {t('admin_forum.new_topic')}
           </button>
         </div>
 
         <div className="max-w-sm">
           <input
             type="text"
-            placeholder="Rechercher un sujet..."
+            placeholder={t('admin_forum.search_ph')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="input w-full"
@@ -88,13 +92,13 @@ export default function AdminForum() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  <th className="table-header">Sujet</th>
-                  <th className="table-header">Auteur</th>
-                  <th className="table-header">Réponses</th>
-                  <th className="table-header">Vues</th>
-                  <th className="table-header">Statut</th>
-                  <th className="table-header">Date</th>
-                  <th className="table-header">Actions</th>
+                  <th className="table-header">{t('admin_forum.col_topic')}</th>
+                  <th className="table-header">{t('admin_forum.col_author')}</th>
+                  <th className="table-header">{t('admin_forum.col_replies')}</th>
+                  <th className="table-header">{t('admin_forum.col_views')}</th>
+                  <th className="table-header">{t('admin_forum.col_status')}</th>
+                  <th className="table-header">{t('admin_forum.col_date')}</th>
+                  <th className="table-header">{t('admin_forum.col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -110,9 +114,9 @@ export default function AdminForum() {
                     <td className="table-cell text-gray-500">{topic.views}</td>
                     <td className="table-cell">
                       <div className="flex gap-1">
-                        {topic.is_pinned && <span className="badge bg-blue-100 text-blue-700">Épinglé</span>}
-                        {topic.is_locked && <span className="badge bg-amber-100 text-amber-700">Verrouillé</span>}
-                        {!topic.is_pinned && !topic.is_locked && <span className="text-gray-400 text-xs">Normal</span>}
+                        {topic.is_pinned && <span className="badge bg-blue-100 text-blue-700">{t('admin_forum.badge_pinned')}</span>}
+                        {topic.is_locked && <span className="badge bg-amber-100 text-amber-700">{t('admin_forum.badge_locked')}</span>}
+                        {!topic.is_pinned && !topic.is_locked && <span className="text-gray-400 text-xs">{t('admin_forum.badge_normal')}</span>}
                       </div>
                     </td>
                     <td className="table-cell text-gray-400 text-xs">
@@ -123,28 +127,28 @@ export default function AdminForum() {
                         <Link
                           to={`/salarie/forum/${topic.id}`}
                           className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Voir"
+                          title={t('admin_forum.btn_view')}
                         >
                           <Eye className="w-4 h-4" />
                         </Link>
                         <button
                           onClick={() => pinMutation.mutate(topic.id)}
                           className={clsx('p-1.5 rounded-lg transition-colors', topic.is_pinned ? 'text-blue-500 bg-blue-50' : 'text-gray-400 hover:text-blue-500 hover:bg-blue-50')}
-                          title={topic.is_pinned ? 'Désépingler' : 'Épingler'}
+                          title={topic.is_pinned ? t('admin_forum.btn_unpin') : t('admin_forum.btn_pin')}
                         >
                           <Pin className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => lockMutation.mutate(topic.id)}
                           className={clsx('p-1.5 rounded-lg transition-colors', topic.is_locked ? 'text-amber-500 bg-amber-50' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50')}
-                          title={topic.is_locked ? 'Déverrouiller' : 'Verrouiller'}
+                          title={topic.is_locked ? t('admin_forum.btn_unlock') : t('admin_forum.btn_lock')}
                         >
                           <Lock className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => { if (confirm(`Supprimer "${topic.title}" ?`)) deleteMutation.mutate(topic.id); }}
+                          onClick={() => { if (confirm(t('admin_forum.confirm_delete', { title: topic.title }))) deleteMutation.mutate(topic.id); }}
                           className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Supprimer"
+                          title={t('admin_forum.btn_delete')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -153,7 +157,7 @@ export default function AdminForum() {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={7} className="py-12 text-center text-gray-400">Aucun sujet</td></tr>
+                  <tr><td colSpan={7} className="py-12 text-center text-gray-400">{t('admin_forum.no_topics')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -162,9 +166,9 @@ export default function AdminForum() {
 
         {total > 20 && (
           <div className="flex gap-2 justify-center">
-            <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="btn-secondary">Précédent</button>
-            <span className="flex items-center text-sm text-gray-500">Page {page}</span>
-            <button disabled={topics.length < 20} onClick={() => setPage(p => p + 1)} className="btn-secondary">Suivant</button>
+            <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="btn-secondary">{t('admin_forum.prev')}</button>
+            <span className="flex items-center text-sm text-gray-500">{t('admin_forum.page', { page })}</span>
+            <button disabled={topics.length < 20} onClick={() => setPage(p => p + 1)} className="btn-secondary">{t('admin_forum.next')}</button>
           </div>
         )}
       </div>
@@ -173,27 +177,27 @@ export default function AdminForum() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-lg w-full shadow-xl">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold">Nouveau sujet</h3>
+              <h3 className="text-lg font-semibold">{t('admin_forum.modal_title')}</h3>
               <button onClick={() => setShowCreate(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Titre</label>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">{t('admin_forum.label_title')}</label>
                 <input className="input w-full" value={newTopic.title} onChange={e => setNewTopic(f => ({ ...f, title: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Contenu</label>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">{t('admin_forum.label_content')}</label>
                 <textarea className="input w-full h-32 resize-none" value={newTopic.content} onChange={e => setNewTopic(f => ({ ...f, content: e.target.value }))} />
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-5">
-              <button onClick={() => setShowCreate(false)} className="btn-secondary">Annuler</button>
+              <button onClick={() => setShowCreate(false)} className="btn-secondary">{t('common.cancel')}</button>
               <button
                 onClick={() => { if (newTopic.title && newTopic.content) createMutation.mutate(newTopic); }}
                 disabled={createMutation.isPending}
                 className="btn-primary"
               >
-                Créer
+                {t('common.create')}
               </button>
             </div>
           </div>
