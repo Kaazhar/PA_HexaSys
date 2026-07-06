@@ -301,7 +301,7 @@ export default function DashboardPro() {
                 </div>
               ) : (
                 <ul className="space-y-2">
-                  {(dashboard?.my_listings || []).map((listing: { id: number; title: string; status: string; type: string; price?: number }) => (
+                  {(dashboard?.my_listings || []).map((listing: any) => (
                     <li key={listing.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{listing.title}</p>
@@ -330,7 +330,7 @@ export default function DashboardPro() {
                 </div>
               ) : (
                 <ul className="space-y-2">
-                  {(dashboard?.projects || []).map((project: { id: number; title: string; views: number; likes: number; is_featured: boolean }) => (
+                  {(dashboard?.projects || []).map((project: any) => (
                     <li key={project.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{project.title}</p>

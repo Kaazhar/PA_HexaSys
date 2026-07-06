@@ -14,7 +14,7 @@ type AdminView = 'admin' | 'particulier' | 'professionnel' | 'salarie';
 
 const ADMIN_VIEWS: AdminView[] = ['admin', 'particulier', 'professionnel', 'salarie'];
 
-const ADMIN_VIEW_SIDEBARS: Record<AdminView, typeof adminSidebar> = {
+const ADMIN_VIEW_SIDEBARS = {
   admin:         adminSidebar,
   particulier:   particulierSidebar,
   professionnel: proSidebar,

@@ -22,7 +22,6 @@ export default function AdminProjects() {
   const [isNew, setIsNew] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
-  // Gestion des étapes du projet — identique au dashboard pro
   const [manageProject, setManageProject] = useState<Project | null>(null);
 
   const { data, isLoading } = useQuery({

@@ -192,7 +192,7 @@ export default function ScorePage() {
                 <h2 className="font-semibold text-gray-900">{t('score.history_title')}</h2>
               </div>
               <ul className="divide-y divide-gray-50">
-                {entries.map((entry: { id: number; reason: string; points: number; created_at: string }) => (
+                {entries.map((entry: any) => (
                   <li key={entry.id} className="flex items-center justify-between px-5 py-3">
                     <div>
                       <p className="text-sm text-gray-800">{entry.reason}</p>

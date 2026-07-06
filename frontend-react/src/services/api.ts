@@ -259,7 +259,6 @@ export interface ProjectStepInput {
   before_images?: string;
   after_images?: string;
   tags?: string;
-  // Rétro-compatibilité anciennes avancées
   image_url?: string;
   comment?: string;
 }

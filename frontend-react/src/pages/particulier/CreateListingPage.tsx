@@ -85,7 +85,6 @@ export default function CreateListingPage() {
   const sizeSlots = allSlots.filter(s => s.size === sizeCategory);
   const freeCount = sizeSlots.filter(s => s.status === 'free').length;
 
-  // Les fichiers choisis passent d'abord par le recadrage (un par un).
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []).filter(f => f.type.startsWith('image/'));
     if (!files.length) return;
@@ -93,7 +92,6 @@ export default function CreateListingPage() {
     e.target.value = '';
   };
 
-  // Upload de l'image recadrée, puis passage au fichier suivant de la file.
   const handleCropConfirm = async (cropped: File) => {
     setCropQueue(prev => prev.slice(1));
     setUploading(true);

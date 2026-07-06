@@ -18,11 +18,6 @@ interface ProjectStepsManagerProps {
 
 const split = (s?: string) => (s || '').split(',').map(x => x.trim()).filter(Boolean);
 
-/**
- * Gestion des étapes d'un projet (onglets Étape n°X) : ajout / édition / suppression.
- * Chaque étape reprend les champs de la création (sauf le titre, auto-numéroté).
- * Images gérées par upload + recadrage (ImageCropModal).
- */
 export default function ProjectStepsManager({ projectId, title, onClose }: ProjectStepsManagerProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -47,7 +42,6 @@ export default function ProjectStepsManager({ projectId, title, onClose }: Proje
   const [cropTarget, setCropTarget] = useState<'before' | 'after'>('before');
   const [uploading, setUploading] = useState(false);
 
-  // Garde l'onglet sélectionné dans les bornes quand la liste change.
   useEffect(() => {
     setTab(prev => Math.min(prev, Math.max(0, steps.length - 1)));
   }, [steps.length]);

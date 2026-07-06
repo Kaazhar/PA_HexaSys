@@ -20,7 +20,7 @@ const GAP = 14;
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
-const stepsByRole: Record<UserRole, Step[]> = {
+const stepsByRole: { [key: string]: Step[] } = {
   particulier: [
     {
       title: 'Bienvenue sur UpcycleConnect !',

@@ -130,7 +130,6 @@ export default function SalarieFormations() {
     });
   };
 
-  // Helpers séances/chapitres
   const addSession = () => setForm(f => ({ ...f, sessions: [...f.sessions, { date: '', duration: '120' }] }));
   const removeSession = (i: number) => setForm(f => ({ ...f, sessions: f.sessions.filter((_, idx) => idx !== i) }));
   const updateSession = (i: number, key: keyof SessionForm, value: string) =>
@@ -162,7 +161,7 @@ export default function SalarieFormations() {
           </div>
         ) : (
           <div className="space-y-3">
-            {workshops.map((ws: { id: number; title: string; date: string; duration: number; location: string; enrolled: number; max_spots: number; min_spots: number; status: string; type: string; price: number; cancel_reason?: string }) => (
+            {workshops.map((ws: any) => (
               <div
                 key={ws.id}
                 onClick={() => setDetailId(ws.id)}

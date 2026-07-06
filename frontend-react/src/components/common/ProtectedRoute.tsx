@@ -32,7 +32,7 @@ export default function ProtectedRoute({ children, roles }: ProtectedRouteProps)
   }
 
   if (roles && user && !roles.includes(user.role)) {
-    const dashboardMap: Record<UserRole, string> = {
+    const dashboardMap = {
       admin: '/admin',
       professionnel: '/pro',
       salarie: '/salarie',

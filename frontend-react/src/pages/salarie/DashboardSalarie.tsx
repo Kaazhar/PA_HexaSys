@@ -81,7 +81,7 @@ export default function DashboardSalarie() {
                 </div>
               ) : (
                 <ul className="space-y-3">
-                  {(dashboard?.my_workshops || []).map((ws: { id: number; title: string; date: string; enrolled: number; max_spots: number; status: string; location: string }) => (
+                  {(dashboard?.my_workshops || []).map((ws: any) => (
                     <li key={ws.id} className="p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
@@ -113,7 +113,7 @@ export default function DashboardSalarie() {
                 </div>
               ) : (
                 <ul className="space-y-3">
-                  {(dashboard?.upcoming_workshops || []).map((ws: { id: number; title: string; date: string; duration: number; location: string; price: number }) => (
+                  {(dashboard?.upcoming_workshops || []).map((ws: any) => (
                     <li key={ws.id} className="p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors">
                       <div className="flex items-start gap-3">
                         <div className="flex-1 min-w-0">
@@ -143,7 +143,7 @@ export default function DashboardSalarie() {
                   {t('dashboard_salarie.see_all')}                </Link>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {(dashboard?.my_articles || []).map((article: { id: number; title: string; status: string; views: number; created_at: string }) => (
+                {(dashboard?.my_articles || []).map((article: any) => (
                   <div key={article.id} className="p-4 border border-gray-100 rounded-xl hover:border-gray-200 transition-colors">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <p className="text-sm font-medium text-gray-900 line-clamp-1">{article.title}</p>

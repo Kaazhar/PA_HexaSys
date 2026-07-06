@@ -4,19 +4,13 @@ import { useTranslation } from 'react-i18next';
 
 interface ImageCropModalProps {
   file: File;
-  /** Ratio largeur/hauteur du cadre (défaut 4:3, adapté au catalogue). */
   aspect?: number;
   onCancel: () => void;
   onConfirm: (cropped: File) => void;
 }
 
-// Taille du cadre de prévisualisation (en pixels CSS).
 const VW = 320;
 
-/**
- * Recadrage simple d'une image (pan + zoom) dans un cadre au bon ratio,
- * puis export de l'image recadrée via canvas. Aucune dépendance externe.
- */
 export default function ImageCropModal({ file, aspect = 4 / 3, onCancel, onConfirm }: ImageCropModalProps) {
   const { t } = useTranslation();
   const VH = Math.round(VW / aspect);
@@ -26,12 +20,11 @@ export default function ImageCropModal({ file, aspect = 4 / 3, onCancel, onConfi
   const [nat, setNat] = useState({ w: 0, h: 0 });
   const [minScale, setMinScale] = useState(1);
   const [scale, setScale] = useState(1);
-  const [pos, setPos] = useState({ x: 0, y: 0 }); // translation du coin haut-gauche de l'image dans le cadre
+  const [pos, setPos] = useState({ x: 0, y: 0 });
   const [url, setUrl] = useState('');
 
   const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
 
-  // Charge l'image et initialise le cadrage (couvre le cadre, centré).
   useEffect(() => {
     const objectUrl = URL.createObjectURL(file);
     setUrl(objectUrl);
@@ -47,7 +40,6 @@ export default function ImageCropModal({ file, aspect = 4 / 3, onCancel, onConfi
     };
     img.src = objectUrl;
     return () => URL.revokeObjectURL(objectUrl);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file]);
 
   const clamp = (x: number, y: number, s: number) => ({
@@ -67,7 +59,6 @@ export default function ImageCropModal({ file, aspect = 4 / 3, onCancel, onConfi
   };
   const onPointerUp = () => { drag.current = null; };
 
-  // Zoom autour du centre du cadre.
   const onZoom = (e: React.ChangeEvent<HTMLInputElement>) => {
     const s1 = Number(e.target.value);
     const cx = (VW / 2 - pos.x) / scale;
@@ -88,7 +79,6 @@ export default function ImageCropModal({ file, aspect = 4 / 3, onCancel, onConfi
     canvas.height = OH;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    // Région source visible dans le cadre.
     const sx = -pos.x / scale;
     const sy = -pos.y / scale;
     const sw = VW / scale;

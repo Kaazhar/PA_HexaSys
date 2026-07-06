@@ -20,7 +20,6 @@ export default function ConseilsPage() {
     queryFn: () => articleService.getAll({ limit: 50, tag: activeTag || undefined }),
   });
 
-  // Liste complète des tags : requête non filtrée pour que les chips ne disparaissent pas
   const { data: allData } = useQuery({
     queryKey: ['articles', 'all-tags'],
     queryFn: () => articleService.getAll({ limit: 50 }),

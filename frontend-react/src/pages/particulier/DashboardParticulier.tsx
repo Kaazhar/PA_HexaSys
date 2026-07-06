@@ -81,7 +81,7 @@ export default function DashboardParticulier() {
                 </div>
               ) : (
                 <ul className="space-y-3">
-                  {(dashboard?.my_listings || []).map((listing: { id: number; title: string; status: string; type: string; price?: number }) => (
+                  {(dashboard?.my_listings || []).map((listing: any) => (
                     <li key={listing.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{listing.title}</p>
@@ -109,7 +109,7 @@ export default function DashboardParticulier() {
                 </div>
               ) : (
                 <ul className="space-y-3">
-                  {(dashboard?.upcoming_workshops || []).map((ws: { id: number; title: string; date: string; location: string; price: number }) => (
+                  {(dashboard?.upcoming_workshops || []).map((ws: any) => (
                     <li key={ws.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{ws.title}</p>

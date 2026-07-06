@@ -4,7 +4,6 @@ import {
   Briefcase, Image, FileText, Calendar, Send, MessageSquare, Lightbulb, PackageCheck, Globe, Receipt,
 } from 'lucide-react';
 
-// Les `label` sont des clés i18n (namespace `sidebar.*`), traduites au rendu dans Sidebar via t().
 export const adminSidebar = [
   { label: 'sidebar.users',        path: '/admin/utilisateurs',   icon: <Users className="w-4 h-4" /> },
   { label: 'sidebar.listings',     path: '/admin/annonces',       icon: <Tag className="w-4 h-4" /> },

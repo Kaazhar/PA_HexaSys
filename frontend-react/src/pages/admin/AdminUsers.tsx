@@ -22,7 +22,7 @@ interface BanFormData {
   is_permanent: boolean;
 }
 
-const roleColors: Record<UserRole, string> = {
+const roleColors: Record<string, string> = {
   admin: 'bg-purple-100 text-purple-800',
   professionnel: 'bg-blue-100 text-blue-800',
   salarie: 'bg-amber-100 text-amber-800',
@@ -131,7 +131,7 @@ export default function AdminUsers() {
   const total = data?.data?.total || 0;
   const totalPages = Math.ceil(total / 10);
 
-  const roleLabels: Record<UserRole, string> = {
+  const roleLabels: Record<string, string> = {
     admin: t('admin_users.role_admin'),
     professionnel: t('admin_users.role_pro'),
     salarie: t('admin_users.role_salarie'),
