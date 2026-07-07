@@ -132,16 +132,6 @@ export default function HomePage() {
           </div>
         </section>
       )}
-
-      <section className="py-24 bg-gradient-to-br from-[#2D5016] to-[#1e3a0f]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">{t('home.cta_title')}</h2>
-          <p className="text-white/70 text-lg mb-10">{t('home.cta_subtitle')}</p>
-          <Link to="/register" className="inline-flex items-center bg-[#C97664] text-white px-10 py-4 rounded-xl font-bold hover:bg-[#b8604f] transition-colors text-lg shadow-xl">
-            {t('home.cta_button')}
-          </Link>
-        </div>
-      </section>
     </PublicLayout>
   );
 }
