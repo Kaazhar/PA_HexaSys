@@ -325,7 +325,6 @@ type Project struct {
 	IsFeatured   bool   `gorm:"default:false" json:"is_featured"`
 }
 
-// ProjectUpdate : une avancée d'un projet (image + commentaire).
 type ProjectUpdate struct {
 	Base
 	ProjectID    uint   `gorm:"index" json:"project_id"`
@@ -337,7 +336,6 @@ type ProjectUpdate struct {
 	Tags         string `json:"tags"`
 }
 
-// ProjectFollower : un utilisateur qui suit un projet.
 type ProjectFollower struct {
 	Base
 	ProjectID uint `gorm:"index" json:"project_id"`

@@ -74,7 +74,6 @@ func AuthRequired() gin.HandlerFunc {
 	}
 }
 
-// OptionalAuth renseigne userID/userRole si un token valide est présent, sans bloquer sinon.
 func OptionalAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")

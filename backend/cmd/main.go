@@ -209,7 +209,6 @@ func main() {
 	api.GET("/subscription-plans", handlers.ListerPlansAbonnement)
 	api.GET("/subscriptions/my", middleware.AuthRequired(), handlers.MesAbonnements)
 	api.POST("/subscriptions/subscribe-free", middleware.AuthRequired(), handlers.SouscrirePlanGratuit)
-	api.GET("/subscription", middleware.AuthRequired(), handlers.MesAbonnements)
 
 	api.GET("/invoices/mine", middleware.AuthRequired(), handlers.MesFactures)
 	api.GET("/invoices/:id/pdf", middleware.AuthRequired(), handlers.TelechargerFacturePDF)

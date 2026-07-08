@@ -150,7 +150,6 @@ export default function ProjectStepsManager({ projectId, title, onClose }: Proje
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
         </div>
 
-        {/* Onglets des étapes */}
         <div className="px-5 pt-4">
           <div className="flex flex-wrap gap-1.5 border-b border-gray-100 pb-3">
             {steps.map((s, i) => (
@@ -212,7 +211,6 @@ export default function ProjectStepsManager({ projectId, title, onClose }: Proje
                     </div>
                   </div>
                 )}
-                {/* Compat anciennes avancées (image unique) */}
                 {split(current.image_url).length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {split(current.image_url).map((src, i) => <img key={i} src={src} alt="" className="w-24 h-24 object-cover rounded-lg border border-gray-100" />)}
@@ -226,7 +224,6 @@ export default function ProjectStepsManager({ projectId, title, onClose }: Proje
               </div>
             ) : null
           ) : (
-            /* Formulaire ajout / édition */
             <div className="space-y-4">
               <h4 className="font-semibold text-gray-900">
                 {mode === 'edit'

@@ -80,7 +80,6 @@ export const newsletterService = {
 export const userService = {
   getAll: (params?: any) =>
     api.get<{ users: User[]; total: number; page: number; limit: number }>('/admin/users', { params }),
-  getOne: (id: number) => api.get<User>(`/admin/users/${id}`),
   getPublicProfile: (id: number) => api.get(`/users/${id}`),
   create: (data: Partial<User> & { password: string }) => api.post<User>('/admin/users', data),
   update: (id: number, data: Partial<User>) => api.put<User>(`/admin/users/${id}`, data),
@@ -166,7 +165,6 @@ export const categoryService = {
 
 export const containerService = {
   getAll: () => api.get<Container[]>('/containers'),
-  getOne: (id: number) => api.get<Container>(`/containers/${id}`),
   create: (data: Partial<Container>) => api.post<Container>('/containers', data),
   update: (id: number, data: Partial<Container>) => api.put<Container>(`/containers/${id}`, data),
   getSlots: (id: number) => api.get<ContainerSlot[]>('/containers/slots', { params: { container_id: id } }),
