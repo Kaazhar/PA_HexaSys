@@ -162,12 +162,7 @@ export default function ListingsPage() {
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm text-gray-500">{total} {t('listings.results')}</span>
               <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
-                <button onClick={() => setViewMode('grid')} className={clsx('px-3 py-1.5 rounded-md text-xs font-medium transition-colors', viewMode === 'grid' ? 'bg-white shadow text-primary-600' : 'text-gray-400 hover:text-gray-600')}>
-                  {t('listings.view_grid', { defaultValue: 'Grille' })}
-                </button>
-                <button onClick={() => setViewMode('map')} className={clsx('px-3 py-1.5 rounded-md text-xs font-medium transition-colors', viewMode === 'map' ? 'bg-white shadow text-primary-600' : 'text-gray-400 hover:text-gray-600')}>
-                  {t('listings.view_map', { defaultValue: 'Carte' })}
-                </button>
+            
               </div>
             </div>
 
