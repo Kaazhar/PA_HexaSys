@@ -32,6 +32,7 @@ export const particulierSidebar = [
   { label: 'sidebar.my_deposits',    path: '/mes-depots',        icon: <PackageCheck className="w-4 h-4" /> },
   { label: 'sidebar.my_purchases',   path: '/mes-achats',        icon: <Receipt className="w-4 h-4" /> },
   { label: 'sidebar.my_score',       path: '/score',             icon: <Star className="w-4 h-4" /> },
+  { label: 'sidebar.subscription',   path: '/abonnement',        icon: <Briefcase className="w-4 h-4" /> },
 ];
 
 export const proSidebar = [

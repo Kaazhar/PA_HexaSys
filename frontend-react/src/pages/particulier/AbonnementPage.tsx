@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { proSidebar, adminSidebar } from '../../config/sidebars';
+import { proSidebar, adminSidebar, particulierSidebar } from '../../config/sidebars';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { subscriptionService, stripeService } from '../../services/api';
@@ -46,7 +46,7 @@ const PLAN_STYLES = [
 export default function AbonnementPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const sidebar = user?.role === 'admin' ? adminSidebar : proSidebar;
+  const sidebar = user?.role === 'admin' ? adminSidebar : user?.role === 'particulier' ? particulierSidebar : proSidebar;
   const queryClient = useQueryClient();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [stripeLoading, setStripeLoading] = useState(false);
