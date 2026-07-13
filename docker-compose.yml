@@ -9,7 +9,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
-      - db_data:/var/lib/mysql
+      - /mnt/truenas-db:/var/lib/mysql
     networks:
       - backend
     healthcheck:
@@ -92,5 +92,4 @@ networks:
   frontend:
 
 volumes:
-  db_data:
   uploads_data:
